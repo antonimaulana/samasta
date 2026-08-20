@@ -1,0 +1,68 @@
+# =============================================================================
+# Contoh konfigurasi Nginx — Portal Samasta (SITAMAN)
+# Sesuaikan: server_name, root, ssl_certificate, php-fpm socket
+# =============================================================================
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name sitaman.batam.go.id;
+
+    # Redirect HTTP → HTTPS
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name sitaman.batam.go.id;
+
+    # --- SSL (sesuaikan path sertifikat Kominfo / BSSN) ---
+    ssl_certificate     /etc/ssl/certs/sitaman.batam.go.id.fullchain.pem;
+    ssl_certificate_key /etc/ssl/private/sitaman.batam.go.id.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    # --- Document root HARUS folder public/ Laravel ---
+    root /var/www/samasta/public;
+    index index.php;
+
+    charset utf-8;
+    client_max_body_size 20M;
+
+    # --- Security headers (sesuaikan kebijakan Kominfo) ---
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # --- Log ---
+    access_log /var/log/nginx/sitaman-access.log;
+    error_log  /var/log/nginx/sitaman-error.log;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    # Cache asset build Vite (hash di nama file)
+    location ~* \.(css|js|jpg|jpeg|png|gif|webp|svg|ico|woff2?)$ {
+        expires 7d;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+}

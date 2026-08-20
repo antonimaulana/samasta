@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Samasta">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a3e635"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#bg)"/>
+  <path fill="#ffffff" d="M16 7c-2.2 3.8-5.5 7.2-5.5 12.2a5.5 5.5 0 0 0 11 0c0-5-3.3-8.4-5.5-12.2z"/>
+  <path stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" fill="none" d="M16 24.5V16"/>
+</svg>

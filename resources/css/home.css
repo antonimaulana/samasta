@@ -1,0 +1,166 @@
+@keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+@keyframes sway {
+    0%, 100% { transform: rotate(-6deg) translateY(0); }
+    50% { transform: rotate(6deg) translateY(-6px); }
+}
+@keyframes drift {
+    0%, 100% { transform: translateX(0) rotate(0deg); opacity: 0.35; }
+    50% { transform: translateX(12px) rotate(8deg); opacity: 0.55; }
+}
+.animate-float { animation: float-y 4s ease-in-out infinite; }
+.animate-float-delay { animation: float-y 4s ease-in-out 1.5s infinite; }
+.animate-sway { animation: sway 5s ease-in-out infinite; }
+.animate-sway-delay { animation: sway 6s ease-in-out 1.2s infinite; }
+.animate-drift { animation: drift 7s ease-in-out infinite; }
+
+.home-botanical-bg {
+    background-color: #f0fdf4;
+    background-image:
+        radial-gradient(ellipse 80% 50% at 10% 0%, rgba(134, 239, 172, 0.25) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 90% 20%, rgba(52, 211, 153, 0.15) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%2316a34a' fill-opacity='0.04'%3E%3Cpath d='M40 8c-8 12-8 24 0 36 8-12 8-24 0-36z'/%3E%3Cpath d='M12 50c10-4 18-2 24 6-10 4-18 2-24-6z'/%3E%3Cpath d='M68 52c-8-6-16-8-24-4 8 6 16 8 24 4z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.section-leaf-divider {
+    height: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 32 Q30 8 60 32 T120 32' fill='none' stroke='%2322c55e' stroke-width='1.5' stroke-opacity='0.25'/%3E%3Cpath d='M20 28c6-8 12-8 18 0M82 28c6-8 12-8 18 0' fill='none' stroke='%2384cc16' stroke-width='1' stroke-opacity='0.3'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: 120px 40px;
+    opacity: 0.8;
+}
+
+.card-leaf-corner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5rem;
+    height: 5rem;
+    background: radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.fakta-edukasi-card {
+    background: linear-gradient(135deg, #059669 0%, #16a34a 45%, #22c55e 100%);
+    position: relative;
+    overflow: hidden;
+}
+.fakta-edukasi-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 85% 15%, rgba(255,255,255,0.12) 0%, transparent 45%),
+        radial-gradient(circle at 10% 90%, rgba(0,0,0,0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+.fakta-edukasi-card::after {
+    content: '';
+    position: absolute;
+    right: -2rem;
+    bottom: -2rem;
+    width: 10rem;
+    height: 10rem;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='white' fill-opacity='0.06'%3E%3Cpath d='M32 4C20 20 18 38 32 60 46 38 44 20 32 4z'/%3E%3C/svg%3E") center/contain no-repeat;
+    pointer-events: none;
+}
+.fakta-pod {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(8px);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+.fakta-pod:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
+}
+.fakta-rotator-text {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.fakta-rotator-text.is-leaving {
+    opacity: 0;
+    transform: translateY(8px);
+}
+.fakta-rotator-text.is-entering {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.home-hero {
+    min-height: min(88vh, 860px);
+}
+
+.home-hero__overlay {
+    background:
+        linear-gradient(105deg, rgba(6, 47, 34, 0.93) 0%, rgba(6, 78, 59, 0.82) 40%, rgba(6, 47, 34, 0.68) 100%),
+        linear-gradient(to top, rgba(6, 47, 34, 0.7) 0%, transparent 42%);
+}
+
+.home-hero-card-media {
+    min-height: 8.5rem;
+}
+
+.info-slide-card {
+    min-height: 18rem;
+}
+#info-slider-track {
+    align-items: stretch;
+}
+@media (min-width: 768px) {
+    .info-slide-card {
+        min-height: 15rem;
+    }
+    .info-slide-card--perda {
+        min-height: 14.5rem;
+    }
+    #info-terkini-slider .info-terkini-panel {
+        min-height: 15rem;
+    }
+}
+.info-slide-value {
+    font-size: 1.875rem;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+@media (min-width: 768px) {
+    .info-slide-value {
+        font-size: 2.25rem;
+    }
+}
+.info-slide-label {
+    margin-top: 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.9);
+    text-wrap: balance;
+    overflow-wrap: break-word;
+}
+@media (min-width: 768px) {
+    .info-slide-label {
+        font-size: 0.75rem;
+    }
+}
+.info-slide-metric {
+    min-width: 0;
+    flex: 1 1 0;
+}
+.info-slide-metrics {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.info-slide-metrics__divider {
+    width: 1px;
+    align-self: stretch;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.28);
+}
+.info-terkini-panel {
+    background: linear-gradient(180deg, #ffffff 0%, #f7fdf9 100%);
+}
