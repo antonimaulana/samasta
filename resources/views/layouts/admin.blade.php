@@ -8,6 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
     @unless ($isViewer ?? false)
+        @include('layouts.partials.mobile-nav-styles')
         <style>
             .sidebar-menu-group .sidebar-submenu {
                 overflow: hidden;
@@ -30,9 +31,6 @@
             .sidebar-chevron {
                 transition: transform 0.2s ease;
             }
-            body.admin-nav-open { overflow: hidden; }
-            #admin-mobile-drawer.is-open { transform: translateX(0); }
-            #admin-mobile-backdrop.is-open { opacity: 1; pointer-events: auto; }
         </style>
     @endunless
 </head>
@@ -68,7 +66,7 @@
                         @else
                             <button type="button"
                                     id="admin-mobile-menu-toggle"
-                                    class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 md:hidden"
+                                    class="relative z-[51] h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                                     aria-label="Buka menu admin"
                                     aria-expanded="false"
                                     aria-controls="admin-mobile-drawer">
@@ -157,12 +155,8 @@
 
     @unless ($isViewer ?? false)
         {{-- Admin mobile drawer --}}
-        <div id="admin-mobile-backdrop"
-             class="fixed inset-0 z-[60] bg-gray-900/50 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"
-             aria-hidden="true"></div>
-        <aside id="admin-mobile-drawer"
-               class="fixed inset-y-0 left-0 z-[70] w-[min(100vw-3rem,280px)] -translate-x-full transform overflow-y-auto bg-gray-900 text-white shadow-2xl transition-transform duration-300 md:hidden"
-               aria-hidden="true">
+        <div id="admin-mobile-backdrop" style="display:none" aria-hidden="true"></div>
+        <aside id="admin-mobile-drawer" style="display:none" aria-hidden="true">
             <div class="flex items-center justify-between border-b border-gray-800 px-5 py-4">
                 <div class="flex items-center gap-3">
                     @include('layouts.partials.app-logo', ['size' => 'sm'])
@@ -180,8 +174,9 @@
             @include('layouts.partials.admin-nav', ['mobileExpanded' => true])
         </aside>
 
+        @include('layouts.partials.mobile-nav-script')
         <script>
-            window.onPageReady = function (fn) {
+            window.onPageReady = window.onPageReady || function (fn) {
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', fn);
                 } else {
@@ -190,31 +185,17 @@
             };
 
             window.onPageReady(function () {
-                const toggle = document.getElementById('admin-mobile-menu-toggle');
-                const closeBtn = document.getElementById('admin-mobile-menu-close');
-                const drawer = document.getElementById('admin-mobile-drawer');
-                const backdrop = document.getElementById('admin-mobile-backdrop');
-
-                function setAdminNav(open) {
-                    if (!drawer || !backdrop) return;
-                    drawer.classList.toggle('is-open', open);
-                    backdrop.classList.toggle('is-open', open);
-                    document.body.classList.toggle('admin-nav-open', open);
-                    toggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
-                    drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
-                    backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
-                }
-
-                toggle?.addEventListener('click', function () {
-                    setAdminNav(!drawer.classList.contains('is-open'));
-                });
-                closeBtn?.addEventListener('click', function () { setAdminNav(false); });
-                backdrop?.addEventListener('click', function () { setAdminNav(false); });
-                drawer?.querySelectorAll('a').forEach(function (link) {
-                    link.addEventListener('click', function () { setAdminNav(false); });
-                });
-                document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape') setAdminNav(false);
+                initMobileDrawer({
+                    toggleId: 'admin-mobile-menu-toggle',
+                    closeId: 'admin-mobile-menu-close',
+                    drawerId: 'admin-mobile-drawer',
+                    backdropId: 'admin-mobile-backdrop',
+                    bodyClass: 'admin-nav-open',
+                    side: 'left',
+                    width: 280,
+                    background: '#111827',
+                    color: '#ffffff',
+                    shadow: '10px 0 40px rgba(0,0,0,0.25)',
                 });
             });
         </script>

@@ -10,11 +10,9 @@
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
+    @include('layouts.partials.mobile-nav-styles')
     <style>
         body { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
-        body.mobile-nav-open { overflow: hidden; }
-        #public-mobile-drawer.is-open { transform: translateX(0); }
-        #public-mobile-backdrop.is-open { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body class="min-h-screen @yield('body_class', 'bg-green-50') text-gray-900 antialiased">
@@ -34,37 +32,19 @@
 
             <button type="button"
                     id="public-mobile-menu-toggle"
-                    class="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-green-200 bg-white text-green-700 shadow-sm md:hidden"
+                    class="relative z-[51] h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-xl border border-green-200 bg-white text-green-700 shadow-sm"
                     aria-label="Buka menu"
                     aria-expanded="false"
                     aria-controls="public-mobile-drawer">
                 <svg class="h-5 w-5" id="public-menu-icon-open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
-                <svg class="hidden h-5 w-5" id="public-menu-icon-close" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-5 w-5" id="public-menu-icon-close" style="display:none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
     </header>
-
-    {{-- Mobile drawer --}}
-    <div id="public-mobile-backdrop"
-         class="fixed inset-0 z-[60] bg-gray-900/40 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"
-         aria-hidden="true"></div>
-    <aside id="public-mobile-drawer"
-           class="fixed inset-y-0 right-0 z-[70] w-[min(100vw-3rem,320px)] translate-x-full transform overflow-y-auto border-l border-green-100 bg-white shadow-2xl transition-transform duration-300 md:hidden"
-           aria-hidden="true">
-        <div class="flex items-center justify-between border-b border-green-100 px-4 py-4">
-            <p class="font-bold text-green-800">Menu</p>
-            <button type="button" id="public-mobile-menu-close" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100" aria-label="Tutup menu">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        @include('layouts.partials.public-nav', ['variant' => 'mobile'])
-    </aside>
 
     @yield('hero')
 
@@ -94,8 +74,23 @@
         </div>
     </footer>
 
+    {{-- Mobile drawer --}}
+    <div id="public-mobile-backdrop" style="display:none" aria-hidden="true"></div>
+    <aside id="public-mobile-drawer" style="display:none" aria-hidden="true">
+        <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #dcfce7;padding:1rem;">
+            <p style="margin:0;font-weight:700;color:#166534;">Menu</p>
+            <button type="button" id="public-mobile-menu-close" style="border:0;background:transparent;padding:0.5rem;color:#6b7280;" aria-label="Tutup menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        @include('layouts.partials.public-nav', ['variant' => 'mobile'])
+    </aside>
+
+    @include('layouts.partials.mobile-nav-script')
     <script>
-        window.onPageReady = function (fn) {
+        window.onPageReady = window.onPageReady || function (fn) {
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', fn);
             } else {
@@ -105,35 +100,18 @@
     </script>
     <script>
         onPageReady(function () {
-            const toggle = document.getElementById('public-mobile-menu-toggle');
-            const closeBtn = document.getElementById('public-mobile-menu-close');
-            const drawer = document.getElementById('public-mobile-drawer');
-            const backdrop = document.getElementById('public-mobile-backdrop');
-            const iconOpen = document.getElementById('public-menu-icon-open');
-            const iconClose = document.getElementById('public-menu-icon-close');
-
-            function setMobileNav(open) {
-                if (!drawer || !backdrop) return;
-                drawer.classList.toggle('is-open', open);
-                backdrop.classList.toggle('is-open', open);
-                document.body.classList.toggle('mobile-nav-open', open);
-                toggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
-                drawer.setAttribute('aria-hidden', open ? 'false' : 'true');
-                backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
-                iconOpen?.classList.toggle('hidden', open);
-                iconClose?.classList.toggle('hidden', !open);
-            }
-
-            toggle?.addEventListener('click', function () {
-                setMobileNav(!drawer.classList.contains('is-open'));
-            });
-            closeBtn?.addEventListener('click', function () { setMobileNav(false); });
-            backdrop?.addEventListener('click', function () { setMobileNav(false); });
-            drawer?.querySelectorAll('a').forEach(function (link) {
-                link.addEventListener('click', function () { setMobileNav(false); });
-            });
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') setMobileNav(false);
+            initMobileDrawer({
+                toggleId: 'public-mobile-menu-toggle',
+                closeId: 'public-mobile-menu-close',
+                drawerId: 'public-mobile-drawer',
+                backdropId: 'public-mobile-backdrop',
+                iconOpenId: 'public-menu-icon-open',
+                iconCloseId: 'public-menu-icon-close',
+                bodyClass: 'mobile-nav-open',
+                side: 'right',
+                width: 320,
+                background: '#ffffff',
+                shadow: '-10px 0 40px rgba(0,0,0,0.12)',
             });
 
             const menu = document.getElementById('jelajahi-menu');
