@@ -43,7 +43,7 @@
                         @include('layouts.partials.app-logo', ['size' => 'sm'])
                         <div>
                             <p class="text-lg font-semibold">Admin {{ config('app.name') }}</p>
-                            <p class="text-xs text-gray-400">Panel Manajemen Hijau</p>
+                            <p class="text-xs text-gray-400">{{ config('app.full_name') }}</p>
                         </div>
                     </div>
                 </div>
@@ -201,6 +201,7 @@
         </script>
     @endunless
 
+    <script src="{{ asset('js/searchable-select.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

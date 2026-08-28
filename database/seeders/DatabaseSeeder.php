@@ -38,7 +38,7 @@ class DatabaseSeeder extends Seeder
         User::query()->updateOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@sitaman.batam')],
             [
-                'name' => env('ADMIN_NAME', 'Administrator Samasta'),
+                'name' => env('ADMIN_NAME', 'Administrator SIMTAMAN'),
                 'password' => $password,
                 'role' => User::ROLE_ADMIN,
             ]

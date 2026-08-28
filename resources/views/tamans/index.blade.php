@@ -185,13 +185,13 @@
                         <h2 class="mt-2 text-lg font-semibold text-gray-900">{{ $taman->nama_taman }}</h2>
                         <p class="mt-2 line-clamp-2 text-sm text-gray-600">{{ $taman->alamat }}</p>
 
-                        @if ($taman->fasilitas)
+                        @if ($taman->fasilitas_nama_list !== [])
                             <div class="mt-3 flex flex-wrap gap-1">
-                                @foreach (array_slice($taman->fasilitas, 0, 3) as $fasilitas)
+                                @foreach (array_slice($taman->fasilitas_nama_list, 0, 3) as $fasilitas)
                                     <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">{{ $fasilitas }}</span>
                                 @endforeach
-                                @if (count($taman->fasilitas) > 3)
-                                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">+{{ count($taman->fasilitas) - 3 }}</span>
+                                @if (count($taman->fasilitas_nama_list) > 3)
+                                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">+{{ count($taman->fasilitas_nama_list) - 3 }}</span>
                                 @endif
                             </div>
                         @endif

@@ -106,7 +106,9 @@
                     <a href="{{ route('tamans.map') }}" class="mt-3 text-sm font-bold text-green-700 hover:underline">Reset filter</a>
                 </div>
             @else
-                <div id="taman-map" class="h-[480px] w-full sm:h-[560px] lg:h-[calc(100vh-12rem)] lg:min-h-[560px]"></div>
+                <div class="taman-map-shell">
+                    <div id="taman-map" class="taman-map-canvas" role="img" aria-label="Peta interaktif taman di Kota Batam"></div>
+                </div>
             @endif
         </div>
     </div>
@@ -114,7 +116,7 @@
 
 @if ($tamans->isNotEmpty())
     @push('styles')
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        @include('tamans.partials.leaflet-fix-styles')
         <style>
             .taman-map-popup { min-width: 220px; max-width: 260px; }
             .taman-map-popup img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; }
@@ -130,28 +132,54 @@
     @endpush
 
     @push('scripts')
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
         <script>
             onPageReady(function () {
+                const mapElement = document.getElementById('taman-map');
+                if (!mapElement) {
+                    return;
+                }
+
+                if (typeof L === 'undefined') {
+                    mapElement.innerHTML = '<div class="flex h-full items-center justify-center p-6 text-center text-sm text-gray-600">Peta tidak dapat dimuat. Periksa koneksi internet lalu muat ulang halaman.</div>';
+                    return;
+                }
+
                 const points = @json($mapPoints);
                 const batamCenter = [1.0456, 104.0305];
-                const map = L.map('taman-map').setView(batamCenter, 12);
-                const markerLayers = [];
+                const batamBounds = L.latLngBounds([0.8, 103.8], [1.3, 104.5]);
+                let map = null;
+                let markerLayers = [];
                 let userLat = null;
                 let userLng = null;
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap',
-                    maxZoom: 19,
-                }).addTo(map);
-
-                const userIcon = L.divIcon({
-                    className: '',
-                    html: '<div style="width:14px;height:14px;background:#2563eb;border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #2563eb55"></div>',
-                    iconSize: [14, 14],
-                    iconAnchor: [7, 7],
-                });
                 let userMarker = null;
+
+                function refreshMapSize() {
+                    if (map) {
+                        map.invalidateSize({ animate: false, pan: false });
+                    }
+                }
+
+                function initMap() {
+                    if (mapElement.offsetHeight < 200 || mapElement.offsetWidth < 200) {
+                        requestAnimationFrame(initMap);
+                        return;
+                    }
+
+                    map = L.map(mapElement, {
+                        preferCanvas: false,
+                    }).setView(batamCenter, 12);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap',
+                        maxZoom: 19,
+                    }).addTo(map);
+
+                    refreshMapSize();
+                    setupMarkers();
+                    bindControls();
+                    scheduleResizePasses();
+                }
 
                 function createPinIcon(color) {
                     return L.divIcon({
@@ -162,6 +190,13 @@
                         popupAnchor: [0, -24],
                     });
                 }
+
+                const userIcon = L.divIcon({
+                    className: '',
+                    html: '<div style="width:14px;height:14px;background:#2563eb;border:2px solid white;border-radius:50%;box-shadow:0 0 0 2px #2563eb55"></div>',
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7],
+                });
 
                 function escapeHtml(text) {
                     const div = document.createElement('div');
@@ -218,57 +253,92 @@
                     }
                 }
 
-                points.forEach(function (point) {
-                    const marker = L.marker([point.lat, point.lng], {
-                        icon: createPinIcon(point.pinColor),
-                    }).bindPopup(buildPopup(point));
+                function setupMarkers() {
+                    points.forEach(function (point) {
+                        const marker = L.marker([point.lat, point.lng], {
+                            icon: createPinIcon(point.pinColor),
+                        }).bindPopup(buildPopup(point));
 
-                    marker.on('popupopen', function () {
-                        marker.setPopupContent(buildPopup(point));
+                        marker.on('popupopen', function () {
+                            marker.setPopupContent(buildPopup(point));
+                        });
+
+                        markerLayers.push({ point: point, marker: marker });
+                        marker.addTo(map);
                     });
 
-                    markerLayers.push({ point: point, marker: marker });
-                    marker.addTo(map);
-                });
+                    refreshMapSize();
 
-                if (markerLayers.length > 0) {
-                    const bounds = markerLayers.map(function (e) { return [e.point.lat, e.point.lng]; });
-                    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+                    if (markerLayers.length > 0) {
+                        const bounds = L.latLngBounds(markerLayers.map(function (entry) {
+                            return [entry.point.lat, entry.point.lng];
+                        }));
+
+                        if (bounds.isValid()) {
+                            const padded = bounds.pad(0.12);
+                            if (batamBounds.contains(padded)) {
+                                map.fitBounds(padded, { padding: [40, 40], maxZoom: 14 });
+                            } else {
+                                map.setView(batamCenter, 12);
+                            }
+                        }
+                    }
+
+                    refreshMapSize();
                 }
 
-                document.querySelectorAll('.map-kategori-toggle').forEach(function (btn) {
-                    btn.addEventListener('click', function () {
-                        const isActive = btn.dataset.active !== 'false';
-                        btn.dataset.active = isActive ? 'false' : 'true';
-                        applyMarkerVisibility();
+                function bindControls() {
+                    document.querySelectorAll('.map-kategori-toggle').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            const isActive = btn.dataset.active !== 'false';
+                            btn.dataset.active = isActive ? 'false' : 'true';
+                            applyMarkerVisibility();
+                        });
                     });
-                });
 
-                document.getElementById('map-locate-me')?.addEventListener('click', function () {
-                    if (!navigator.geolocation) {
-                        alert('Browser tidak mendukung geolokasi.');
-                        return;
-                    }
-                    navigator.geolocation.getCurrentPosition(function (pos) {
-                        userLat = pos.coords.latitude;
-                        userLng = pos.coords.longitude;
-
-                        if (userMarker) {
-                            map.removeLayer(userMarker);
+                    document.getElementById('map-locate-me')?.addEventListener('click', function () {
+                        if (!navigator.geolocation) {
+                            alert('Browser tidak mendukung geolokasi.');
+                            return;
                         }
+                        navigator.geolocation.getCurrentPosition(function (pos) {
+                            userLat = pos.coords.latitude;
+                            userLng = pos.coords.longitude;
 
-                        userMarker = L.marker([userLat, userLng], { icon: userIcon })
-                            .addTo(map)
-                            .bindPopup('Lokasi Anda')
-                            .openPopup();
+                            if (userMarker) {
+                                map.removeLayer(userMarker);
+                            }
 
-                        map.setView([userLat, userLng], 14);
-                    }, function () {
-                        alert('Tidak dapat mengakses lokasi Anda.');
+                            userMarker = L.marker([userLat, userLng], { icon: userIcon })
+                                .addTo(map)
+                                .bindPopup('Lokasi Anda')
+                                .openPopup();
+
+                            map.setView([userLat, userLng], 14);
+                            refreshMapSize();
+                        }, function () {
+                            alert('Tidak dapat mengakses lokasi Anda.');
+                        });
                     });
-                });
+                }
 
-                setTimeout(function () { map.invalidateSize(); }, 150);
+                function scheduleResizePasses() {
+                    refreshMapSize();
+                    requestAnimationFrame(function () {
+                        refreshMapSize();
+                        requestAnimationFrame(refreshMapSize);
+                    });
+                    setTimeout(refreshMapSize, 150);
+                    setTimeout(refreshMapSize, 500);
+                    window.addEventListener('load', refreshMapSize);
+                    window.addEventListener('resize', refreshMapSize);
+
+                    if (typeof ResizeObserver !== 'undefined') {
+                        new ResizeObserver(refreshMapSize).observe(mapElement.closest('.taman-map-shell') || mapElement);
+                    }
+                }
+
+                initMap();
             });
         </script>
     @endpush

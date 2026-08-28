@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Pemangkasan;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class JadwalLayananQuery
 {
@@ -19,6 +20,31 @@ class JadwalLayananQuery
             ->when(filled($jenis), fn (Builder $q) => $q->where('jenis_layanan', $jenis));
     }
 
+    /**
+     * Jadwal aktif jika tanggal berada dalam rentang mulai–selesai rencana.
+     */
+    public static function overlapsDate(Builder $query, Carbon|string $date): Builder
+    {
+        $dateString = Carbon::parse($date)->toDateString();
+
+        return $query
+            ->whereDate('tanggal_eksekusi', '<=', $dateString)
+            ->whereRaw('COALESCE(tanggal_akhir_jadwal, tanggal_eksekusi) >= ?', [$dateString]);
+    }
+
+    /**
+     * Jadwal aktif jika rentang pelaksanaan bertumpuk dengan periode.
+     */
+    public static function overlapsPeriod(Builder $query, Carbon|string $start, Carbon|string $end): Builder
+    {
+        $startString = Carbon::parse($start)->toDateString();
+        $endString = Carbon::parse($end)->toDateString();
+
+        return $query
+            ->whereDate('tanggal_eksekusi', '<=', $endString)
+            ->whereRaw('COALESCE(tanggal_akhir_jadwal, tanggal_eksekusi) >= ?', [$startString]);
+    }
+
     public static function semua(?string $pelaksana = null, ?string $jenis = null): Builder
     {
         return self::applyFilters(
@@ -31,7 +57,7 @@ class JadwalLayananQuery
     public static function hariIni(?string $pelaksana = null, ?string $jenis = null): Builder
     {
         return self::applyFilters(
-            self::belumSelesai()->whereDate('tanggal_eksekusi', today()),
+            self::overlapsDate(self::belumSelesai(), today()),
             $pelaksana,
             $jenis,
         );
@@ -40,7 +66,7 @@ class JadwalLayananQuery
     public static function besok(?string $pelaksana = null, ?string $jenis = null): Builder
     {
         return self::applyFilters(
-            self::belumSelesai()->whereDate('tanggal_eksekusi', today()->addDay()),
+            self::overlapsDate(self::belumSelesai(), today()->addDay()),
             $pelaksana,
             $jenis,
         );
@@ -49,10 +75,11 @@ class JadwalLayananQuery
     public static function mingguIni(?string $pelaksana = null, ?string $jenis = null): Builder
     {
         return self::applyFilters(
-            self::belumSelesai()->whereBetween('tanggal_eksekusi', [
-                today()->startOfWeek()->toDateString(),
-                today()->endOfWeek()->toDateString(),
-            ]),
+            self::overlapsPeriod(
+                self::belumSelesai(),
+                today()->startOfWeek(),
+                today()->endOfWeek(),
+            ),
             $pelaksana,
             $jenis,
         );
@@ -79,7 +106,10 @@ class JadwalLayananQuery
     public static function terlambat(?string $pelaksana = null, ?string $jenis = null): Builder
     {
         return self::applyFilters(
-            self::belumSelesai()->whereDate('tanggal_eksekusi', '<', today()),
+            self::belumSelesai()->whereRaw(
+                'COALESCE(tanggal_akhir_jadwal, tanggal_eksekusi) < ?',
+                [today()->toDateString()],
+            ),
             $pelaksana,
             $jenis,
         )->orderBy('tanggal_eksekusi');

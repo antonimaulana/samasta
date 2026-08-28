@@ -34,22 +34,30 @@ class TamanMapData
                     ->whereNotNull('longitude')
                     ->with(['images' => fn ($q) => $q->latest()->limit(1)])
                     ->get()
-                    ->map(fn (Taman $taman) => [
-                        'id' => $taman->id,
-                        'nama' => $taman->nama_taman,
-                        'kategori' => $taman->kategori,
-                        'lat' => (float) $taman->latitude,
-                        'lng' => (float) $taman->longitude,
-                        'url' => route('tamans.show', $taman),
-                        'alamat' => $taman->alamat,
-                        'foto' => $taman->foto_url,
-                        'fasilitas' => $taman->fasilitas ?? [],
-                        'pinColor' => Taman::kategoriPinColor($taman->kategori),
-                        'directionsUrl' => ParkNavigation::googleDirectionsUrl(
-                            (float) $taman->latitude,
-                            (float) $taman->longitude
-                        ),
-                    ])
+                    ->map(function (Taman $taman) {
+                        $coords = $taman->normalizedMapCoordinates();
+                        if ($coords === null) {
+                            return null;
+                        }
+
+                        return [
+                            'id' => $taman->id,
+                            'nama' => $taman->nama_taman,
+                            'kategori' => $taman->kategori,
+                            'lat' => $coords['lat'],
+                            'lng' => $coords['lng'],
+                            'url' => route('tamans.show', $taman),
+                            'alamat' => $taman->alamat,
+                            'foto' => $taman->foto_url,
+                            'fasilitas' => $taman->fasilitas_nama_list,
+                            'pinColor' => Taman::kategoriPinColor($taman->kategori),
+                            'directionsUrl' => ParkNavigation::googleDirectionsUrl(
+                                $coords['lat'],
+                                $coords['lng'],
+                            ),
+                        ];
+                    })
+                    ->filter()
                     ->values();
             }
         );

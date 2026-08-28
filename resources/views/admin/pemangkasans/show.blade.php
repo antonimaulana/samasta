@@ -12,9 +12,7 @@
             'Diproses' => 'bg-amber-100 text-amber-800',
             default => 'bg-blue-100 text-blue-800',
         };
-        $isLate = $pemangkasan->status !== 'Selesai'
-            && $pemangkasan->tanggal_eksekusi->isPast()
-            && ! $pemangkasan->tanggal_eksekusi->isToday();
+        $isLate = \App\Support\PemangkasanSchedule::isLate($pemangkasan);
     @endphp
 
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -38,7 +36,7 @@
                         <h2 class="mt-3 text-xl font-bold text-gray-900">{{ $pemangkasan->lokasi_pohon }}</h2>
                         @if ($isLate)
                             <p class="mt-1 text-sm font-medium text-red-600">
-                                Terlambat — jadwal {{ $pemangkasan->tanggal_eksekusi->translatedFormat('d F Y') }}
+                                Terlambat — jadwal {{ \App\Support\PemangkasanSchedule::labelRentang($pemangkasan) }}
                             </p>
                         @endif
                     </div>
@@ -76,7 +74,12 @@
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">Jadwal Pelaksanaan</dt>
-                        <dd class="mt-1 font-medium text-gray-900">{{ $pemangkasan->tanggal_eksekusi->translatedFormat('d F Y') }}</dd>
+                        <dd class="mt-1 font-medium text-gray-900">
+                            {{ \App\Support\PemangkasanSchedule::labelRentang($pemangkasan) }}
+                            <span class="block text-sm font-normal text-gray-600">
+                                {{ (int) ($pemangkasan->total_hari ?? 1) }} hari rencana · {{ \App\Support\PemangkasanSchedule::progressSummary($pemangkasan) }}
+                            </span>
+                        </dd>
                     </div>
                     @if ($pemangkasan->status === 'Selesai' && $pemangkasan->tanggal_penyelesaian)
                         <div>
@@ -103,27 +106,29 @@
                 </dl>
             </div>
 
-            @if (! $isMiniGarden && $pemangkasan->foto_sebelum)
-                <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-                    <h3 class="text-sm font-semibold text-emerald-900">
-                        {{ $isTumbang ? 'Foto Sebelum Penanganan' : 'Foto Sebelum Pelaksanaan' }}
-                    </h3>
-                    <a href="{{ $pemangkasan->foto_sebelum_url }}" target="_blank" rel="noopener">
-                        <img src="{{ $pemangkasan->foto_sebelum_url }}" alt="Foto sebelum"
-                             class="mt-3 max-h-80 rounded-lg border border-gray-200 object-cover">
-                    </a>
-                </div>
-            @endif
-
-            @if ($pemangkasan->foto_sesudah)
-                <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-                    <h3 class="text-sm font-semibold text-emerald-900">
-                        {{ $isTumbang ? 'Foto Setelah Penanganan' : 'Foto Setelah Pelaksanaan' }}
-                    </h3>
-                    <a href="{{ $pemangkasan->foto_sesudah_url }}" target="_blank" rel="noopener">
-                        <img src="{{ $pemangkasan->foto_sesudah_url }}" alt="Foto sesudah"
-                             class="mt-3 max-h-80 rounded-lg border border-gray-200 object-cover">
-                    </a>
+            @if ($pemangkasan->progres->isNotEmpty())
+                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                    <h3 class="text-sm font-bold text-gray-900">Progres Harian</h3>
+                    <div class="mt-4 space-y-3">
+                        @foreach ($pemangkasan->progres as $entry)
+                            <div class="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm">
+                                <div class="flex flex-wrap items-start justify-between gap-2">
+                                    <p class="font-semibold text-gray-900">
+                                        Hari ke-{{ $entry->hari_ke }} · {{ $entry->tanggal->translatedFormat('d F Y') }}
+                                        · {{ $entry->jumlah_personil }} personil
+                                    </p>
+                                    <a href="{{ route('admin.pemangkasans.export-pdf-progres', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry]) }}"
+                                       class="rounded border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                                       target="_blank" rel="noopener">
+                                        PDF
+                                    </a>
+                                </div>
+                                @if ($entry->catatan)
+                                    <p class="mt-1 text-gray-600">{{ $entry->catatan }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             @endif
         </div>

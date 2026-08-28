@@ -60,24 +60,27 @@
         </form>
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Nama Alat/Armada</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Jenis</th>
-                        <th class="px-4 py-3 text-center font-medium text-gray-600">Jumlah</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Peruntukan (Tim)</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Kondisi</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Keterangan</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Aksi</th>
-                    </tr>
-                </thead>
+    <x-admin.data-table>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama Alat/Armada</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Jumlah</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan (Tim)</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Kondisi</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Keterangan</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+            </tr>
+        </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($items as $item)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 font-medium text-gray-900">{{ $item->nama }}</td>
+                            <td class="px-4 py-3 font-medium text-gray-900">
+                                <a href="{{ route('admin.alat-sarana-operasionals.show', $item) }}"
+                                   class="text-green-800 hover:text-green-900 hover:underline">
+                                    {{ $item->nama }}
+                                </a>
+                            </td>
                             <td class="px-4 py-3 text-gray-700">
                                 {{ $item->jenis }}
                                 @if ($item->no_plat)
@@ -105,6 +108,8 @@
                             <td class="max-w-xs px-4 py-3 text-gray-600">{{ $item->keterangan ? Str::limit($item->keterangan, 80) : '—' }}</td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex justify-end gap-2">
+                                    <a href="{{ route('admin.alat-sarana-operasionals.show', $item) }}"
+                                       class="rounded border border-green-300 px-3 py-1 text-green-700 hover:bg-green-50">Riwayat</a>
                                     <x-admin.can-write>
                                         <a href="{{ route('admin.alat-sarana-operasionals.edit', $item) }}"
                                            class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">Edit</a>
@@ -131,11 +136,10 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-
         @if ($items->hasPages())
-            <div class="border-t border-gray-200 px-4 py-3">{{ $items->links() }}</div>
+            <x-slot:footer>
+                {{ $items->links() }}
+            </x-slot:footer>
         @endif
-    </div>
+    </x-admin.data-table>
 @endsection

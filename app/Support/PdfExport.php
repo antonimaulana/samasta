@@ -41,6 +41,8 @@ class PdfExport
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', $orientation);
+        $dompdf->set_option('isHtml5ParserEnabled', true);
+        $dompdf->set_option('isPhpEnabled', false);
         $dompdf->render();
 
         return $dompdf->output();

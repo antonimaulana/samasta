@@ -11,14 +11,14 @@ use App\Models\Taman;
 use App\Models\TamanImage;
 use App\Support\OperationalAlertService;
 use App\Support\OperatorWilayahScope;
-use App\Support\PdfExport;
+use App\Support\TamanTableSort;
 use App\Support\TableSearch;
 use App\Support\KelurahanResolver;
 use App\Support\TamanCsvImporter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -34,47 +34,22 @@ class TamanController extends Controller
     {
         $scope = app(OperatorWilayahScope::class);
 
-        $tamans = TableSearch::apply(
-            $scope->scopeTamans(Taman::with(['images', 'kelurahan.kecamatan'])->latest(), $request->user()),
+        $query = TableSearch::apply(
+            $scope->scopeTamans(Taman::with(['images', 'kelurahan.kecamatan']), $request->user()),
             $request,
-            ['nama_taman', 'alamat', 'kategori', 'deskripsi']
+            ['nama_taman', 'alamat', 'kategori', 'deskripsi', 'kontraktor', 'konsultan_perencana']
         )
             ->when($request->input('alert') === 'incomplete', fn ($q) => app(OperationalAlertService::class)->filterIncompleteTamans($q))
-            ->paginate(10)->withQueryString();
+            ->when(
+                in_array($request->input('status_data'), [Taman::STATUS_DATA_LENGKAP, Taman::STATUS_DATA_BELUM_LENGKAP], true),
+                fn ($q) => $q->where('status_data', $request->input('status_data'))
+            );
 
-        return view('admin.tamans.index', compact('tamans'));
-    }
+        $sortState = TamanTableSort::apply($query, $request);
 
-    public function exportPdf(Request $request): Response
-    {
-        $this->authorize('viewAny', Taman::class);
+        $tamans = $query->paginate(10)->withQueryString();
 
-        PdfExport::ensureGdLoaded();
-
-        $scope = app(OperatorWilayahScope::class);
-
-        $tamans = TableSearch::apply(
-            $scope->scopeTamans(Taman::with(['kelurahan.kecamatan']), $request->user()),
-            $request,
-            ['nama_taman', 'alamat', 'kategori', 'deskripsi']
-        )
-            ->when($request->input('alert') === 'incomplete', fn ($q) => app(OperationalAlertService::class)->filterIncompleteTamans($q))
-            ->orderBy('nama_taman')
-            ->get();
-
-        $tamansPerKategori = Taman::groupByKategori($tamans);
-        $search = trim((string) $request->input('search', ''));
-
-        $html = view('admin.tamans.pdf', [
-            'tamansPerKategori' => $tamansPerKategori,
-            'totalTaman' => $tamans->count(),
-            'search' => $search !== '' ? $search : null,
-            'generatedAt' => now(),
-        ])->render();
-
-        $filename = 'data-taman-'.now()->format('Y-m-d').'.pdf';
-
-        return PdfExport::download($html, $filename, 'landscape');
+        return view('admin.tamans.index', compact('tamans', 'sortState'));
     }
 
     public function importForm(): View
@@ -150,14 +125,26 @@ class TamanController extends Controller
 
         $result = $importer->import($path);
 
-        if ($result['imported'] === 0 && $result['skipped'] === 0 && $result['errors'] !== []) {
-            return back()->withErrors(['file' => $result['errors'][0]]);
+        if ($result['imported'] === 0 && ($result['updated'] ?? 0) === 0 && $result['skipped'] === 0 && $result['errors'] !== []) {
+            return back()
+                ->with('import_result', $result)
+                ->with('warning', $result['errors'][0]);
         }
 
-        if ($result['imported'] > 0) {
+        $processed = ($result['imported'] ?? 0) + ($result['updated'] ?? 0);
+
+        if ($processed > 0) {
+            $message = [];
+            if (($result['imported'] ?? 0) > 0) {
+                $message[] = number_format($result['imported']).' taman baru';
+            }
+            if (($result['updated'] ?? 0) > 0) {
+                $message[] = number_format($result['updated']).' taman diperbarui';
+            }
+
             return redirect()
                 ->route('admin.tamans.index')
-                ->with('success', number_format($result['imported']).' taman berhasil diimport.')
+                ->with('success', implode(', ', $message).' berhasil diproses dari CSV.')
                 ->with('import_result', $result);
         }
 
@@ -183,6 +170,8 @@ class TamanController extends Controller
         $taman = Taman::create($validated);
 
         $this->storeGalleryImages($taman, $request->file('fotos', []));
+        $taman->refresh()->load('images', 'kelurahan');
+        $taman->syncStatusData();
 
         return redirect()
             ->route('admin.tamans.index')
@@ -191,7 +180,7 @@ class TamanController extends Controller
 
     public function show(Taman $taman): View
     {
-        $taman->load('images');
+        $taman->load(['images', 'kelurahan.kecamatan']);
 
         $kinerjas = app(OperatorWilayahScope::class)->scopePemeliharaan(
             PemeliharaanTaman::query()->where('taman_id', $taman->id),
@@ -229,6 +218,8 @@ class TamanController extends Controller
 
         $this->deleteGalleryImages($taman, $request->input('hapus_fotos', []));
         $this->storeGalleryImages($taman, $request->file('fotos', []));
+        $taman->refresh()->load('images', 'kelurahan');
+        $taman->syncStatusData();
 
         return redirect()
             ->route('admin.tamans.index')
@@ -264,6 +255,9 @@ class TamanController extends Controller
 
         Storage::disk('public')->delete($image->path_foto);
         $image->delete();
+
+        $taman->refresh()->load('images', 'kelurahan');
+        $taman->syncStatusData();
 
         return redirect()
             ->route('admin.tamans.show', $taman)

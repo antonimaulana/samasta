@@ -39,7 +39,7 @@ class TamanWilayahGeocoderTest extends TestCase
 
         $this->actingAs($admin)
             ->getJson(route('admin.tamans.resolve-wilayah', [
-                'latitude' => -1.08286,
+                'latitude' => 1.0456,
                 'longitude' => 104.03050,
             ]))
             ->assertOk()
@@ -69,7 +69,7 @@ class TamanWilayahGeocoderTest extends TestCase
                 'kategori' => 'Taman Kota',
                 'luasan' => 1500,
                 'alamat' => 'Jl. Auto Wilayah',
-                'latitude' => '-1.08286000',
+                'latitude' => '1.04560000',
                 'longitude' => '104.03050000',
                 'deskripsi' => 'Deskripsi taman auto wilayah dari koordinat.',
             ])
@@ -96,7 +96,7 @@ class TamanWilayahGeocoderTest extends TestCase
 
         $csv = implode("\n", [
             'nama_taman,kategori,kecamatan,kelurahan,luasan,alamat,latitude,longitude,deskripsi,fasilitas',
-            'Taman Koordinat Saja,Taman Kota,,,900,Jl. Koordinat,-1.082860,104.030500,Deskripsi dari koordinat saja,',
+            'Taman Koordinat Saja,Taman Kota,,,900,Jl. Koordinat,1.045600,104.030500,Deskripsi dari koordinat saja,',
         ]);
 
         $file = UploadedFile::fake()->createWithContent('tamans.csv', $csv);
@@ -114,7 +114,7 @@ class TamanWilayahGeocoderTest extends TestCase
     {
         config(['wilayah.geocoder.enabled' => false]);
 
-        $result = KelurahanResolver::findByCoordinates(-1.08286, 104.03050);
+        $result = KelurahanResolver::findByCoordinates(1.0456, 104.03050);
 
         $this->assertNull($result);
     }

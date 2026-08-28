@@ -4,15 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pemangkasan;
+use App\Models\PemangkasanProgres;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
+use App\Support\ArmadaAssignment;
 use App\Support\JadwalLayananQuery;
 use App\Support\OperatorWilayahScope;
 use App\Support\PelaksanaScheduleConflictChecker;
+use App\Support\PemangkasanProgresPdf;
+use App\Support\PemangkasanSchedule;
 use App\Support\TableSearch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -94,27 +99,22 @@ class PemangkasanController extends Controller
     {
         return view('admin.pemangkasans.create', [
             'tamans' => $this->tamansForSelect(),
+            'armadaInventory' => ArmadaAssignment::inventory(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validatePemangkasan($request);
-
-        if ($request->hasFile('foto_sebelum')) {
-            $validated['foto_sebelum'] = $request->file('foto_sebelum')->store('pemangkasan', 'public');
-        }
-
-        if ($request->hasFile('foto_sesudah')) {
-            $validated['foto_sesudah'] = $request->file('foto_sesudah')->store('pemangkasan', 'public');
-        }
+        $validated = $this->validatePemangkasan($request, requiresArmada: false);
+        $armadaRows = ArmadaAssignment::extractRows($request);
 
         if ($request->hasFile('pendukung_pelaksanaan')) {
             $validated['pendukung_pelaksanaan'] = $request->file('pendukung_pelaksanaan')
                 ->store('pemangkasan/pendukung', 'public');
         }
 
-        Pemangkasan::create($validated);
+        $pemangkasan = Pemangkasan::create($validated);
+        ArmadaAssignment::sync($pemangkasan, $armadaRows);
 
         return redirect()
             ->route('admin.pemangkasans.index')
@@ -124,14 +124,15 @@ class PemangkasanController extends Controller
     public function edit(Pemangkasan $pemangkasan): View
     {
         return view('admin.pemangkasans.edit', [
-            'pemangkasan' => $pemangkasan,
+            'pemangkasan' => $pemangkasan->load(['armadas', 'progres']),
             'tamans' => $this->tamansForSelect(),
+            'armadaInventory' => ArmadaAssignment::inventory(),
         ]);
     }
 
     public function show(Request $request, Pemangkasan $pemangkasan): View
     {
-        $pemangkasan->load('taman');
+        $pemangkasan->load(['taman', 'progres']);
 
         $backUrl = $request->filled('view') || $request->input('from') === 'jadwal'
             ? route('admin.pemangkasans.index', array_filter([
@@ -154,23 +155,8 @@ class PemangkasanController extends Controller
 
     public function update(Request $request, Pemangkasan $pemangkasan): RedirectResponse
     {
-        $validated = $this->validatePemangkasan($request, $pemangkasan);
-
-        if ($request->hasFile('foto_sebelum')) {
-            if ($pemangkasan->foto_sebelum) {
-                Storage::disk('public')->delete($pemangkasan->foto_sebelum);
-            }
-
-            $validated['foto_sebelum'] = $request->file('foto_sebelum')->store('pemangkasan', 'public');
-        }
-
-        if ($request->hasFile('foto_sesudah')) {
-            if ($pemangkasan->foto_sesudah) {
-                Storage::disk('public')->delete($pemangkasan->foto_sesudah);
-            }
-
-            $validated['foto_sesudah'] = $request->file('foto_sesudah')->store('pemangkasan', 'public');
-        }
+        $validated = $this->validatePemangkasan($request, $pemangkasan, requiresArmada: false);
+        $armadaRows = ArmadaAssignment::extractRows($request);
 
         if ($request->hasFile('pendukung_pelaksanaan')) {
             if ($pemangkasan->hasPendukungPelaksanaanFile()) {
@@ -182,6 +168,7 @@ class PemangkasanController extends Controller
         }
 
         $pemangkasan->update($validated);
+        ArmadaAssignment::sync($pemangkasan, $armadaRows);
 
         return redirect()
             ->route('admin.pemangkasans.index')
@@ -211,6 +198,13 @@ class PemangkasanController extends Controller
         return back()->with('success', 'Status layanan berhasil diperbarui.');
     }
 
+    public function exportPdfProgres(Pemangkasan $pemangkasan, PemangkasanProgres $pemangkasanProgres): Response
+    {
+        $this->authorize('view', $pemangkasan);
+
+        return PemangkasanProgresPdf::download($pemangkasan, $pemangkasanProgres);
+    }
+
     public function destroy(Pemangkasan $pemangkasan): RedirectResponse
     {
         if ($pemangkasan->foto_sebelum) {
@@ -232,7 +226,7 @@ class PemangkasanController extends Controller
             ->with('success', 'Data operasional pertamanan berhasil dihapus.');
     }
 
-    private function validatePemangkasan(Request $request, ?Pemangkasan $pemangkasan = null): array
+    private function validatePemangkasan(Request $request, ?Pemangkasan $pemangkasan = null, bool $requiresArmada = false): array
     {
         $isMiniGarden = $request->input('jenis_layanan') === 'Pemasangan Mini Garden';
         $isLokasiLuar = $request->boolean('lokasi_luar');
@@ -253,6 +247,7 @@ class PemangkasanController extends Controller
                 'max:5120',
             ],
             'tanggal_eksekusi' => ['required', 'date'],
+            'tanggal_akhir_jadwal' => ['required', 'date', 'after_or_equal:tanggal_eksekusi'],
             'tanggal_penyelesaian' => [
                 Rule::requiredIf(fn () => $request->input('status') === 'Selesai'),
                 'nullable',
@@ -261,8 +256,6 @@ class PemangkasanController extends Controller
             'pelaksana' => ['required', 'array', 'min:1'],
             'pelaksana.*' => ['required', 'string', Rule::in(PemeliharaanTaman::timNames())],
             'status' => ['required', Rule::in(Pemangkasan::STATUS)],
-            'foto_sebelum' => ['nullable', 'image', 'max:2048'],
-            'foto_sesudah' => ['nullable', 'image', 'max:2048'],
         ];
 
         if (! $isMiniGarden) {
@@ -273,19 +266,20 @@ class PemangkasanController extends Controller
             }
         }
 
-        $validated = $request->validate($rules, [], [
+        $rules = array_merge($rules, ArmadaAssignment::validationRules($requiresArmada));
+
+        $validated = $request->validate($rules, [], array_merge([
             'pelaksana' => 'pelaksana',
             'pelaksana.*' => 'tim pelaksana',
             'penanggungjawab' => 'penanggung jawab',
             'kontak_permohonan' => 'kontak permohonan',
             'pendukung_pelaksanaan' => 'pendukung pelaksanaan',
-            'foto_sebelum' => 'foto sebelum pelaksanaan',
-            'foto_sesudah' => 'foto setelah pelaksanaan',
-            'tanggal_eksekusi' => 'jadwal pelaksanaan',
+            'tanggal_eksekusi' => 'tanggal mulai pelaksanaan',
+            'tanggal_akhir_jadwal' => 'tanggal selesai pelaksanaan',
             'tanggal_penyelesaian' => 'tanggal penyelesaian',
             'taman_id' => 'lokasi taman',
             'lokasi_pohon' => 'lokasi',
-        ]);
+        ], ArmadaAssignment::validationAttributes()));
 
         if ($isMiniGarden) {
             $validated['taman_id'] = null;
@@ -297,13 +291,21 @@ class PemangkasanController extends Controller
             $validated['lokasi_pohon'] = PemeliharaanTaman::lokasiLabelFromTaman($taman);
         }
 
-        unset($validated['lokasi_luar']);
+        unset($validated['lokasi_luar'], $validated['armada']);
+
+        $validated = array_merge(
+            $validated,
+            PemangkasanSchedule::normalizeScheduleFields(
+                $validated['tanggal_eksekusi'],
+                $validated['tanggal_akhir_jadwal'],
+            ),
+        );
 
         if ($validated['status'] !== 'Selesai') {
             $validated['tanggal_penyelesaian'] = null;
         }
 
-        unset($validated['foto_sebelum'], $validated['foto_sesudah'], $validated['pendukung_pelaksanaan']);
+        unset($validated['pendukung_pelaksanaan']);
 
         $validated['kondisi_sebelum'] = '';
 

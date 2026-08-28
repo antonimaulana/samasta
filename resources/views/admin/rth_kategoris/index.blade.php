@@ -16,20 +16,18 @@
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari nama kategori...'])
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Icon</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Nama</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Luas (m²)</th>
-                        <th class="px-4 py-3 text-center font-medium text-gray-600">Lokasi</th>
-                        <th class="px-4 py-3 text-center font-medium text-gray-600">Urutan</th>
-                        <th class="px-4 py-3 text-center font-medium text-gray-600">Status</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Aksi</th>
-                    </tr>
-                </thead>
+    <x-admin.data-table>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Icon</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Luas (m²)</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Lokasi</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Urutan</th>
+                <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Status</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+            </tr>
+        </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($kategoris as $kategori)
                         <tr class="hover:bg-gray-50">
@@ -84,13 +82,10 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-
         @if ($kategoris->hasPages())
-            <div class="border-t border-gray-200 px-4 py-3">
+            <x-slot:footer>
                 {{ $kategoris->links() }}
-            </div>
+            </x-slot:footer>
         @endif
-    </div>
+    </x-admin.data-table>
 @endsection

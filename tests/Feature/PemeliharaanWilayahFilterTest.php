@@ -42,7 +42,9 @@ class PemeliharaanWilayahFilterTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.pemeliharaan-tamans.create'))
             ->assertOk()
-            ->assertSee('applyWilayahFilter', false)
+            ->assertSee('Taman Filter Test')
+            ->assertSee('js/searchable-select.js', false)
+            ->assertSee('bootTimWilayahFilter', false)
             ->assertSee('Lokasi di luar wilayah pemeliharaan');
     }
 

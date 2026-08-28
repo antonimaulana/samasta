@@ -98,7 +98,7 @@
 <div class="page-break"></div>
 
 <h2>1. Gambaran Umum</h2>
-<p>{{ $appName }} (SITAMAN) adalah aplikasi web monolith berbasis Laravel untuk mengelola operasional pertamanan kota, portal informasi publik, engagement warga, dan monitoring DPA (Daftar Paket Anggaran).</p>
+<p>{{ $appName }} ({{ $appFullName ?? config('app.full_name', 'Sistem Informasi Manajemen Pertamanan') }}) adalah aplikasi web monolith berbasis Laravel untuk mengelola operasional pertamanan kota, portal informasi publik, engagement warga, dan monitoring DPA (Daftar Paket Anggaran).</p>
 
 <div class="arch-box">
     Portal Publik (/) ──→ routes/public.php<br>

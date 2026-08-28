@@ -136,20 +136,18 @@
     @endif
 
     {{-- Tabel --}}
-    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Tanggal</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Kategori</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Rating</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Taman</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Saran</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Nama</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Aksi</th>
-                    </tr>
-                </thead>
+    <x-admin.data-table>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Kategori</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Rating</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Taman</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Saran</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+            </tr>
+        </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($surveys as $survey)
                         <tr class="hover:bg-gray-50">
@@ -185,12 +183,12 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
         @if ($surveys->hasPages())
-            <div class="border-t border-gray-200 px-4 py-3">{{ $surveys->links() }}</div>
+            <x-slot:footer>
+                {{ $surveys->links() }}
+            </x-slot:footer>
         @endif
-    </div>
+    </x-admin.data-table>
 @endsection
 
 @push('scripts')

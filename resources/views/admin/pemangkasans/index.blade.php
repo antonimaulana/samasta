@@ -30,7 +30,7 @@
         <x-admin.can-write>
             <a href="{{ route('admin.pemangkasans.create') }}"
                class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
-                + Tambah Operasional
+                + Permohonan Baru
             </a>
         </x-admin.can-write>
     </div>
@@ -108,26 +108,23 @@
         @endif
     </form>
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Jadwal</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Jenis</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Lokasi</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Asal</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Pelaksana</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Status</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Aksi</th>
-                    </tr>
-                </thead>
+    <x-admin.data-table>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jadwal</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Asal</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pelaksana</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+            </tr>
+        </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($pemangkasans as $pemangkasan)
                         @php
-                            $isLate = $pemangkasan->status !== 'Selesai'
-                                && $pemangkasan->tanggal_eksekusi->isPast()
-                                && ! $pemangkasan->tanggal_eksekusi->isToday();
+                            $isLate = \App\Support\PemangkasanSchedule::isLate($pemangkasan);
+                            $isActiveToday = \App\Support\PemangkasanSchedule::isActiveToday($pemangkasan);
                             $statusClass = match ($pemangkasan->status) {
                                 'Selesai' => 'bg-emerald-100 text-emerald-800',
                                 'Diproses' => 'bg-amber-100 text-amber-800',
@@ -138,12 +135,13 @@
                         @endphp
                         <tr class="hover:bg-gray-50 {{ $isLate ? 'bg-red-50/40' : '' }}">
                             <td class="px-4 py-3">
-                                <p class="font-medium text-gray-900">{{ $pemangkasan->tanggal_eksekusi->format('d M Y') }}</p>
+                                <p class="font-medium text-gray-900">{{ \App\Support\PemangkasanSchedule::labelRentang($pemangkasan) }}</p>
+                                <p class="text-xs text-gray-500">{{ \App\Support\PemangkasanSchedule::progressSummary($pemangkasan) }}</p>
                                 @if ($isLate)
                                     <p class="text-xs font-medium text-red-600">Terlambat</p>
-                                @elseif ($pemangkasan->tanggal_eksekusi->isToday())
+                                @elseif ($isActiveToday)
                                     <p class="text-xs font-medium text-emerald-700">Hari ini</p>
-                                @elseif ($pemangkasan->tanggal_eksekusi->isTomorrow())
+                                @elseif (\App\Support\PemangkasanSchedule::tanggalWithinSchedule($pemangkasan, today()->addDay()))
                                     <p class="text-xs font-medium text-blue-700">Besok</p>
                                 @endif
                             </td>
@@ -211,13 +209,10 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-
         @if ($pemangkasans->hasPages())
-            <div class="border-t border-gray-200 px-4 py-3">
+            <x-slot:footer>
                 {{ $pemangkasans->withQueryString()->links() }}
-            </div>
+            </x-slot:footer>
         @endif
-    </div>
+    </x-admin.data-table>
 @endsection

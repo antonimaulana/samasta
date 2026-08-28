@@ -50,7 +50,7 @@ class TamanExportPdfTest extends TestCase
         );
 
         $this->actingAs($admin)
-            ->get(route('admin.tamans.export-pdf'))
+            ->get(route('admin.taman-laporan.export-pdf'))
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
     }
@@ -60,7 +60,7 @@ class TamanExportPdfTest extends TestCase
         $viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);
 
         $this->actingAs($viewer)
-            ->get(route('admin.tamans.export-pdf'))
+            ->get(route('admin.taman-laporan.export-pdf'))
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
     }

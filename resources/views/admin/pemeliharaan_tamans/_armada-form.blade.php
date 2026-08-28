@@ -1,5 +1,7 @@
 @php
     $armadaInventory = $armadaInventory ?? collect();
+    $armadaVisibility = $armadaVisibility ?? 'tim-select';
+    $armadaRequired = $armadaRequired ?? true;
     $sopirOptions = \App\Models\PemeliharaanTamanArmada::SOPIR_OPTIONS;
     $armadaRows = $armadaRows ?? old('armada', $kinerja?->armadas?->map(fn ($row) => [
         'alat_sarana_operasional_id' => $row->alat_sarana_operasional_id ?? '',
@@ -15,7 +17,7 @@
         <div>
             <h3 class="text-sm font-bold text-green-800">Data Armada</h3>
             <p class="mt-1 text-xs text-gray-500">
-                Pilih armada dari inventaris Alat/Sarana Operasional (Tim Armada) dan tentukan sopir.
+                Pilih armada dari inventaris Alat/Sarana Operasional (Tim Armada) dan tentukan sopir{{ $armadaRequired ? '.' : ' — opsional.' }}
             </p>
         </div>
         <button type="button" id="add-armada-row"
@@ -52,7 +54,7 @@
                 </div>
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">Nama Armada *</label>
+                        <label class="mb-1 block text-sm font-medium text-gray-700">Nama Armada{{ $armadaRequired ? ' *' : '' }}</label>
                         <select name="armada[{{ $index }}][alat_sarana_operasional_id]"
                                 class="armada-select w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                                 @disabled($armadaInventory->isEmpty())>
@@ -68,7 +70,7 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">Sopir *</label>
+                        <label class="mb-1 block text-sm font-medium text-gray-700">Sopir{{ $armadaRequired ? ' *' : '' }}</label>
                         <select name="armada[{{ $index }}][sopir]"
                                 class="armada-sopir w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
                             <option value="">Pilih sopir</option>
@@ -97,7 +99,7 @@
         </div>
         <div class="grid gap-4 md:grid-cols-2">
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Nama Armada *</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Nama Armada{{ $armadaRequired ? ' *' : '' }}</label>
                 <select name="armada[__INDEX__][alat_sarana_operasional_id]"
                         class="armada-select w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
                     <option value="">Pilih armada</option>
@@ -107,7 +109,7 @@
                 </select>
             </div>
             <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Sopir *</label>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Sopir{{ $armadaRequired ? ' *' : '' }}</label>
                 <select name="armada[__INDEX__][sopir]"
                         class="armada-sopir w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
                     <option value="">Pilih sopir</option>
@@ -124,16 +126,30 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const timArmadaName = @json(\App\Models\PemeliharaanTaman::TIM_ARMADA);
+        const visibilityMode = @json($armadaVisibility);
+        const armadaRequired = @json($armadaRequired);
         const timSelect = document.getElementById('tim');
         const armadaSection = document.getElementById('armada-section');
         const armadaRows = document.getElementById('armada-rows');
         const addArmadaButton = document.getElementById('add-armada-row');
         const armadaTemplate = document.getElementById('armada-row-template');
 
+        function pelaksanaIncludesTimArmada() {
+            return Array.from(document.querySelectorAll('input[name="pelaksana[]"]:checked'))
+                .some(function (input) {
+                    return input.value === timArmadaName;
+                });
+        }
+
         function currentTimValue() {
+            if (visibilityMode === 'pelaksana-checkbox') {
+                return pelaksanaIncludesTimArmada() ? timArmadaName : '';
+            }
+
             if (! timSelect) {
                 return @json($operatorTim ?? '');
             }
+
             return timSelect.value;
         }
 
@@ -141,7 +157,7 @@
             const show = currentTimValue() === timArmadaName;
             armadaSection?.classList.toggle('hidden', ! show);
             armadaSection?.querySelectorAll('.armada-select, .armada-sopir').forEach(function (input) {
-                input.required = show;
+                input.required = show && armadaRequired;
             });
         }
 
@@ -179,6 +195,9 @@
         });
 
         timSelect?.addEventListener('change', toggleArmadaSection);
+        document.querySelectorAll('input[name="pelaksana[]"]').forEach(function (checkbox) {
+            checkbox.addEventListener('change', toggleArmadaSection);
+        });
         toggleArmadaSection();
     });
 </script>

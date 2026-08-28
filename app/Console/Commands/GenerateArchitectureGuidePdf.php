@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\View;
 class GenerateArchitectureGuidePdf extends Command
 {
     protected $signature = 'docs:architecture-pdf
-                            {--output=docs/DOKUMENTASI-ARSITEKTUR-SAMASTA.pdf : Path file PDF output relatif ke base path}';
+                            {--output=docs/DOKUMENTASI-ARSITEKTUR-SIMTAMAN.pdf : Path file PDF output relatif ke base path}';
 
-    protected $description = 'Generate PDF dokumentasi arsitektur aplikasi SAMASTA';
+    protected $description = 'Generate PDF dokumentasi arsitektur aplikasi SIMTAMAN';
 
     public function handle(): int
     {
@@ -27,7 +27,8 @@ class GenerateArchitectureGuidePdf extends Command
 
         $html = View::make('docs.pdf.dokumentasi-arsitektur', [
             'generatedAt' => now()->timezone('Asia/Jakarta')->format('d F Y, H:i').' WIB',
-            'appName' => config('app.name', 'Samasta'),
+            'appName' => config('app.name', 'SIMTAMAN'),
+            'appFullName' => config('app.full_name', 'Sistem Informasi Manajemen Pertamanan'),
         ])->render();
 
         file_put_contents($absolutePath, PdfExport::renderBinary($html));

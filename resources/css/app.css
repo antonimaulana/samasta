@@ -9,3 +9,15 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Leaflet + Tailwind: tile markers must not inherit img max-width rules. */
+.leaflet-container img,
+.leaflet-container svg,
+.leaflet-container canvas {
+    max-width: none !important;
+    max-height: none !important;
+}
+
+.leaflet-container {
+    font: inherit;
+}

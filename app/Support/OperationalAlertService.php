@@ -116,28 +116,19 @@ class OperationalAlertService
     private function tamanIncomplete(): array
     {
         $tamans = $this->incompleteTamansQuery()
-            ->with('images')
             ->orderBy('nama_taman')
-            ->get(['nama_taman', 'latitude', 'longitude', 'foto']);
+            ->get(['nama_taman', 'status_data']);
 
         return [
             'key' => 'taman_incomplete',
-            'label' => 'Data Taman Tidak Lengkap',
-            'description' => 'Taman tanpa koordinat atau foto profil',
+            'label' => 'Data Taman Belum Lengkap',
+            'description' => 'Taman dengan status data Belum Lengkap',
             'count' => $tamans->count(),
             'severity' => 'info',
             'url' => route('admin.tamans.index', ['alert' => 'incomplete']),
-            'samples' => $tamans->take(3)->map(function (Taman $taman) {
-                $issues = [];
-                if ($this->tamanMissingCoordinates($taman)) {
-                    $issues[] = 'koordinat';
-                }
-                if ($this->tamanMissingPhotos($taman)) {
-                    $issues[] = 'foto';
-                }
-
-                return "{$taman->nama_taman} (belum ada: ".implode(', ', $issues).')';
-            })->all(),
+            'samples' => $tamans->take(3)->map(
+                fn (Taman $taman) => "{$taman->nama_taman} ({$taman->status_data_text})"
+            )->all(),
         ];
     }
 
@@ -148,41 +139,7 @@ class OperationalAlertService
 
     public function filterIncompleteTamans($query)
     {
-        return $query->where(function ($query) {
-            $query->where(fn ($q) => $this->applyMissingCoordinatesScope($q))
-                ->orWhere(fn ($q) => $this->applyMissingPhotosScope($q));
-        });
-    }
-
-    private function applyMissingCoordinatesScope($query): void
-    {
-        $query->where(function ($q) {
-            $q->whereNull('latitude')
-                ->orWhere('latitude', '')
-                ->orWhereNull('longitude')
-                ->orWhere('longitude', '');
-        });
-    }
-
-    private function applyMissingPhotosScope($query): void
-    {
-        $query->where(function ($q) {
-            $q->whereNull('foto')->orWhere('foto', '');
-        })->whereDoesntHave('images');
-    }
-
-    private function tamanMissingCoordinates(Taman $taman): bool
-    {
-        return blank($taman->latitude) || blank($taman->longitude);
-    }
-
-    private function tamanMissingPhotos(Taman $taman): bool
-    {
-        if ($taman->relationLoaded('images')) {
-            return blank($taman->foto) && $taman->images->isEmpty();
-        }
-
-        return blank($taman->foto) && ! $taman->images()->exists();
+        return $query->where('status_data', Taman::STATUS_DATA_BELUM_LENGKAP);
     }
 
     public static function clearCache(): void

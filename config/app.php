@@ -13,7 +13,18 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'SIMTAMAN'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Full Name
+    |--------------------------------------------------------------------------
+    |
+    | Nama lengkap aplikasi untuk subtitle, footer, dan metadata.
+    |
+    */
+
+    'full_name' => env('APP_FULL_NAME', 'Sistem Informasi Manajemen Pertamanan'),
 
     /*
     |--------------------------------------------------------------------------

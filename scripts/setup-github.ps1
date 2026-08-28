@@ -1,4 +1,4 @@
-# Setup GitHub repo untuk proyek SAMASTA (Windows)
+# Setup GitHub repo untuk proyek SIMTAMAN (Windows)
 # Usage: .\scripts\setup-github.ps1 -GitHubUsername "antonimaulana"
 # Repo aktif: https://github.com/antonimaulana/samasta
 # Requires: Git for Windows, GitHub CLI (gh) recommended
@@ -48,7 +48,7 @@ if ($status) {
     if ($envStaged) {
         Write-Error "ABORT: .env akan ter-commit! Hapus dari staging: git reset HEAD .env"
     }
-    git commit -m "Initial commit: Portal SAMASTA Disperakimtan Kota Batam"
+    git commit -m "Initial commit: Portal SIMTAMAN Disperakimtan Batam"
     Write-Host "[OK] Initial commit created" -ForegroundColor Green
 } else {
     Write-Host "[INFO] Working tree clean or already committed" -ForegroundColor Yellow

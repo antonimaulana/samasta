@@ -126,7 +126,7 @@
 <div class="cover">
     <h1>Panduan Deploy {{ $appName }}</h1>
     <p class="subtitle">Hosting Production di VPS Biznet Gio Cloud + Cloudflare</p>
-    <p style="font-size: 11px; color: #4b5563;">Portal SAMASTA — Disperakimtan Kota Batam</p>
+    <p style="font-size: 11px; color: #4b5563;">Portal {{ $appName }} — Disperakimtan Kota Batam</p>
 
     <table class="meta-box">
         <tr>
@@ -166,7 +166,7 @@
         <li>Install Stack LEMP (Nginx + PHP + MySQL)</li>
         <li>Firewall &amp; Keamanan Dasar</li>
         <li>Setup Database Production</li>
-        <li>Deploy Aplikasi SAMASTA</li>
+        <li>Deploy Aplikasi {{ $appName }}</li>
         <li>Konfigurasi Nginx</li>
         <li>Hubungkan Domain ke Cloudflare</li>
         <li>SSL &amp; Trust Proxy Laravel</li>
@@ -372,7 +372,7 @@ EXIT;</pre>
 
 <div class="page-break"></div>
 
-<h2>8. Deploy Aplikasi SAMASTA</h2>
+<h2>8. Deploy Aplikasi {{ $appName }}</h2>
 <p><strong>Setup GitHub:</strong> lihat <code>docs/deploy/GITHUB-SETUP.md</code>. Repo: <code>github.com/antonimaulana/samasta</code></p>
 <pre>sudo mkdir -p /var/www/samasta
 sudo chown $USER:www-data /var/www/samasta
@@ -389,7 +389,7 @@ cp .env.example .env
 nano .env</pre>
 
 <h3>8.1 Contoh .env Production</h3>
-<pre>APP_NAME="Samasta"
+<pre>APP_NAME="SIMTAMAN"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://samasta.batam.go.id
@@ -442,7 +442,7 @@ php artisan view:cache</pre>
 <h3>8.3 Buat Admin Production</h3>
 <pre>php artisan tinker</pre>
 <pre>\App\Models\User::create([
-    'name' => 'Administrator Samasta',
+    'name' => 'Administrator SIMTAMAN',
     'email' => 'admin@sitaman.batam',
     'password' => bcrypt('PasswordAdminKuat!2026'),
     'role' => 'admin',
@@ -538,7 +538,7 @@ php artisan config:cache</pre>
 <div class="page-break"></div>
 
 <h2>12. Cron Scheduler &amp; Queue Worker</h2>
-<p>Aplikasi SAMASTA memiliki scheduler harian (reminder layanan, digest operasional) dan queue database.</p>
+<p>Aplikasi {{ $appName }} memiliki scheduler harian (reminder layanan, digest operasional) dan queue database.</p>
 
 <h3>12.1 Cron Scheduler</h3>
 <p>Jalankan <code>sudo crontab -e -u www-data</code> dan tambahkan:</p>

@@ -38,7 +38,7 @@ class StoreAduanValidationTest extends TestCase
             'jenis_aduan' => 'Kondisi Taman Rusak',
             'deskripsi' => 'Deskripsi aduan yang cukup panjang untuk validasi.',
             'foto' => UploadedFile::fake()->image('bukti.jpg'),
-            'latitude' => -1.08286000,
+            'latitude' => 1.04560000,
             'longitude' => 104.03050000,
             'nama_pelapor' => 'Pelapor Test',
             'kontak_pelapor' => '081234567890',

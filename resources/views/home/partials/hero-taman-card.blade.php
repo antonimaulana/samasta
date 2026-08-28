@@ -2,7 +2,7 @@
 
    class="group flex h-full flex-col overflow-hidden rounded-2xl border border-green-100 bg-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">
 
-    <div class="home-hero-card-media relative w-full overflow-hidden">
+    <div class="relative aspect-[4/3] w-full overflow-hidden bg-emerald-50">
 
         @if ($label ?? null)
 
@@ -17,18 +17,11 @@
         @if ($taman->foto_url)
 
             <img src="{{ $taman->foto_url }}" alt="{{ $taman->nama_taman }}"
-
                  class="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105">
 
         @else
 
             <div class="relative h-full w-full bg-gradient-to-br from-emerald-100 via-green-100 to-lime-200">
-
-                <img src="{{ asset('images/hero-taman-hijau.jpg') }}" alt=""
-
-                     aria-hidden="true"
-
-                     class="absolute inset-0 h-full w-full object-cover opacity-35">
 
                 <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-3 text-center">
 

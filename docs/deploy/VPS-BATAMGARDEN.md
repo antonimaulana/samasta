@@ -1,6 +1,6 @@
 # VPS Production — BatamGarden (Biznet Gio Cloud)
 
-Referensi cepat server production SAMASTA. **Jangan commit file ini jika berisi password.**
+Referensi cepat server production SIMTAMAN. **Jangan commit file ini jika berisi password.**
 
 | Item | Nilai |
 |------|--------|
@@ -111,7 +111,7 @@ php artisan view:cache
 | Dokumen | Path |
 |---------|------|
 | Panduan deploy lengkap (PDF) | `docs/PANDUAN-DEPLOY-BIZNET-CLOUDFLARE.pdf` |
-| Dokumentasi arsitektur (PDF) | `docs/DOKUMENTASI-ARSITEKTUR-SAMASTA.pdf` |
+| Dokumentasi arsitektur (PDF) | `docs/DOKUMENTASI-ARSITEKTUR-SIMTAMAN.pdf` |
 | Contoh Nginx | `docs/deploy/nginx-sitaman.conf.example` |
 | Contoh Supervisor | `docs/deploy/supervisor-sitaman.conf.example` |
 | Setup GitHub | `docs/deploy/GITHUB-SETUP.md` |

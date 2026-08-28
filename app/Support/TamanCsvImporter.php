@@ -4,14 +4,19 @@ namespace App\Support;
 
 use App\Models\Kelurahan;
 use App\Models\Taman;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class TamanCsvImporter
 {
     /** @var list<string> */
-    public const HEADERS = [
+    public const REQUIRED_HEADERS = [
         'nama_taman',
+    ];
+
+    /** @var list<string> */
+    public const OPTIONAL_FILE_HEADERS = [
         'kategori',
         'kecamatan',
         'kelurahan',
@@ -21,10 +26,33 @@ class TamanCsvImporter
         'longitude',
         'deskripsi',
         'fasilitas',
+        'tahun_pembangunan',
+        'nilai_pembangunan',
+        'kontraktor',
+        'konsultan_perencana',
+        'data_verified_at',
+    ];
+
+    /** @var array<string, string> */
+    private const HEADER_ALIASES = [
+        'nama_tam' => 'nama_taman',
+        'nama' => 'nama_taman',
+        'tahun_pen' => 'tahun_pembangunan',
+        'nilai_pemb' => 'nilai_pembangunan',
+        'konsultan_' => 'konsultan_perencana',
+        'konsultan' => 'konsultan_perencana',
+        'data_verified' => 'data_verified_at',
+        'verified_at' => 'data_verified_at',
+    ];
+
+    /** @var list<string> */
+    public const HEADERS = [
+        ...self::REQUIRED_HEADERS,
+        ...self::OPTIONAL_FILE_HEADERS,
     ];
 
     /**
-     * @return array{imported: int, skipped: int, errors: list<string>}
+     * @return array{imported: int, updated: int, skipped: int, errors: list<string>}
      */
     public function import(string $absolutePath): array
     {
@@ -33,6 +61,7 @@ class TamanCsvImporter
         if ($handle === false) {
             return [
                 'imported' => 0,
+                'updated' => 0,
                 'skipped' => 0,
                 'errors' => ['File CSV tidak dapat dibaca.'],
             ];
@@ -45,25 +74,27 @@ class TamanCsvImporter
 
             return [
                 'imported' => 0,
+                'updated' => 0,
                 'skipped' => 0,
                 'errors' => ['File CSV kosong.'],
             ];
         }
 
-        $header = $this->normalizeHeader($this->repairRow($header, $delimiter));
-        $missing = array_diff(self::HEADERS, $header);
+        [$header, $delimiter] = $this->resolveHeaderRow($header, $delimiter);
 
-        if ($missing !== []) {
+        if (! in_array('nama_taman', $header, true)) {
             fclose($handle);
 
             return [
                 'imported' => 0,
+                'updated' => 0,
                 'skipped' => 0,
-                'errors' => ['Kolom wajib tidak ditemukan: '.implode(', ', $missing).'. Unduh template CSV terlebih dahulu.'],
+                'errors' => ['Kolom nama_taman tidak ditemukan. Pastikan baris header ada (contoh: nama_taman atau nama_tam) dan simpan CSV dengan pemisah titik koma (;).'],
             ];
         }
 
         $imported = 0;
+        $updated = 0;
         $skipped = 0;
         $errors = [];
         $rowNumber = 1;
@@ -72,19 +103,25 @@ class TamanCsvImporter
             $rowNumber++;
 
             $row = $this->repairRow($row, $delimiter);
+            $row = $this->padRow($row, count($header));
 
             if ($this->isEmptyRow($row)) {
                 continue;
             }
 
             $data = $this->mapRow($header, $row);
+            $data = $this->nullifyEmptyFields($data);
             $data['luasan'] = $this->normalizeLuasan($data['luasan'] ?? null);
+            $data['nilai_pembangunan'] = $this->normalizeNilaiPembangunan($data['nilai_pembangunan'] ?? null);
+            $data['tahun_pembangunan'] = $this->normalizeTahunPembangunan($data['tahun_pembangunan'] ?? null);
             $data['kategori'] = $this->normalizeKategori($data['kategori'] ?? null);
             $data['latitude'] = $this->normalizeCoordinate($data['latitude'] ?? null);
             $data['longitude'] = $this->normalizeCoordinate($data['longitude'] ?? null);
             $data['kecamatan'] = $this->normalizeWilayahName($data['kecamatan'] ?? null);
             $data['kelurahan'] = $this->normalizeWilayahName($data['kelurahan'] ?? null);
-            $validator = Validator::make($data, $this->rules());
+            $data['data_verified_at'] = $this->normalizeDataVerifiedAt($data['data_verified_at'] ?? null);
+            $data = $this->nullifyEmptyFields($data);
+            $validator = Validator::make($data, $this->rules(), $this->validationMessages());
 
             if ($validator->fails()) {
                 $errors[] = 'Baris '.$rowNumber.': '.implode(' ', $validator->errors()->all());
@@ -94,37 +131,45 @@ class TamanCsvImporter
             }
 
             $payload = $validator->validated();
-            $kelurahan = $this->resolveKelurahan($payload);
-
-            if (! $kelurahan) {
-                $errors[] = 'Baris '.$rowNumber.': wilayah tidak ditemukan. Isi kecamatan/kelurahan atau koordinat latitude/longitude yang valid.';
-                $skipped++;
-
-                continue;
-            }
+            $coordinatesProvidedInCsv = $this->hasCoordinates($payload);
+            $payload = array_merge($payload, Taman::applyDefaultCoordinates(
+                $payload['latitude'] ?? null,
+                $payload['longitude'] ?? null,
+            ));
+            $kelurahan = $this->resolveKelurahan($payload, $coordinatesProvidedInCsv);
 
             unset($payload['kecamatan'], $payload['kelurahan']);
-            $payload['kelurahan_id'] = $kelurahan->id;
-            $payload['fasilitas'] = $this->parseFasilitas($payload['fasilitas'] ?? null);
+            $payload['kelurahan_id'] = $kelurahan?->id;
 
-            $exists = Taman::query()
+            $rawFasilitas = $payload['fasilitas'] ?? null;
+            $payload['fasilitas'] = Taman::normalizeFasilitasArray($this->parseFasilitas($rawFasilitas));
+
+            $existing = Taman::query()
                 ->whereRaw('LOWER(TRIM(nama_taman)) = ?', [mb_strtolower(trim($payload['nama_taman']))])
-                ->exists();
+                ->first();
 
-            if ($exists) {
-                $errors[] = 'Baris '.$rowNumber.': taman "'.$payload['nama_taman'].'" sudah ada — dilewati.';
-                $skipped++;
+            if ($existing) {
+                $updatePayload = $this->prepareUpdatePayload($payload, filled($rawFasilitas));
+                $updatePayload = $this->applyMissingCoordinates($existing, $updatePayload, $payload, $coordinatesProvidedInCsv);
+
+                if ($updatePayload !== []) {
+                    $existing->fill($updatePayload);
+                    $existing->save();
+                }
+
+                $existing->syncStatusData();
+                $updated++;
 
                 continue;
             }
 
-            Taman::create($payload);
+            Taman::create($this->prepareCreatePayload($payload))->syncStatusData();
             $imported++;
         }
 
         fclose($handle);
 
-        return compact('imported', 'skipped', 'errors');
+        return compact('imported', 'updated', 'skipped', 'errors');
     }
 
     public function templateDelimiter(): string
@@ -146,10 +191,15 @@ class TamanCsvImporter
                 'Belian',
                 '5000',
                 'Jl. Contoh No. 1, Batam',
-                '-1.082860',
+                '1.045600',
                 '104.030500',
                 'Taman contoh untuk panduan pengisian CSV.',
-                'Area bermain, jogging track',
+                'Playground:Baik; Jogging Track:Baik',
+                '2020',
+                '1500000000',
+                'PT Contoh Kontraktor',
+                'PT Contoh Konsultan',
+                '2026-08-23 10:00',
             ],
         ];
     }
@@ -169,15 +219,23 @@ class TamanCsvImporter
         $firstLine = $this->stripBom($firstLine);
         $delimiter = ',';
 
-        if (preg_match('/^sep=(.+)$/i', trim($firstLine), $matches) === 1) {
-            $delimiter = $matches[1] !== '' ? $matches[1] : ';';
-            $headerLine = fgets($handle);
+        if (preg_match('/^sep=(.*)$/i', trim($firstLine), $matches) === 1) {
+            $sepRemainder = trim($matches[1]);
+            $hintDelimiter = $this->parseSepDelimiterHint($sepRemainder) ?? ';';
+            $headerLine = $this->extractHeaderLineFromSepRow($sepRemainder);
 
-            if ($headerLine === false) {
-                return [null, $delimiter];
+            if ($headerLine === null) {
+                $headerLine = fgets($handle);
+
+                if ($headerLine === false) {
+                    return [null, $hintDelimiter];
+                }
             }
 
-            return [str_getcsv($this->stripBom($headerLine), $delimiter), $delimiter];
+            $headerLine = $this->stripBom($headerLine);
+            $delimiter = $this->resolveDelimiter($headerLine, $hintDelimiter);
+
+            return [str_getcsv($headerLine, $delimiter), $delimiter];
         }
 
         $delimiter = $this->detectDelimiter($firstLine);
@@ -194,27 +252,121 @@ class TamanCsvImporter
         return $line;
     }
 
+    private function parseSepDelimiterHint(string $sepRemainder): ?string
+    {
+        if ($sepRemainder === '') {
+            return null;
+        }
+
+        $char = $sepRemainder[0];
+
+        return in_array($char, [';', ',', "\t", '|'], true) ? $char : null;
+    }
+
+    private function extractHeaderLineFromSepRow(string $sepRemainder): ?string
+    {
+        if ($sepRemainder === '' || in_array($sepRemainder, [';', ',', "\t", '|'], true)) {
+            return null;
+        }
+
+        if ($this->parseSepDelimiterHint($sepRemainder) !== null) {
+            $headerLine = ltrim(substr($sepRemainder, 1));
+
+            return $headerLine !== '' ? $headerLine : null;
+        }
+
+        return $sepRemainder;
+    }
+
+    /**
+     * @param  list<string|null>  $header
+     * @return array{0: list<string>, 1: string}
+     */
+    private function resolveHeaderRow(array $header, string $delimiter): array
+    {
+        $header = $this->normalizeHeader($this->repairRow($header, $delimiter));
+
+        if (in_array('nama_taman', $header, true)) {
+            return [$header, $delimiter];
+        }
+
+        if (count($header) === 1) {
+            $singleLine = trim((string) ($header[0] ?? ''));
+
+            foreach ([',', ';', "\t", '|'] as $candidate) {
+                $parsed = $this->normalizeHeader(str_getcsv($singleLine, $candidate));
+
+                if (in_array('nama_taman', $parsed, true)) {
+                    return [$parsed, $candidate];
+                }
+            }
+        }
+
+        foreach ([',', ';', "\t", '|'] as $candidate) {
+            if ($candidate === $delimiter) {
+                continue;
+            }
+
+            $parsed = $this->normalizeHeader(str_getcsv(implode($delimiter, $header), $candidate));
+
+            if (in_array('nama_taman', $parsed, true)) {
+                return [$parsed, $candidate];
+            }
+        }
+
+        return [$header, $delimiter];
+    }
+
     private function detectDelimiter(string $line): string
     {
-        $commaCount = substr_count($line, ',');
-        $semicolonCount = substr_count($line, ';');
-        $tabCount = substr_count($line, "\t");
+        return $this->resolveDelimiter($line);
+    }
 
-        if ($semicolonCount >= $commaCount && $semicolonCount >= $tabCount && $semicolonCount > 0) {
-            return ';';
+    private function resolveDelimiter(string $line, ?string $hint = null): string
+    {
+        $hint = ($hint !== null && $hint !== '' && strlen($hint) === 1) ? $hint : null;
+
+        $candidates = array_values(array_unique(array_filter(
+            [$hint, ';', ',', "\t", '|'],
+            fn (?string $candidate) => $candidate !== null && $candidate !== ''
+        )));
+
+        $best = ';';
+        $bestCount = 0;
+
+        foreach ($candidates as $candidate) {
+            $parsed = str_getcsv($line, $candidate);
+
+            if (count($parsed) > $bestCount) {
+                $bestCount = count($parsed);
+                $best = $candidate;
+            }
         }
 
-        if ($tabCount > $commaCount && $tabCount > $semicolonCount) {
-            return "\t";
+        return $best;
+    }
+
+    private function canonicalHeaderColumn(string $column): string
+    {
+        $column = strtolower(trim($column));
+
+        if (isset(self::HEADER_ALIASES[$column])) {
+            return self::HEADER_ALIASES[$column];
         }
 
-        return ',';
+        foreach (self::HEADERS as $known) {
+            if (str_starts_with($known, $column) && strlen($column) >= 4) {
+                return $known;
+            }
+        }
+
+        return $column;
     }
 
     /**
      * @param  array<string, string|null>  $payload
      */
-    private function resolveKelurahan(array $payload): ?Kelurahan
+    private function resolveKelurahan(array $payload, bool $geocodeFromCoordinates = true): ?Kelurahan
     {
         $kelurahan = KelurahanResolver::findByNames($payload['kecamatan'], $payload['kelurahan']);
 
@@ -233,7 +385,7 @@ class TamanCsvImporter
             }
         }
 
-        if (! $this->hasCoordinates($payload)) {
+        if (! $geocodeFromCoordinates || ! $this->hasCoordinates($payload)) {
             return null;
         }
 
@@ -267,7 +419,9 @@ class TamanCsvImporter
                 $column = substr($column, 3);
             }
 
-            return strtolower($column);
+            $column = strtolower($column);
+
+            return $this->canonicalHeaderColumn($column);
         }, $header));
     }
 
@@ -306,14 +460,80 @@ class TamanCsvImporter
 
     private function normalizeLuasan(?string $value): ?string
     {
+        return $this->normalizeOptionalInteger($value);
+    }
+
+    private function normalizeNilaiPembangunan(?string $value): ?string
+    {
+        return $this->normalizeOptionalInteger($value);
+    }
+
+    private function normalizeTahunPembangunan(?string $value): ?string
+    {
         if ($value === null) {
             return null;
         }
 
         $value = trim($value);
 
-        if ($value === '') {
-            return $value;
+        if ($value === '' || $this->isPlaceholderValue($value)) {
+            return null;
+        }
+
+        if (preg_match('/^\d{4}/', $value, $matches) !== 1) {
+            return null;
+        }
+
+        $year = (int) $matches[0];
+        $currentYear = (int) date('Y');
+
+        if ($year < 1950 || $year > $currentYear) {
+            return null;
+        }
+
+        return (string) $year;
+    }
+
+    private function normalizeOptionalInteger(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+        $value = preg_replace('/^rp\.?\s*/iu', '', $value) ?? $value;
+        $value = preg_replace('/\s*m[²2]\s*$/iu', '', $value) ?? $value;
+        $value = trim($value);
+
+        if ($value === '' || $this->isPlaceholderValue($value)) {
+            return null;
+        }
+
+        return $this->parseIntegerString($value);
+    }
+
+    private function isPlaceholderValue(string $value): bool
+    {
+        return in_array(mb_strtolower($value), [
+            '-',
+            '—',
+            '–',
+            'n/a',
+            'na',
+            '#n/a',
+            'null',
+            'kosong',
+            'none',
+        ], true);
+    }
+
+    private function parseIntegerString(string $value): ?string
+    {
+        if (preg_match('/^\d{1,3}(\.\d{3})+,\d+$/', $value) === 1) {
+            $normalized = str_replace('.', '', $value);
+            $normalized = str_replace(',', '.', $normalized);
+
+            return (string) (int) round((float) $normalized);
         }
 
         if (preg_match('/^\d{1,3}(\.\d{3})+$/', $value) === 1) {
@@ -324,13 +544,32 @@ class TamanCsvImporter
             return str_replace(',', '', $value);
         }
 
+        if (preg_match('/^\d+,\d+$/', $value) === 1) {
+            return (string) (int) round((float) str_replace(',', '.', $value));
+        }
+
         $numeric = str_replace(',', '.', $value);
 
         if (is_numeric($numeric)) {
             return (string) (int) round((float) $numeric);
         }
 
-        return $value;
+        return null;
+    }
+
+    private function normalizeIntegerString(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if ($value === '' || $this->isPlaceholderValue($value)) {
+            return null;
+        }
+
+        return $this->parseIntegerString($value);
     }
 
     private function normalizeCoordinate(?string $value): ?string
@@ -359,6 +598,11 @@ class TamanCsvImporter
         }
 
         $value = trim($value);
+
+        if ($value === '' || $this->isPlaceholderValue($value)) {
+            return null;
+        }
+
         $value = preg_replace('/^(kelurahan|kel\.?|desa|kecamatan|kec\.?)\s+/iu', '', $value) ?? $value;
 
         return trim($value);
@@ -366,11 +610,21 @@ class TamanCsvImporter
 
     private function normalizeKategori(?string $value): ?string
     {
-        if ($value === null) {
+        if ($value === null || trim($value) === '' || $this->isPlaceholderValue(trim($value))) {
             return null;
         }
 
         $value = trim($value);
+
+        $aliases = [
+            'rth jalur hijau' => 'Jalur Hijau Jalan',
+            'rth jalur hijau jalan' => 'Jalur Hijau Jalan',
+        ];
+
+        $key = mb_strtolower($value);
+        if (isset($aliases[$key])) {
+            return $aliases[$key];
+        }
 
         foreach (Taman::KATEGORI as $kategori) {
             if (strcasecmp($value, $kategori) === 0) {
@@ -379,6 +633,48 @@ class TamanCsvImporter
         }
 
         return $value;
+    }
+
+    private function normalizeDataVerifiedAt(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        if ($value === '' || $this->isPlaceholderValue($value)) {
+            return null;
+        }
+
+        $formats = [
+            'Y-m-d H:i',
+            'Y-m-d H:i:s',
+            'Y-m-d',
+            'd/m/Y H:i',
+            'd/m/Y H:i:s',
+            'd/m/Y',
+            'd-m-Y H:i',
+            'd-m-Y',
+        ];
+
+        foreach ($formats as $format) {
+            try {
+                $parsed = Carbon::createFromFormat($format, $value, config('app.timezone'));
+
+                if ($parsed !== false) {
+                    return $parsed->format('Y-m-d H:i:s');
+                }
+            } catch (\Throwable) {
+                continue;
+            }
+        }
+
+        try {
+            return Carbon::parse($value, config('app.timezone'))->format('Y-m-d H:i:s');
+        } catch (\Throwable) {
+            return $value;
+        }
     }
 
     /**
@@ -401,6 +697,19 @@ class TamanCsvImporter
 
     /**
      * @param  list<string|null>  $row
+     * @return list<string|null>
+     */
+    private function padRow(array $row, int $length): array
+    {
+        while (count($row) < $length) {
+            $row[] = null;
+        }
+
+        return $row;
+    }
+
+    /**
+     * @param  list<string|null>  $row
      */
     private function isEmptyRow(array $row): bool
     {
@@ -414,26 +723,179 @@ class TamanCsvImporter
     }
 
     /**
+     * @param  array<string, string|null>  $data
+     * @return array<string, string|null>
+     */
+    private function nullifyEmptyFields(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            if ($key === 'nama_taman') {
+                continue;
+            }
+
+            if ($value === null || (is_string($value) && trim($value) === '')) {
+                $data[$key] = null;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
-    private function rules(): array
+    private function prepareCreatePayload(array $payload): array
+    {
+        $payload['kategori'] = $payload['kategori'] ?? '';
+        $payload['luasan'] = $payload['luasan'] ?? 0;
+        $payload['alamat'] = $payload['alamat'] ?? '';
+        $payload['deskripsi'] = $payload['deskripsi'] ?? '';
+        $payload = array_merge($payload, Taman::applyDefaultCoordinates(
+            $payload['latitude'] ?? null,
+            $payload['longitude'] ?? null,
+        ));
+        $payload['kelurahan_id'] = $payload['kelurahan_id'] ?? null;
+
+        if (! filled($payload['data_verified_at'] ?? null)) {
+            unset($payload['data_verified_at']);
+        }
+
+        return $payload;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function prepareUpdatePayload(array $payload, bool $hasFasilitasInCsv): array
+    {
+        $update = [];
+
+        foreach ([
+            'kategori',
+            'alamat',
+            'latitude',
+            'longitude',
+            'deskripsi',
+            'tahun_pembangunan',
+            'nilai_pembangunan',
+            'kontraktor',
+            'konsultan_perencana',
+            'data_verified_at',
+        ] as $field) {
+            if (($payload[$field] ?? null) !== null) {
+                $update[$field] = $payload[$field];
+            }
+        }
+
+        if (($payload['luasan'] ?? null) !== null && (int) $payload['luasan'] > 0) {
+            $update['luasan'] = (int) $payload['luasan'];
+        }
+
+        if (($payload['kelurahan_id'] ?? null) !== null) {
+            $update['kelurahan_id'] = $payload['kelurahan_id'];
+        }
+
+        if ($hasFasilitasInCsv) {
+            $update['fasilitas'] = $payload['fasilitas'];
+        }
+
+        return $update;
+    }
+
+    /**
+     * @param  array<string, mixed>  $updatePayload
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function applyMissingCoordinates(Taman $existing, array $updatePayload, array $payload, bool $geocodeFromCoordinates = true): array
+    {
+        if (filled($existing->latitude) && filled($existing->longitude)) {
+            return $updatePayload;
+        }
+
+        $coords = Taman::applyDefaultCoordinates(
+            $updatePayload['latitude'] ?? $payload['latitude'] ?? $existing->latitude,
+            $updatePayload['longitude'] ?? $payload['longitude'] ?? $existing->longitude,
+        );
+
+        if (! filled($existing->latitude) && ! array_key_exists('latitude', $updatePayload)) {
+            $updatePayload['latitude'] = $coords['latitude'];
+        }
+
+        if (! filled($existing->longitude) && ! array_key_exists('longitude', $updatePayload)) {
+            $updatePayload['longitude'] = $coords['longitude'];
+        }
+
+        if (! filled($existing->kelurahan_id) && ! array_key_exists('kelurahan_id', $updatePayload) && filled($payload['kelurahan_id'] ?? null)) {
+            $updatePayload['kelurahan_id'] = $payload['kelurahan_id'];
+        }
+
+        if (
+            $geocodeFromCoordinates
+            && ! filled($existing->kelurahan_id)
+            && ! array_key_exists('kelurahan_id', $updatePayload)
+        ) {
+            $latitude = $updatePayload['latitude'] ?? $existing->latitude ?? $coords['latitude'];
+            $longitude = $updatePayload['longitude'] ?? $existing->longitude ?? $coords['longitude'];
+            $kelurahan = KelurahanResolver::findByCoordinates((float) $latitude, (float) $longitude);
+
+            if ($kelurahan) {
+                $updatePayload['kelurahan_id'] = $kelurahan->id;
+            }
+        }
+
+        return $updatePayload;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function validationMessages(): array
     {
         return [
-            'nama_taman' => ['required', 'string', 'max:255'],
-            'kategori' => ['required', Rule::in(Taman::KATEGORI)],
-            'kecamatan' => ['nullable', 'string', 'max:255'],
-            'kelurahan' => ['nullable', 'string', 'max:255'],
-            'luasan' => ['required', 'integer', 'min:1'],
-            'alamat' => ['required', 'string'],
-            'latitude' => ['nullable', 'string', 'max:255'],
-            'longitude' => ['nullable', 'string', 'max:255'],
-            'deskripsi' => ['required', 'string'],
-            'fasilitas' => ['nullable', 'string'],
+            'nama_taman.required' => 'Nama taman wajib diisi.',
+            'kategori.in' => 'Kategori tidak valid.',
+            'luasan.integer' => 'Luasan harus angka bulat.',
+            'luasan.min' => 'Luasan tidak boleh negatif.',
+            'tahun_pembangunan.integer' => 'Tahun pembangunan harus angka bulat.',
+            'tahun_pembangunan.min' => 'Tahun pembangunan minimal 1950.',
+            'tahun_pembangunan.max' => 'Tahun pembangunan tidak boleh melebihi tahun berjalan.',
+            'nilai_pembangunan.integer' => 'Nilai pembangunan harus angka bulat.',
+            'nilai_pembangunan.min' => 'Nilai pembangunan tidak boleh negatif.',
+            'data_verified_at.date' => 'Format waktu pemutakhiran tidak valid.',
         ];
     }
 
     /**
-     * @return list<string>|null
+     * @return array<string, mixed>
+     */
+    private function rules(): array
+    {
+        $currentYear = (int) date('Y');
+
+        return [
+            'nama_taman' => ['required', 'string', 'max:255'],
+            'kategori' => ['nullable', Rule::in(Taman::KATEGORI)],
+            'kecamatan' => ['nullable', 'string', 'max:255'],
+            'kelurahan' => ['nullable', 'string', 'max:255'],
+            'luasan' => ['nullable', 'integer', 'min:0'],
+            'alamat' => ['nullable', 'string'],
+            'latitude' => ['nullable', 'string', 'max:255'],
+            'longitude' => ['nullable', 'string', 'max:255'],
+            'deskripsi' => ['nullable', 'string'],
+            'fasilitas' => ['nullable', 'string'],
+            'tahun_pembangunan' => ['nullable', 'integer', 'min:1950', 'max:'.$currentYear],
+            'nilai_pembangunan' => ['nullable', 'integer', 'min:0'],
+            'kontraktor' => ['nullable', 'string', 'max:255'],
+            'konsultan_perencana' => ['nullable', 'string', 'max:255'],
+            'data_verified_at' => ['nullable', 'date'],
+        ];
+    }
+
+    /**
+     * @return list<array{nama: string, kondisi?: string}>|null
      */
     private function parseFasilitas(?string $fasilitas): ?array
     {
@@ -442,7 +904,35 @@ class TamanCsvImporter
         }
 
         $items = preg_split('/[,;|]+/', $fasilitas);
+        $resolved = [];
 
-        return array_values(array_filter(array_map('trim', $items ?: [])));
+        foreach (array_map('trim', $items ?: []) as $item) {
+            if ($item === '') {
+                continue;
+            }
+
+            $nama = null;
+            $kondisi = 'Baik';
+
+            if (preg_match('/^(.+?)[:](.+)$/', $item, $matches) === 1) {
+                $nama = trim($matches[1]);
+                $kondisi = trim($matches[2]);
+            } else {
+                $nama = $item;
+            }
+
+            $canonicalNama = Taman::resolveFasilitasNama($nama) ?? $nama;
+
+            if ($canonicalNama === '') {
+                continue;
+            }
+
+            $resolved[] = [
+                'nama' => $canonicalNama,
+                'kondisi' => $kondisi,
+            ];
+        }
+
+        return $resolved === [] ? null : $resolved;
     }
 }

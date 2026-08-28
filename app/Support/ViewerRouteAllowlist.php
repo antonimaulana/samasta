@@ -24,6 +24,8 @@ class ViewerRouteAllowlist
             'admin.operasional-pertamanan-laporan.export-pdf',
             'admin.tamans.index',
             'admin.tamans.show',
+            'admin.taman-laporan.index',
+            'admin.taman-laporan.export-pdf',
             'admin.tamans.export-pdf',
             'admin.bibits.index',
             'admin.bibits.show',

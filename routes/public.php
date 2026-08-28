@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RthArController;
 use App\Http\Controllers\AduanMasyarakatController;
 use App\Http\Controllers\EnsiklopediaController;
 use App\Http\Controllers\HomeController;
@@ -13,6 +14,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::redirect('/beranda', '/')->name('beranda');
 
 Route::get('/rth-kota-batam', [RthController::class, 'index'])->name('rth.index');
+
+Route::get('/rth/{taman}/ar-scan', [RthArController::class, 'showArProfile'])->name('rth.ar-scan');
 
 Route::get('/ensiklopedia', [EnsiklopediaController::class, 'index'])->name('ensiklopedia.index');
 Route::get('/ensiklopedia/kuis', [EnsiklopediaController::class, 'quiz'])->name('ensiklopedia.quiz');

@@ -79,7 +79,7 @@ class TamanImportTest extends TestCase
         $this->assertDatabaseCount('tamans', 0);
     }
 
-    public function test_import_skips_duplicate_nama_taman(): void
+    public function test_import_updates_existing_taman_when_nama_matches(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $kelurahan = Kelurahan::whereHas('kecamatan', fn ($q) => $q->where('nama', 'Batam Kota'))->where('nama', 'Belian')->first();
@@ -94,9 +94,9 @@ class TamanImportTest extends TestCase
         ]);
 
         $csv = implode("\n", [
-            'nama_taman,kategori,kecamatan,kelurahan,luasan,alamat,latitude,longitude,deskripsi,fasilitas',
-            'Taman Existing,Taman Kota,Batam Kota,Belian,2000,Jl. Baru,,,Deskripsi baru,',
-            'Taman Baru,RTH Jalur Hijau,Sekupang,Tiban Indah,500,Jl. Baru 2,,,Deskripsi taman baru,',
+            'nama_taman,kategori,kecamatan,kelurahan,luasan,alamat,latitude,longitude,deskripsi,fasilitas,tahun_pembangunan',
+            'Taman Existing,Taman Kota,Batam Kota,Belian,2000,Jl. Baru,,,Deskripsi baru,,2018',
+            'Taman Baru,Jalur Hijau Jalan,Sekupang,Tiban Indah,500,Jl. Baru 2,,,Deskripsi taman baru,,',
         ]);
 
         $file = UploadedFile::fake()->createWithContent('tamans.csv', $csv);
@@ -107,8 +107,16 @@ class TamanImportTest extends TestCase
 
         $result = session('import_result');
         $this->assertSame(1, $result['imported']);
-        $this->assertSame(1, $result['skipped']);
+        $this->assertSame(1, $result['updated']);
+        $this->assertSame(0, $result['skipped']);
         $this->assertDatabaseCount('tamans', 2);
+
+        $existing = Taman::where('nama_taman', 'Taman Existing')->first();
+        $this->assertSame(2000, $existing->luasan);
+        $this->assertSame('Jl. Baru', $existing->alamat);
+        $this->assertSame(2018, $existing->tahun_pembangunan);
+        $this->assertSame(Taman::defaultLatitude(), $existing->latitude);
+        $this->assertSame(Taman::defaultLongitude(), $existing->longitude);
     }
 
     public function test_import_accepts_indonesian_luasan_format(): void
@@ -156,7 +164,7 @@ class TamanImportTest extends TestCase
 
         $csv = implode("\n", [
             'nama_taman,kategori,kecamatan,kelurahan,luasan,alamat,latitude,longitude,deskripsi,fasilitas',
-            'Taman Invalid,Taman Kota,Wilayah Salah,Kelurahan Salah,abc,Jl. Invalid,,,Deskripsi invalid,',
+            'Taman Invalid,Kategori Salah,Batam Kota,Belian,5000,Jl. Invalid,,,Deskripsi invalid,',
         ]);
 
         $file = UploadedFile::fake()->createWithContent('tamans.csv', $csv);

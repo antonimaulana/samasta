@@ -100,10 +100,6 @@
         linear-gradient(to top, rgba(6, 47, 34, 0.7) 0%, transparent 42%);
 }
 
-.home-hero-card-media {
-    min-height: 8.5rem;
-}
-
 .info-slide-card {
     min-height: 18rem;
 }

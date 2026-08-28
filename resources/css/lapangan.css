@@ -1,0 +1,122 @@
+/* Input Lapangan — mobile-first, ramah petugas lapangan */
+
+@keyframes lapangan-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@keyframes lapangan-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes lapangan-pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+.lapangan-body {
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34, 197, 94, 0.12), transparent),
+        linear-gradient(to bottom, #ecfdf5 0%, #ffffff 40%, #f0fdf4 100%);
+}
+
+.lapangan-header {
+    background: linear-gradient(135deg, #14532d 0%, #166534 45%, #15803d 100%);
+    border-bottom: none;
+    box-shadow: 0 4px 20px rgba(20, 83, 45, 0.15);
+}
+
+.lapangan-card {
+    border-radius: 1.25rem;
+    border: 1px solid rgba(134, 239, 172, 0.35);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 24px rgba(15, 118, 110, 0.06);
+    backdrop-filter: blur(8px);
+}
+
+.lapangan-card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.lapangan-card-hover:hover {
+    transform: translateY(-2px);
+    border-color: rgba(34, 197, 94, 0.5);
+    box-shadow: 0 12px 32px rgba(22, 101, 52, 0.12);
+}
+
+.lapangan-menu-icon {
+    animation: lapangan-float 4s ease-in-out infinite;
+}
+
+.lapangan-k3-banner {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fef3c7 100%);
+    border: 1px solid #fdba74;
+}
+
+.lapangan-motivation {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 1px solid #86efac;
+}
+
+.lapangan-step-active {
+    background: linear-gradient(135deg, #166534, #15803d);
+    color: white;
+    box-shadow: 0 4px 14px rgba(22, 101, 52, 0.35);
+}
+
+.lapangan-step-idle {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px dashed #d1d5db;
+}
+
+.lapangan-btn-primary {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lapangan-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+}
+
+.lapangan-btn-primary:active {
+    transform: translateY(0);
+}
+
+.lapangan-tab-active {
+    transform: scale(1.02);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.lapangan-progress-bar {
+    background: linear-gradient(90deg, #22c55e, #16a34a, #15803d);
+    background-size: 200% 100%;
+    animation: lapangan-shimmer 3s linear infinite;
+}
+
+.lapangan-pin-input {
+    letter-spacing: 0.5em;
+    font-variant-numeric: tabular-nums;
+}
+
+.lapangan-alert-success {
+    animation: lapangan-pulse-soft 2s ease-in-out 1;
+}
+
+.lapangan-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lapangan-section-title::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background: linear-gradient(to bottom, #22c55e, #15803d);
+}

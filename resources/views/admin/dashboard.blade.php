@@ -170,7 +170,7 @@
                 <x-admin.can-write>
                     <a href="{{ route('admin.pemangkasans.create') }}"
                        class="rounded-lg border border-green-200 bg-white px-4 py-2 text-xs font-bold text-green-700 hover:bg-green-50">
-                        + Tambah Operasional
+                        + Permohonan Baru
                     </a>
                 </x-admin.can-write>
             </div>
@@ -245,50 +245,48 @@
                 @endforeach
             </div>
 
-            <div class="overflow-hidden rounded-xl border border-gray-100">
-                <div class="border-b border-gray-100 bg-gray-50 px-4 py-3">
-                    <h4 class="font-semibold text-gray-900">Operasional per Jenis</h4>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-white">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-medium text-gray-600">Jenis Operasional</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600">Rencana</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600">Diproses</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600">Selesai</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600">Progress</th>
-                                <th class="px-4 py-3 text-right font-medium text-gray-600"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach ($layanan_per_jenis as $row)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3">
-                                        <span class="mr-2">{{ $row['icon'] }}</span>
-                                        <span class="font-medium text-gray-900">{{ $row['jenis'] }}</span>
-                                    </td>
-                                    <td class="px-4 py-3 text-center">{{ $row['rencana'] }}</td>
-                                    <td class="px-4 py-3 text-center">{{ $row['diproses'] }}</td>
-                                    <td class="px-4 py-3 text-center">{{ $row['selesai'] }}</td>
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center gap-2">
-                                            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
-                                                <div class="h-full rounded-full bg-green-500" style="width: {{ $row['progress'] }}%"></div>
-                                            </div>
-                                            <span class="w-8 text-xs font-semibold text-gray-600">{{ $row['progress'] }}%</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-right">
-                                        <a href="{{ route('admin.pemangkasans.index', ['jenis' => $row['jenis']]) }}"
-                                           class="text-xs font-semibold text-green-700 hover:underline">Detail</a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <x-admin.data-table class="border-gray-100">
+                <x-slot:header>
+                    <div class="border-b border-gray-100 bg-gray-50 px-4 py-3">
+                        <h4 class="font-semibold text-gray-900">Operasional per Jenis</h4>
+                    </div>
+                </x-slot:header>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis Operasional</th>
+                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Rencana</th>
+                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Diproses</th>
+                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Selesai</th>
+                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Progress</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach ($layanan_per_jenis as $row)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm">
+                                <span class="mr-2">{{ $row['icon'] }}</span>
+                                <span class="font-medium text-gray-900">{{ $row['jenis'] }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-center text-sm">{{ $row['rencana'] }}</td>
+                            <td class="px-4 py-3 text-center text-sm">{{ $row['diproses'] }}</td>
+                            <td class="px-4 py-3 text-center text-sm">{{ $row['selesai'] }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                                        <div class="h-full rounded-full bg-green-500" style="width: {{ $row['progress'] }}%"></div>
+                                    </div>
+                                    <span class="w-8 text-xs font-semibold text-gray-600">{{ $row['progress'] }}%</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-right text-sm">
+                                <a href="{{ route('admin.pemangkasans.index', ['jenis' => $row['jenis']]) }}"
+                                   class="text-xs font-semibold text-green-700 hover:underline">Detail</a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </x-admin.data-table>
         </div>
     </details>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlatSaranaOperasional;
+use App\Support\ArmadaUsageHistory;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,6 +33,16 @@ class AlatSaranaOperasionalController extends Controller
 
         return view('admin.alat_sarana_operasionals.index', [
             'items' => $items,
+        ]);
+    }
+
+    public function show(AlatSaranaOperasional $alatSaranaOperasional): View
+    {
+        $usageHistory = app(ArmadaUsageHistory::class)->forAlat($alatSaranaOperasional);
+
+        return view('admin.alat_sarana_operasionals.show', [
+            'item' => $alatSaranaOperasional,
+            'usageHistory' => $usageHistory,
         ]);
     }
 

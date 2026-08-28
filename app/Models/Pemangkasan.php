@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Pemangkasan extends Model
@@ -30,6 +31,10 @@ class Pemangkasan extends Model
         'dampak',
         'pendukung_pelaksanaan',
         'tanggal_eksekusi',
+        'tanggal_akhir_jadwal',
+        'total_hari',
+        'hari_tercapai',
+        'persentase_progres',
         'tanggal_penyelesaian',
         'pelaksana',
         'status',
@@ -41,7 +46,11 @@ class Pemangkasan extends Model
         return [
             'tanggal_permohonan' => 'date',
             'tanggal_eksekusi' => 'date',
+            'tanggal_akhir_jadwal' => 'date',
             'tanggal_penyelesaian' => 'date',
+            'total_hari' => 'integer',
+            'hari_tercapai' => 'integer',
+            'persentase_progres' => 'integer',
             'pelaksana' => 'array',
         ];
     }
@@ -57,6 +66,51 @@ class Pemangkasan extends Model
     public function taman(): BelongsTo
     {
         return $this->belongsTo(Taman::class);
+    }
+
+    public function armadas(): HasMany
+    {
+        return $this->hasMany(PemangkasanArmada::class)->orderBy('urutan');
+    }
+
+    public function progres(): HasMany
+    {
+        return $this->hasMany(PemangkasanProgres::class)->orderBy('tanggal');
+    }
+
+    public function usesTimArmada(): bool
+    {
+        $teams = $this->pelaksana;
+
+        return is_array($teams)
+            && in_array(PemeliharaanTaman::TIM_ARMADA, $teams, true);
+    }
+
+    /**
+     * Status yang boleh dipilih petugas lapangan saat menyimpan form.
+     *
+     * @return list<string>
+     */
+    public function lapanganStatusOptions(): array
+    {
+        return match ($this->status) {
+            'Rencana' => ['Diproses'],
+            'Diproses' => ['Diproses', 'Selesai'],
+            default => [],
+        };
+    }
+
+    public function allowsLapanganStatusTransition(string $newStatus): bool
+    {
+        if ($this->status === 'Selesai') {
+            return false;
+        }
+
+        if ($newStatus === $this->status) {
+            return $this->status === 'Diproses';
+        }
+
+        return in_array($newStatus, $this->lapanganStatusOptions(), true);
     }
 
     public function lokasiLabel(): string
@@ -85,6 +139,17 @@ class Pemangkasan extends Model
         }
 
         return (string) ($teams ?? '');
+    }
+
+    public function armadaPdfHtml(): ?string
+    {
+        if ($this->armadas->isEmpty()) {
+            return null;
+        }
+
+        return $this->armadas
+            ->map(fn (PemangkasanArmada $armada) => $armada->pdfEntryHtml())
+            ->implode(', ');
     }
 
     public function getFotoSesudahUrlAttribute(): ?string

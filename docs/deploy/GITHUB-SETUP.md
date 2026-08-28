@@ -1,4 +1,4 @@
-# Setup GitHub — SAMASTA (SITAMAN)
+# Setup GitHub — SIMTAMAN
 
 Panduan push kode dari laptop Windows ke GitHub, lalu clone/update di VPS BatamGarden.
 
@@ -49,7 +49,7 @@ git add -A
 git status
 # Pastikan .env TIDAK muncul di daftar staged
 
-git commit -m "Initial commit: Portal SAMASTA Disperakimtan Batam"
+git commit -m "Initial commit: Portal SIMTAMAN Disperakimtan Batam"
 
 gh auth login
 gh repo create samasta --public --source=. --remote=origin --push

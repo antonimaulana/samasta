@@ -14,7 +14,7 @@ class SurveyKepuasan extends Model
         'Operasional Pertamanan',
         'Kondisi Taman',
         'Respon Aduan',
-        'Portal Samasta',
+        'Portal SIMTAMAN',
     ];
 
     public static function kategoriLabel(?string $kategori): string
@@ -22,8 +22,20 @@ class SurveyKepuasan extends Model
         return match ($kategori) {
             'Layanan Pertamanan' => 'Operasional Pertamanan',
             'Kinerja Pertamanan' => 'Operasional Pertamanan',
-            'Portal Batam Tumbuh' => 'Portal Samasta',
+            'Portal Batam Tumbuh', 'Portal Samasta' => 'Portal SIMTAMAN',
             default => $kategori ?? '',
+        };
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function kategoriStorageValues(string $kategori): array
+    {
+        return match ($kategori) {
+            'Portal SIMTAMAN' => ['Portal SIMTAMAN', 'Portal Samasta', 'Portal Batam Tumbuh'],
+            'Operasional Pertamanan' => ['Operasional Pertamanan', 'Layanan Pertamanan', 'Kinerja Pertamanan'],
+            default => [$kategori],
         };
     }
 
@@ -86,7 +98,7 @@ class SurveyKepuasan extends Model
         })->all();
 
         $byKategori = collect(self::KATEGORI)->map(function (string $kategori) use ($query) {
-            $categoryQuery = (clone $query)->where('kategori', $kategori);
+            $categoryQuery = (clone $query)->whereIn('kategori', self::kategoriStorageValues($kategori));
             $count = $categoryQuery->count();
 
             return [

@@ -32,17 +32,15 @@
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari nama tanaman, nama ilmiah, jenis...'])
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <x-admin.data-table>
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Nama Tanaman</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Jenis</th>
-                        <th class="px-4 py-3 text-center font-medium text-gray-600">Total Stok</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Stok per Sumber</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Kesiapan Tanam</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Aksi</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama Tanaman</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
+                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Total Stok</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Stok per Sumber</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Kesiapan Tanam</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -129,35 +127,32 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-
         @if ($bibits->hasPages())
-            <div class="border-t border-gray-200 px-4 py-3">
+            <x-slot:footer>
                 {{ $bibits->links() }}
-            </div>
+            </x-slot:footer>
         @endif
-    </div>
+    </x-admin.data-table>
 
     <div class="mt-8 grid gap-6 xl:grid-cols-2">
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-teal-50 bg-teal-50 px-4 py-3">
-                <h3 class="text-sm font-semibold text-teal-800">Transaksi Masuk Terbaru</h3>
-                <a href="{{ route('admin.bibit-masuks.index') }}" class="text-xs font-medium text-teal-700 hover:underline">
-                    Lihat semua →
-                </a>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Tanggal</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Bibit</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Jumlah</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Sumber</th>
-                            <th class="px-4 py-2 text-right font-medium text-gray-600">Aksi</th>
-                        </tr>
-                    </thead>
+        <x-admin.data-table>
+            <x-slot:header>
+                <div class="flex items-center justify-between border-b border-teal-50 bg-teal-50 px-4 py-3">
+                    <h3 class="text-sm font-semibold text-teal-800">Transaksi Masuk Terbaru</h3>
+                    <a href="{{ route('admin.bibit-masuks.index') }}" class="text-xs font-medium text-teal-700 hover:underline">
+                        Lihat semua →
+                    </a>
+                </div>
+            </x-slot:header>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Bibit</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sumber</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                    </tr>
+                </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($recentMasuks as $masuk)
                             <tr class="hover:bg-gray-50">
@@ -188,28 +183,26 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-        </div>
+        </x-admin.data-table>
 
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-red-50 bg-red-50 px-4 py-3">
-                <h3 class="text-sm font-semibold text-red-800">Transaksi Keluar Terbaru</h3>
-                <a href="{{ route('admin.bibit-keluars.index') }}" class="text-xs font-medium text-red-700 hover:underline">
-                    Lihat semua →
-                </a>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Tanggal</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Bibit</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Jumlah</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Lokasi</th>
-                            <th class="px-4 py-2 text-right font-medium text-gray-600">Aksi</th>
-                        </tr>
-                    </thead>
+        <x-admin.data-table>
+            <x-slot:header>
+                <div class="flex items-center justify-between border-b border-red-50 bg-red-50 px-4 py-3">
+                    <h3 class="text-sm font-semibold text-red-800">Transaksi Keluar Terbaru</h3>
+                    <a href="{{ route('admin.bibit-keluars.index') }}" class="text-xs font-medium text-red-700 hover:underline">
+                        Lihat semua →
+                    </a>
+                </div>
+            </x-slot:header>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Bibit</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                    </tr>
+                </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($recentKeluars as $keluar)
                             <tr class="hover:bg-gray-50">
@@ -240,8 +233,6 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-        </div>
+        </x-admin.data-table>
     </div>
 @endsection

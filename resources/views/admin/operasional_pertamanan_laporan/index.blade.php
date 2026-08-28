@@ -136,90 +136,86 @@
         </div>
     </div>
 
-    <div class="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="border-b border-gray-100 px-6 py-4">
-            <h3 class="text-base font-semibold text-gray-800">Ringkasan per Jenis Operasional</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Jenis Operasional</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Rencana</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Diproses</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Selesai</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Total</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse ($ringkasanPerJenis as $row)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 font-medium">{{ $row['jenis'] }}</td>
-                            <td class="px-4 py-3 text-right text-blue-700">{{ number_format($row['rencana']) }}</td>
-                            <td class="px-4 py-3 text-right text-amber-700">{{ number_format($row['diproses']) }}</td>
-                            <td class="px-4 py-3 text-right text-emerald-700">{{ number_format($row['selesai']) }}</td>
-                            <td class="px-4 py-3 text-right font-semibold text-gray-900">{{ number_format($row['total']) }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                Tidak ada data operasional pada periode ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <x-admin.data-table class="mb-8">
+        <x-slot:header>
+            <div class="border-b border-gray-100 px-6 py-4">
+                <h3 class="text-base font-semibold text-gray-800">Ringkasan per Jenis Operasional</h3>
+            </div>
+        </x-slot:header>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis Operasional</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Rencana</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Diproses</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Selesai</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Total</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            @forelse ($ringkasanPerJenis as $row)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm font-medium">{{ $row['jenis'] }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-blue-700">{{ number_format($row['rencana']) }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-amber-700">{{ number_format($row['diproses']) }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-emerald-700">{{ number_format($row['selesai']) }}</td>
+                    <td class="px-4 py-3 text-right text-sm font-semibold text-gray-900">{{ number_format($row['total']) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                        Tidak ada data operasional pada periode ini.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </x-admin.data-table>
 
-    <div class="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="border-b border-gray-100 px-6 py-4">
-            <h3 class="text-base font-semibold text-gray-800">Daftar Operasional dalam Periode</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Tgl. Pelaksanaan</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Jenis</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Lokasi</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Pelaksana</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse ($daftarLayanan as $layanan)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-600">{{ $layanan->tanggal_eksekusi->format('d M Y') }}</td>
-                            <td class="px-4 py-3">
-                                <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ \App\Models\Pemangkasan::badgeClass($layanan->jenis_layanan) }}">
-                                    {{ $layanan->jenis_layanan }}
-                                </span>
-                            </td>
-                            <td class="max-w-xs truncate px-4 py-3">{{ $layanan->lokasi_pohon }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $layanan->pelaksanaLabel() ?: '—' }}</td>
-                            <td class="px-4 py-3">
-                                @php
-                                    $statusClass = match ($layanan->status) {
-                                        'Selesai' => 'bg-emerald-100 text-emerald-800',
-                                        'Diproses' => 'bg-amber-100 text-amber-800',
-                                        default => 'bg-blue-100 text-blue-800',
-                                    };
-                                @endphp
-                                <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $statusClass }}">{{ $layanan->status }}</span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                Tidak ada operasional pada periode ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <x-admin.data-table class="mb-8">
+        <x-slot:header>
+            <div class="border-b border-gray-100 px-6 py-4">
+                <h3 class="text-base font-semibold text-gray-800">Daftar Operasional dalam Periode</h3>
+            </div>
+        </x-slot:header>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tgl. Pelaksanaan</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pelaksana</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            @forelse ($daftarLayanan as $layanan)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $layanan->tanggal_eksekusi->format('d M Y') }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ \App\Models\Pemangkasan::badgeClass($layanan->jenis_layanan) }}">
+                            {{ $layanan->jenis_layanan }}
+                        </span>
+                    </td>
+                    <td class="max-w-xs truncate px-4 py-3 text-sm">{{ $layanan->lokasi_pohon }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $layanan->pelaksanaLabel() ?: '—' }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        @php
+                            $statusClass = match ($layanan->status) {
+                                'Selesai' => 'bg-emerald-100 text-emerald-800',
+                                'Diproses' => 'bg-amber-100 text-amber-800',
+                                default => 'bg-blue-100 text-blue-800',
+                            };
+                        @endphp
+                        <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $statusClass }}">{{ $layanan->status }}</span>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                        Tidak ada operasional pada periode ini.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </x-admin.data-table>
 
     <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <div class="border-b border-emerald-50 bg-emerald-50 px-4 py-3">

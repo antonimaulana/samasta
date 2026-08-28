@@ -108,17 +108,15 @@
     </div>
     @endif
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Tanggal</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Tim</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Lokasi</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Aksi</th>
-                    </tr>
-                </thead>
+    <x-admin.data-table>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tim</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+            </tr>
+        </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($kinerjas as $kinerja)
                         <tr class="hover:bg-gray-50">
@@ -170,10 +168,10 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
         @if ($kinerjas->hasPages())
-            <div class="border-t border-gray-200 px-4 py-3">{{ $kinerjas->links() }}</div>
+            <x-slot:footer>
+                {{ $kinerjas->links() }}
+            </x-slot:footer>
         @endif
-    </div>
+    </x-admin.data-table>
 @endsection

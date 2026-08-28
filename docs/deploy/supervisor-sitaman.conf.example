@@ -1,5 +1,5 @@
 ; =============================================================================
-; Supervisor — Queue worker Laravel (Samasta)
+; Supervisor — Queue worker Laravel (SIMTAMAN)
 ; Salin ke /etc/supervisor/conf.d/sitaman-queue.conf
 ; =============================================================================
 

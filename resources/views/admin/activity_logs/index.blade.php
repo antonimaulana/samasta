@@ -6,18 +6,16 @@
 @section('content')
     <p class="mb-6 text-sm text-gray-600">Catatan perubahan data yang dilakukan pengguna admin (create, update, delete).</p>
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Waktu</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Pengguna</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Aksi</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Subjek</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">IP</th>
-                    </tr>
-                </thead>
+    <x-admin.data-table>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Waktu</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pengguna</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Aksi</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Subjek</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">IP</th>
+            </tr>
+        </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($logs as $log)
                         <tr class="hover:bg-gray-50">
@@ -47,11 +45,10 @@
                         </tr>
                     @endforelse
                 </tbody>
-            </table>
-        </div>
-
         @if ($logs->hasPages())
-            <div class="border-t border-gray-200 px-4 py-3">{{ $logs->links() }}</div>
+            <x-slot:footer>
+                {{ $logs->links() }}
+            </x-slot:footer>
         @endif
-    </div>
+    </x-admin.data-table>
 @endsection

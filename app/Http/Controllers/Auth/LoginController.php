@@ -27,7 +27,12 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('admin.dashboard'));
+            $user = Auth::user();
+            $intended = $user?->isOperator()
+                ? route('lapangan.index')
+                : route('admin.dashboard');
+
+            return redirect()->intended($intended);
         }
 
         return back()

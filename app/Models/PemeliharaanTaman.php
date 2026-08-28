@@ -165,6 +165,21 @@ class PemeliharaanTaman extends Model
         return $label;
     }
 
+    public function lokasiLabel(): string
+    {
+        if ($this->taman_id) {
+            $taman = $this->relationLoaded('taman')
+                ? $this->taman
+                : $this->taman()->first(['id', 'nama_taman', 'alamat']);
+
+            if ($taman) {
+                return self::lokasiLabelFromTaman($taman);
+            }
+        }
+
+        return (string) ($this->lokasi_pelaksanaan ?: '—');
+    }
+
     /**
      * @return list<string>
      */

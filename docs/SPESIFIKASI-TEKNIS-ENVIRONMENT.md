@@ -1,10 +1,10 @@
 # Spesifikasi Teknis Environment  
-## Portal Samasta (SITAMAN)
+## SIMTAMAN (Sistem Informasi Manajemen Pertamanan)
 
 | Item | Keterangan |
 |------|------------|
 | **Aplikasi** | Portal Profil Pertamanan & Operasional Disperakimtan Kota Batam |
-| **Nama sistem** | Samasta / SITAMAN |
+| **Nama sistem** | SIMTAMAN |
 | **Versi framework** | Laravel 12.x |
 | **Bahasa** | PHP 8.2+ |
 | **Penyusun dokumen** | Tim pengembang aplikasi |
@@ -14,7 +14,7 @@
 
 ## 1. Latar belakang
 
-Aplikasi **Samasta** adalah sistem informasi pertamanan dan ruang terbuka hijau (RTH) untuk:
+Aplikasi **SIMTAMAN** adalah sistem informasi pertamanan dan ruang terbuka hijau (RTH) untuk:
 
 - **Publik:** jelajahi taman, peta interaktif, aduan masyarakat, ensiklopedia, survey kepuasan.
 - **Internal Disperakimtan:** dashboard operasional, data taman, pemeliharaan, kinerja pertamanan, bibit, aduan, laporan PDF, manajemen pengguna dengan hak akses per wilayah.
@@ -404,7 +404,7 @@ Poin penting:
 | E. Referensi VPS BatamGarden | `docs/deploy/VPS-BATAMGARDEN.md` |
 | F. Setup GitHub &amp; deploy key | `docs/deploy/GITHUB-SETUP.md` |
 | G. Panduan deploy PDF | `docs/PANDUAN-DEPLOY-BIZNET-CLOUDFLARE.pdf` |
-| H. Dokumentasi arsitektur PDF | `docs/DOKUMENTASI-ARSITEKTUR-SAMASTA.pdf` |
+| H. Dokumentasi arsitektur PDF | `docs/DOKUMENTASI-ARSITEKTUR-SIMTAMAN.pdf` |
 
 ---
 
@@ -456,4 +456,4 @@ Detail SSH dan checklist deploy: **`docs/deploy/VPS-BATAMGARDEN.md`**
 
 ---
 
-*Dokumen ini disusun berdasarkan kondisi codebase SITAMAN per Agustus 2026. Revisi dokumen mengikuti perubahan major pada aplikasi.*
+*Dokumen ini disusun berdasarkan kondisi codebase SIMTAMAN per Agustus 2026. Revisi dokumen mengikuti perubahan major pada aplikasi.*

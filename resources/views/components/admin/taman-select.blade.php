@@ -40,9 +40,10 @@
         :placeholder="$placeholder"
         :required="$required"
         :input-class="$inputClass"
+        empty-text="Tidak ada taman yang cocok. Pilih tim pelaksana atau ketik kata kunci lain."
     />
 
     @if ($hint)
-        <p class="mt-1 text-xs text-gray-500">{{ $hint }}</p>
+        <p class="mt-1 text-xs text-gray-500">{{ $hint }} Ketuk kolom pencarian untuk membuka daftar.</p>
     @endif
 @endif

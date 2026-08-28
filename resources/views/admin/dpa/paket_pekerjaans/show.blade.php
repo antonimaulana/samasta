@@ -67,79 +67,101 @@
     </div>
 
     @if ($activeTahap === \App\Support\DpaMonitoring::TAHAP_PENGADAAN)
-        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h3 class="font-semibold text-gray-900">Item Rinci HPS</h3>
+        <x-admin.data-table class="mb-8">
+            <x-slot:header>
+                <div class="px-5 py-4">
+                    <h3 class="font-semibold text-gray-900">Item Rinci HPS</h3>
+                </div>
+            </x-slot:header>
             @if ($hpsItems->isNotEmpty())
-                <table class="mt-4 min-w-full text-sm">
-                    <thead><tr class="border-b text-left text-gray-600">
-                        <th class="py-2 pr-4">Uraian</th><th class="py-2 pr-4">Vol</th><th class="py-2 pr-4">Satuan</th><th class="py-2 pr-4">Harga</th><th class="py-2 pr-4">Jumlah</th><th></th>
-                    </tr></thead>
-                    <tbody>
-                        @foreach ($hpsItems as $item)
-                            <tr class="border-b border-gray-100">
-                                <td class="py-2 pr-4">{{ $item->uraian }}</td>
-                                <td class="py-2 pr-4">{{ $item->volume }}</td>
-                                <td class="py-2 pr-4">{{ $item->satuan }}</td>
-                                <td class="py-2 pr-4">{{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
-                                <td class="py-2 pr-4">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
-                                <td class="py-2">
-                                    <form action="{{ route('admin.dpa.paket-pekerjaans.hps-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" onsubmit="return confirm('Hapus item?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-xs text-red-600 hover:underline">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Uraian</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Vol</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Satuan</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Harga</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach ($hpsItems as $item)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm">{{ $item->uraian }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $item->volume }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $item->satuan }}</td>
+                            <td class="px-4 py-3 text-sm">{{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-sm">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-right text-sm">
+                                <form action="{{ route('admin.dpa.paket-pekerjaans.hps-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" onsubmit="return confirm('Hapus item?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="text-xs text-red-600 hover:underline">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
             @endif
-            <form action="{{ route('admin.dpa.paket-pekerjaans.hps-items.store', $paketPekerjaan) }}" method="POST" class="mt-4 grid gap-3 sm:grid-cols-5">
-                @csrf
-                <input type="text" name="uraian" placeholder="Uraian *" required class="rounded border px-2 py-1.5 text-sm sm:col-span-2">
-                <input type="number" name="volume" placeholder="Volume *" step="0.01" min="0" required class="rounded border px-2 py-1.5 text-sm">
-                <input type="text" name="satuan" placeholder="Satuan" class="rounded border px-2 py-1.5 text-sm">
-                <input type="number" name="harga_satuan" placeholder="Harga satuan *" min="0" required class="rounded border px-2 py-1.5 text-sm">
-                <button type="submit" class="rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700 sm:col-span-5 sm:w-fit">+ Item HPS</button>
-            </form>
-        </div>
+            <x-slot:footer>
+                <form action="{{ route('admin.dpa.paket-pekerjaans.hps-items.store', $paketPekerjaan) }}" method="POST" class="grid gap-3 sm:grid-cols-5">
+                    @csrf
+                    <input type="text" name="uraian" placeholder="Uraian *" required class="rounded border px-2 py-1.5 text-sm sm:col-span-2">
+                    <input type="number" name="volume" placeholder="Volume *" step="0.01" min="0" required class="rounded border px-2 py-1.5 text-sm">
+                    <input type="text" name="satuan" placeholder="Satuan" class="rounded border px-2 py-1.5 text-sm">
+                    <input type="number" name="harga_satuan" placeholder="Harga satuan *" min="0" required class="rounded border px-2 py-1.5 text-sm">
+                    <button type="submit" class="rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700 sm:col-span-5 sm:w-fit">+ Item HPS</button>
+                </form>
+            </x-slot:footer>
+        </x-admin.data-table>
     @endif
 
     @if ($activeTahap === \App\Support\DpaMonitoring::TAHAP_KONTRAK)
-        <div class="mb-8 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h3 class="font-semibold text-gray-900">Item Rinci SPK / Kontrak</h3>
+        <x-admin.data-table class="mb-8">
+            <x-slot:header>
+                <div class="px-5 py-4">
+                    <h3 class="font-semibold text-gray-900">Item Rinci SPK / Kontrak</h3>
+                </div>
+            </x-slot:header>
             @if ($spkItems->isNotEmpty())
-                <table class="mt-4 min-w-full text-sm">
-                    <thead><tr class="border-b text-left text-gray-600">
-                        <th class="py-2 pr-4">Uraian</th><th class="py-2 pr-4">Vol</th><th class="py-2 pr-4">Satuan</th><th class="py-2 pr-4">Harga</th><th class="py-2 pr-4">Jumlah</th><th></th>
-                    </tr></thead>
-                    <tbody>
-                        @foreach ($spkItems as $item)
-                            <tr class="border-b border-gray-100">
-                                <td class="py-2 pr-4">{{ $item->uraian }}</td>
-                                <td class="py-2 pr-4">{{ $item->volume }}</td>
-                                <td class="py-2 pr-4">{{ $item->satuan }}</td>
-                                <td class="py-2 pr-4">{{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
-                                <td class="py-2 pr-4">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
-                                <td class="py-2">
-                                    <form action="{{ route('admin.dpa.paket-pekerjaans.spk-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" onsubmit="return confirm('Hapus item?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="text-xs text-red-600 hover:underline">Hapus</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Uraian</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Vol</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Satuan</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Harga</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach ($spkItems as $item)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-sm">{{ $item->uraian }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $item->volume }}</td>
+                            <td class="px-4 py-3 text-sm">{{ $item->satuan }}</td>
+                            <td class="px-4 py-3 text-sm">{{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-sm">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-right text-sm">
+                                <form action="{{ route('admin.dpa.paket-pekerjaans.spk-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" onsubmit="return confirm('Hapus item?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="text-xs text-red-600 hover:underline">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
             @endif
-            <form action="{{ route('admin.dpa.paket-pekerjaans.spk-items.store', $paketPekerjaan) }}" method="POST" class="mt-4 grid gap-3 sm:grid-cols-5">
-                @csrf
-                <input type="text" name="uraian" placeholder="Uraian *" required class="rounded border px-2 py-1.5 text-sm sm:col-span-2">
-                <input type="number" name="volume" placeholder="Volume *" step="0.01" min="0" required class="rounded border px-2 py-1.5 text-sm">
-                <input type="text" name="satuan" placeholder="Satuan" class="rounded border px-2 py-1.5 text-sm">
-                <input type="number" name="harga_satuan" placeholder="Harga satuan *" min="0" required class="rounded border px-2 py-1.5 text-sm">
-                <button type="submit" class="rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700 sm:col-span-5 sm:w-fit">+ Item SPK</button>
-            </form>
-        </div>
+            <x-slot:footer>
+                <form action="{{ route('admin.dpa.paket-pekerjaans.spk-items.store', $paketPekerjaan) }}" method="POST" class="grid gap-3 sm:grid-cols-5">
+                    @csrf
+                    <input type="text" name="uraian" placeholder="Uraian *" required class="rounded border px-2 py-1.5 text-sm sm:col-span-2">
+                    <input type="number" name="volume" placeholder="Volume *" step="0.01" min="0" required class="rounded border px-2 py-1.5 text-sm">
+                    <input type="text" name="satuan" placeholder="Satuan" class="rounded border px-2 py-1.5 text-sm">
+                    <input type="number" name="harga_satuan" placeholder="Harga satuan *" min="0" required class="rounded border px-2 py-1.5 text-sm">
+                    <button type="submit" class="rounded bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700 sm:col-span-5 sm:w-fit">+ Item SPK</button>
+                </form>
+            </x-slot:footer>
+        </x-admin.data-table>
 
         <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
             <h3 class="font-semibold text-gray-900">Progres Pekerjaan</h3>

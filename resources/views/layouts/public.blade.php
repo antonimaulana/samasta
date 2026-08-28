@@ -22,7 +22,7 @@
                 @include('layouts.partials.app-logo', ['class' => 'transition group-hover:scale-105'])
                 <div class="min-w-0">
                     <span class="block truncate text-base font-bold leading-tight text-green-700">{{ config('app.name') }}</span>
-                    <span class="block text-[10px] font-bold uppercase tracking-widest text-lime-500">Profil Pertamanan</span>
+                    <span class="block text-[10px] font-bold uppercase tracking-widest text-lime-500">{{ config('app.full_name') }}</span>
                 </div>
             </a>
 
@@ -68,7 +68,7 @@
         <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6 lg:px-8">
             <div class="text-center sm:text-left">
                 <p class="font-bold text-green-700">{{ config('app.name') }}</p>
-                <p class="mt-1 text-sm text-gray-500">Portal Profil Pertamanan Kota Batam</p>
+                <p class="mt-1 text-sm text-gray-500">{{ config('app.full_name') }} · Kota Batam</p>
             </div>
             <p class="text-xs text-gray-400">&copy; {{ date('Y') }} {{ config('app.name') }}</p>
         </div>

@@ -110,47 +110,45 @@
         </div>
     </div>
 
-    <div class="mb-8 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div class="border-b border-gray-100 px-6 py-4">
-            <h3 class="text-base font-semibold text-gray-800">Mutasi per Jenis Tanaman</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Nama Tanaman</th>
-                        <th class="px-4 py-3 text-left font-medium text-gray-600">Jenis</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Masuk</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Keluar</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Mutasi</th>
-                        <th class="px-4 py-3 text-right font-medium text-gray-600">Stok Sekarang</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse ($mutasiPerBibit as $row)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3">
-                                <x-admin.bibit-nama :bibit="$row['bibit']" />
-                            </td>
-                            <td class="px-4 py-3 text-gray-600">{{ $row['bibit']->jenis }}</td>
-                            <td class="px-4 py-3 text-right font-medium text-teal-700">+{{ number_format($row['masuk']) }}</td>
-                            <td class="px-4 py-3 text-right font-medium text-red-700">-{{ number_format($row['keluar']) }}</td>
-                            <td class="px-4 py-3 text-right font-semibold {{ $row['mutasi'] >= 0 ? 'text-blue-700' : 'text-red-700' }}">
-                                {{ $row['mutasi'] >= 0 ? '+' : '' }}{{ number_format($row['mutasi']) }}
-                            </td>
-                            <td class="px-4 py-3 text-right text-gray-700">{{ number_format($row['stok_sekarang']) }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-                                Tidak ada mutasi stok pada periode ini.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <x-admin.data-table class="mb-8">
+        <x-slot:header>
+            <div class="border-b border-gray-100 px-6 py-4">
+                <h3 class="text-base font-semibold text-gray-800">Mutasi per Jenis Tanaman</h3>
+            </div>
+        </x-slot:header>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama Tanaman</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Masuk</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Keluar</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Mutasi</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Stok Sekarang</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            @forelse ($mutasiPerBibit as $row)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm">
+                        <x-admin.bibit-nama :bibit="$row['bibit']" />
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $row['bibit']->jenis }}</td>
+                    <td class="px-4 py-3 text-right text-sm font-medium text-teal-700">+{{ number_format($row['masuk']) }}</td>
+                    <td class="px-4 py-3 text-right text-sm font-medium text-red-700">-{{ number_format($row['keluar']) }}</td>
+                    <td class="px-4 py-3 text-right text-sm font-semibold {{ $row['mutasi'] >= 0 ? 'text-blue-700' : 'text-red-700' }}">
+                        {{ $row['mutasi'] >= 0 ? '+' : '' }}{{ number_format($row['mutasi']) }}
+                    </td>
+                    <td class="px-4 py-3 text-right text-sm text-gray-700">{{ number_format($row['stok_sekarang']) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                        Tidak ada mutasi stok pada periode ini.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </x-admin.data-table>
 
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">

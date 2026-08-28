@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Taman;
+use App\Models\TamanImage;
 use App\Support\HomePageData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -80,5 +81,28 @@ class HomePageDataTest extends TestCase
             ->assertOk()
             ->assertSee('Ketertiban Umum di Taman')
             ->assertSee('Perda Kota Batam Nomor 16 Tahun 2007');
+    }
+
+    public function test_home_hero_shows_featured_taman_gallery_photo(): void
+    {
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Cemara Asri',
+            'kategori' => 'Taman Kota',
+            'luasan' => 5000,
+            'alamat' => 'Alamat unggulan',
+            'deskripsi' => 'Deskripsi taman unggulan hero.',
+        ]);
+
+        TamanImage::create([
+            'taman_id' => $taman->id,
+            'path_foto' => 'tamans/hero-unggulan.jpg',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Taman Unggulan')
+            ->assertSee('Taman Cemara Asri')
+            ->assertSee('storage/tamans/hero-unggulan.jpg', false)
+            ->assertSee('aspect-[4/3]', false);
     }
 }

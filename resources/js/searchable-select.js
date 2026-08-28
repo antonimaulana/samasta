@@ -94,6 +94,8 @@ function initSearchableSelect(root) {
 
     input.addEventListener('focus', openList);
 
+    input.addEventListener('click', openList);
+
     input.addEventListener('input', function () {
         hidden.value = '';
         input.classList.remove('border-red-500', 'ring-1', 'ring-red-500');
@@ -200,6 +202,8 @@ function initSearchableSelect(root) {
 
         dispatchChange({ value, label });
     });
+
+    root.dispatchEvent(new CustomEvent('searchable-select:ready', { bubbles: true }));
 }
 
 function initSearchableSelects() {

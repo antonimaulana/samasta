@@ -4,11 +4,11 @@
 @section('header', 'Edit Taman')
 
 @section('content')
-    <div class="mb-4">
-        <a href="{{ route('admin.tamans.show', $taman) }}" class="text-sm text-green-700 hover:underline">← Kembali ke profil taman</a>
-    </div>
+    <div class="mx-auto max-w-5xl">
+        <x-admin.rth-page-toolbar
+            :back-url="route('admin.tamans.show', $taman)"
+            back-label="← Kembali ke profil taman" />
 
-    <div class="max-w-3xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <form action="{{ route('admin.tamans.update', $taman) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -25,4 +25,6 @@
             @method('DELETE')
         </form>
     @endforeach
+
+    @include('admin.tamans.partials.location-map-assets')
 @endsection

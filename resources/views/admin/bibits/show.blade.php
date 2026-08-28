@@ -81,21 +81,21 @@
     </div>
 
     <div class="grid gap-6 xl:grid-cols-2">
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div class="border-b border-teal-50 bg-teal-50 px-4 py-3">
-                <h3 class="text-sm font-semibold text-teal-800">Riwayat Stok Masuk ({{ $bibit->masuks->count() }})</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Tanggal</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Jumlah</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Sumber</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Sisa</th>
-                            <th class="px-4 py-2 text-right font-medium text-gray-600">Aksi</th>
-                        </tr>
-                    </thead>
+        <x-admin.data-table>
+            <x-slot:header>
+                <div class="border-b border-teal-50 bg-teal-50 px-4 py-3">
+                    <h3 class="text-sm font-semibold text-teal-800">Riwayat Stok Masuk ({{ $bibit->masuks->count() }})</h3>
+                </div>
+            </x-slot:header>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sumber</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sisa</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                    </tr>
+                </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($bibit->masuks as $masuk)
                             <tr class="hover:bg-gray-50">
@@ -119,25 +119,23 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-        </div>
+        </x-admin.data-table>
 
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div class="border-b border-red-50 bg-red-50 px-4 py-3">
-                <h3 class="text-sm font-semibold text-red-800">Riwayat Stok Keluar ({{ $bibit->keluars->count() }})</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Tanggal</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Jumlah</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Peruntukan</th>
-                            <th class="px-4 py-2 text-left font-medium text-gray-600">Lokasi</th>
-                            <th class="px-4 py-2 text-right font-medium text-gray-600">Aksi</th>
-                        </tr>
-                    </thead>
+        <x-admin.data-table>
+            <x-slot:header>
+                <div class="border-b border-red-50 bg-red-50 px-4 py-3">
+                    <h3 class="text-sm font-semibold text-red-800">Riwayat Stok Keluar ({{ $bibit->keluars->count() }})</h3>
+                </div>
+            </x-slot:header>
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
+                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                    </tr>
+                </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($bibit->keluars as $keluar)
                             <tr class="hover:bg-gray-50">
@@ -161,8 +159,6 @@
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
-            </div>
-        </div>
+        </x-admin.data-table>
     </div>
 @endsection

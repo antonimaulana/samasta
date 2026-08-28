@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\RthKategoriController;
 use App\Http\Controllers\Admin\PemeliharaanTamanController;
 use App\Http\Controllers\Admin\SurveyKepuasanController as AdminSurveyKepuasanController;
 use App\Http\Controllers\Admin\TamanController as AdminTamanController;
+use App\Http\Controllers\Admin\TamanLaporanController;
+use App\Http\Controllers\RthArController;
 use App\Http\Controllers\Admin\TimPelaksanaController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
@@ -51,8 +53,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('tamans.import');
     Route::post('tamans/import', [AdminTamanController::class, 'import'])
         ->name('tamans.import.store');
-    Route::get('tamans/export/pdf', [AdminTamanController::class, 'exportPdf'])
-        ->name('tamans.export-pdf');
+    Route::get('tamans/export/pdf', function (Request $request) {
+        return redirect()->route('admin.taman-laporan.export-pdf', $request->query());
+    })->name('tamans.export-pdf');
+    Route::get('taman-laporan', [TamanLaporanController::class, 'index'])->name('taman-laporan.index');
+    Route::get('taman-laporan/export/pdf', [TamanLaporanController::class, 'exportPdf'])->name('taman-laporan.export-pdf');
+    Route::get('tamans/{taman}/ar-qr', [RthArController::class, 'qrImage'])
+        ->name('tamans.ar-qr');
     Route::delete('tamans/{taman}/images/{image}', [AdminTamanController::class, 'destroyImage'])
         ->name('tamans.images.destroy');
     Route::resource('tamans', AdminTamanController::class);
@@ -69,6 +76,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::get('bibit-laporan/export/pdf', [BibitLaporanController::class, 'exportPdf'])->name('bibit-laporan.export-pdf');
     Route::get('pemangkasans/schedule-conflicts', [PemangkasanController::class, 'checkScheduleConflict'])
         ->name('pemangkasans.schedule-conflicts');
+    Route::get('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}/export/pdf', [PemangkasanController::class, 'exportPdfProgres'])
+        ->name('pemangkasans.export-pdf-progres');
     Route::patch('pemangkasans/{pemangkasan}/status', [PemangkasanController::class, 'updateStatus'])
         ->name('pemangkasans.update-status');
     Route::resource('pemangkasans', PemangkasanController::class);
@@ -105,7 +114,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::get('pemeliharaan-tamans/{pemeliharaan_taman}/export/pdf', [PemeliharaanTamanController::class, 'exportPdfOperasional'])
         ->name('pemeliharaan-tamans.export-pdf-operasional');
     Route::resource('pemeliharaan-tamans', PemeliharaanTamanController::class)->except(['show']);
-    Route::resource('alat-sarana-operasionals', AlatSaranaOperasionalController::class)->except(['show']);
+    Route::resource('alat-sarana-operasionals', AlatSaranaOperasionalController::class);
     Route::resource('aduan-masyarakats', AdminAduanMasyarakatController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::patch('aduan-masyarakats/{aduan_masyarakat}/status', [AdminAduanMasyarakatController::class, 'updateStatus'])
         ->name('aduan-masyarakats.update-status');

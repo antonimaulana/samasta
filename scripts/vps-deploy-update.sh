@@ -9,7 +9,7 @@ BRANCH="${BRANCH:-main}"
 
 cd "$APP_DIR"
 
-echo "=== SAMASTA deploy update — $(date) ==="
+echo "=== SIMTAMAN deploy update — $(date) ==="
 echo "Directory: $APP_DIR | Branch: $BRANCH"
 
 git fetch origin

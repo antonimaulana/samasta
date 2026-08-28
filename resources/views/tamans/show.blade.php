@@ -14,60 +14,13 @@
     </div>
 
     @php
-        $galleryImages = $taman->images;
-        $hasLegacyFoto = $taman->foto && $galleryImages->isEmpty();
-        $parkLat = $taman->latitude ? (float) $taman->latitude : null;
-        $parkLng = $taman->longitude ? (float) $taman->longitude : null;
+        $mapCoords = $taman->normalizedMapCoordinates();
+        $parkLat = $mapCoords['lat'] ?? null;
+        $parkLng = $mapCoords['lng'] ?? null;
     @endphp
 
     <article class="overflow-hidden rounded-3xl bg-white shadow-xl shadow-green-100/60 ring-1 ring-green-100">
-        @if ($galleryImages->isNotEmpty() || $hasLegacyFoto)
-            <div class="border-b border-green-50 bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-6">
-                <div class="mb-3 flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-green-800">Galeri Foto</h2>
-                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">
-                        {{ $galleryImages->count() ?: 1 }} foto
-                    </span>
-                </div>
-
-                @if ($galleryImages->count() > 1)
-                    <div class="swiper taman-gallery-swiper overflow-hidden rounded-2xl ring-1 ring-green-100">
-                        <div class="swiper-wrapper">
-                            @foreach ($galleryImages as $image)
-                                <div class="swiper-slide">
-                                    <img src="{{ $image->url }}" alt="{{ $taman->nama_taman }}"
-                                         class="h-72 w-full object-cover sm:h-96">
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="swiper-button-prev !text-green-700"></div>
-                        <div class="swiper-button-next !text-green-700"></div>
-                        <div class="swiper-pagination !bottom-3"></div>
-                    </div>
-
-                    <div class="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6">
-                        @foreach ($galleryImages as $index => $image)
-                            <button type="button"
-                                    onclick="window.tamanGallerySwiper?.slideTo({{ $index }})"
-                                    class="overflow-hidden rounded-xl border-2 border-transparent transition hover:border-green-500 focus:border-green-600 focus:outline-none">
-                                <img src="{{ $image->url }}" alt="Thumbnail {{ $index + 1 }}"
-                                     class="h-16 w-full object-cover sm:h-20">
-                            </button>
-                        @endforeach
-                    </div>
-                @elseif ($galleryImages->count() === 1)
-                    <img src="{{ $galleryImages->first()->url }}" alt="{{ $taman->nama_taman }}"
-                         class="h-72 w-full rounded-2xl object-cover ring-1 ring-green-100 sm:h-96">
-                @else
-                    <img src="{{ $taman->foto_url }}" alt="{{ $taman->nama_taman }}"
-                         class="h-72 w-full rounded-2xl object-cover ring-1 ring-green-100 sm:h-96">
-                @endif
-            </div>
-        @else
-            <div class="flex h-64 items-center justify-center bg-gradient-to-br from-lime-100 via-green-100 to-emerald-100 sm:h-80">
-                <span class="text-7xl">🌳</span>
-            </div>
-        @endif
+        <x-taman-gallery :taman="$taman" variant="public" nested :constrained="false" />
 
         <div class="p-6 sm:p-8">
             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -108,14 +61,26 @@
                 </div>
             @endif
 
-            @if ($taman->fasilitas)
+            @if ($taman->fasilitas_items !== [])
                 <div class="mt-8">
                     <h2 class="text-lg font-bold text-gray-900">Fasilitas</h2>
                     <ul class="mt-3 grid gap-2 sm:grid-cols-2">
-                        @foreach ($taman->fasilitas as $fasilitas)
-                            <li class="flex items-center gap-2 rounded-xl bg-lime-50 px-3 py-2.5 text-sm font-medium text-green-800 ring-1 ring-lime-100">
-                                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-[10px] text-white">✓</span>
-                                {{ $fasilitas }}
+                        @foreach ($taman->fasilitas_items as $item)
+                            @php
+                                $kondisiClass = match ($item['kondisi']) {
+                                    'Baik' => 'bg-green-100 text-green-800 ring-green-200',
+                                    'Rusak Ringan' => 'bg-amber-100 text-amber-800 ring-amber-200',
+                                    default => 'bg-red-100 text-red-800 ring-red-200',
+                                };
+                            @endphp
+                            <li class="flex items-center justify-between gap-2 rounded-xl bg-lime-50 px-3 py-2.5 text-sm font-medium text-green-800 ring-1 ring-lime-100">
+                                <span class="flex items-center gap-2">
+                                    <span class="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-[10px] text-white">✓</span>
+                                    {{ $item['nama'] }}
+                                </span>
+                                <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ring-1 {{ $kondisiClass }}">
+                                    {{ $item['kondisi'] }}
+                                </span>
                             </li>
                         @endforeach
                     </ul>
@@ -161,42 +126,27 @@
                         </a>
                     </div>
 
-                    <div id="map" style="height: 400px;" class="z-0 mt-4 overflow-hidden rounded-2xl border border-green-100 ring-1 ring-green-50"></div>
+                    <div id="map" class="taman-detail-map z-0 mt-4 overflow-hidden rounded-2xl border border-green-100 ring-1 ring-green-50"></div>
                 </div>
             @endif
         </div>
     </article>
 @endsection
 
-@if ($taman->images->count() > 1)
-    @push('styles')
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    @endpush
-
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-        <script>
-            onPageReady(function () {
-                window.tamanGallerySwiper = new Swiper('.taman-gallery-swiper', {
-                    loop: true,
-                    autoplay: { delay: 4000, disableOnInteraction: false },
-                    pagination: { el: '.swiper-pagination', clickable: true },
-                    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-                });
-            });
-        </script>
-    @endpush
-@endif
-
 @if ($parkLat && $parkLng)
     @push('styles')
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        @include('tamans.partials.leaflet-fix-styles')
     @endpush
 
     @push('scripts')
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
         <script>
             onPageReady(function () {
+                const mapElement = document.getElementById('map');
+                if (!mapElement || typeof L === 'undefined') {
+                    return;
+                }
+
                 const lat = {{ $parkLat }};
                 const lng = {{ $parkLng }};
                 const namaTaman = @json($taman->nama_taman);

@@ -11,7 +11,7 @@ class GenerateDeployGuidePdf extends Command
     protected $signature = 'docs:deploy-guide-pdf
                             {--output=docs/PANDUAN-DEPLOY-BIZNET-CLOUDFLARE.pdf : Path file PDF output relatif ke base path}';
 
-    protected $description = 'Generate PDF panduan deploy SAMASTA di VPS Biznet + Cloudflare';
+    protected $description = 'Generate PDF panduan deploy SIMTAMAN di VPS Biznet + Cloudflare';
 
     public function handle(): int
     {
@@ -27,7 +27,8 @@ class GenerateDeployGuidePdf extends Command
 
         $html = View::make('docs.pdf.panduan-deploy-biznet-cloudflare', [
             'generatedAt' => now()->timezone('Asia/Jakarta')->format('d F Y, H:i').' WIB',
-            'appName' => config('app.name', 'Samasta'),
+            'appName' => config('app.name', 'SIMTAMAN'),
+            'appFullName' => config('app.full_name', 'Sistem Informasi Manajemen Pertamanan'),
         ])->render();
 
         file_put_contents($absolutePath, PdfExport::renderBinary($html));

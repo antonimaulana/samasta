@@ -160,12 +160,13 @@
     </div>
 @endforeach
 
+@unless($hideFormActions ?? false)
 <div class="mt-6 flex gap-3">
     <button type="submit"
             class="rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
         Simpan
     </button>
-    <a href="{{ route('admin.pemeliharaan-tamans.index', [
+    <a href="{{ $cancelUrl ?? route('admin.pemeliharaan-tamans.index', [
         'tanggal_mulai' => old('tanggal', $kinerja?->tanggal?->format('Y-m-d') ?? now()->toDateString()),
         'tanggal_selesai' => old('tanggal', $kinerja?->tanggal?->format('Y-m-d') ?? now()->toDateString()),
     ]) }}"
@@ -173,16 +174,19 @@
         Batal
     </a>
 </div>
+@endunless
 
 @push('scripts')
-    @if (! empty($timWilayahKelurahan))
+    @if (! empty($timWilayahKelurahan) && blank($operatorTim ?? null))
         @include('admin.partials.tim-wilayah-taman-filter', [
             'timWilayahKelurahan' => $timWilayahKelurahan,
             'timSelectId' => 'tim',
             'tamanInputId' => 'taman_id',
         ])
     @endif
-    @include('admin.partials.tim-auto-suggest', ['mode' => 'select', 'pelaksanaSelectId' => 'tim'])
+    @if (blank($operatorTim ?? null))
+        @include('admin.partials.tim-auto-suggest', ['mode' => 'select', 'pelaksanaSelectId' => 'tim'])
+    @endif
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const lokasiLuarCheckbox = document.getElementById('lokasi_luar');

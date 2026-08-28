@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AlatSaranaOperasional extends Model
 {
@@ -75,5 +76,21 @@ class AlatSaranaOperasional extends Model
         return $query
             ->where('peruntukan', PemeliharaanTaman::TIM_ARMADA)
             ->whereIn('jenis', self::ARMADA_JENIS);
+    }
+
+    public function pemeliharaanPenggunaan(): HasMany
+    {
+        return $this->hasMany(PemeliharaanTamanArmada::class);
+    }
+
+    public function permohonanPenggunaan(): HasMany
+    {
+        return $this->hasMany(PemangkasanArmada::class);
+    }
+
+    public function isArmada(): bool
+    {
+        return self::isArmadaJenis($this->jenis)
+            && $this->peruntukan === PemeliharaanTaman::TIM_ARMADA;
     }
 }

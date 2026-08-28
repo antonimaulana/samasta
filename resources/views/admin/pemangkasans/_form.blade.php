@@ -145,13 +145,37 @@
         </div>
     </div>
 
-    <div>
-        <label for="tanggal_eksekusi" id="label-tanggal-eksekusi" class="mb-1 block text-sm font-medium text-gray-700">Jadwal Pelaksanaan *</label>
-        <input type="date" name="tanggal_eksekusi" id="tanggal_eksekusi"
-               value="{{ old('tanggal_eksekusi', $pemangkasan?->tanggal_eksekusi?->format('Y-m-d') ?? '') }}"
-               required
-               class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
+    <div class="md:col-span-2">
+        <label class="mb-1 block text-sm font-medium text-gray-700">Jadwal Pelaksanaan *</label>
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+                <label for="tanggal_eksekusi" class="mb-1 block text-xs font-medium text-gray-500">Tanggal Mulai</label>
+                <input type="date" name="tanggal_eksekusi" id="tanggal_eksekusi"
+                       value="{{ old('tanggal_eksekusi', $pemangkasan?->tanggal_eksekusi?->format('Y-m-d') ?? '') }}"
+                       required
+                       class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
+            </div>
+            <div>
+                <label for="tanggal_akhir_jadwal" class="mb-1 block text-xs font-medium text-gray-500">Tanggal Selesai (Rencana)</label>
+                <input type="date" name="tanggal_akhir_jadwal" id="tanggal_akhir_jadwal"
+                       value="{{ old('tanggal_akhir_jadwal', $pemangkasan?->tanggal_akhir_jadwal?->format('Y-m-d') ?? $pemangkasan?->tanggal_eksekusi?->format('Y-m-d') ?? '') }}"
+                       required
+                       class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
+            </div>
+        </div>
+        <p class="mt-2 text-xs text-gray-600">
+            Total rencana: <strong id="total-hari-jadwal">{{ $pemangkasan?->total_hari ?? '—' }}</strong> hari
+            @if ($pemangkasan && $pemangkasan->progres->isNotEmpty())
+                · Progres: <strong>{{ \App\Support\PemangkasanSchedule::progressSummary($pemangkasan) }}</strong>
+            @endif
+        </p>
         <div id="jadwal-konflik-warning" class="mt-2 hidden rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"></div>
+        @error('tanggal_eksekusi')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
+        @error('tanggal_akhir_jadwal')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
     </div>
 
     <div class="md:col-span-2">
@@ -208,63 +232,40 @@
         @enderror
     </div>
 
-    <div id="foto-sebelum-section" class="md:col-span-2 {{ $isMiniGarden ? 'hidden' : '' }}">
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-            <label for="foto_sebelum" id="label-foto-sebelum" class="mb-1 block text-sm font-medium text-emerald-900">Foto Sebelum Pelaksanaan</label>
-            <input type="file" name="foto_sebelum" id="foto_sebelum" accept="image/*"
-                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 file:mr-3 file:rounded file:border-0 file:bg-emerald-100 file:px-3 file:py-1 file:text-emerald-800">
-            <p id="hint-foto-sebelum" class="mt-1 text-xs text-emerald-800">Opsional. Maks. 2 MB.</p>
-            @error('foto_sebelum')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-            @enderror
-            @if ($pemangkasan?->foto_sebelum)
-                <img src="{{ $pemangkasan->foto_sebelum_url }}" alt="Foto sebelum pelaksanaan"
-                     class="mt-3 h-40 rounded-lg border border-gray-200 object-cover">
-            @endif
-        </div>
-    </div>
-
     <div id="dampak-section" class="md:col-span-2 hidden">
         <label for="dampak" class="mb-1 block text-sm font-medium text-gray-700">Dampak</label>
         <textarea name="dampak" id="dampak" rows="3"
                   placeholder="Opsional — contoh: Menutup badan jalan, merusak kabel listrik, dll."
                   class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">{{ old('dampak', $pemangkasan?->dampak ?? '') }}</textarea>
     </div>
-
-    <div id="foto-sesudah-section" class="md:col-span-2 {{ $currentStatus === 'Selesai' ? '' : 'hidden' }}">
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-            <label for="foto_sesudah" id="label-foto" class="mb-1 block text-sm font-medium text-emerald-900">Foto Setelah Pelaksanaan</label>
-            <input type="file" name="foto_sesudah" id="foto_sesudah" accept="image/*"
-                   class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 file:mr-3 file:rounded file:border-0 file:bg-emerald-100 file:px-3 file:py-1 file:text-emerald-800">
-            <p class="mt-1 text-xs text-emerald-800">Opsional. Maks. 2 MB.</p>
-            @if ($pemangkasan?->foto_sesudah)
-                <img src="{{ $pemangkasan->foto_sesudah_url }}" alt="Foto setelah pelaksanaan"
-                     class="mt-3 h-40 rounded-lg border border-gray-200 object-cover">
-            @endif
-        </div>
-    </div>
 </div>
 
+@include('admin.pemeliharaan_tamans._armada-form', [
+    'kinerja' => $pemangkasan ?? null,
+    'armadaInventory' => $armadaInventory ?? \App\Support\ArmadaAssignment::inventory(),
+    'isTimArmada' => in_array(\App\Models\PemeliharaanTaman::TIM_ARMADA, $selectedPelaksana, true),
+    'armadaVisibility' => 'pelaksana-checkbox',
+    'armadaRequired' => false,
+])
+
+@unless($hideFormActions ?? false)
 <div class="mt-6 flex gap-3">
     <button type="submit"
             class="rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
         Simpan
     </button>
-    <a href="{{ route('admin.pemangkasans.index') }}"
+    <a href="{{ $cancelUrl ?? route('admin.pemangkasans.index') }}"
        class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
         Batal
     </a>
 </div>
+@endunless
 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const jenisSelect = document.getElementById('jenis_layanan');
             const statusSelect = document.getElementById('status');
-            const fotoSection = document.getElementById('foto-sesudah-section');
-            const fotoInput = document.getElementById('foto_sesudah');
-            const fotoSebelumSection = document.getElementById('foto-sebelum-section');
-            const fotoSebelumInput = document.getElementById('foto_sebelum');
             const dampakSection = document.getElementById('dampak-section');
             const penyelesaianSection = document.getElementById('tanggal-penyelesaian-section');
             const penyelesaianInput = document.getElementById('tanggal_penyelesaian');
@@ -276,7 +277,6 @@
             const tamanSearchInput = document.getElementById('taman_id_search');
             const lokasiManualInput = document.getElementById('lokasi_pohon');
             const lokasiPohonSection = document.getElementById('lokasi-pohon-section');
-            const fotoSebelumLabel = document.getElementById('label-foto-sebelum');
 
             const labels = {
                 pemangkasan: {
@@ -286,8 +286,6 @@
                     kontakPermohonan: 'Kontak Permohonan *',
                     tanggalPermohonan: 'Tanggal Permohonan *',
                     tanggalPelaksanaan: 'Jadwal Pelaksanaan *',
-                    fotoSebelum: 'Foto Sebelum Pelaksanaan',
-                    foto: 'Foto Setelah Pelaksanaan',
                 },
                 tumbang: {
                     section: 'Data Laporan',
@@ -296,8 +294,6 @@
                     kontakPermohonan: 'Kontak Laporan *',
                     tanggalPermohonan: 'Tanggal Laporan *',
                     tanggalPelaksanaan: 'Jadwal Pelaksanaan *',
-                    fotoSebelum: 'Foto Sebelum Penanganan',
-                    foto: 'Foto Setelah Penanganan',
                 },
                 miniGarden: {
                     section: 'Data Permohonan',
@@ -306,7 +302,6 @@
                     kontakPermohonan: 'Kontak Permohonan *',
                     tanggalPermohonan: 'Tanggal Permohonan *',
                     tanggalPelaksanaan: 'Jadwal Pelaksanaan *',
-                    foto: 'Foto Setelah Pelaksanaan',
                 },
             };
 
@@ -329,21 +324,11 @@
                 document.getElementById('label-penanggungjawab').textContent = config.penanggungjawab;
                 document.getElementById('label-kontak-permohonan').textContent = config.kontakPermohonan;
                 document.getElementById('label-tanggal-permohonan').textContent = config.tanggalPermohonan;
-                document.getElementById('label-tanggal-eksekusi').textContent = config.tanggalPelaksanaan;
-                document.getElementById('label-foto').textContent = config.foto;
-                if (fotoSebelumLabel && config.fotoSebelum) {
-                    fotoSebelumLabel.textContent = config.fotoSebelum;
-                }
 
                 lokasiPohonSection.classList.toggle('hidden', mini);
-                fotoSebelumSection.classList.toggle('hidden', mini);
                 dampakSection.classList.toggle('hidden', mini || ! isPohonTumbang());
 
                 if (mini) {
-                    if (fotoSebelumInput) {
-                        fotoSebelumInput.required = false;
-                    }
-
                     if (tamanHiddenInput) {
                         tamanHiddenInput.removeAttribute('data-searchable-required');
                     }
@@ -393,14 +378,7 @@
 
             function toggleSelesaiSection() {
                 const isSelesai = statusSelect.value === 'Selesai';
-                fotoSection.classList.toggle('hidden', ! isSelesai);
                 penyelesaianSection.classList.toggle('hidden', ! isSelesai);
-                if (fotoInput) {
-                    fotoInput.required = false;
-                }
-                if (fotoSebelumInput) {
-                    fotoSebelumInput.required = false;
-                }
                 if (pendukungInput) {
                     pendukungInput.required = false;
                 }
@@ -435,10 +413,45 @@
             });
 
             const tanggalEksekusiInput = document.getElementById('tanggal_eksekusi');
-            const jadwalKonflikWarning = document.getElementById('jadwal-konflik-warning');
+            const tanggalAkhirInput = document.getElementById('tanggal_akhir_jadwal');
+            const totalHariLabel = document.getElementById('total-hari-jadwal');
+
+            function updateTotalHariJadwal() {
+                if (! tanggalEksekusiInput || ! tanggalAkhirInput || ! totalHariLabel) {
+                    return;
+                }
+
+                const mulai = tanggalEksekusiInput.value;
+                const akhir = tanggalAkhirInput.value || mulai;
+
+                if (! mulai) {
+                    totalHariLabel.textContent = '—';
+                    return;
+                }
+
+                const start = new Date(mulai + 'T00:00:00');
+                const end = new Date(akhir + 'T00:00:00');
+                const diff = Math.max(0, Math.round((end - start) / 86400000)) + 1;
+                totalHariLabel.textContent = String(diff);
+            }
+
+            tanggalEksekusiInput?.addEventListener('change', function () {
+                if (tanggalAkhirInput && (! tanggalAkhirInput.value || tanggalAkhirInput.value < tanggalEksekusiInput.value)) {
+                    tanggalAkhirInput.value = tanggalEksekusiInput.value;
+                }
+                updateTotalHariJadwal();
+                queueScheduleConflictCheck();
+            });
+            tanggalAkhirInput?.addEventListener('change', function () {
+                updateTotalHariJadwal();
+                queueScheduleConflictCheck();
+            });
+            updateTotalHariJadwal();
+
             const pemangkasanForm = document.getElementById('pemangkasan-form');
             const excludePemangkasanId = {{ $pemangkasan?->id ?? 'null' }};
             const scheduleConflictUrl = @json(route('admin.pemangkasans.schedule-conflicts'));
+            const jadwalKonflikWarning = document.getElementById('jadwal-konflik-warning');
             let scheduleConflicts = [];
             let scheduleConflictConfirmed = false;
             let scheduleConflictTimer = null;
@@ -534,10 +547,6 @@
                 scheduleConflictConfirmed = false;
                 clearTimeout(scheduleConflictTimer);
                 scheduleConflictTimer = setTimeout(checkScheduleConflicts, 300);
-            }
-
-            if (tanggalEksekusiInput) {
-                tanggalEksekusiInput.addEventListener('change', queueScheduleConflictCheck);
             }
 
             document.querySelectorAll('input[name="pelaksana[]"]').forEach(function (checkbox) {

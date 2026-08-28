@@ -22,25 +22,7 @@ class TamanController extends Controller
 
 {
 
-    private const POPULAR_FASILITAS = [
-
-        'Jogging Track',
-
-        'Area Bermain',
-
-        'Toilet',
-
-        'Wifi',
-
-        'Tempat Parkir',
-
-        'Area Piknik',
-
-        'Playground',
-
-        'Kolam Ikan',
-
-    ];
+    private const POPULAR_FASILITAS = Taman::FASILITAS_DAFTAR;
 
 
 
@@ -237,31 +219,12 @@ class TamanController extends Controller
      */
 
     private function fasilitasSearchTerms(string $label): array
-
     {
+        if (in_array($label, Taman::FASILITAS_DAFTAR, true)) {
+            return [$label];
+        }
 
-        return match ($label) {
-
-            'Jogging Track' => ['jogging'],
-
-            'Area Bermain' => ['bermain', 'playground'],
-
-            'Toilet' => ['toilet'],
-
-            'Wifi' => ['wifi'],
-
-            'Tempat Parkir' => ['parkir'],
-
-            'Area Piknik' => ['piknik'],
-
-            'Playground' => ['playground'],
-
-            'Kolam Ikan' => ['kolam'],
-
-            default => [$label],
-
-        };
-
+        return [$label];
     }
 
 }

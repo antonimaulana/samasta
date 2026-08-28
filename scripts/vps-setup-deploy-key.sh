@@ -7,7 +7,7 @@ set -euo pipefail
 KEY_PATH="$HOME/.ssh/samasta_deploy"
 CONFIG_BLOCK=$'Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/samasta_deploy\n  IdentitiesOnly yes\n'
 
-echo "=== SAMASTA — GitHub Deploy Key Setup ==="
+echo "=== SIMTAMAN — GitHub Deploy Key Setup ==="
 
 if [[ -f "$KEY_PATH" ]]; then
     echo "[INFO] Key already exists: $KEY_PATH"

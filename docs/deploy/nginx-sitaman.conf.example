@@ -1,5 +1,5 @@
 # =============================================================================
-# Contoh konfigurasi Nginx — Portal Samasta (SITAMAN)
+# Contoh konfigurasi Nginx — SIMTAMAN
 # Sesuaikan: server_name, root, ssl_certificate, php-fpm socket
 # =============================================================================
 
