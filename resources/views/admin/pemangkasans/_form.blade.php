@@ -240,14 +240,6 @@
     </div>
 </div>
 
-@include('admin.pemeliharaan_tamans._armada-form', [
-    'kinerja' => $pemangkasan ?? null,
-    'armadaInventory' => $armadaInventory ?? \App\Support\ArmadaAssignment::inventory(),
-    'isTimArmada' => in_array(\App\Models\PemeliharaanTaman::TIM_ARMADA, $selectedPelaksana, true),
-    'armadaVisibility' => 'pelaksana-checkbox',
-    'armadaRequired' => false,
-])
-
 @unless($hideFormActions ?? false)
 <div class="mt-6 flex gap-3">
     <button type="submit"

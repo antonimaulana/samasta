@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PemangkasanArmada extends Model
+class PemangkasanProgresArmada extends Model
 {
     protected $fillable = [
-        'pemangkasan_id',
+        'pemangkasan_progres_id',
         'alat_sarana_operasional_id',
         'jenis_armada',
         'no_plat',
@@ -23,9 +23,9 @@ class PemangkasanArmada extends Model
         ];
     }
 
-    public function pemangkasan(): BelongsTo
+    public function progres(): BelongsTo
     {
-        return $this->belongsTo(Pemangkasan::class);
+        return $this->belongsTo(PemangkasanProgres::class, 'pemangkasan_progres_id');
     }
 
     public function alatSarana(): BelongsTo

@@ -162,7 +162,7 @@
     <table class="info">
         <tr>
             <th>Tanggal Pelaksanaan</th>
-            <td>{{ $kinerja->tanggal->translatedFormat('l, d F Y') }}</td>
+            <td>{{ \App\Support\OperasionalPelaksanaanTime::displayLong($kinerja->tanggal) }}</td>
         </tr>
         <tr>
             <th>Pengawas</th>

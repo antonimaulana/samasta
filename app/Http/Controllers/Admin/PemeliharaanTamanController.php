@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlatSaranaOperasional;
+use App\Support\OperasionalPelaksanaanTime;
 use App\Models\PemeliharaanTaman;
 use App\Models\PemeliharaanTamanArmada;
 use App\Models\Taman;
@@ -110,8 +111,8 @@ class PemeliharaanTamanController extends Controller
 
         return redirect()
             ->route('admin.pemeliharaan-tamans.index', [
-                'tanggal_mulai' => $validated['tanggal'],
-                'tanggal_selesai' => $validated['tanggal'],
+                'tanggal_mulai' => OperasionalPelaksanaanTime::datePart($validated['tanggal']),
+                'tanggal_selesai' => OperasionalPelaksanaanTime::datePart($validated['tanggal']),
             ])
             ->with('success', 'Operasional pemeliharaan taman berhasil dicatat.');
     }
@@ -141,8 +142,8 @@ class PemeliharaanTamanController extends Controller
 
         return redirect()
             ->route('admin.pemeliharaan-tamans.index', [
-                'tanggal_mulai' => $validated['tanggal'],
-                'tanggal_selesai' => $validated['tanggal'],
+                'tanggal_mulai' => OperasionalPelaksanaanTime::datePart($validated['tanggal']),
+                'tanggal_selesai' => OperasionalPelaksanaanTime::datePart($validated['tanggal']),
             ])
             ->with('success', 'Operasional pemeliharaan taman berhasil diperbarui.');
     }
@@ -323,7 +324,7 @@ class PemeliharaanTamanController extends Controller
         }
 
         $attributes = [
-            'tanggal' => 'tanggal pelaksanaan',
+            'tanggal' => 'tanggal & waktu pelaksanaan',
             'tim' => 'tim',
             'taman_id' => 'lokasi pelaksanaan',
             'lokasi_pelaksanaan' => 'lokasi pelaksanaan',
@@ -345,6 +346,8 @@ class PemeliharaanTamanController extends Controller
         $validated = $request->validate($rules, [], $attributes);
 
         unset($validated['armada']);
+
+        $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
 
         return $validated;
     }
@@ -385,7 +388,7 @@ class PemeliharaanTamanController extends Controller
         }
 
         $attributes = [
-            'tanggal' => 'tanggal pelaksanaan',
+            'tanggal' => 'tanggal & waktu pelaksanaan',
             'tim' => 'tim',
             'taman_id' => 'lokasi pelaksanaan',
             'lokasi_pelaksanaan' => 'lokasi pelaksanaan',
@@ -412,6 +415,8 @@ class PemeliharaanTamanController extends Controller
         $validated = $request->validate($rules, [], $attributes);
 
         unset($validated['armada']);
+
+        $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
 
         return $validated;
     }

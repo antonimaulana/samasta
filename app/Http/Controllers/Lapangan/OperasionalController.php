@@ -122,7 +122,7 @@ class OperasionalController extends Controller
 
         return redirect()
             ->route('lapangan.index')
-            ->with('success', 'Pemeliharaan rutin '.$menuItem['label'].' berhasil dicatat untuk '.$pemeliharaan->tanggal->format('d/m/Y').'.');
+            ->with('success', 'Pemeliharaan rutin '.$menuItem['label'].' berhasil dicatat untuk '.\App\Support\OperasionalPelaksanaanTime::display($pemeliharaan->tanggal).'.');
     }
 
     public function indexPermohonan(Request $request): View
@@ -138,7 +138,7 @@ class OperasionalController extends Controller
 
         $permohonans = $scope->scopePemangkasan(
             Pemangkasan::query()
-                ->with(['taman', 'progres'])
+                ->with(['taman'])
                 ->where('status', $status)
                 ->when($status === 'Selesai', fn ($q) => $q->orderByDesc('tanggal_penyelesaian'))
                 ->when($status !== 'Selesai', fn ($q) => $q->orderBy('tanggal_eksekusi'))
@@ -167,7 +167,7 @@ class OperasionalController extends Controller
     {
         $this->ensureCanUpdatePermohonan($request, $pemangkasan);
 
-        $pemangkasan->load(['taman', 'armadas', 'progres']);
+        $pemangkasan->load(['taman', 'progres']);
 
         return view('lapangan.permohonan.edit', [
             'menuItem' => LapanganMenu::find('permohonan', $request->user()),

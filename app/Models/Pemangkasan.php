@@ -68,11 +68,6 @@ class Pemangkasan extends Model
         return $this->belongsTo(Taman::class);
     }
 
-    public function armadas(): HasMany
-    {
-        return $this->hasMany(PemangkasanArmada::class)->orderBy('urutan');
-    }
-
     public function progres(): HasMany
     {
         return $this->hasMany(PemangkasanProgres::class)->orderBy('tanggal');
@@ -130,6 +125,40 @@ class Pemangkasan extends Model
         return (string) ($this->lokasi_pohon ?? '');
     }
 
+    public function lokasiKategoriLabel(): string
+    {
+        if ($this->taman_id) {
+            $kategori = $this->relationLoaded('taman')
+                ? $this->taman?->kategori
+                : $this->taman()->value('kategori');
+
+            return $kategori ?? '—';
+        }
+
+        return 'Permintaan Masyarakat';
+    }
+
+    public function lokasiPelaksanaanPdfLabel(): string
+    {
+        return '('.$this->lokasiKategoriLabel().') '.$this->lokasiLabel();
+    }
+
+    public function asalPermohonanPdfLabel(): string
+    {
+        $parts = array_filter([
+            $this->asal,
+            $this->penanggungjawab,
+        ]);
+
+        $label = implode(' — ', $parts);
+
+        if (filled($this->kontak_permohonan)) {
+            $label .= ' ('.$this->kontak_permohonan.')';
+        }
+
+        return $label ?: '—';
+    }
+
     public function pelaksanaLabel(): string
     {
         $teams = $this->pelaksana;
@@ -139,17 +168,6 @@ class Pemangkasan extends Model
         }
 
         return (string) ($teams ?? '');
-    }
-
-    public function armadaPdfHtml(): ?string
-    {
-        if ($this->armadas->isEmpty()) {
-            return null;
-        }
-
-        return $this->armadas
-            ->map(fn (PemangkasanArmada $armada) => $armada->pdfEntryHtml())
-            ->implode(', ');
     }
 
     public function getFotoSesudahUrlAttribute(): ?string

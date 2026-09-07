@@ -17,11 +17,8 @@ class RthKotaBatam
      */
 
     public static function kategori(): array
-
     {
-
-        return KontenBerandaCache::rthKategoris();
-
+        return self::kategoriStatic();
     }
 
 

@@ -85,7 +85,7 @@ class AlatSaranaOperasional extends Model
 
     public function permohonanPenggunaan(): HasMany
     {
-        return $this->hasMany(PemangkasanArmada::class);
+        return $this->hasMany(PemangkasanProgresArmada::class, 'alat_sarana_operasional_id');
     }
 
     public function isArmada(): bool

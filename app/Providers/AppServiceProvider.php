@@ -5,10 +5,7 @@ namespace App\Providers;
 use App\Models\AduanMasyarakat;
 use App\Models\EnsiklopediaArtikel;
 use App\Models\EnsiklopediaKategori;
-use App\Models\KotaProfile;
-use App\Models\Pejabat;
 use App\Models\Pemangkasan;
-use App\Models\RthKategori;
 use App\Models\Taman;
 use App\Models\User;
 use App\Policies\DashboardPolicy;
@@ -16,7 +13,6 @@ use App\Policies\NotificationPolicy;
 use App\Support\AdminLayoutData;
 use App\Support\HomePageData;
 use App\Support\JadwalLayananQuery;
-use App\Support\KontenBerandaCache;
 use App\Support\MasukanPanelIndicator;
 use App\Support\OperationalAlertService;
 use Carbon\Carbon;
@@ -44,14 +40,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('notifications.update', fn (User $user) => (new NotificationPolicy)->update($user));
 
         foreach ([Taman::class, Pemangkasan::class, AduanMasyarakat::class, EnsiklopediaArtikel::class] as $model) {
-            $model::saved(function () {
-                HomePageData::forgetStatsCache();
-                KontenBerandaCache::forgetAll();
-            });
-            $model::deleted(function () {
-                HomePageData::forgetStatsCache();
-                KontenBerandaCache::forgetAll();
-            });
+            $model::saved(fn () => HomePageData::forgetStatsCache());
+            $model::deleted(fn () => HomePageData::forgetStatsCache());
         }
 
         Pemangkasan::saved(fn () => AdminLayoutData::forgetJadwalTerlambatCount());
@@ -59,11 +49,6 @@ class AppServiceProvider extends ServiceProvider
 
         EnsiklopediaKategori::saved(fn () => HomePageData::forgetEnsiklopediaKategorisCache());
         EnsiklopediaKategori::deleted(fn () => HomePageData::forgetEnsiklopediaKategorisCache());
-
-        foreach ([Pejabat::class, RthKategori::class, KotaProfile::class] as $model) {
-            $model::saved(fn () => KontenBerandaCache::forgetAll());
-            $model::deleted(fn () => KontenBerandaCache::forgetAll());
-        }
 
         View::composer('layouts.admin', function ($view) {
             if (auth()->check()) {

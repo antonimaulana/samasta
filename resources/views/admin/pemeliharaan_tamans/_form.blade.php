@@ -3,19 +3,14 @@
     $isLokasiLuar = filter_var(old('lokasi_luar', ($kinerja && ! $kinerja->taman_id) ? '1' : '0'), FILTER_VALIDATE_BOOLEAN);
     $selectedTim = old('tim', $kinerja?->tim ?? ($operatorTim ?? ''));
     $isTimArmada = $selectedTim === \App\Models\PemeliharaanTaman::TIM_ARMADA;
-    $fotoGroups = [
-        'Sebelum Pelaksanaan' => ['foto_sebelum_1', 'foto_sebelum_2'],
-        'Saat Pelaksanaan' => ['foto_saat_1', 'foto_saat_2'],
-        'Sesudah Pelaksanaan' => ['foto_sesudah_1', 'foto_sesudah_2'],
-    ];
 @endphp
 
 <div class="grid gap-6 md:grid-cols-2">
     <div>
-        <label for="tanggal" class="mb-1 block text-sm font-medium text-gray-700">Tanggal Pelaksanaan *</label>
-        <input type="date" name="tanggal" id="tanggal" required
-               value="{{ old('tanggal', $kinerja?->tanggal?->format('Y-m-d') ?? now()->toDateString()) }}"
-               class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
+        <x-operasional-pelaksanaan-datetime
+            name="tanggal"
+            :value="$kinerja?->tanggal"
+        />
     </div>
 
     <div>
@@ -134,31 +129,7 @@
     @enderror
 </div>
 
-@foreach ($fotoGroups as $groupLabel => $fields)
-    <div class="mt-8 border-t border-gray-100 pt-6">
-        <h3 class="mb-4 text-sm font-bold text-green-800">{{ $groupLabel }}</h3>
-        <div class="grid gap-6 md:grid-cols-2">
-            @foreach ($fields as $field)
-                @php
-                    $label = \App\Models\PemeliharaanTaman::FOTO_FIELDS[$field];
-                    $hasExisting = filled($kinerja?->{$field});
-                @endphp
-                <div>
-                    <label for="{{ $field }}" class="mb-1 block text-sm font-medium text-gray-700">
-                        {{ $label }} {{ $kinerja ? '' : '*' }}
-                    </label>
-                    <input type="file" name="{{ $field }}" id="{{ $field }}" accept="image/*"
-                           {{ $kinerja ? '' : 'required' }}
-                           class="w-full rounded-lg border border-gray-300 px-3 py-2 file:mr-3 file:rounded file:border-0 file:bg-green-50 file:px-3 file:py-1 file:text-green-700">
-                    @if ($hasExisting)
-                        <img src="{{ $kinerja->fotoUrl($field) }}" alt="{{ $label }}"
-                             class="mt-3 h-32 w-full rounded-lg border object-cover">
-                    @endif
-                </div>
-            @endforeach
-        </div>
-    </div>
-@endforeach
+<x-operasional-foto-fields :record="$kinerja" :required="! $kinerja" />
 
 @unless($hideFormActions ?? false)
 <div class="mt-6 flex gap-3">
@@ -167,8 +138,8 @@
         Simpan
     </button>
     <a href="{{ $cancelUrl ?? route('admin.pemeliharaan-tamans.index', [
-        'tanggal_mulai' => old('tanggal', $kinerja?->tanggal?->format('Y-m-d') ?? now()->toDateString()),
-        'tanggal_selesai' => old('tanggal', $kinerja?->tanggal?->format('Y-m-d') ?? now()->toDateString()),
+        'tanggal_mulai' => old('tanggal', \App\Support\OperasionalPelaksanaanTime::datePart($kinerja?->tanggal)),
+        'tanggal_selesai' => old('tanggal', \App\Support\OperasionalPelaksanaanTime::datePart($kinerja?->tanggal)),
     ]) }}"
        class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
         Batal

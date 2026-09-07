@@ -114,14 +114,22 @@
                             <div class="rounded-lg border border-gray-100 bg-gray-50 px-4 py-3 text-sm">
                                 <div class="flex flex-wrap items-start justify-between gap-2">
                                     <p class="font-semibold text-gray-900">
-                                        Hari ke-{{ $entry->hari_ke }} · {{ $entry->tanggal->translatedFormat('d F Y') }}
+                                        Hari ke-{{ $entry->hari_ke }} · {{ \App\Support\OperasionalPelaksanaanTime::display($entry->tanggal) }}
                                         · {{ $entry->jumlah_personil }} personil
                                     </p>
-                                    <a href="{{ route('admin.pemangkasans.export-pdf-progres', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry]) }}"
-                                       class="rounded border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
-                                       target="_blank" rel="noopener">
-                                        PDF
-                                    </a>
+                                    <div class="flex flex-wrap gap-2">
+                                        <x-admin.can-write>
+                                            <a href="{{ route('admin.pemangkasans.progres.edit', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry]) }}"
+                                               class="rounded border border-blue-300 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50">
+                                                Edit
+                                            </a>
+                                        </x-admin.can-write>
+                                        <a href="{{ route('admin.pemangkasans.export-pdf-progres', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry]) }}"
+                                           class="rounded border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
+                                           target="_blank" rel="noopener">
+                                            PDF
+                                        </a>
+                                    </div>
                                 </div>
                                 @if ($entry->catatan)
                                     <p class="mt-1 text-gray-600">{{ $entry->catatan }}</p>

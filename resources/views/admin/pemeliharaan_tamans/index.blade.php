@@ -120,7 +120,7 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($kinerjas as $kinerja)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-600">{{ $kinerja->tanggal->format('d M Y') }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ \App\Support\OperasionalPelaksanaanTime::display($kinerja->tanggal) }}</td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{{ $kinerja->tim }}</span>
                             </td>

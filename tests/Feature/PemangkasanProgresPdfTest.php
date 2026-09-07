@@ -24,6 +24,42 @@ class PemangkasanProgresPdfTest extends TestCase
         $this->seed(WilayahBatamSeeder::class);
     }
 
+    public function test_admin_can_update_progress_entry(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        [$permohonan, $progres] = $this->createSampleProgress('Catatan awal.');
+
+        $this->actingAs($admin)
+            ->get(route('admin.pemangkasans.progres.edit', [
+                'pemangkasan' => $permohonan,
+                'pemangkasanProgres' => $progres,
+            ]))
+            ->assertOk()
+            ->assertSee('Edit Progres Permohonan', false)
+            ->assertSee('Catatan awal.', false);
+
+        $payload = [
+            'tanggal' => now()->format('Y-m-d\TH:i'),
+            'jumlah_personil' => 8,
+            'catatan' => 'Catatan diperbarui admin.',
+        ];
+
+        $this->actingAs($admin)
+            ->put(route('admin.pemangkasans.progres.update', [
+                'pemangkasan' => $permohonan,
+                'pemangkasanProgres' => $progres,
+            ]), $payload)
+            ->assertRedirect(route('admin.pemangkasans.show', $permohonan))
+            ->assertSessionHas('success');
+
+        $progres->refresh();
+
+        $this->assertSame(8, $progres->jumlah_personil);
+        $this->assertSame('Catatan diperbarui admin.', $progres->catatan);
+    }
+
     public function test_admin_can_export_daily_progress_pdf(): void
     {
         if (! extension_loaded('gd')) {
@@ -92,12 +128,16 @@ class PemangkasanProgresPdfTest extends TestCase
 
         $html = PemangkasanProgresPdf::render(
             PemangkasanProgresPdf::resolveEntry($permohonan, $dayOne),
-            $permohonan->fresh(['taman', 'armadas.alatSarana']),
+            $permohonan->fresh(['taman']),
         );
 
         $this->assertStringContainsString('Catatan khusus hari pertama.', $html);
         $this->assertStringContainsString('4 orang', $html);
-        $this->assertStringContainsString('Hari ke-1 dari 2 hari rencana', $html);
+        $this->assertStringContainsString('1 / 2 hari (50% progres)', $html);
+        $this->assertStringContainsString('Warga — Budi (081234567890)', $html);
+        $this->assertStringContainsString('(Taman Kota)', $html);
+        $this->assertStringNotContainsString('Jenis Layanan', $html);
+        $this->assertStringNotContainsString('Penanggung Jawab</th>', $html);
         $this->assertStringNotContainsString('Catatan khusus hari kedua.', $html);
         $this->assertStringNotContainsString('9 orang', $html);
 
@@ -136,18 +176,18 @@ class PemangkasanProgresPdfTest extends TestCase
             'status' => 'Diproses',
         ]);
 
-        $fotoPath = UploadedFile::fake()->image('sebelum.jpg')->store('pemangkasan/progres', 'public');
+        $fotoPaths = [];
+        foreach (array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS) as $field) {
+            $fotoPaths[$field] = UploadedFile::fake()->image($field.'.jpg')->store('pemangkasan/progres', 'public');
+        }
 
-        $progres = PemangkasanProgres::create([
+        $progres = PemangkasanProgres::create(array_merge([
             'pemangkasan_id' => $permohonan->id,
             'tanggal' => '2026-08-28',
             'hari_ke' => 1,
             'jumlah_personil' => 4,
-            'foto_sebelum' => $fotoPath,
-            'foto_saat' => $fotoPath,
-            'foto_sesudah' => $fotoPath,
             'catatan' => $catatan,
-        ]);
+        ], $fotoPaths));
 
         return [$permohonan, $progres];
     }

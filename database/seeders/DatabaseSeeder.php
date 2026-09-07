@@ -15,7 +15,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(WilayahBatamSeeder::class);
         $this->call(TimPelaksanaSeeder::class);
-        $this->call(KontenBerandaSeeder::class);
 
         if (app()->environment('production')) {
             $this->command?->warn('DatabaseSeeder dilewati di production. Buat akun admin secara manual.');

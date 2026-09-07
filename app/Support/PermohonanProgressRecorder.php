@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
+use App\Models\PemeliharaanTaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class PermohonanProgressRecorder
         $validated = $this->validate($request, $permohonan);
         $armadaRows = ArmadaAssignment::extractRows($request);
 
-        $this->recordDailyProgress($permohonan, $request, $validated);
+        $this->recordDailyProgress($permohonan, $request, $validated, $armadaRows);
 
         $permohonan->update([
             'status' => $validated['status'],
@@ -30,17 +31,21 @@ class PermohonanProgressRecorder
                 : null,
         ]);
 
-        ArmadaAssignment::sync($permohonan, $armadaRows);
         PemangkasanSchedule::recalculate($permohonan);
 
-        return $permohonan->fresh(['taman', 'armadas', 'progres']);
+        return $permohonan->fresh(['taman', 'progres.armadas']);
     }
 
     /**
      * @param  array<string, mixed>  $validated
+     * @param  list<array{alat_sarana_operasional_id: int, jenis_armada: string, no_plat: string, sopir: string}>  $armadaRows
      */
-    private function recordDailyProgress(Pemangkasan $permohonan, Request $request, array $validated): PemangkasanProgres
-    {
+    private function recordDailyProgress(
+        Pemangkasan $permohonan,
+        Request $request,
+        array $validated,
+        array $armadaRows,
+    ): PemangkasanProgres {
         $tanggal = $validated['tanggal_progres'];
 
         if (! PemangkasanSchedule::tanggalWithinSchedule($permohonan, $tanggal)) {
@@ -64,7 +69,7 @@ class PermohonanProgressRecorder
         $entry->jumlah_personil = (int) $validated['jumlah_personil'];
         $entry->catatan = $validated['catatan'] ?? null;
 
-        foreach (['foto_sebelum', 'foto_saat', 'foto_sesudah'] as $field) {
+        foreach (PemangkasanProgres::fotoFieldKeys() as $field) {
             if ($request->hasFile($field)) {
                 if ($entry->{$field}) {
                     Storage::disk('public')->delete($entry->{$field});
@@ -75,6 +80,7 @@ class PermohonanProgressRecorder
         }
 
         $entry->save();
+        ArmadaAssignment::sync($entry, $armadaRows);
 
         return $entry;
     }
@@ -92,9 +98,6 @@ class PermohonanProgressRecorder
             'tanggal_progres' => ['required', 'date'],
             'jumlah_personil' => ['required', 'integer', 'min:1', 'max:9999'],
             'catatan' => ['nullable', 'string'],
-            'foto_sebelum' => ['nullable', 'image', 'max:4096'],
-            'foto_saat' => ['nullable', 'image', 'max:4096'],
-            'foto_sesudah' => ['nullable', 'image', 'max:4096'],
             'tanggal_penyelesaian' => [
                 Rule::requiredIf(fn () => $request->input('status') === 'Selesai'),
                 'nullable',
@@ -107,47 +110,40 @@ class PermohonanProgressRecorder
             $rules['dampak'] = ['nullable', 'string'];
         }
 
-        $inputStatus = (string) $request->input('status');
+        $attributes = [
+            'status' => 'status',
+            'tanggal_progres' => 'tanggal & waktu pelaksanaan',
+            'jumlah_personil' => 'jumlah personil',
+            'catatan' => 'catatan pekerjaan',
+            'tanggal_penyelesaian' => 'tanggal penyelesaian',
+            'dampak' => 'dampak',
+            ...ArmadaAssignment::validationAttributes(),
+        ];
 
         if (! $isMiniGarden) {
-            if ($inputStatus !== 'Rencana') {
-                $rules['foto_sebelum'][] = Rule::requiredIf(function () use ($request, $permohonan) {
-                    $tanggal = $request->input('tanggal_progres', now()->toDateString());
-                    $existing = $permohonan->progres()->whereDate('tanggal', $tanggal)->first();
+            foreach (PemeliharaanTaman::FOTO_FIELDS as $field => $label) {
+                $rules[$field] = [
+                    'nullable',
+                    'image',
+                    'max:4096',
+                    Rule::requiredIf(function () use ($request, $permohonan, $field) {
+                        $tanggal = OperasionalPelaksanaanTime::datePart(
+                            $request->input('tanggal_progres', now()->toDateString())
+                        );
+                        $existing = $permohonan->progres()->whereDate('tanggal', $tanggal)->first();
 
-                    return ! $request->hasFile('foto_sebelum') && ! $existing?->foto_sebelum;
-                });
-                $rules['foto_saat'][] = Rule::requiredIf(function () use ($request, $permohonan) {
-                    $tanggal = $request->input('tanggal_progres', now()->toDateString());
-                    $existing = $permohonan->progres()->whereDate('tanggal', $tanggal)->first();
-
-                    return ! $request->hasFile('foto_saat') && ! $existing?->foto_saat;
-                });
-            }
-
-            if ($inputStatus !== 'Selesai') {
-                $rules['foto_sesudah'][] = Rule::requiredIf(function () use ($request, $permohonan) {
-                    $tanggal = $request->input('tanggal_progres', now()->toDateString());
-                    $existing = $permohonan->progres()->whereDate('tanggal', $tanggal)->first();
-
-                    return ! $request->hasFile('foto_sesudah') && ! $existing?->foto_sesudah;
-                });
+                        return ! $request->hasFile($field) && ! filled($existing?->{$field});
+                    }),
+                ];
+                $attributes[$field] = strtolower($label);
             }
         }
 
-        $validated = $request->validate($rules, [], array_merge([
-            'status' => 'status',
-            'tanggal_progres' => 'tanggal progres',
-            'jumlah_personil' => 'jumlah personil',
-            'catatan' => 'catatan pekerjaan',
-            'foto_sebelum' => 'foto sebelum pelaksanaan',
-            'foto_saat' => 'foto saat pelaksanaan',
-            'foto_sesudah' => 'foto sesudah pelaksanaan',
-            'tanggal_penyelesaian' => 'tanggal penyelesaian',
-            'dampak' => 'dampak',
-        ], ArmadaAssignment::validationAttributes()));
+        $validated = $request->validate($rules, [], $attributes);
 
         unset($validated['armada']);
+
+        $validated['tanggal_progres'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_progres']);
 
         if ($validated['status'] !== 'Selesai') {
             $validated['tanggal_penyelesaian'] = null;

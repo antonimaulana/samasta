@@ -2,44 +2,44 @@
 
 namespace Tests\Feature;
 
-use App\Models\Pejabat;
-use App\Models\User;
-use App\Support\KontenBerandaCache;
 use App\Support\PemerintahKotaBatam;
+use App\Support\RthKotaBatam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class KontenBerandaTest extends TestCase
 {
     use RefreshDatabase;
-
-    public function test_pejabat_cms_data_is_used_on_homepage(): void
+    public function test_homepage_displays_static_pejabat_data(): void
     {
-        $this->seed(\Database\Seeders\KontenBerandaSeeder::class);
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('H. Amsakar Ahmad')
+            ->assertSee('Walikota Batam')
+            ->assertSee('Li Claudia Chandra')
+            ->assertSee('Drs. Eryudhi Apriadi');
+    }
 
-        Pejabat::query()->where('nama', 'H. Amsakar Ahmad')->update([
-            'jabatan' => 'Walikota Batam (CMS)',
-        ]);
-
-        KontenBerandaCache::forgetAll();
+    public function test_homepage_displays_static_visi_misi(): void
+    {
+        $visiMisi = PemerintahKotaBatam::visiMisiStatic();
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Walikota Batam (CMS)');
+            ->assertSee($visiMisi['visi'], false);
     }
 
-    public function test_admin_can_open_pejabat_index(): void
+    public function test_static_rth_kategori_data_is_available(): void
     {
-        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $kategori = RthKotaBatam::kategori();
 
-        $this->actingAs($admin)
-            ->get(route('admin.pejabats.index'))
-            ->assertOk()
-            ->assertSee('Pejabat Beranda');
+        $this->assertNotEmpty($kategori);
+        $this->assertSame('RTH Taman Kota', $kategori[0]['nama']);
+        $this->assertGreaterThan(0, RthKotaBatam::total()['luas']);
     }
 
-    public function test_static_fallback_when_no_pejabat_records(): void
+    public function test_static_pejabat_data_is_available(): void
     {
-        $this->assertNotEmpty(PemerintahKotaBatam::pimpinan());
+        $this->assertCount(3, PemerintahKotaBatam::pimpinan());
     }
 }

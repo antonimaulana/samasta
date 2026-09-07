@@ -17,11 +17,8 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnsiklopediaArtikelController;
 use App\Http\Controllers\Admin\EnsiklopediaKategoriController;
 use App\Http\Controllers\Admin\OperasionalPertamananLaporanController;
-use App\Http\Controllers\Admin\KotaProfileController;
 use App\Http\Controllers\Admin\NotificationController;
-use App\Http\Controllers\Admin\PejabatController;
 use App\Http\Controllers\Admin\PemangkasanController;
-use App\Http\Controllers\Admin\RthKategoriController;
 use App\Http\Controllers\Admin\PemeliharaanTamanController;
 use App\Http\Controllers\Admin\SurveyKepuasanController as AdminSurveyKepuasanController;
 use App\Http\Controllers\Admin\TamanController as AdminTamanController;
@@ -78,6 +75,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('pemangkasans.schedule-conflicts');
     Route::get('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}/export/pdf', [PemangkasanController::class, 'exportPdfProgres'])
         ->name('pemangkasans.export-pdf-progres');
+    Route::get('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}/edit', [PemangkasanController::class, 'editProgres'])
+        ->name('pemangkasans.progres.edit');
+    Route::put('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}', [PemangkasanController::class, 'updateProgres'])
+        ->name('pemangkasans.progres.update');
     Route::patch('pemangkasans/{pemangkasan}/status', [PemangkasanController::class, 'updateStatus'])
         ->name('pemangkasans.update-status');
     Route::resource('pemangkasans', PemangkasanController::class);
@@ -129,10 +130,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         Route::put('tim-pelaksanas/{tim_pelaksana}/wilayah', [TimPelaksanaController::class, 'updateWilayah'])->name('tim-pelaksanas.wilayah.update');
         Route::resource('ensiklopedia-kategoris', EnsiklopediaKategoriController::class)->except(['show']);
         Route::resource('ensiklopedia-artikels', EnsiklopediaArtikelController::class)->except(['show']);
-        Route::resource('pejabats', PejabatController::class)->except(['show']);
-        Route::resource('rth-kategoris', RthKategoriController::class)->except(['show']);
-        Route::get('kota-profile/edit', [KotaProfileController::class, 'edit'])->name('kota-profile.edit');
-        Route::put('kota-profile', [KotaProfileController::class, 'update'])->name('kota-profile.update');
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::resource('users', UserController::class)->except(['show']);
 

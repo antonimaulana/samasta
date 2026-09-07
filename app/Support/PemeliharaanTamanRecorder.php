@@ -82,7 +82,7 @@ class PemeliharaanTamanRecorder
         }
 
         $attributes = [
-            'tanggal' => 'tanggal pelaksanaan',
+            'tanggal' => 'tanggal & waktu pelaksanaan',
             'tim' => 'tim',
             'taman_id' => 'lokasi pelaksanaan',
             'lokasi_pelaksanaan' => 'lokasi pelaksanaan',
@@ -102,6 +102,8 @@ class PemeliharaanTamanRecorder
         $validated = $request->validate($rules, [], $attributes);
 
         unset($validated['armada'], $validated['lokasi_luar']);
+
+        $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
 
         return $validated;
     }

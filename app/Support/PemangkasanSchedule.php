@@ -109,7 +109,7 @@ class PemangkasanSchedule
         $hariKe = (int) $entry->hari_ke;
         $persen = self::persentaseProgres($hariKe, $total);
 
-        return 'Hari ke-'.$hariKe.' dari '.$total.' hari rencana ('.$persen.'% dari target harian)';
+        return $hariKe.' / '.$total.' hari ('.$persen.'% progres)';
     }
 
     public static function isLate(Pemangkasan $permohonan): bool

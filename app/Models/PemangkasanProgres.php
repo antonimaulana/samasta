@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class PemangkasanProgres extends Model
@@ -15,16 +16,19 @@ class PemangkasanProgres extends Model
         'tanggal',
         'hari_ke',
         'jumlah_personil',
-        'foto_sebelum',
-        'foto_saat',
-        'foto_sesudah',
+        'foto_sebelum_1',
+        'foto_sebelum_2',
+        'foto_saat_1',
+        'foto_saat_2',
+        'foto_sesudah_1',
+        'foto_sesudah_2',
         'catatan',
     ];
 
     protected function casts(): array
     {
         return [
-            'tanggal' => 'date',
+            'tanggal' => 'datetime',
             'hari_ke' => 'integer',
             'jumlah_personil' => 'integer',
         ];
@@ -33,6 +37,42 @@ class PemangkasanProgres extends Model
     public function pemangkasan(): BelongsTo
     {
         return $this->belongsTo(Pemangkasan::class);
+    }
+
+    public function armadas(): HasMany
+    {
+        return $this->hasMany(PemangkasanProgresArmada::class, 'pemangkasan_progres_id')->orderBy('urutan');
+    }
+
+    public function armadaPdfHtml(): ?string
+    {
+        if ($this->armadas->isEmpty()) {
+            return null;
+        }
+
+        return $this->armadas
+            ->map(fn (PemangkasanProgresArmada $armada) => $armada->pdfEntryHtml())
+            ->implode(', ');
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function fotoFieldKeys(): array
+    {
+        return array_keys(PemeliharaanTaman::FOTO_FIELDS);
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public static function fotoGroups(): array
+    {
+        return [
+            'Sebelum Pelaksanaan' => ['foto_sebelum_1', 'foto_sebelum_2'],
+            'Saat Pelaksanaan' => ['foto_saat_1', 'foto_saat_2'],
+            'Sesudah Pelaksanaan' => ['foto_sesudah_1', 'foto_sesudah_2'],
+        ];
     }
 
     public function fotoUrl(string $field): ?string

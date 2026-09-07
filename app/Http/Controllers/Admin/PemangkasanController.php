@@ -11,6 +11,7 @@ use App\Support\ArmadaAssignment;
 use App\Support\JadwalLayananQuery;
 use App\Support\OperatorWilayahScope;
 use App\Support\PelaksanaScheduleConflictChecker;
+use App\Support\PermohonanProgresEntryRecorder;
 use App\Support\PemangkasanProgresPdf;
 use App\Support\PemangkasanSchedule;
 use App\Support\TableSearch;
@@ -99,22 +100,19 @@ class PemangkasanController extends Controller
     {
         return view('admin.pemangkasans.create', [
             'tamans' => $this->tamansForSelect(),
-            'armadaInventory' => ArmadaAssignment::inventory(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validatePemangkasan($request, requiresArmada: false);
-        $armadaRows = ArmadaAssignment::extractRows($request);
+        $validated = $this->validatePemangkasan($request);
 
         if ($request->hasFile('pendukung_pelaksanaan')) {
             $validated['pendukung_pelaksanaan'] = $request->file('pendukung_pelaksanaan')
                 ->store('pemangkasan/pendukung', 'public');
         }
 
-        $pemangkasan = Pemangkasan::create($validated);
-        ArmadaAssignment::sync($pemangkasan, $armadaRows);
+        Pemangkasan::create($validated);
 
         return redirect()
             ->route('admin.pemangkasans.index')
@@ -124,9 +122,8 @@ class PemangkasanController extends Controller
     public function edit(Pemangkasan $pemangkasan): View
     {
         return view('admin.pemangkasans.edit', [
-            'pemangkasan' => $pemangkasan->load(['armadas', 'progres']),
+            'pemangkasan' => $pemangkasan->load(['progres']),
             'tamans' => $this->tamansForSelect(),
-            'armadaInventory' => ArmadaAssignment::inventory(),
         ]);
     }
 
@@ -155,8 +152,7 @@ class PemangkasanController extends Controller
 
     public function update(Request $request, Pemangkasan $pemangkasan): RedirectResponse
     {
-        $validated = $this->validatePemangkasan($request, $pemangkasan, requiresArmada: false);
-        $armadaRows = ArmadaAssignment::extractRows($request);
+        $validated = $this->validatePemangkasan($request, $pemangkasan);
 
         if ($request->hasFile('pendukung_pelaksanaan')) {
             if ($pemangkasan->hasPendukungPelaksanaanFile()) {
@@ -168,7 +164,6 @@ class PemangkasanController extends Controller
         }
 
         $pemangkasan->update($validated);
-        ArmadaAssignment::sync($pemangkasan, $armadaRows);
 
         return redirect()
             ->route('admin.pemangkasans.index')
@@ -205,6 +200,33 @@ class PemangkasanController extends Controller
         return PemangkasanProgresPdf::download($pemangkasan, $pemangkasanProgres);
     }
 
+    public function editProgres(Pemangkasan $pemangkasan, PemangkasanProgres $pemangkasanProgres): View
+    {
+        $this->authorize('update', $pemangkasan);
+        $this->ensureProgresBelongsToPermohonan($pemangkasan, $pemangkasanProgres);
+
+        $pemangkasan->load(['taman', 'progres']);
+        $pemangkasanProgres->load(['armadas']);
+
+        return view('admin.pemangkasans.progres.edit', [
+            'pemangkasan' => $pemangkasan,
+            'progres' => $pemangkasanProgres,
+            'armadaInventory' => ArmadaAssignment::inventory(),
+        ]);
+    }
+
+    public function updateProgres(Request $request, Pemangkasan $pemangkasan, PemangkasanProgres $pemangkasanProgres): RedirectResponse
+    {
+        $this->authorize('update', $pemangkasan);
+        $this->ensureProgresBelongsToPermohonan($pemangkasan, $pemangkasanProgres);
+
+        app(PermohonanProgresEntryRecorder::class)->update($pemangkasan, $pemangkasanProgres, $request);
+
+        return redirect()
+            ->route('admin.pemangkasans.show', $pemangkasan)
+            ->with('success', 'Progres permohonan berhasil diperbarui.');
+    }
+
     public function destroy(Pemangkasan $pemangkasan): RedirectResponse
     {
         if ($pemangkasan->foto_sebelum) {
@@ -226,7 +248,14 @@ class PemangkasanController extends Controller
             ->with('success', 'Data operasional pertamanan berhasil dihapus.');
     }
 
-    private function validatePemangkasan(Request $request, ?Pemangkasan $pemangkasan = null, bool $requiresArmada = false): array
+    private function ensureProgresBelongsToPermohonan(Pemangkasan $pemangkasan, PemangkasanProgres $pemangkasanProgres): void
+    {
+        if ($pemangkasanProgres->pemangkasan_id !== $pemangkasan->id) {
+            abort(404);
+        }
+    }
+
+    private function validatePemangkasan(Request $request, ?Pemangkasan $pemangkasan = null): array
     {
         $isMiniGarden = $request->input('jenis_layanan') === 'Pemasangan Mini Garden';
         $isLokasiLuar = $request->boolean('lokasi_luar');
@@ -266,9 +295,7 @@ class PemangkasanController extends Controller
             }
         }
 
-        $rules = array_merge($rules, ArmadaAssignment::validationRules($requiresArmada));
-
-        $validated = $request->validate($rules, [], array_merge([
+        $validated = $request->validate($rules, [], [
             'pelaksana' => 'pelaksana',
             'pelaksana.*' => 'tim pelaksana',
             'penanggungjawab' => 'penanggung jawab',
@@ -279,7 +306,7 @@ class PemangkasanController extends Controller
             'tanggal_penyelesaian' => 'tanggal penyelesaian',
             'taman_id' => 'lokasi taman',
             'lokasi_pohon' => 'lokasi',
-        ], ArmadaAssignment::validationAttributes()));
+        ]);
 
         if ($isMiniGarden) {
             $validated['taman_id'] = null;
@@ -291,7 +318,7 @@ class PemangkasanController extends Controller
             $validated['lokasi_pohon'] = PemeliharaanTaman::lokasiLabelFromTaman($taman);
         }
 
-        unset($validated['lokasi_luar'], $validated['armada']);
+        unset($validated['lokasi_luar']);
 
         $validated = array_merge(
             $validated,

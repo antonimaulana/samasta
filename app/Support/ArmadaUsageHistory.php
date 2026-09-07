@@ -3,7 +3,7 @@
 namespace App\Support;
 
 use App\Models\AlatSaranaOperasional;
-use App\Models\PemangkasanArmada;
+use App\Models\PemangkasanProgresArmada;
 use App\Models\PemeliharaanTamanArmada;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -43,21 +43,25 @@ class ArmadaUsageHistory
                 ];
             });
 
-        $permohonan = PemangkasanArmada::query()
+        $permohonan = PemangkasanProgresArmada::query()
             ->where('alat_sarana_operasional_id', $alat->id)
-            ->with(['pemangkasan.taman'])
+            ->with(['progres.pemangkasan.taman'])
             ->get()
-            ->map(function (PemangkasanArmada $row) {
-                $permohonan = $row->pemangkasan;
+            ->map(function (PemangkasanProgresArmada $row) {
+                $progres = $row->progres;
+                $permohonan = $progres?->pemangkasan;
 
                 return [
                     'sumber' => 'Permohonan',
-                    'tanggal' => $permohonan?->tanggal_eksekusi ?? $permohonan?->tanggal_permohonan,
+                    'tanggal' => $progres?->tanggal ?? $permohonan?->tanggal_eksekusi ?? $permohonan?->tanggal_permohonan,
                     'pekerjaan' => $permohonan?->jenis_layanan ?? 'Permohonan operasional',
                     'lokasi' => $permohonan?->lokasiLabel() ?? '—',
                     'sopir' => $row->sopir,
-                    'url' => $permohonan
-                        ? route('admin.pemangkasans.show', $permohonan)
+                    'url' => ($permohonan && $progres)
+                        ? route('admin.pemangkasans.progres.edit', [
+                            'pemangkasan' => $permohonan,
+                            'pemangkasanProgres' => $progres,
+                        ])
                         : null,
                 ];
             });

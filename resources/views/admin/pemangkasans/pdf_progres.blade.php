@@ -91,6 +91,14 @@
             letter-spacing: 0.6px;
             text-transform: uppercase;
         }
+        .photos { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .photos td {
+            width: 50%;
+            vertical-align: middle;
+            text-align: center;
+            padding: 5px 4px 6px;
+            border-top: 1px solid rgba(134, 239, 172, 0.35);
+        }
         .photo-box {
             border: 1px solid rgba(134, 239, 172, 0.4);
             background: #f8fafc;
@@ -120,16 +128,12 @@
 </head>
 <body>
     @php
-        $fotoGroups = [
-            'Sebelum Pelaksanaan' => 'foto_sebelum',
-            'Saat Pelaksanaan' => 'foto_saat',
-            'Sesudah Pelaksanaan' => 'foto_sesudah',
-        ];
+        $fotoGroups = \App\Models\PemangkasanProgres::fotoGroups();
         $logoPath = public_path('images/logo-pemkot-batam.png');
         $logoBase64 = is_readable($logoPath)
             ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath))
             : null;
-        $photoMaxWidth = 520;
+        $photoMaxWidth = 392;
         $photoMaxHeight = 178;
         $isTumbang = $permohonan->jenis_layanan === 'Penanganan Pohon Tumbang';
     @endphp
@@ -151,23 +155,15 @@
     <table class="info">
         <tr>
             <th>Tanggal Pelaksanaan</th>
-            <td>{{ $progres->tanggal->translatedFormat('l, d F Y') }} (Hari ke-{{ $progres->hari_ke }})</td>
-        </tr>
-        <tr>
-            <th>Jenis Layanan</th>
-            <td>{{ $permohonan->jenis_layanan }}</td>
+            <td>{{ \App\Support\OperasionalPelaksanaanTime::displayLong($progres->tanggal) }}</td>
         </tr>
         <tr>
             <th>{{ $isTumbang ? 'Asal Laporan' : 'Asal Permohonan' }}</th>
-            <td>{{ $permohonan->asal }}</td>
-        </tr>
-        <tr>
-            <th>Penanggung Jawab</th>
-            <td>{{ $permohonan->penanggungjawab ?: '—' }}</td>
+            <td>{{ $permohonan->asalPermohonanPdfLabel() }}</td>
         </tr>
         <tr>
             <th>Lokasi Pelaksanaan</th>
-            <td>{{ $permohonan->lokasiLabel() }}</td>
+            <td>{{ $permohonan->lokasiPelaksanaanPdfLabel() }}</td>
         </tr>
         <tr>
             <th>Jumlah Personil</th>
@@ -183,15 +179,15 @@
                 <td>{{ $progres->catatan }}</td>
             </tr>
         @endif
-        @if ($permohonan->armadaPdfHtml())
+        @if ($progres->armadaPdfHtml())
             <tr>
                 <th>Armada</th>
-                <td>{!! $permohonan->armadaPdfHtml() !!}</td>
+                <td>{!! $progres->armadaPdfHtml() !!}</td>
             </tr>
         @endif
     </table>
 
-    @foreach ($fotoGroups as $groupLabel => $field)
+    @foreach ($fotoGroups as $groupLabel => $fields)
         <div class="photo-section">
             <table class="photo-section-head">
                 <tr>
@@ -201,22 +197,28 @@
                     </td>
                 </tr>
             </table>
-            <div style="padding: 5px 6px 6px;">
-                <div class="photo-box">
-                    @php
-                        $base64 = $progres->fotoBase64($field);
-                        $size = $progres->fotoPdfSize($field, $photoMaxWidth, $photoMaxHeight);
-                    @endphp
-                    @if ($base64 && $size)
-                        <img src="{{ $base64 }}"
-                             alt="{{ $groupLabel }}"
-                             width="{{ $size['width'] }}"
-                             height="{{ $size['height'] }}">
-                    @else
-                        <div class="photo-empty">Tidak ada foto</div>
-                    @endif
-                </div>
-            </div>
+            <table class="photos">
+                <tr>
+                    @foreach ($fields as $field)
+                        @php
+                            $base64 = $progres->fotoBase64($field);
+                            $size = $progres->fotoPdfSize($field, $photoMaxWidth, $photoMaxHeight);
+                        @endphp
+                        <td>
+                            <div class="photo-box">
+                                @if ($base64 && $size)
+                                    <img src="{{ $base64 }}"
+                                         alt="{{ $groupLabel }}"
+                                         width="{{ $size['width'] }}"
+                                         height="{{ $size['height'] }}">
+                                @else
+                                    <div class="photo-empty">Tidak ada foto</div>
+                                @endif
+                            </div>
+                        </td>
+                    @endforeach
+                </tr>
+            </table>
         </div>
     @endforeach
 

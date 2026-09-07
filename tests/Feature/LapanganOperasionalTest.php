@@ -652,13 +652,16 @@ class LapanganOperasionalTest extends TestCase
      */
     private function progressPayload(array $overrides = []): array
     {
-        return array_merge([
+        $payload = [
             'tanggal_progres' => now()->toDateString(),
             'jumlah_personil' => 5,
-            'foto_sebelum' => UploadedFile::fake()->image('sebelum.jpg'),
-            'foto_saat' => UploadedFile::fake()->image('saat.jpg'),
-            'foto_sesudah' => UploadedFile::fake()->image('sesudah.jpg'),
-        ], $overrides);
+        ];
+
+        foreach (array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS) as $field) {
+            $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
+        }
+
+        return array_merge($payload, $overrides);
     }
 
     private function unlockLapangan(string $pin = '1234'): void

@@ -17,11 +17,8 @@ class PemerintahKotaBatam
      */
 
     public static function pimpinan(): array
-
     {
-
-        return KontenBerandaCache::pejabats();
-
+        return self::pimpinanStatic();
     }
 
 
@@ -33,11 +30,8 @@ class PemerintahKotaBatam
      */
 
     public static function visiMisi(): array
-
     {
-
-        return KontenBerandaCache::visiMisi();
-
+        return self::visiMisiStatic();
     }
 
 

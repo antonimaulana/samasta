@@ -28,19 +28,6 @@
             </div>
         </div>
 
-        @if ($permohonan->progres->isNotEmpty())
-            <div class="mt-3 flex flex-wrap gap-1.5">
-                @foreach ($permohonan->progres as $entry)
-                    <a href="{{ route('lapangan.permohonan.progres.pdf', ['pemangkasan' => $permohonan, 'pemangkasanProgres' => $entry]) }}"
-                       class="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-2 py-1 text-[11px] font-bold text-red-700 hover:bg-red-50"
-                       target="_blank" rel="noopener"
-                       onclick="event.stopPropagation()">
-                        📄 {{ $entry->tanggal->format('d/m') }}
-                    </a>
-                @endforeach
-            </div>
-        @endif
-
         @if ($isLate)
             <p class="mt-2 flex items-center gap-1 text-xs font-bold text-red-600">
                 <span aria-hidden="true">⏰</span> Terlambat dari jadwal — segera tindak lanjuti

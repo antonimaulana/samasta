@@ -66,6 +66,5 @@ class TamanMapData
     public static function forgetCache(): void
     {
         // Pattern-based forget not available; individual keys expire in 10 minutes.
-        // Full flush handled via KontenBerandaCache when taman changes.
     }
 }

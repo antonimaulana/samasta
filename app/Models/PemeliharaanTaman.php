@@ -71,7 +71,7 @@ class PemeliharaanTaman extends Model
     protected function casts(): array
     {
         return [
-            'tanggal' => 'date',
+            'tanggal' => 'datetime',
             'jumlah_personil' => 'integer',
             'hari_ke' => 'integer',
             'total_hari' => 'integer',

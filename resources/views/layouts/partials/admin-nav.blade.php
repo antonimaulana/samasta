@@ -5,7 +5,6 @@
     $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.alat-sarana-operasionals.*');
     $masyarakatActive = request()->routeIs('admin.aduan-masyarakats.*', 'admin.survey-kepuasan.*');
     $ensiklopediaActive = request()->routeIs('admin.ensiklopedia-kategoris.*', 'admin.ensiklopedia-artikels.*');
-    $kontenBerandaActive = request()->routeIs('admin.pejabats.*', 'admin.rth-kategoris.*', 'admin.kota-profile.*');
     $sistemActive = request()->routeIs('admin.tim-pelaksanas.*', 'admin.users.*', 'admin.activity-logs.*');
     $mobileExpanded = $mobileExpanded ?? false;
 @endphp
@@ -148,30 +147,6 @@
                 <a href="{{ route('admin.ensiklopedia-artikels.index') }}"
                    class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.ensiklopedia-artikels.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
                     Artikel
-                </a>
-            </div>
-        </div>
-
-        <div class="sidebar-menu-group {{ $kontenBerandaActive || $mobileExpanded ? 'is-open' : '' }}">
-            <a href="{{ route('admin.pejabats.index') }}"
-               class="flex items-center justify-between rounded-lg px-3 py-2 text-sm {{ $kontenBerandaActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-                <span>Konten Beranda</span>
-                <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </a>
-            <div class="sidebar-submenu">
-                <a href="{{ route('admin.pejabats.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.pejabats.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                    Pejabat
-                </a>
-                <a href="{{ route('admin.rth-kategoris.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.rth-kategoris.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                    Kategori RTH
-                </a>
-                <a href="{{ route('admin.kota-profile.edit') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.kota-profile.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                    Visi &amp; Misi
                 </a>
             </div>
         </div>
