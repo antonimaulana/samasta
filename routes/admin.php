@@ -16,6 +16,10 @@ use App\Http\Controllers\Admin\BibitMasukController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnsiklopediaArtikelController;
 use App\Http\Controllers\Admin\EnsiklopediaKategoriController;
+use App\Http\Controllers\Admin\EvaluasiArmadaController;
+use App\Http\Controllers\Admin\EvaluasiKinerjaTimController;
+use App\Http\Controllers\Admin\EvaluasiOperasionalPermohonanController;
+use App\Http\Controllers\Admin\EvaluasiPemeliharaanController;
 use App\Http\Controllers\Admin\OperasionalPertamananLaporanController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\PemangkasanController;
@@ -98,6 +102,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('operasional-pertamanan-laporan.index');
     Route::get('operasional-pertamanan-laporan/export/pdf', [OperasionalPertamananLaporanController::class, 'exportPdf'])
         ->name('operasional-pertamanan-laporan.export-pdf');
+    Route::get('evaluasi/pemeliharaan', [EvaluasiPemeliharaanController::class, 'index'])
+        ->name('evaluasi.pemeliharaan.index');
+    Route::get('evaluasi/pemeliharaan/export/pdf', [EvaluasiPemeliharaanController::class, 'exportPdf'])
+        ->name('evaluasi.pemeliharaan.export-pdf');
+    Route::get('evaluasi/armada', [EvaluasiArmadaController::class, 'index'])
+        ->name('evaluasi.armada.index');
+    Route::get('evaluasi/armada/export/pdf', [EvaluasiArmadaController::class, 'exportPdf'])
+        ->name('evaluasi.armada.export-pdf');
+    Route::get('evaluasi/kinerja-tim', [EvaluasiKinerjaTimController::class, 'index'])
+        ->name('evaluasi.kinerja-tim.index');
+    Route::get('evaluasi/kinerja-tim/export/pdf', [EvaluasiKinerjaTimController::class, 'exportPdf'])
+        ->name('evaluasi.kinerja-tim.export-pdf');
+    Route::get('evaluasi/operasional-permohonan', [EvaluasiOperasionalPermohonanController::class, 'index'])
+        ->name('evaluasi.operasional-permohonan.index');
+    Route::get('evaluasi/operasional-permohonan/export/pdf', [EvaluasiOperasionalPermohonanController::class, 'exportPdf'])
+        ->name('evaluasi.operasional-permohonan.export-pdf');
     Route::get('kinerja-pertamanan-laporan', function (Request $request) {
         return redirect()->route('admin.operasional-pertamanan-laporan.index', $request->query());
     })->name('kinerja-pertamanan-laporan.index');

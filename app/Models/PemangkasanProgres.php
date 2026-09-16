@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\OperasionalDateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -28,7 +29,7 @@ class PemangkasanProgres extends Model
     protected function casts(): array
     {
         return [
-            'tanggal' => 'datetime',
+            'tanggal' => OperasionalDateTime::class,
             'hari_ke' => 'integer',
             'jumlah_personil' => 'integer',
         ];

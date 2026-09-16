@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\OperasionalDateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -71,7 +72,7 @@ class PemeliharaanTaman extends Model
     protected function casts(): array
     {
         return [
-            'tanggal' => 'datetime',
+            'tanggal' => OperasionalDateTime::class,
             'jumlah_personil' => 'integer',
             'hari_ke' => 'integer',
             'total_hari' => 'integer',

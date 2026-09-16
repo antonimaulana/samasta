@@ -5,6 +5,7 @@
     $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.alat-sarana-operasionals.*');
     $masyarakatActive = request()->routeIs('admin.aduan-masyarakats.*', 'admin.survey-kepuasan.*');
     $ensiklopediaActive = request()->routeIs('admin.ensiklopedia-kategoris.*', 'admin.ensiklopedia-artikels.*');
+    $evaluasiActive = request()->routeIs('admin.evaluasi.*');
     $sistemActive = request()->routeIs('admin.tim-pelaksanas.*', 'admin.users.*', 'admin.activity-logs.*');
     $mobileExpanded = $mobileExpanded ?? false;
 @endphp
@@ -86,6 +87,33 @@
             <a href="{{ route('admin.operasional-pertamanan-laporan.index') }}"
                class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.operasional-pertamanan-laporan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
                 Laporan Operasional
+            </a>
+        </div>
+    </div>
+
+    <div class="sidebar-menu-group {{ $evaluasiActive || $mobileExpanded ? 'is-open' : '' }}">
+        <div class="flex cursor-default items-center justify-between rounded-lg px-3 py-2 text-sm {{ $evaluasiActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
+            <span>Evaluasi</span>
+            <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </div>
+        <div class="sidebar-submenu">
+            <a href="{{ route('admin.evaluasi.pemeliharaan.index') }}"
+               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.pemeliharaan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                Pemeliharaan per Taman
+            </a>
+            <a href="{{ route('admin.evaluasi.armada.index') }}"
+               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.armada.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                Utilisasi Armada
+            </a>
+            <a href="{{ route('admin.evaluasi.kinerja-tim.index') }}"
+               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.kinerja-tim.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                Kinerja Tim
+            </a>
+            <a href="{{ route('admin.evaluasi.operasional-permohonan.index') }}"
+               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.operasional-permohonan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                Operasional Permohonan
             </a>
         </div>
     </div>
