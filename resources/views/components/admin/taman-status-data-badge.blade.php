@@ -1,7 +1,6 @@
 @props([
     'status' => '',
     'size' => 'sm',
-    'compact' => false,
 ])
 
 @php
@@ -9,19 +8,16 @@
     $classes = $isComplete
         ? 'bg-green-100 text-green-800 ring-green-200'
         : 'bg-amber-100 text-amber-800 ring-amber-200';
-    $fullText = $isComplete ? 'Lengkap' : 'Belum Lengkap';
-    $text = $compact
-        ? ($isComplete ? 'Lengkap' : 'Belum')
-        : $fullText;
+    $text = $isComplete ? 'Lengkap' : 'Belum Lengkap';
     $dotClass = $isComplete ? 'bg-green-500' : 'bg-amber-500';
     $padding = match ($size) {
         'lg' => 'px-3 py-1.5 text-sm',
-        'table' => 'px-2 py-0.5 text-xs',
-        default => 'px-2 py-0.5 text-xs',
+        'table' => 'px-2.5 py-1 text-xs leading-snug',
+        default => 'px-2 py-0.5 text-xs leading-snug',
     };
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex max-w-full items-center gap-1 rounded-full font-semibold ring-1 {$classes} {$padding}"]) }} @if ($compact && ! $isComplete) title="{{ $fullText }}" @endif>
+<span {{ $attributes->merge(['class' => "inline-flex max-w-full items-center gap-1.5 rounded-full font-semibold ring-1 {$classes} {$padding}"]) }}>
     <span class="inline-block h-2 w-2 shrink-0 rounded-full {{ $dotClass }}"></span>
-    <span class="min-w-0">{{ $text }}</span>
+    <span class="min-w-0 text-left">{{ $text }}</span>
 </span>

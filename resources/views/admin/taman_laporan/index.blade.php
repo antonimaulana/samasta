@@ -201,12 +201,11 @@
 
                             <x-admin.data-table fixed>
                                 <colgroup>
-                                    <col class="min-w-[7rem] md:w-[34%]">
-                                    <col class="min-w-[3.25rem] md:w-[16%]">
-                                    <col class="min-w-[2.75rem] md:w-[10%]">
-                                    <col class="hidden md:table-column md:w-[8%]">
-                                    <col class="min-w-[4.5rem] md:w-[14%]">
-                                    <col class="hidden md:table-column md:w-[18%]">
+                                    <col style="width: 36%">
+                                    <col style="width: 18%">
+                                    <col style="width: 12%">
+                                    <col class="hidden md:table-column" style="width: 8%">
+                                    <col style="width: 26%">
                                 </colgroup>
                                 @include('admin.tamans.partials.list-table-head', [
                                     'sortState' => $sortState,

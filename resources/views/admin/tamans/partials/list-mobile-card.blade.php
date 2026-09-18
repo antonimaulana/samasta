@@ -21,7 +21,7 @@
             {{ $taman->nama_taman }}
         </p>
         <div class="shrink-0 pt-0.5">
-            <x-admin.taman-status-data-badge :status="$taman->status_data" size="table" compact />
+            <x-admin.taman-status-data-badge :status="$taman->status_data" size="table" />
         </div>
     </div>
 
