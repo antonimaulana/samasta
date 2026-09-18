@@ -4,6 +4,7 @@ use App\Models\Taman;
 use App\Support\TamanCompleteness;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,14 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tamans', function (Blueprint $table) {
-            $table->unsignedSmallInteger('tahun_pembangunan')->nullable()->after('fasilitas');
-            $table->unsignedBigInteger('nilai_pembangunan')->nullable()->after('tahun_pembangunan');
-            $table->string('kontraktor')->nullable()->after('nilai_pembangunan');
-            $table->string('konsultan_perencana')->nullable()->after('kontraktor');
-            $table->timestamp('data_verified_at')->nullable()->after('konsultan_perencana');
-            $table->unsignedTinyInteger('kelengkapan_skor')->default(0)->after('data_verified_at');
-            $table->string('kelengkapan_label', 10)->default('merah')->after('kelengkapan_skor');
+            if (! Schema::hasColumn('tamans', 'tahun_pembangunan')) {
+                $table->unsignedSmallInteger('tahun_pembangunan')->nullable()->after('fasilitas');
+            }
+            if (! Schema::hasColumn('tamans', 'nilai_pembangunan')) {
+                $table->unsignedBigInteger('nilai_pembangunan')->nullable()->after('tahun_pembangunan');
+            }
+            if (! Schema::hasColumn('tamans', 'kontraktor')) {
+                $table->string('kontraktor')->nullable()->after('nilai_pembangunan');
+            }
+            if (! Schema::hasColumn('tamans', 'konsultan_perencana')) {
+                $table->string('konsultan_perencana')->nullable()->after('kontraktor');
+            }
+            if (! Schema::hasColumn('tamans', 'data_verified_at')) {
+                $table->timestamp('data_verified_at')->nullable()->after('konsultan_perencana');
+            }
+            if (! Schema::hasColumn('tamans', 'kelengkapan_skor')) {
+                $table->unsignedTinyInteger('kelengkapan_skor')->default(0)->after('data_verified_at');
+            }
+            if (! Schema::hasColumn('tamans', 'kelengkapan_label')) {
+                $table->string('kelengkapan_label', 20)->default('merah')->after('kelengkapan_skor');
+            }
         });
+
+        if (Schema::hasColumn('tamans', 'kelengkapan_label')) {
+            DB::statement("ALTER TABLE tamans MODIFY kelengkapan_label VARCHAR(20) NOT NULL DEFAULT 'merah'");
+        }
 
         $completeness = app(TamanCompleteness::class);
 
