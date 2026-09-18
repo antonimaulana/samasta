@@ -14,9 +14,17 @@ return new class extends Migration
             'recreate_indexes' => [['tanggal', 'tim']],
         ]);
 
-        Schema::table('pemangkasan_progres', function (Blueprint $table) {
-            $table->dropUnique(['pemangkasan_id', 'tanggal']);
-        });
+        if ($this->indexExists('pemangkasan_progres', 'pemangkasan_progres_pemangkasan_id_tanggal_unique')) {
+            if (! $this->indexExists('pemangkasan_progres', 'pemangkasan_progres_pemangkasan_id_index')) {
+                Schema::table('pemangkasan_progres', function (Blueprint $table) {
+                    $table->index('pemangkasan_id', 'pemangkasan_progres_pemangkasan_id_index');
+                });
+            }
+
+            Schema::table('pemangkasan_progres', function (Blueprint $table) {
+                $table->dropUnique(['pemangkasan_id', 'tanggal']);
+            });
+        }
 
         $this->convertDateColumnToDateTime('pemangkasan_progres', 'tanggal');
     }
@@ -147,6 +155,35 @@ return new class extends Migration
      * @param  list<string>  $dropIndexes
      * @param  list<list<string>>  $recreateIndexes
      */
+    private function indexExists(string $table, string $indexName): bool
+    {
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'mysql') {
+            $database = Schema::getConnection()->getDatabaseName();
+            $result = DB::selectOne(
+                'SELECT 1 FROM information_schema.statistics WHERE table_schema = ? AND table_name = ? AND index_name = ? LIMIT 1',
+                [$database, $table, $indexName]
+            );
+
+            return $result !== null;
+        }
+
+        if ($driver === 'sqlite') {
+            $rows = DB::select("PRAGMA index_list({$table})");
+
+            foreach ($rows as $row) {
+                if (($row->name ?? null) === $indexName) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return false;
+    }
+
     private function finishSqliteDateTimeConversion(
         string $table,
         string $column,
