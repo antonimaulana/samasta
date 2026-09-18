@@ -36,8 +36,8 @@
 
     <x-admin.data-table fixed>
         <colgroup>
-            <col style="width: 30%">
-            <col style="width: 11rem">
+            <col class="min-w-[11rem] md:min-w-0" style="width: 36%">
+            <col class="hidden md:table-column" style="width: 11rem">
             <col style="width: 7rem">
             <col style="width: 6.5rem">
             <col style="width: 4.5rem">

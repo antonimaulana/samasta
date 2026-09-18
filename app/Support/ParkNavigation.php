@@ -26,6 +26,19 @@ class ParkNavigation
         ]);
     }
 
+    public static function googleMapsSearchUrl(string $query): string
+    {
+        return 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($query);
+    }
+
+    public static function wazeSearchUrl(string $query): string
+    {
+        return 'https://waze.com/ul?'.http_build_query([
+            'q' => $query,
+            'navigate' => 'yes',
+        ]);
+    }
+
     public static function estimateTravelMinutes(float $distanceKm, float $avgSpeedKmh = 30): int
     {
         return max(1, (int) round(($distanceKm / $avgSpeedKmh) * 60));

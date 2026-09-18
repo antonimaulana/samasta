@@ -44,7 +44,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return false;
 
@@ -62,7 +62,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return true;
 
@@ -80,7 +80,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return true;
 
@@ -184,7 +184,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator() || $this->hasUnrestrictedWilayahAccess($user)) {
+        if (! $user?->requiresWilayahScope() || $this->hasUnrestrictedWilayahAccess($user)) {
 
             return null;
 
@@ -208,7 +208,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return null;
 
@@ -322,7 +322,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return $query;
 
@@ -360,7 +360,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return $query;
 
@@ -446,7 +446,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return true;
 
@@ -506,7 +506,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return true;
 
@@ -544,7 +544,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator()) {
+        if (! $user?->requiresWilayahScope()) {
 
             return true;
 
@@ -694,7 +694,7 @@ class OperatorWilayahScope
 
     {
 
-        if (! $user?->isOperator() || $this->hasUnrestrictedWilayahAccess($user)) {
+        if (! $user?->requiresWilayahScope() || $this->hasUnrestrictedWilayahAccess($user)) {
 
             return;
 

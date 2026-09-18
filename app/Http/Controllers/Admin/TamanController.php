@@ -15,6 +15,7 @@ use App\Support\TamanTableSort;
 use App\Support\TableSearch;
 use App\Support\KelurahanResolver;
 use App\Support\TamanCsvImporter;
+use App\Support\TamanGalleryImageNormalizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -164,7 +165,10 @@ class TamanController extends Controller
         $validated = $request->validatedTamanPayload();
 
         if ($request->hasFile('foto')) {
-            $validated['foto'] = $request->file('foto')->store('tamans', 'public');
+            $validated['foto'] = app(TamanGalleryImageNormalizer::class)->normalizeAndStore(
+                $request->file('foto'),
+                'tamans',
+            );
         }
 
         $taman = Taman::create($validated);
@@ -211,7 +215,10 @@ class TamanController extends Controller
                 Storage::disk('public')->delete($taman->foto);
             }
 
-            $validated['foto'] = $request->file('foto')->store('tamans', 'public');
+            $validated['foto'] = app(TamanGalleryImageNormalizer::class)->normalizeAndStore(
+                $request->file('foto'),
+                'tamans',
+            );
         }
 
         $taman->update($validated);
@@ -260,7 +267,7 @@ class TamanController extends Controller
         $taman->syncStatusData();
 
         return redirect()
-            ->route('admin.tamans.show', $taman)
+            ->route('admin.tamans.edit', $taman)
             ->with('success', 'Foto galeri berhasil dihapus.');
     }
 
@@ -274,7 +281,7 @@ class TamanController extends Controller
                 continue;
             }
 
-            $path = $file->store('taman_galeri', 'public');
+            $path = app(TamanGalleryImageNormalizer::class)->normalizeAndStore($file);
 
             $taman->images()->create([
                 'path_foto' => $path,

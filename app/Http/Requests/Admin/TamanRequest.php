@@ -8,8 +8,6 @@ use App\Support\TamanWilayahAssigner;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
-
 abstract class TamanRequest extends FormRequest
 {
     public function authorize(): bool
@@ -20,8 +18,19 @@ abstract class TamanRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $items = collect($this->input('fasilitas_items', []))
-            ->filter(fn ($item) => filled(trim((string) ($item['nama'] ?? ''))))
-            ->unique(fn ($item) => mb_strtolower(trim((string) ($item['nama'] ?? ''))))
+            ->map(function (array $item): array {
+                $nama = trim((string) ($item['nama'] ?? ''));
+                if ($nama === Taman::FASILITAS_CUSTOM_VALUE) {
+                    $nama = trim((string) ($item['nama_custom'] ?? ''));
+                }
+
+                return [
+                    'nama' => $nama,
+                    'kondisi' => trim((string) ($item['kondisi'] ?? '')),
+                ];
+            })
+            ->filter(fn (array $item) => filled($item['nama']))
+            ->unique(fn (array $item) => mb_strtolower($item['nama']))
             ->values()
             ->all();
 
@@ -57,7 +66,8 @@ abstract class TamanRequest extends FormRequest
             'longitude' => ['nullable', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string'],
             'fasilitas_items' => ['nullable', 'array'],
-            'fasilitas_items.*.nama' => ['required', 'string', Rule::in(Taman::FASILITAS_DAFTAR)],
+            'fasilitas_items.*.nama' => ['required', 'string', 'max:'.Taman::FASILITAS_NAMA_MAX_LENGTH],
+            'fasilitas_items.*.nama_custom' => ['nullable', 'string', 'max:'.Taman::FASILITAS_NAMA_MAX_LENGTH],
             'fasilitas_items.*.kondisi' => ['required', Rule::in(Taman::FASILITAS_KONDISI)],
             'tahun_pembangunan' => ['nullable', 'integer', 'min:1950', 'max:'.$currentYear],
             'nilai_pembangunan' => ['nullable', 'integer', 'min:0'],
@@ -79,49 +89,13 @@ abstract class TamanRequest extends FormRequest
     {
         return [
             'fotos.*.max' => 'Setiap foto maksimal '.Taman::GALLERY_MAX_SIZE_KB.' KB.',
+            'fasilitas_items.*.kondisi.required' => 'Pilih kondisi untuk setiap fasilitas yang diisi.',
             'fasilitas_items.*.kondisi.in' => 'Kondisi fasilitas harus Baik, Rusak Ringan, atau Rusak Berat.',
-            'fasilitas_items.*.nama.in' => 'Fasilitas harus dipilih dari daftar yang tersedia.',
+            'fasilitas_items.*.nama.required' => 'Pilih fasilitas atau isi nama fasilitas.',
+            'fasilitas_items.*.nama.max' => 'Nama fasilitas maksimal '.Taman::FASILITAS_NAMA_MAX_LENGTH.' karakter.',
+            'fasilitas_items.*.nama_custom.max' => 'Nama fasilitas maksimal '.Taman::FASILITAS_NAMA_MAX_LENGTH.' karakter.',
             'data_verified_at.date' => 'Format waktu pemutakhiran tidak valid.',
         ];
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator) {
-            foreach ($this->file('fotos', []) as $index => $file) {
-                if (! $file) {
-                    continue;
-                }
-
-                $dimensions = @getimagesize($file->getPathname());
-                if (! is_array($dimensions)) {
-                    continue;
-                }
-
-                $width = (int) $dimensions[0];
-                $height = (int) $dimensions[1];
-                $shortSide = min($width, $height);
-
-                if ($shortSide < Taman::GALLERY_MIN_SHORT_SIDE) {
-                    $validator->errors()->add(
-                        "fotos.{$index}",
-                        'Foto minimal '.Taman::GALLERY_MIN_SHORT_SIDE.' px pada sisi terpendek. Disarankan '
-                        .Taman::GALLERY_RECOMMENDED_WIDTH.'×'.Taman::GALLERY_RECOMMENDED_HEIGHT.' px ('
-                        .Taman::galleryAspectRatioLabel().').'
-                    );
-
-                    continue;
-                }
-
-                if (! Taman::isValidGalleryAspectRatio($width, $height)) {
-                    $validator->errors()->add(
-                        "fotos.{$index}",
-                        'Foto harus landscape dengan rasio aspek '.Taman::galleryAspectRatioLabel().'. Disarankan '
-                        .Taman::GALLERY_RECOMMENDED_WIDTH.'×'.Taman::GALLERY_RECOMMENDED_HEIGHT.' px.'
-                    );
-                }
-            }
-        });
     }
 
     /**

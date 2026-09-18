@@ -83,11 +83,27 @@ class RthArScanTest extends TestCase
             ],
         ]);
 
+        $tamanWithKondisi = Taman::create([
+            'nama_taman' => 'Taman Kondisi Tersembunyi',
+            'kategori' => 'Taman Kota',
+            'luasan' => 1000,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
+            'fasilitas' => [
+                ['nama' => 'Toilet', 'kondisi' => 'Rusak Berat'],
+            ],
+        ]);
+
         $this->get(route('rth.ar-scan', $taman))
             ->assertOk()
             ->assertSee('Fasilitas Tersedia')
             ->assertSee('Jogging Track')
             ->assertDontSee('Paket DPA Aktif');
+
+        $this->get(route('rth.ar-scan', $tamanWithKondisi))
+            ->assertOk()
+            ->assertSee('Toilet')
+            ->assertDontSee('Rusak Berat');
     }
 
     public function test_profile_builder_includes_latest_maintenance_summary(): void

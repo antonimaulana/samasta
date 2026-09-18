@@ -15,14 +15,20 @@ class User extends Authenticatable
 
     public const ROLE_ADMIN = 'admin';
 
+    /** Peran operasional: input & pemutakhiran data lapangan (slug tetap `operator`). */
     public const ROLE_OPERATOR = 'operator';
 
+    /** Pengawas tim wilayah / armada / nursery — monitoring read-only per tim. */
+    public const ROLE_PENGAWAS = 'pengawas';
+
+    /** Pimpinan dinas — ringkasan & evaluasi read-only seluruh kota. */
     public const ROLE_VIEWER = 'viewer';
 
     public const ROLES = [
         self::ROLE_ADMIN => 'Administrator',
-        self::ROLE_OPERATOR => 'Operator',
-        self::ROLE_VIEWER => 'Viewer',
+        self::ROLE_OPERATOR => 'Admin',
+        self::ROLE_PENGAWAS => 'Pengawas',
+        self::ROLE_VIEWER => 'Pimpinan',
     ];
 
     protected $fillable = [
@@ -68,9 +74,25 @@ class User extends Authenticatable
         return $this->resolvedRole() === self::ROLE_OPERATOR;
     }
 
+    public function isPengawas(): bool
+    {
+        return $this->resolvedRole() === self::ROLE_PENGAWAS;
+    }
+
     public function isViewer(): bool
     {
         return $this->resolvedRole() === self::ROLE_VIEWER;
+    }
+
+    /** Admin operasional atau pengawas yang dibatasi per tim pelaksana. */
+    public function requiresWilayahScope(): bool
+    {
+        return $this->isOperator() || $this->isPengawas();
+    }
+
+    public function isPimpinan(): bool
+    {
+        return $this->isViewer();
     }
 
     public function canWrite(): bool

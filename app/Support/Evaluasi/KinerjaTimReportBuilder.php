@@ -97,7 +97,7 @@ class KinerjaTimReportBuilder
             ->orderBy('urutan')
             ->orderBy('nama');
 
-        if ($user?->isOperator() && $scope->restrictsWilayah($user)) {
+        if ($user?->requiresWilayahScope() && $scope->restrictsWilayah($user)) {
             $names = $scope->teamNames($user);
 
             if ($names === []) {

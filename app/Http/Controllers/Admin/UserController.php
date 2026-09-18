@@ -194,19 +194,12 @@ class UserController extends Controller
 
     {
 
-        if ($user->role !== User::ROLE_OPERATOR) {
-
+        if (! in_array($user->role, [User::ROLE_OPERATOR, User::ROLE_PENGAWAS], true)) {
             $user->timPelaksanas()->sync([]);
-
             $user->update(['akses_semua_wilayah' => false]);
 
-
-
             return;
-
         }
-
-
 
         if ($validated['akses_semua_wilayah'] ?? false) {
 
@@ -280,21 +273,19 @@ class UserController extends Controller
 
 
 
-        if ($validated['role'] === User::ROLE_OPERATOR
+        $needsTim = in_array($validated['role'], [User::ROLE_OPERATOR, User::ROLE_PENGAWAS], true)
+            && ! ($validated['akses_semua_wilayah'] ?? false)
+            && blank($validated['tim_pelaksana_ids'] ?? null);
 
-            && ! $validated['akses_semua_wilayah']
-
-            && blank($validated['tim_pelaksana_ids'] ?? null)) {
-
+        if ($needsTim) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-
-                'tim_pelaksana_ids' => 'Pilih minimal satu tim pelaksana atau aktifkan akses semua wilayah.',
-
+                'tim_pelaksana_ids' => 'Pilih minimal satu tim pelaksana (Wilayah 1–4, Armada, Nursery, dll.).',
             ]);
-
         }
 
-
+        if ($validated['role'] === User::ROLE_PENGAWAS) {
+            $validated['akses_semua_wilayah'] = false;
+        }
 
         return $validated;
 

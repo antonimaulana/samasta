@@ -5,7 +5,7 @@
 
 @section('content')
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-gray-600">Atur akun admin, operator, dan viewer.</p>
+        <p class="text-sm text-gray-600">Atur akun Administrator, Admin, Pengawas, dan Pimpinan.</p>
         <a href="{{ route('admin.users.create') }}"
            class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
             + Tambah Pengguna

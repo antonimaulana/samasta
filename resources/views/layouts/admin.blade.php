@@ -18,11 +18,22 @@
                 transition: max-height 0.25s ease, opacity 0.2s ease;
             }
             .sidebar-menu-group:hover .sidebar-submenu,
-            .sidebar-menu-group.is-open .sidebar-submenu,
-            .admin-nav-mobile .sidebar-submenu {
-                max-height: 16rem;
+            .sidebar-menu-group.is-open .sidebar-submenu {
+                max-height: min(75vh, 40rem);
                 opacity: 1;
                 pointer-events: auto;
+            }
+            @media (max-width: 767px) {
+                .sidebar-menu-group:hover .sidebar-submenu {
+                    max-height: 0;
+                    opacity: 0;
+                    pointer-events: none;
+                }
+            }
+            .sidebar-menu-trigger {
+                border: 0;
+                background: transparent;
+                font: inherit;
             }
             .sidebar-menu-group:hover .sidebar-chevron,
             .sidebar-menu-group.is-open .sidebar-chevron {
@@ -171,7 +182,7 @@
                     </svg>
                 </button>
             </div>
-            @include('layouts.partials.admin-nav', ['mobileExpanded' => true])
+            @include('layouts.partials.admin-nav')
         </aside>
 
         @include('layouts.partials.mobile-nav-script')
@@ -197,6 +208,25 @@
                     color: '#ffffff',
                     shadow: '10px 0 40px rgba(0,0,0,0.25)',
                 });
+
+                const mobileDrawer = document.getElementById('admin-mobile-drawer');
+                if (mobileDrawer) {
+                    mobileDrawer.querySelectorAll('.sidebar-menu-group').forEach(function (group) {
+                        const trigger = group.querySelector('.sidebar-menu-trigger');
+                        if (!trigger) {
+                            return;
+                        }
+                        trigger.addEventListener('click', function () {
+                            const willOpen = !group.classList.contains('is-open');
+                            mobileDrawer.querySelectorAll('.sidebar-menu-group.is-open').forEach(function (other) {
+                                if (other !== group) {
+                                    other.classList.remove('is-open');
+                                }
+                            });
+                            group.classList.toggle('is-open', willOpen);
+                        });
+                    });
+                }
             });
         </script>
     @endunless

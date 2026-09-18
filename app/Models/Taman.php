@@ -26,6 +26,11 @@ class Taman extends Model
         'Rusak Berat',
     ];
 
+    /** Nilai select saat user mengetik fasilitas di luar daftar standar. */
+    public const FASILITAS_CUSTOM_VALUE = '__custom__';
+
+    public const FASILITAS_NAMA_MAX_LENGTH = 120;
+
     public const FASILITAS_DAFTAR = [
         'Playground',
         'Jogging Track',
@@ -48,8 +53,6 @@ class Taman extends Model
     public const GALLERY_ASPECT_WIDTH = 16;
 
     public const GALLERY_ASPECT_HEIGHT = 9;
-
-    public const GALLERY_MIN_SHORT_SIDE = 720;
 
     public const GALLERY_RECOMMENDED_WIDTH = 1920;
 
@@ -176,6 +179,55 @@ class Taman extends Model
         return ['lat' => $lat, 'lng' => $lng];
     }
 
+    /**
+     * Koordinat untuk tombol rute / Waze / hitung jarak — lebih permisif dari {@see normalizedMapCoordinates()}
+     * (placeholder atau di luar bounds Batam tetap dipakai agar navigasi tidak hilang di profil publik).
+     *
+     * @return array{lat: float, lng: float}|null
+     */
+    public function navigationCoordinates(): ?array
+    {
+        if ($this->latitude === null || $this->longitude === null) {
+            return null;
+        }
+
+        $normalized = self::normalizeBatamCoordinates(
+            (string) $this->latitude,
+            (string) $this->longitude,
+        );
+
+        $lat = (float) $normalized['latitude'];
+        $lng = (float) $normalized['longitude'];
+
+        if (! is_finite($lat) || ! is_finite($lng)) {
+            return null;
+        }
+
+        return ['lat' => $lat, 'lng' => $lng];
+    }
+
+    /**
+     * Koordinat untuk peta profil publik: prefer titik terverifikasi (Batam, bukan placeholder),
+     * fallback ke koordinat navigasi agar pin tetap tampil.
+     *
+     * @return array{lat: float, lng: float}|null
+     */
+    public function publicMapCoordinates(): ?array
+    {
+        return $this->normalizedMapCoordinates() ?? $this->navigationCoordinates();
+    }
+
+    public function publicMapNeedsVerification(): bool
+    {
+        return $this->normalizedMapCoordinates() === null
+            && $this->navigationCoordinates() !== null;
+    }
+
+    public function hasPublicNavigation(): bool
+    {
+        return $this->navigationCoordinates() !== null || filled(trim((string) $this->alamat));
+    }
+
     private static function coordinatesLookSwapped(float $latitude, float $longitude): bool
     {
         $latitudeLooksLikeBatamLongitude = $latitude >= 103 && $latitude <= 105;
@@ -223,9 +275,12 @@ class Taman extends Model
         return self::GALLERY_ASPECT_WIDTH.':'.self::GALLERY_ASPECT_HEIGHT;
     }
 
+    /**
+     * @deprecated Upload no longer requires 16:9 source; use {@see TamanGalleryImageNormalizer} for output canvas.
+     */
     public static function isValidGalleryAspectRatio(int $width, int $height, float $tolerance = 0.03): bool
     {
-        if ($width < 1 || $height < 1 || $width < $height) {
+        if ($width < 1 || $height < 1) {
             return false;
         }
 

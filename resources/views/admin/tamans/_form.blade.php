@@ -61,56 +61,73 @@
     </x-admin.rth-section>
 
     <x-admin.rth-section
-        title="Koordinat Lokasi"
-        description="Latitude & longitude untuk peta dan deteksi wilayah otomatis. Default: pusat Kota Batam.">
+        title="Koordinat & Tag Lokasi"
+        description="Untuk pemutakhiran lapangan: gunakan GPS di titik taman, lalu geser penanda jika perlu. Koordinat terverifikasi muncul akurat di peta publik.">
         @php
             $defaultCoordinates = \App\Models\Taman::defaultCoordinates();
             $latitudeValue = old('latitude', filled($taman?->latitude) ? $taman->latitude : $defaultCoordinates['latitude']);
             $longitudeValue = old('longitude', filled($taman?->longitude) ? $taman->longitude : $defaultCoordinates['longitude']);
+            $coordsVerifiedOnRecord = $taman && $taman->normalizedMapCoordinates() !== null;
         @endphp
         <div class="grid gap-6 md:grid-cols-2">
             <div>
                 <x-admin.form.label for="latitude">Latitude</x-admin.form.label>
                 <x-admin.form.input name="latitude" id="latitude"
                                     value="{{ $latitudeValue }}"
-                                    placeholder="Contoh: {{ $defaultCoordinates['latitude'] }}" />
+                                    placeholder="Contoh: {{ $defaultCoordinates['latitude'] }}"
+                                    inputmode="decimal"
+                                    autocomplete="off" />
             </div>
 
             <div>
                 <x-admin.form.label for="longitude">Longitude</x-admin.form.label>
                 <x-admin.form.input name="longitude" id="longitude"
                                     value="{{ $longitudeValue }}"
-                                    placeholder="Contoh: {{ $defaultCoordinates['longitude'] }}" />
+                                    placeholder="Contoh: {{ $defaultCoordinates['longitude'] }}"
+                                    inputmode="decimal"
+                                    autocomplete="off" />
             </div>
 
             <div class="md:col-span-2">
-                <x-admin.form.label>Pilih Lokasi di Peta</x-admin.form.label>
-                <p class="mb-2 text-sm text-gray-500">Peta default menampilkan Kota Batam. Klik peta atau geser marker untuk menyesuaikan lokasi. Kelurahan/kecamatan akan terisi otomatis jika terdeteksi.</p>
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <x-admin.form.label class="mb-0">Tag lokasi di peta</x-admin.form.label>
+                        <p class="mt-1 text-sm text-gray-500">Klik peta, geser penanda, ketik koordinat, atau ambil posisi GPS Anda saat berada di lokasi taman.</p>
+                    </div>
+                    <span id="taman-coord-status"
+                          class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset {{ $coordsVerifiedOnRecord ? 'bg-emerald-50 text-emerald-800 ring-emerald-200' : 'bg-amber-50 text-amber-900 ring-amber-200' }}"
+                          data-verified="{{ $coordsVerifiedOnRecord ? '1' : '0' }}">
+                        {{ $coordsVerifiedOnRecord ? 'Koordinat terverifikasi (Batam)' : 'Perlu tag / verifikasi lapangan' }}
+                    </span>
+                </div>
+
+                <div class="mb-3 flex flex-wrap gap-2">
+                    <button type="button" id="taman-tag-my-location"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <span aria-hidden="true">📍</span>
+                        <span id="taman-tag-my-location-label">Tag lokasi saya (GPS)</span>
+                    </button>
+                    <button type="button" id="taman-center-map-marker"
+                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
+                        Fokus ke penanda
+                    </button>
+                </div>
+
                 <div id="wilayah-resolve-notice" class="mb-2 hidden rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"></div>
                 <div id="taman-location-map" class="overflow-hidden rounded-lg border border-gray-300 bg-gray-200"></div>
+                <p class="mt-2 text-xs text-gray-500">Kelurahan/kecamatan terisi otomatis setelah koordinat ditetapkan. Izinkan akses lokasi di browser/HP saat menggunakan GPS.</p>
             </div>
         </div>
     </x-admin.rth-section>
 
     <x-admin.rth-section
         title="Galeri Foto Taman"
-        description="Unggah foto landscape sesuai patokan agar tampilan publik rapi.">
-        <div class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-            <p class="font-medium text-gray-900">Patokan upload foto</p>
-            <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-gray-600">
-                <li>Rasio aspek wajib: <strong class="text-gray-900">{{ \App\Models\Taman::galleryAspectRatioLabel() }}</strong> (landscape)</li>
-                <li>Ukuran disarankan: <strong class="text-gray-900">{{ \App\Models\Taman::GALLERY_RECOMMENDED_WIDTH }} × {{ \App\Models\Taman::GALLERY_RECOMMENDED_HEIGHT }} px</strong></li>
-                <li>Minimal sisi terpendek: <strong class="text-gray-900">{{ \App\Models\Taman::GALLERY_MIN_SHORT_SIDE }} px</strong></li>
-                <li>Format: JPG / PNG — maks. {{ \App\Models\Taman::GALLERY_MAX_SIZE_KB / 1024 }} MB per foto</li>
-                <li>Minimal 1 foto agar status data Lengkap</li>
-            </ul>
-        </div>
-
-        <div class="mt-5">
+        description="Unggah foto profil taman (JPG, PNG, WebP).">
+        <div>
             <x-admin.form.label for="fotos">Upload Foto Baru</x-admin.form.label>
             <input type="file" name="fotos[]" id="fotos" accept="image/jpeg,image/png,image/webp" multiple
                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-emerald-800 hover:file:bg-emerald-100">
-            <p class="mt-1 text-sm text-gray-500">Pilih satu atau lebih foto sesuai patokan di atas.</p>
+            <p class="mt-1 text-sm text-gray-500">Pilih satu atau lebih foto.</p>
             <div id="foto-preview" class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"></div>
         </div>
 

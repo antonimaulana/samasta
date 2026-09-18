@@ -20,11 +20,11 @@ class EnsureAdminAccess
 
         if (! $user->canWrite()) {
             if (! $request->isMethodSafe()) {
-                abort(403, 'Akun viewer hanya dapat melihat data.');
+                abort(403, 'Akun ini hanya dapat melihat data (Pengawas/Pimpinan).');
             }
 
             if (str_ends_with($routeName, '.create') || str_ends_with($routeName, '.edit')) {
-                abort(403, 'Akun viewer hanya dapat melihat data.');
+                abort(403, 'Akun ini hanya dapat melihat data (Pengawas/Pimpinan).');
             }
         }
 

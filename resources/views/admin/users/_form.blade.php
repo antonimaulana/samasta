@@ -20,7 +20,7 @@
                class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
     </div>
 
-    <div>
+    <div class="md:col-span-2">
         <label for="role" class="mb-1 block text-sm font-medium text-gray-700">Peran *</label>
         <select name="role" id="role" required
                 class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
@@ -28,20 +28,23 @@
                 <option value="{{ $value }}" @selected(old('role', $user?->role ?? 'operator') === $value)>{{ $label }}</option>
             @endforeach
         </select>
-        <p class="mt-1 text-xs text-gray-500">
-            Admin: akses penuh · Operator: input data · Viewer: lihat &amp; export saja
-        </p>
+        <ul class="mt-2 list-inside list-disc space-y-0.5 text-xs text-gray-500">
+            <li><strong class="font-medium text-gray-700">Administrator</strong> — kuasa penuh sistem &amp; pengguna</li>
+            <li><strong class="font-medium text-gray-700">Admin</strong> — input/pemutakhiran data (termasuk lapangan)</li>
+            <li><strong class="font-medium text-gray-700">Pengawas</strong> — pantau operasional tim (Wilayah 1–4, Armada, Nursery); lihat saja</li>
+            <li><strong class="font-medium text-gray-700">Pimpinan</strong> — ringkasan &amp; evaluasi seluruh kota; lihat saja</li>
+        </ul>
     </div>
 
     <div id="operator-wilayah-field" class="md:col-span-2 hidden space-y-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
-        <div>
+        <div id="akses-semua-wilayah-wrap">
             <label class="flex cursor-pointer items-center gap-2">
                 <input type="checkbox" name="akses_semua_wilayah" id="akses_semua_wilayah" value="1"
                        @checked($allWilayah)
                        class="rounded border-gray-300 text-green-600 focus:ring-green-500">
                 <span class="text-sm font-medium text-gray-800">Akses semua wilayah</span>
             </label>
-            <p class="mt-1 text-xs text-gray-500">Operator dapat melihat dan mengelola data seluruh tim/wilayah.</p>
+            <p class="mt-1 text-xs text-gray-500">Hanya untuk peran Admin — kelola data seluruh tim/wilayah.</p>
         </div>
 
         <div id="tim-pelaksana-list">
@@ -57,7 +60,7 @@
                 @endforeach
             </div>
             <p class="mt-2 text-xs text-gray-500">
-                Pilih satu atau beberapa tim wilayah. Kosongkan jika memakai opsi akses semua wilayah di atas.
+                Wajib untuk Admin (kecuali akses semua wilayah) dan Pengawas — pilih tim yang diampu.
             </p>
             @error('tim_pelaksana_ids')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -84,27 +87,39 @@
     (function () {
         const roleSelect = document.getElementById('role');
         const wilayahField = document.getElementById('operator-wilayah-field');
+        const allWilayahWrap = document.getElementById('akses-semua-wilayah-wrap');
         const allWilayahCheckbox = document.getElementById('akses_semua_wilayah');
         const timList = document.getElementById('tim-pelaksana-list');
         const timCheckboxes = () => Array.from(document.querySelectorAll('.tim-pelaksana-checkbox'));
 
-        function syncWilayahField() {
-            const isOperator = roleSelect.value === 'operator';
-            wilayahField.classList.toggle('hidden', !isOperator);
+        function roleNeedsWilayah() {
+            return roleSelect.value === 'operator' || roleSelect.value === 'pengawas';
+        }
 
-            if (!isOperator) {
+        function syncWilayahField() {
+            const needsWilayah = roleNeedsWilayah();
+            wilayahField.classList.toggle('hidden', !needsWilayah);
+
+            if (!needsWilayah) {
                 allWilayahCheckbox.checked = false;
                 timCheckboxes().forEach((checkbox) => {
                     checkbox.checked = false;
                     checkbox.disabled = false;
                 });
-            } else {
-                syncTimList();
+                return;
             }
+
+            const isPengawas = roleSelect.value === 'pengawas';
+            allWilayahWrap.classList.toggle('hidden', isPengawas);
+            if (isPengawas) {
+                allWilayahCheckbox.checked = false;
+            }
+
+            syncTimList();
         }
 
         function syncTimList() {
-            const lockTeams = allWilayahCheckbox.checked;
+            const lockTeams = allWilayahCheckbox.checked && roleSelect.value === 'operator';
             timList.classList.toggle('opacity-50', lockTeams);
 
             timCheckboxes().forEach((checkbox) => {

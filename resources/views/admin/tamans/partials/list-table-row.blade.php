@@ -5,12 +5,19 @@
 ])
 
 <tr class="hover:bg-gray-50">
-    <td class="px-4 py-3">
-        <span class="block truncate text-sm font-medium text-gray-900" title="{{ $taman->nama_taman }}">{{ $taman->nama_taman }}</span>
-        <p class="mt-0.5 truncate text-sm text-gray-500" title="{{ $taman->alamat }}">{{ $taman->alamat ?: '—' }}</p>
+    <td class="max-w-0 px-4 py-3">
+        <div class="min-w-0">
+            <span class="block truncate text-sm font-medium text-gray-900" title="{{ $taman->nama_taman }}">{{ $taman->nama_taman }}</span>
+            @if ($showKategori)
+                <div class="mt-1 md:hidden">
+                    <x-admin.taman-kategori-badge :kategori="$taman->kategori" class="max-w-full truncate text-xs" />
+                </div>
+            @endif
+            <p class="mt-0.5 truncate text-sm text-gray-500" title="{{ $taman->alamat }}">{{ $taman->alamat ?: '—' }}</p>
+        </div>
     </td>
     @if ($showKategori)
-        <td class="whitespace-nowrap px-4 py-3">
+        <td class="hidden whitespace-nowrap px-4 py-3 md:table-cell">
             <x-admin.taman-kategori-badge :kategori="$taman->kategori" />
         </td>
     @endif

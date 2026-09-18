@@ -43,11 +43,17 @@
             const defaultLat = @json(\App\Models\Taman::DEFAULT_LATITUDE);
             const defaultLng = @json(\App\Models\Taman::DEFAULT_LONGITUDE);
             const defaultZoom = @json(\App\Models\Taman::DEFAULT_MAP_ZOOM);
+            const batamBounds = @json(config('wilayah.batam_bounds'));
             const kelurahanHidden = document.getElementById('kelurahan_id');
             const kelurahanRoot = kelurahanHidden?.closest('[data-searchable-select]');
             const wilayahNotice = document.getElementById('wilayah-resolve-notice');
+            const coordStatus = document.getElementById('taman-coord-status');
+            const tagLocationBtn = document.getElementById('taman-tag-my-location');
+            const tagLocationLabel = document.getElementById('taman-tag-my-location-label');
+            const centerMapBtn = document.getElementById('taman-center-map-marker');
             const resolveUrl = @json(route('admin.tamans.resolve-wilayah'));
             let resolveTimer = null;
+            let accuracyCircle = null;
 
             function parseCoordinate(value, fallback) {
                 const parsed = parseFloat(String(value ?? '').replace(',', '.').trim());
@@ -66,6 +72,53 @@
                 }
 
                 return { lat, lng };
+            }
+
+            function isPlaceholderCoordinates(lat, lng) {
+                return Math.abs(lat - defaultLat) < 0.0001 && Math.abs(lng - defaultLng) < 0.0001;
+            }
+
+            function isWithinBatamBounds(lat, lng) {
+                return lat >= batamBounds.min_lat
+                    && lat <= batamBounds.max_lat
+                    && lng >= batamBounds.min_lng
+                    && lng <= batamBounds.max_lng;
+            }
+
+            function coordinatesAreVerified(lat, lng) {
+                return !isPlaceholderCoordinates(lat, lng) && isWithinBatamBounds(lat, lng);
+            }
+
+            function updateCoordStatus(lat, lng) {
+                if (!coordStatus) return;
+                const verified = coordinatesAreVerified(lat, lng);
+                coordStatus.textContent = verified
+                    ? 'Koordinat terverifikasi (Batam)'
+                    : 'Perlu tag / verifikasi lapangan';
+                coordStatus.dataset.verified = verified ? '1' : '0';
+                coordStatus.classList.remove('bg-emerald-50', 'text-emerald-800', 'ring-emerald-200', 'bg-amber-50', 'text-amber-900', 'ring-amber-200');
+                coordStatus.classList.add(
+                    verified ? 'bg-emerald-50' : 'bg-amber-50',
+                    verified ? 'text-emerald-800' : 'text-amber-900',
+                    verified ? 'ring-emerald-200' : 'ring-amber-200',
+                );
+            }
+
+            function setAccuracyCircle(lat, lng, radiusMeters) {
+                if (accuracyCircle) {
+                    map.removeLayer(accuracyCircle);
+                    accuracyCircle = null;
+                }
+                if (!Number.isFinite(radiusMeters) || radiusMeters <= 0) {
+                    return;
+                }
+                accuracyCircle = L.circle([lat, lng], {
+                    radius: Math.min(radiusMeters, 500),
+                    color: '#059669',
+                    fillColor: '#10b981',
+                    fillOpacity: 0.15,
+                    weight: 2,
+                }).addTo(map);
             }
 
             const parsedLat = parseCoordinate(latInput.value, defaultLat);
@@ -93,6 +146,7 @@
             function updateInputs(lat, lng) {
                 latInput.value = lat.toFixed(8);
                 lngInput.value = lng.toFixed(8);
+                updateCoordStatus(lat, lng);
                 scheduleWilayahResolve(lat, lng);
             }
 
@@ -130,10 +184,31 @@
                 }
             }
 
-            function moveMarker(lat, lng) {
+            function moveMarker(lat, lng, options) {
+                const opts = options || {};
                 marker.setLatLng([lat, lng]);
                 map.panTo([lat, lng]);
+                if (opts.zoom) {
+                    map.setView([lat, lng], opts.zoom);
+                }
+                if (opts.accuracyMeters) {
+                    setAccuracyCircle(lat, lng, opts.accuracyMeters);
+                } else if (!opts.keepAccuracyCircle) {
+                    setAccuracyCircle(lat, lng, 0);
+                }
                 updateInputs(lat, lng);
+            }
+
+            function syncMarkerFromInputs() {
+                const lat = parseCoordinate(latInput.value, NaN);
+                const lng = parseCoordinate(lngInput.value, NaN);
+                if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                    return;
+                }
+                const normalized = normalizeBatamCoordinates(lat, lng);
+                marker.setLatLng([normalized.lat, normalized.lng]);
+                updateCoordStatus(normalized.lat, normalized.lng);
+                scheduleWilayahResolve(normalized.lat, normalized.lng);
             }
 
             marker.on('dragend', function (event) {
@@ -145,9 +220,59 @@
                 moveMarker(event.latlng.lat, event.latlng.lng);
             });
 
+            latInput.addEventListener('change', syncMarkerFromInputs);
+            lngInput.addEventListener('change', syncMarkerFromInputs);
+
+            centerMapBtn?.addEventListener('click', function () {
+                const position = marker.getLatLng();
+                map.setView([position.lat, position.lng], Math.max(map.getZoom(), 16));
+                refreshMapSize();
+            });
+
+            tagLocationBtn?.addEventListener('click', function () {
+                if (!navigator.geolocation) {
+                    showWilayahNotice('Browser tidak mendukung GPS. Gunakan klik peta atau isi koordinat manual.', false);
+                    return;
+                }
+
+                tagLocationBtn.disabled = true;
+                if (tagLocationLabel) {
+                    tagLocationLabel.textContent = 'Mengambil GPS…';
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        const accuracy = pos.coords.accuracy;
+                        moveMarker(lat, lng, { zoom: 17, accuracyMeters: accuracy });
+                        const accText = Number.isFinite(accuracy)
+                            ? ` Akurasi ±${Math.round(accuracy)} m.`
+                            : '';
+                        showWilayahNotice(`Lokasi GPS diterapkan.${accText} Geser penanda jika perlu menyesuaikan titik taman.`, true);
+                        tagLocationBtn.disabled = false;
+                        if (tagLocationLabel) {
+                            tagLocationLabel.textContent = 'Tag lokasi saya (GPS)';
+                        }
+                    },
+                    function (error) {
+                        const message = error.code === error.PERMISSION_DENIED
+                            ? 'Akses lokasi ditolak. Aktifkan izin GPS/lokasi untuk situs ini.'
+                            : 'Tidak dapat mengambil GPS. Coba lagi atau tentukan titik di peta.';
+                        showWilayahNotice(message, false);
+                        tagLocationBtn.disabled = false;
+                        if (tagLocationLabel) {
+                            tagLocationLabel.textContent = 'Tag lokasi saya (GPS)';
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
+                );
+            });
+
             if (!hasStoredCoordinates || initialLat !== parsedLat || initialLng !== parsedLng) {
                 updateInputs(initialLat, initialLng);
             } else {
+                updateCoordStatus(initialLat, initialLng);
                 scheduleWilayahResolve(initialLat, initialLng);
             }
 

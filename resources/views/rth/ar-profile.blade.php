@@ -199,10 +199,6 @@
             list-style: none;
         }
         .ar-fasilitas li {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
             padding: 4px 0;
         }
         .ar-kondisi {
@@ -346,17 +342,7 @@
                             @if ($fasilitas['count'] > 0)
                                 <ul class="ar-fasilitas">
                                     @foreach ($fasilitas['items'] as $item)
-                                        @php
-                                            $kondisiClass = match ($item['kondisi']) {
-                                                'Baik' => 'ar-kondisi ar-kondisi-baik',
-                                                'Rusak Ringan' => 'ar-kondisi ar-kondisi-ringan',
-                                                default => 'ar-kondisi ar-kondisi-berat',
-                                            };
-                                        @endphp
-                                        <li>
-                                            <span>{{ $item['nama'] }}</span>
-                                            <span class="{{ $kondisiClass }}">{{ $item['kondisi'] }}</span>
-                                        </li>
+                                        <li>{{ $item['nama'] }}</li>
                                     @endforeach
                                 </ul>
                             @else
