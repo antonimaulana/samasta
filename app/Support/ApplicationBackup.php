@@ -93,18 +93,20 @@ class ApplicationBackup
         $path = "{$target}.sql.gz";
         $binary = (string) config('backup.mysqldump_binary', 'mysqldump');
 
-        $dump = Process::timeout(600)->run([
-            $binary,
-            '--host='.($config['host'] ?? '127.0.0.1'),
-            '--port='.($config['port'] ?? '3306'),
-            '--user='.($config['username'] ?? 'root'),
-            '--single-transaction',
-            '--quick',
-            '--lock-tables=false',
-            $config['database'] ?? '',
-        ], null, [
-            'MYSQL_PWD' => (string) ($config['password'] ?? ''),
-        ]);
+        $password = (string) ($config['password'] ?? '');
+
+        $dump = Process::timeout(600)
+            ->env($password !== '' ? ['MYSQL_PWD' => $password] : [])
+            ->run([
+                $binary,
+                '--host='.($config['host'] ?? '127.0.0.1'),
+                '--port='.($config['port'] ?? '3306'),
+                '--user='.($config['username'] ?? 'root'),
+                '--single-transaction',
+                '--quick',
+                '--lock-tables=false',
+                $config['database'] ?? '',
+            ]);
 
         if (! $dump->successful()) {
             throw new RuntimeException('mysqldump gagal: '.$dump->errorOutput());
