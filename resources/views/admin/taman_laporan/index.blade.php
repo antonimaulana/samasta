@@ -199,44 +199,30 @@
                                 <span class="text-sm text-gray-500">{{ $items->count() }} taman · {{ number_format($items->sum('luasan'), 0, ',', '.') }} M²</span>
                             </div>
 
-                            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                                <div class="md:hidden">
-                                    @include('admin.tamans.partials.list-mobile-header', ['showActions' => false])
+                            <x-admin.data-table fixed>
+                                <colgroup>
+                                    <col class="min-w-[7rem] md:w-[34%]">
+                                    <col class="min-w-[3.25rem] md:w-[16%]">
+                                    <col class="min-w-[2.75rem] md:w-[10%]">
+                                    <col class="hidden md:table-column md:w-[8%]">
+                                    <col class="min-w-[4.5rem] md:w-[14%]">
+                                    <col class="hidden md:table-column md:w-[18%]">
+                                </colgroup>
+                                @include('admin.tamans.partials.list-table-head', [
+                                    'sortState' => $sortState,
+                                    'showKategori' => false,
+                                    'showActions' => false,
+                                ])
+                                <tbody class="divide-y divide-gray-100">
                                     @foreach ($items as $taman)
-                                        @include('admin.tamans.partials.list-mobile-card', [
+                                        @include('admin.tamans.partials.list-table-row', [
                                             'taman' => $taman,
                                             'showKategori' => false,
                                             'showActions' => false,
                                         ])
                                     @endforeach
-                                </div>
-                                <div class="hidden md:block">
-                                    <x-admin.data-table fixed class="!rounded-none !border-0 !shadow-none">
-                                        <colgroup>
-                                            <col style="width: 34%">
-                                            <col style="width: 16%">
-                                            <col style="width: 10%">
-                                            <col style="width: 8%">
-                                            <col style="width: 14%">
-                                            <col style="width: 18%">
-                                        </colgroup>
-                                        @include('admin.tamans.partials.list-table-head', [
-                                            'sortState' => $sortState,
-                                            'showKategori' => false,
-                                            'showActions' => false,
-                                        ])
-                                        <tbody class="divide-y divide-gray-100">
-                                            @foreach ($items as $taman)
-                                                @include('admin.tamans.partials.list-table-row', [
-                                                    'taman' => $taman,
-                                                    'showKategori' => false,
-                                                    'showActions' => false,
-                                                ])
-                                            @endforeach
-                                        </tbody>
-                                    </x-admin.data-table>
-                                </div>
-                            </div>
+                                </tbody>
+                            </x-admin.data-table>
                         </div>
                     @endif
                 @endforeach
