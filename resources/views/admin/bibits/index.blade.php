@@ -8,12 +8,14 @@
         <div>
             <p class="text-sm text-gray-600">Master data bibit, stok masuk, dan stok keluar.</p>
         </div>
-        <x-admin.can-write>
         <div class="flex flex-wrap gap-2">
+            <x-admin.can-manage-users>
             <a href="{{ route('admin.bibits.import') }}"
                class="rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-medium text-teal-800 hover:bg-teal-100">
                 Import CSV
             </a>
+            </x-admin.can-manage-users>
+            <x-admin.can-write>
             <a href="{{ route('admin.bibit-masuks.create') }}"
                class="rounded-lg border border-teal-300 bg-teal-50 px-4 py-2 text-sm font-medium text-teal-800 hover:bg-teal-100">
                 + Stok Masuk
@@ -26,8 +28,8 @@
                class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
                 + Tambah Bibit
             </a>
+            </x-admin.can-write>
         </div>
-        </x-admin.can-write>
     </div>
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari nama tanaman, nama ilmiah, jenis...'])

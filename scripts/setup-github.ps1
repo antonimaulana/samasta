@@ -48,7 +48,7 @@ if ($status) {
     if ($envStaged) {
         Write-Error "ABORT: .env akan ter-commit! Hapus dari staging: git reset HEAD .env"
     }
-    git commit -m "Initial commit: Portal SIMTAMAN Disperakimtan Batam"
+    git commit -m "Initial commit: SIMTAMAN Disperakimtan Batam"
     Write-Host "[OK] Initial commit created" -ForegroundColor Green
 } else {
     Write-Host "[INFO] Working tree clean or already committed" -ForegroundColor Yellow

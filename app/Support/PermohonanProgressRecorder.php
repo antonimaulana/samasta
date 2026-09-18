@@ -81,6 +81,7 @@ class PermohonanProgressRecorder
 
         $entry->save();
         ArmadaAssignment::sync($entry, $armadaRows);
+        PetugasAssignment::syncFromRequest($entry, $request, is_array($permohonan->pelaksana) ? $permohonan->pelaksana : []);
 
         return $entry;
     }
@@ -93,10 +94,13 @@ class PermohonanProgressRecorder
         $isPohonTumbang = $permohonan->jenis_layanan === 'Penanganan Pohon Tumbang';
         $isMiniGarden = $permohonan->jenis_layanan === 'Pemasangan Mini Garden';
 
+        $teamNames = is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [];
+        $rosterExists = PetugasAssignment::rosterExistsForTeams($teamNames);
+
         $rules = [
             'status' => ['required', Rule::in($permohonan->lapanganStatusOptions())],
             'tanggal_progres' => ['required', 'date'],
-            'jumlah_personil' => ['required', 'integer', 'min:1', 'max:9999'],
+            'jumlah_personil' => [$rosterExists ? 'nullable' : 'required', 'integer', 'min:1', 'max:9999'],
             'catatan' => ['nullable', 'string'],
             'tanggal_penyelesaian' => [
                 Rule::requiredIf(fn () => $request->input('status') === 'Selesai'),
@@ -139,11 +143,14 @@ class PermohonanProgressRecorder
             }
         }
 
-        $validated = $request->validate($rules, [], $attributes);
+        $rules = array_merge($rules, PetugasAssignment::validationRules($rosterExists));
 
-        unset($validated['armada']);
+        $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
+
+        unset($validated['armada'], $validated['petugas_ids']);
 
         $validated['tanggal_progres'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_progres']);
+        PetugasAssignment::applyValidatedPersonil($validated, $request, $teamNames);
 
         if ($validated['status'] !== 'Selesai') {
             $validated['tanggal_penyelesaian'] = null;

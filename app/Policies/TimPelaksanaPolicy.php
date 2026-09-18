@@ -16,4 +16,9 @@ class TimPelaksanaPolicy
     {
         return $user->canManageUsers() && $timPelaksana->memiliki_wilayah_kerja;
     }
+
+    public function managePetugas(User $user, TimPelaksana $timPelaksana): bool
+    {
+        return $user->canManageUsers();
+    }
 }

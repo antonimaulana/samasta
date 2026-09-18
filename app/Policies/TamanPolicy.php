@@ -17,6 +17,6 @@ class TamanPolicy extends AdminContentPolicy
 
     public function import(User $user): bool
     {
-        return $user->canManageUsers();
+        return $user->canImportBulk();
     }
 }

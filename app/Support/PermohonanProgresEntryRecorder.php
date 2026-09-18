@@ -49,9 +49,14 @@ class PermohonanProgresEntryRecorder
 
         $entry->save();
         ArmadaAssignment::sync($entry, $armadaRows);
+        PetugasAssignment::syncFromRequest(
+            $entry,
+            $request,
+            is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [],
+        );
         PemangkasanSchedule::recalculate($permohonan);
 
-        return $entry->fresh(['armadas']);
+        return $entry->fresh(['armadas', 'petugas']);
     }
 
     /**
@@ -61,9 +66,12 @@ class PermohonanProgresEntryRecorder
     {
         $isMiniGarden = $permohonan->jenis_layanan === 'Pemasangan Mini Garden';
 
+        $teamNames = is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [];
+        $rosterExists = PetugasAssignment::rosterExistsForTeams($teamNames);
+
         $rules = [
             'tanggal' => ['required', 'date'],
-            'jumlah_personil' => ['required', 'integer', 'min:1', 'max:9999'],
+            'jumlah_personil' => [$rosterExists ? 'nullable' : 'required', 'integer', 'min:1', 'max:9999'],
             'catatan' => ['nullable', 'string'],
             ...ArmadaAssignment::validationRules(false),
         ];
@@ -87,9 +95,14 @@ class PermohonanProgresEntryRecorder
             }
         }
 
-        $validated = $request->validate($rules, [], $attributes);
+        $rules = array_merge($rules, PetugasAssignment::validationRules($rosterExists));
+
+        $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
+
+        unset($validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
+        PetugasAssignment::applyValidatedPersonil($validated, $request, $teamNames);
 
         if (! PemangkasanSchedule::tanggalWithinSchedule($permohonan, $validated['tanggal'])) {
             throw ValidationException::withMessages([

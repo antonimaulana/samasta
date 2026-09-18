@@ -172,7 +172,12 @@
             <th>Lokasi Pelaksanaan</th>
             <td>({{ $kinerja->lokasiKategoriLabel() }}) {{ $kinerja->lokasi_pelaksanaan }}</td>
         </tr>
-        @if ($kinerja->jumlah_personil)
+        @if ($kinerja->relationLoaded('petugas') && $kinerja->petugas->isNotEmpty())
+            <tr>
+                <th>Petugas Pelaksana</th>
+                <td>{{ $kinerja->petugasLabel() }} ({{ $kinerja->petugas->count() }} orang)</td>
+            </tr>
+        @elseif ($kinerja->jumlah_personil)
             <tr>
                 <th>Jumlah Personil</th>
                 <td>{{ $kinerja->jumlah_personil }} orang</td>

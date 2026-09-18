@@ -3,7 +3,7 @@
 
 | Item | Keterangan |
 |------|------------|
-| **Aplikasi** | Portal Profil Pertamanan & Operasional Disperakimtan Kota Batam |
+| **Aplikasi** | SIMTAMAN — Sistem Informasi Manajemen Pertamanan (Disperakimtan Kota Batam) |
 | **Nama sistem** | SIMTAMAN |
 | **Versi framework** | Laravel 12.x |
 | **Bahasa** | PHP 8.2+ |

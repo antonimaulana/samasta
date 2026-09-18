@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Kelurahan;
+use App\Models\Petugas;
 use App\Models\TimPelaksana;
 use Illuminate\Database\Seeder;
 
@@ -57,6 +58,56 @@ class TimPelaksanaSeeder extends Seeder
 
             if ($assigned->isNotEmpty()) {
                 $team->kelurahans()->sync($assigned->values()->all());
+            }
+        }
+
+        $this->seedPetugasContoh();
+    }
+
+    private function seedPetugasContoh(): void
+    {
+        $samples = [
+            'Tim Wilayah 1' => [
+                ['nama' => 'Maryono', 'is_pengawas' => true, 'is_inti' => true],
+                ['nama' => 'Ahmad Hidayat', 'is_inti' => true],
+                ['nama' => 'Budi Santoso', 'is_inti' => true],
+                ['nama' => 'Candra Wijaya'],
+                ['nama' => 'Dedi Kurniawan'],
+            ],
+            'Tim Wilayah 2' => [
+                ['nama' => 'Muhammad Rifan', 'is_pengawas' => true, 'is_inti' => true],
+                ['nama' => 'Eko Prasetyo', 'is_inti' => true],
+                ['nama' => 'Fitri Rahmawati', 'is_inti' => true],
+                ['nama' => 'Gunawan'],
+            ],
+            'Tim Armada' => [
+                ['nama' => 'Munasir', 'is_pengawas' => true, 'is_inti' => true],
+                ['nama' => 'Hendra Sopir', 'jabatan' => 'Sopir', 'is_inti' => true],
+                ['nama' => 'Iwan Sopir', 'jabatan' => 'Sopir'],
+            ],
+        ];
+
+        foreach ($samples as $teamName => $members) {
+            $team = TimPelaksana::query()->where('nama', $teamName)->first();
+
+            if (! $team) {
+                continue;
+            }
+
+            foreach ($members as $index => $member) {
+                Petugas::query()->updateOrCreate(
+                    [
+                        'tim_pelaksana_id' => $team->id,
+                        'nama' => $member['nama'],
+                    ],
+                    [
+                        'jabatan' => $member['jabatan'] ?? null,
+                        'is_inti' => (bool) ($member['is_inti'] ?? false),
+                        'is_pengawas' => (bool) ($member['is_pengawas'] ?? false),
+                        'aktif' => true,
+                        'urutan' => $index + 1,
+                    ],
+                );
             }
         }
     }

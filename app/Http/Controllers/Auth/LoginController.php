@@ -28,7 +28,8 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            $intended = $user?->isOperator()
+            // Pengawas → Input Lapangan; Admin (operator) & backpanel lain → dashboard admin.
+            $intended = $user?->isPengawas()
                 ? route('lapangan.index')
                 : route('admin.dashboard');
 

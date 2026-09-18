@@ -126,7 +126,7 @@
 <div class="cover">
     <h1>Panduan Deploy {{ $appName }}</h1>
     <p class="subtitle">Hosting Production di VPS Biznet Gio Cloud + Cloudflare</p>
-    <p style="font-size: 11px; color: #4b5563;">Portal {{ $appName }} — Disperakimtan Kota Batam</p>
+    <p style="font-size: 11px; color: #4b5563;">{{ $appName }} — {{ $appFullName ?? 'Sistem Informasi Manajemen Pertamanan' }} · Disperakimtan Kota Batam</p>
 
     <table class="meta-box">
         <tr>

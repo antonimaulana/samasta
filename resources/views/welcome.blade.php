@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'Portal Tata Hijau') }}</title>
+        <title>{{ config('app.name', 'SIMTAMAN') }} — {{ config('app.full_name', 'Sistem Informasi Manajemen Pertamanan') }}</title>
 
         <!-- Fonts & Tailwind CDN Langsung untuk Bypass Kendala Build -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -46,8 +46,8 @@
                     </svg>
                 </div>
                 <div>
-                    <span class="text-lg font-extrabold tracking-tight text-white block leading-none">SI-PERTAMANAN</span>
-                    <span class="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Batam City Portal</span>
+                    <span class="text-lg font-extrabold tracking-tight text-white block leading-none">{{ config('app.name', 'SIMTAMAN') }}</span>
+                    <span class="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">{{ config('app.full_name', 'Sistem Informasi Manajemen Pertamanan') }}</span>
                 </div>
             </div>
 
@@ -78,7 +78,7 @@
             <div class="lg:col-span-6 space-y-8">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-950 border border-emerald-800/60 text-emerald-400 text-xs font-bold uppercase tracking-widest">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                    Sistem Manajemen Infrastruktur Hijau
+                    {{ config('app.full_name', 'Sistem Informasi Manajemen Pertamanan') }}
                 </div>
 
                 <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.05]">
@@ -173,7 +173,7 @@
 
         <!-- Footer -->
         <footer class="w-full max-w-7xl mx-auto px-6 py-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-            <p>&copy; {{ date('Y') }} SI-PERTAMANAN. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name', 'SIMTAMAN') }} — Disperakimtan Kota Batam</p>
             <div class="flex gap-6">
                 <a href="#" class="hover:text-slate-300 transition-colors">Dokumentasi</a>
                 <a href="#" class="hover:text-slate-300 transition-colors">Peta Wilayah</a>

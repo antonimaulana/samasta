@@ -13,7 +13,7 @@ class TamanRthYearlySummary
      */
     public function years(): array
     {
-        $years = config('simapan.rth_laporan.tahun', [2025, 2026]);
+        $years = config('simtaman.rth_laporan.tahun', [2025, 2026]);
 
         return collect($years)
             ->map(fn ($year) => (int) $year)
@@ -34,8 +34,8 @@ class TamanRthYearlySummary
         $scope = app(OperatorWilayahScope::class);
         $baseQuery = $scope->scopeTamans(Taman::query(), $user);
 
-        $rtrwLuasan = (int) config('simapan.rth_laporan.luasan_rth_publik_rtrw_m2', 52_990_000);
-        $penyesuaianTidakTerpelihara = (int) config('simapan.rth_laporan.luasan_penyesuaian_tidak_terpelihara_m2', 300_000);
+        $rtrwLuasan = (int) config('simtaman.rth_laporan.luasan_rth_publik_rtrw_m2', 52_990_000);
+        $penyesuaianTidakTerpelihara = (int) config('simtaman.rth_laporan.luasan_penyesuaian_tidak_terpelihara_m2', 300_000);
 
         $years = $this->years();
         $metrics = [];

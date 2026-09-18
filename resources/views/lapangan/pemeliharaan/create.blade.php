@@ -33,6 +33,7 @@
                 'prefillTamanId' => $prefillTamanId,
                 'timWilayahKelurahan' => $timWilayahKelurahan,
                 'armadaInventory' => $armadaInventory,
+                'rostersByTeam' => $rostersByTeam ?? [],
                 'hideFormActions' => true,
             ])
 

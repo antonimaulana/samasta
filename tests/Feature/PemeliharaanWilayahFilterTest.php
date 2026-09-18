@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AlatSaranaOperasional;
 use App\Models\Kelurahan;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
@@ -12,10 +13,12 @@ use Database\Seeders\TimPelaksanaSeeder;
 use Database\Seeders\WilayahBatamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Tests\Support\PetugasTestHelpers;
 use Tests\TestCase;
 
 class PemeliharaanWilayahFilterTest extends TestCase
 {
+    use PetugasTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -52,15 +55,15 @@ class PemeliharaanWilayahFilterTest extends TestCase
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
-        $payload = [
+        $payload = $this->withPetugasForTeam([
             'tanggal' => now()->toDateString(),
             'tim' => 'Tim Wilayah 1',
             'lokasi_luar' => '1',
             'lokasi_pelaksanaan' => 'Jl. Manual Lokasi, Batam Center',
             'uraian_pekerjaan' => 'Test lokasi manual',
-        ];
+        ], 'Tim Wilayah 1');
 
-        foreach (array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS) as $field) {
+        foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
             $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
         }
 
@@ -96,14 +99,14 @@ class PemeliharaanWilayahFilterTest extends TestCase
             'deskripsi' => 'Deskripsi test pemeliharaan wilayah filter.',
         ]);
 
-        $payload = [
+        $payload = $this->withPetugasForTeam([
             'tanggal' => now()->toDateString(),
             'tim' => 'Tim Wilayah 1',
             'taman_id' => $taman->id,
             'uraian_pekerjaan' => 'Test',
-        ];
+        ], 'Tim Wilayah 1');
 
-        foreach (array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS) as $field) {
+        foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
             $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
         }
 
@@ -134,7 +137,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
-        $dumpTruck = \App\Models\AlatSaranaOperasional::create([
+        $dumpTruck = AlatSaranaOperasional::create([
             'nama' => 'Dump Truck BP 1234 AB',
             'jenis' => 'Dump Truck',
             'no_plat' => 'BP 1234 AB',
@@ -143,7 +146,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
             'peruntukan' => 'Tim Armada',
             'kondisi' => 'Baik',
         ]);
-        $crane = \App\Models\AlatSaranaOperasional::create([
+        $crane = AlatSaranaOperasional::create([
             'nama' => 'Crane BP 5678 CD',
             'jenis' => 'Crane',
             'no_plat' => 'BP 5678 CD',
@@ -153,19 +156,18 @@ class PemeliharaanWilayahFilterTest extends TestCase
             'kondisi' => 'Baik',
         ]);
 
-        $payload = [
+        $payload = $this->withPetugasForTeam([
             'tanggal' => now()->toDateString(),
             'tim' => 'Tim Armada',
             'lokasi_luar' => '1',
             'lokasi_pelaksanaan' => 'Depo Armada',
-            'jumlah_personil' => 4,
             'hari_ke' => 1,
             'total_hari' => 3,
             'persentase_progres' => 25,
             'uraian_pekerjaan' => 'Pengangkutan material',
-        ];
+        ], 'Tim Armada', 2);
 
-        foreach (array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS) as $field) {
+        foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
             $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
         }
 
@@ -182,9 +184,9 @@ class PemeliharaanWilayahFilterTest extends TestCase
             ->post(route('admin.pemeliharaan-tamans.store'), $payload)
             ->assertRedirect();
 
-        $record = \App\Models\PemeliharaanTaman::query()->where('lokasi_pelaksanaan', 'Depo Armada')->first();
+        $record = PemeliharaanTaman::query()->where('lokasi_pelaksanaan', 'Depo Armada')->first();
         $this->assertNotNull($record);
-        $this->assertSame(4, $record->jumlah_personil);
+        $this->assertSame(2, $record->jumlah_personil);
         $this->assertSame('Pengangkutan material', $record->uraian_pekerjaan);
         $this->assertCount(2, $record->armadas);
         $this->assertDatabaseHas('pemeliharaan_taman_armadas', [
@@ -206,7 +208,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
             'deskripsi' => 'Deskripsi test label pdf pemeliharaan.',
         ]);
 
-        $record = \App\Models\PemeliharaanTaman::create([
+        $record = PemeliharaanTaman::create([
             'tanggal' => now()->toDateString(),
             'tim' => 'Tim Wilayah 1',
             'taman_id' => $taman->id,
@@ -222,7 +224,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
         $this->assertSame('(Taman Kota) '.$record->lokasi_pelaksanaan, $record->lokasiPelaksanaanPdfLabel());
         $this->assertSame('2 / 5 hari (40% progres)', $record->progressSummaryLabel());
 
-        $manual = \App\Models\PemeliharaanTaman::create([
+        $manual = PemeliharaanTaman::create([
             'tanggal' => now()->toDateString(),
             'tim' => 'Tim Armada',
             'taman_id' => null,

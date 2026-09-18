@@ -10,7 +10,7 @@
 @endphp
 
 <nav class="space-y-1 px-4 py-4">
-    @if ($canManageUsers ?? false)
+    @if ($canWrite ?? false)
         <p class="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Menu Operasional</p>
     @endif
 
@@ -173,7 +173,7 @@
         </div>
     </div>
 
-    @if ($canManageUsers ?? false)
+    @if ($canWrite ?? false)
         <div class="sidebar-menu-group {{ $ensiklopediaActive ? 'is-open' : '' }}">
             <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $ensiklopediaActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
                 <span>Ensiklopedia</span>
@@ -192,7 +192,9 @@
                 </a>
             </div>
         </div>
+    @endif
 
+    @if ($canManageUsers ?? false)
         <div class="sidebar-menu-group {{ $sistemActive ? 'is-open' : '' }}">
             <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $sistemActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
                 <span>Sistem</span>
@@ -229,7 +231,7 @@
            class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800">
             Lihat Situs Publik
         </a>
-        @if (auth()->user()?->canWrite())
+        @if (auth()->user()?->canInputLapangan())
             <a href="{{ route('lapangan.index') }}"
                class="mt-2 block rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600">
                 Input Lapangan

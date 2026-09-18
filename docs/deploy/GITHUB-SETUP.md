@@ -49,7 +49,7 @@ git add -A
 git status
 # Pastikan .env TIDAK muncul di daftar staged
 
-git commit -m "Initial commit: Portal SIMTAMAN Disperakimtan Batam"
+git commit -m "Initial commit: SIMTAMAN Disperakimtan Batam"
 
 gh auth login
 gh repo create samasta --public --source=. --remote=origin --push

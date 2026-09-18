@@ -1,36 +1,41 @@
-﻿<?php
+<?php
 
+use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\AduanMasyarakatController as AdminAduanMasyarakatController;
+use App\Http\Controllers\Admin\AlatSaranaOperasionalController;
+use App\Http\Controllers\Admin\BibitController;
+use App\Http\Controllers\Admin\BibitKeluarController;
+use App\Http\Controllers\Admin\BibitLaporanController;
+use App\Http\Controllers\Admin\BibitMasukController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Dpa\DashboardController as DpaDashboardController;
 use App\Http\Controllers\Admin\Dpa\DocumentTemplateController as DpaDocumentTemplateController;
 use App\Http\Controllers\Admin\Dpa\DpaController as AdminDpaController;
 use App\Http\Controllers\Admin\Dpa\PaketPekerjaanController as DpaPaketPekerjaanController;
 use App\Http\Controllers\Admin\Dpa\PenyediaController as DpaPenyediaController;
 use App\Http\Controllers\Admin\Dpa\TahunAnggaranController as DpaTahunAnggaranController;
-use App\Http\Controllers\Admin\AlatSaranaOperasionalController;
-use App\Http\Controllers\Admin\ActivityLogController;
-use App\Http\Controllers\Admin\AduanMasyarakatController as AdminAduanMasyarakatController;
-use App\Http\Controllers\Admin\BibitController;
-use App\Http\Controllers\Admin\BibitKeluarController;
-use App\Http\Controllers\Admin\BibitLaporanController;
-use App\Http\Controllers\Admin\BibitMasukController;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnsiklopediaArtikelController;
 use App\Http\Controllers\Admin\EnsiklopediaKategoriController;
 use App\Http\Controllers\Admin\EvaluasiArmadaController;
+use App\Http\Controllers\Admin\EvaluasiKelengkapanDataController;
 use App\Http\Controllers\Admin\EvaluasiKinerjaTimController;
+use App\Http\Controllers\Admin\EvaluasiMasukanMasyarakatController;
 use App\Http\Controllers\Admin\EvaluasiOperasionalPermohonanController;
 use App\Http\Controllers\Admin\EvaluasiPemeliharaanController;
-use App\Http\Controllers\Admin\OperasionalPertamananLaporanController;
+use App\Http\Controllers\Admin\EvaluasiRapKonsolidasiController;
+use App\Http\Controllers\Admin\EvaluasiRthTerpeliharaController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\OperasionalPertamananLaporanController;
 use App\Http\Controllers\Admin\PemangkasanController;
 use App\Http\Controllers\Admin\PemeliharaanTamanController;
+use App\Http\Controllers\Admin\PetugasController;
 use App\Http\Controllers\Admin\SurveyKepuasanController as AdminSurveyKepuasanController;
 use App\Http\Controllers\Admin\TamanController as AdminTamanController;
 use App\Http\Controllers\Admin\TamanLaporanController;
-use App\Http\Controllers\RthArController;
 use App\Http\Controllers\Admin\TimPelaksanaController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\RthArController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -118,6 +123,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('evaluasi.operasional-permohonan.index');
     Route::get('evaluasi/operasional-permohonan/export/pdf', [EvaluasiOperasionalPermohonanController::class, 'exportPdf'])
         ->name('evaluasi.operasional-permohonan.export-pdf');
+    Route::get('evaluasi/rth-terpelihara', [EvaluasiRthTerpeliharaController::class, 'index'])
+        ->name('evaluasi.rth-terpelihara.index');
+    Route::get('evaluasi/rth-terpelihara/export/pdf', [EvaluasiRthTerpeliharaController::class, 'exportPdf'])
+        ->name('evaluasi.rth-terpelihara.export-pdf');
+    Route::get('evaluasi/masukan-masyarakat', [EvaluasiMasukanMasyarakatController::class, 'index'])
+        ->name('evaluasi.masukan-masyarakat.index');
+    Route::get('evaluasi/masukan-masyarakat/export/pdf', [EvaluasiMasukanMasyarakatController::class, 'exportPdf'])
+        ->name('evaluasi.masukan-masyarakat.export-pdf');
+    Route::get('evaluasi/kelengkapan-data', [EvaluasiKelengkapanDataController::class, 'index'])
+        ->name('evaluasi.kelengkapan-data.index');
+    Route::get('evaluasi/kelengkapan-data/export/pdf', [EvaluasiKelengkapanDataController::class, 'exportPdf'])
+        ->name('evaluasi.kelengkapan-data.export-pdf');
+    Route::get('evaluasi/rap-konsolidasi', [EvaluasiRapKonsolidasiController::class, 'index'])
+        ->name('evaluasi.rap-konsolidasi.index');
+    Route::get('evaluasi/rap-konsolidasi/export/pdf', [EvaluasiRapKonsolidasiController::class, 'exportPdf'])
+        ->name('evaluasi.rap-konsolidasi.export-pdf');
     Route::get('kinerja-pertamanan-laporan', function (Request $request) {
         return redirect()->route('admin.operasional-pertamanan-laporan.index', $request->query());
     })->name('kinerja-pertamanan-laporan.index');
@@ -143,13 +164,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::delete('survey-kepuasan/{survey_kepuasan}', [AdminSurveyKepuasanController::class, 'destroy'])->name('survey-kepuasan.destroy');
 
     Route::get('tim-pelaksanas/suggest', [TimPelaksanaController::class, 'suggest'])->name('tim-pelaksanas.suggest');
-    Route::get('tim-pelaksanas', [TimPelaksanaController::class, 'index'])->name('tim-pelaksanas.index');
+    Route::get('tim-pelaksanas/roster', [TimPelaksanaController::class, 'roster'])->name('tim-pelaksanas.roster');
+    Route::resource('ensiklopedia-kategoris', EnsiklopediaKategoriController::class)->except(['show']);
+    Route::resource('ensiklopedia-artikels', EnsiklopediaArtikelController::class)->except(['show']);
 
     Route::middleware('admin.manage')->group(function () {
+        Route::get('tim-pelaksanas', [TimPelaksanaController::class, 'index'])->name('tim-pelaksanas.index');
         Route::get('tim-pelaksanas/{tim_pelaksana}/wilayah', [TimPelaksanaController::class, 'editWilayah'])->name('tim-pelaksanas.wilayah.edit');
         Route::put('tim-pelaksanas/{tim_pelaksana}/wilayah', [TimPelaksanaController::class, 'updateWilayah'])->name('tim-pelaksanas.wilayah.update');
-        Route::resource('ensiklopedia-kategoris', EnsiklopediaKategoriController::class)->except(['show']);
-        Route::resource('ensiklopedia-artikels', EnsiklopediaArtikelController::class)->except(['show']);
+        Route::get('tim-pelaksanas/{tim_pelaksana}/petugas', [PetugasController::class, 'index'])->name('tim-pelaksanas.petugas.index');
+        Route::post('tim-pelaksanas/{tim_pelaksana}/petugas', [PetugasController::class, 'store'])->name('tim-pelaksanas.petugas.store');
+        Route::put('tim-pelaksanas/{tim_pelaksana}/petugas/{petugas}', [PetugasController::class, 'update'])->name('tim-pelaksanas.petugas.update');
+        Route::delete('tim-pelaksanas/{tim_pelaksana}/petugas/{petugas}', [PetugasController::class, 'destroy'])->name('tim-pelaksanas.petugas.destroy');
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::resource('users', UserController::class)->except(['show']);
 

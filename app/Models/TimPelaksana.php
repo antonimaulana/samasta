@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class TimPelaksana extends Model
@@ -29,6 +30,16 @@ class TimPelaksana extends Model
     {
         return $this->belongsToMany(Kelurahan::class, 'kelurahan_tim_pelaksana')
             ->withTimestamps();
+    }
+
+    public function petugas(): HasMany
+    {
+        return $this->hasMany(Petugas::class)->orderBy('urutan')->orderBy('nama');
+    }
+
+    public function petugasAktif(): HasMany
+    {
+        return $this->petugas()->where('aktif', true);
     }
 
     /**

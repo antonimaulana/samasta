@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -23,6 +24,7 @@ class PemeliharaanTamanRecorder
 
         $pemeliharaan = PemeliharaanTaman::create($validated);
         ArmadaAssignment::sync($pemeliharaan, $armadaRows);
+        PetugasAssignment::syncFromRequest($pemeliharaan, $request, [$validated['tim']]);
 
         return $pemeliharaan;
     }
@@ -99,11 +101,16 @@ class PemeliharaanTamanRecorder
             $attributes[$field] = strtolower($label);
         }
 
-        $validated = $request->validate($rules, [], $attributes);
+        $rules = array_merge($rules, PetugasAssignment::validationRules(
+            PetugasAssignment::rosterExistsForTeams([(string) $request->input('tim')]),
+        ));
 
-        unset($validated['armada'], $validated['lokasi_luar']);
+        $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
+
+        unset($validated['armada'], $validated['lokasi_luar'], $validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
+        PetugasAssignment::applyValidatedPersonil($validated, $request, [(string) $request->input('tim')]);
 
         return $validated;
     }
@@ -136,7 +143,7 @@ class PemeliharaanTamanRecorder
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Taman>
+     * @return Collection<int, Taman>
      */
     public function tamanOptions(?User $user = null)
     {
@@ -150,7 +157,7 @@ class PemeliharaanTamanRecorder
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Taman>
+     * @return Collection<int, Taman>
      */
     public function tamanOptionsForTeam(?User $user, string $tim)
     {

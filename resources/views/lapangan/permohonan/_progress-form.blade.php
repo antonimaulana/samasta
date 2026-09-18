@@ -54,7 +54,7 @@
 
                         </p>
 
-                        <p class="text-xs text-gray-600">{{ $entry->jumlah_personil }} personil
+                        <p class="text-xs text-gray-600">{{ $entry->petugasLabel() }}
 
                             @if ($entry->catatan) · {{ Str::limit($entry->catatan, 50) }} @endif
 
@@ -120,24 +120,15 @@
 
             </div>
 
-            <div>
-
-                <label for="jumlah_personil" class="mb-1 block text-sm font-bold text-gray-700">Jumlah personil *</label>
-
-                <input type="number" name="jumlah_personil" id="jumlah_personil" min="1" max="9999" required
-
-                       value="{{ old('jumlah_personil') }}"
-
-                       placeholder="Contoh: 5"
-
-                       class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-base focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-100">
-
-                @error('jumlah_personil')
-
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
-
-                @enderror
-
+            <div class="sm:col-span-2">
+                <label class="mb-2 block text-sm font-bold text-gray-700">Petugas pelaksana *</label>
+                <x-petugas-picker
+                    :team-names="$permohonan->pelaksana ?? []"
+                    :selected-ids="old('petugas_ids', [])"
+                    :rosters-by-team="$rostersByTeam ?? []"
+                    :roster-url="route('admin.tim-pelaksanas.roster')"
+                    variant="lapangan"
+                />
             </div>
 
         </div>

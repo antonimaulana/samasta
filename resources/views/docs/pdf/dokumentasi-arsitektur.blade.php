@@ -63,7 +63,7 @@
 
 <div class="cover">
     <h1>Dokumentasi Arsitektur {{ $appName }}</h1>
-    <p class="subtitle">Portal Manajemen Pertamanan &amp; Operasional Disperakimtan Kota Batam</p>
+    <p class="subtitle">SIMTAMAN — Sistem Informasi Manajemen Pertamanan · Disperakimtan Kota Batam</p>
     <p style="font-size: 11px; color: #4b5563;">Sistem Aplikasi Manajemen Asri, Satuan Taman &amp; Anggaran</p>
     <table class="meta-box">
         <tr><td>Dokumen</td><td>Dokumentasi Arsitektur &amp; Struktur Development</td></tr>

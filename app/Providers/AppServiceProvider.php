@@ -75,6 +75,8 @@ class AppServiceProvider extends ServiceProvider
                     'canWrite' => $user->canWrite(),
                     'canDelete' => $user->canDelete(),
                     'canManageUsers' => $user->canManageUsers(),
+                    'canImportBulk' => $user->canImportBulk(),
+                    'isPengawas' => $user->isPengawas(),
                     'isViewer' => $user->isViewer(),
                     'authUserRole' => $user->roleLabel(),
                     'unreadNotificationsCount' => $notificationsEnabled

@@ -4,20 +4,25 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlatSaranaOperasional;
-use App\Support\OperasionalPelaksanaanTime;
 use App\Models\PemeliharaanTaman;
 use App\Models\PemeliharaanTamanArmada;
 use App\Models\Taman;
+use App\Models\User;
+use App\Support\OperasionalPelaksanaanTime;
+use App\Support\OperatorWilayahScope;
+use App\Support\PetugasAssignment;
+use App\Support\PetugasRosterBuilder;
 use App\Support\TableSearch;
 use App\Support\TimPelaksanaResolver;
-use App\Support\OperatorWilayahScope;
 use Carbon\Carbon;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PemeliharaanTamanController extends Controller
@@ -94,6 +99,7 @@ class PemeliharaanTamanController extends Controller
             'tamans' => $this->tamanOptions($user),
             'prefillTamanId' => $request->integer('taman_id') ?: null,
             'timWilayahKelurahan' => app(TimPelaksanaResolver::class)->kelurahanIdsByTeamName(),
+            'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
             ...$this->operatorTimViewData($user),
             ...$this->armadaFormData(),
         ]);
@@ -108,6 +114,7 @@ class PemeliharaanTamanController extends Controller
 
         $pemeliharaan = PemeliharaanTaman::create($validated);
         $this->syncArmadas($pemeliharaan, $armadaRows);
+        PetugasAssignment::syncFromRequest($pemeliharaan, $request, [$validated['tim']]);
 
         return redirect()
             ->route('admin.pemeliharaan-tamans.index', [
@@ -122,9 +129,10 @@ class PemeliharaanTamanController extends Controller
         $user = auth()->user();
 
         return view('admin.pemeliharaan_tamans.edit', [
-            'kinerja' => $pemeliharaanTaman->load('armadas'),
+            'kinerja' => $pemeliharaanTaman->load(['armadas', 'petugas']),
             'tamans' => $this->tamanOptions($user),
             'timWilayahKelurahan' => app(TimPelaksanaResolver::class)->kelurahanIdsByTeamName(),
+            'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
             ...$this->operatorTimViewData($user),
             ...$this->armadaFormData(),
         ]);
@@ -139,6 +147,7 @@ class PemeliharaanTamanController extends Controller
 
         $pemeliharaanTaman->update($validated);
         $this->syncArmadas($pemeliharaanTaman, $armadaRows);
+        PetugasAssignment::syncFromRequest($pemeliharaanTaman, $request, [$validated['tim']]);
 
         return redirect()
             ->route('admin.pemeliharaan-tamans.index', [
@@ -222,7 +231,7 @@ class PemeliharaanTamanController extends Controller
         $this->ensureGdLoaded();
 
         $html = view('admin.pemeliharaan_tamans.pdf_operasional', [
-            'kinerja' => $pemeliharaanTaman->load(['armadas.alatSarana', 'taman']),
+            'kinerja' => $pemeliharaanTaman->load(['armadas.alatSarana', 'taman', 'petugas']),
         ])->render();
 
         $slug = str($pemeliharaanTaman->lokasi_pelaksanaan)->slug('-')->limit(30, '');
@@ -282,7 +291,7 @@ class PemeliharaanTamanController extends Controller
     private function ensureTamanInTeamWilayah(string $tim, int $tamanId): void
     {
         if (! app(TimPelaksanaResolver::class)->tamanAllowedForTeam($tim, $tamanId)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'taman_id' => 'Lokasi pelaksanaan tidak termasuk wilayah kerja '.$tim.'.',
             ]);
         }
@@ -343,11 +352,16 @@ class PemeliharaanTamanController extends Controller
             $attributes[$field] = strtolower($label);
         }
 
-        $validated = $request->validate($rules, [], $attributes);
+        $rules = array_merge($rules, PetugasAssignment::validationRules(
+            PetugasAssignment::rosterExistsForTeams([(string) $request->input('tim')]),
+        ));
 
-        unset($validated['armada']);
+        $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
+
+        unset($validated['armada'], $validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
+        PetugasAssignment::applyValidatedPersonil($validated, $request, [(string) $request->input('tim')]);
 
         return $validated;
     }
@@ -412,11 +426,16 @@ class PemeliharaanTamanController extends Controller
             $attributes[$field] = strtolower($label);
         }
 
-        $validated = $request->validate($rules, [], $attributes);
+        $rules = array_merge($rules, PetugasAssignment::validationRules(
+            PetugasAssignment::rosterExistsForTeams([(string) $request->input('tim')]),
+        ));
 
-        unset($validated['armada']);
+        $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
+
+        unset($validated['armada'], $validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
+        PetugasAssignment::applyValidatedPersonil($validated, $request, [(string) $request->input('tim')]);
 
         return $validated;
     }
@@ -446,9 +465,9 @@ class PemeliharaanTamanController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Taman>
+     * @return Collection<int, Taman>
      */
-    private function tamanOptions(?\App\Models\User $user = null)
+    private function tamanOptions(?User $user = null)
     {
         $query = Taman::query()->orderBy('nama_taman');
 
@@ -513,7 +532,7 @@ class PemeliharaanTamanController extends Controller
     /**
      * @return array{operatorTim: ?string, operatorTimOptions: ?list<string>}
      */
-    private function operatorTimViewData(?\App\Models\User $user): array
+    private function operatorTimViewData(?User $user): array
     {
         $allowed = app(OperatorWilayahScope::class)->allowedTimNamesForForm($user);
 
@@ -529,7 +548,7 @@ class PemeliharaanTamanController extends Controller
     }
 
     /**
-     * @return array{armadaInventory: \Illuminate\Database\Eloquent\Collection<int, AlatSaranaOperasional>}
+     * @return array{armadaInventory: Collection<int, AlatSaranaOperasional>}
      */
     private function armadaFormData(): array
     {

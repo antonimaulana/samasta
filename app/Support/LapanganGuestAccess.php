@@ -8,7 +8,7 @@ class LapanganGuestAccess
 {
     public static function enabled(): bool
     {
-        return filled(config('simapan.lapangan.pin'));
+        return filled(config('simtaman.lapangan.pin'));
     }
 
     public static function isUnlocked(Request $request): bool
@@ -23,7 +23,7 @@ class LapanganGuestAccess
             return false;
         }
 
-        $ttlMinutes = (int) config('simapan.lapangan.session_ttl_minutes', 480);
+        $ttlMinutes = (int) config('simtaman.lapangan.session_ttl_minutes', 480);
 
         if ($ttlMinutes > 0 && (time() - $unlockedAt) > ($ttlMinutes * 60)) {
             self::lock($request);
@@ -36,7 +36,7 @@ class LapanganGuestAccess
 
     public static function attempt(Request $request, string $pin): bool
     {
-        $expected = (string) config('simapan.lapangan.pin');
+        $expected = (string) config('simtaman.lapangan.pin');
 
         if ($expected === '' || ! hash_equals($expected, $pin)) {
             return false;
@@ -54,7 +54,7 @@ class LapanganGuestAccess
 
     public static function allowsSubmission(Request $request): bool
     {
-        if ($request->user()?->canWrite()) {
+        if ($request->user()?->canInputLapangan()) {
             return true;
         }
 
@@ -63,6 +63,6 @@ class LapanganGuestAccess
 
     public static function sessionKey(): string
     {
-        return (string) config('simapan.lapangan.session_key', 'lapangan_guest_unlocked_at');
+        return (string) config('simtaman.lapangan.session_key', 'lapangan_guest_unlocked_at');
     }
 }

@@ -42,16 +42,22 @@
                         {{ $team->memiliki_wilayah_kerja ? number_format($team->kelurahans_count) : '—' }}
                     </td>
                     <td class="px-4 py-3 text-right text-sm">
-                        @if ($team->memiliki_wilayah_kerja)
+                        <div class="flex flex-wrap justify-end gap-2">
                             <x-admin.can-manage-users>
-                            <a href="{{ route('admin.tim-pelaksanas.wilayah.edit', $team) }}"
-                               class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
-                                Atur Wilayah
-                            </a>
+                                <a href="{{ route('admin.tim-pelaksanas.petugas.index', $team) }}"
+                                   class="rounded border border-emerald-300 px-3 py-1 text-emerald-800 hover:bg-emerald-50">
+                                    Anggota
+                                </a>
                             </x-admin.can-manage-users>
-                        @else
-                            <span class="text-xs text-gray-400">Manual</span>
-                        @endif
+                            @if ($team->memiliki_wilayah_kerja)
+                                <x-admin.can-manage-users>
+                                <a href="{{ route('admin.tim-pelaksanas.wilayah.edit', $team) }}"
+                                   class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
+                                    Wilayah
+                                </a>
+                                </x-admin.can-manage-users>
+                            @endif
+                        </div>
                     </td>
                 </tr>
             @endforeach

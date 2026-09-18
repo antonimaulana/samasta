@@ -30,8 +30,8 @@
         </select>
         <ul class="mt-2 list-inside list-disc space-y-0.5 text-xs text-gray-500">
             <li><strong class="font-medium text-gray-700">Administrator</strong> — kuasa penuh sistem &amp; pengguna</li>
-            <li><strong class="font-medium text-gray-700">Admin</strong> — input/pemutakhiran data (termasuk lapangan)</li>
-            <li><strong class="font-medium text-gray-700">Pengawas</strong> — pantau operasional tim (Wilayah 1–4, Armada, Nursery); lihat saja</li>
+            <li><strong class="font-medium text-gray-700">Admin</strong> — backpanel operasional (tanpa menu Sistem/DPA); tanpa import massal, hapus master, atau kelola pengguna</li>
+            <li><strong class="font-medium text-gray-700">Pengawas</strong> — pantau tim (Wilayah 1–4, Armada, Nursery) + <strong>wajib input lapangan</strong></li>
             <li><strong class="font-medium text-gray-700">Pimpinan</strong> — ringkasan &amp; evaluasi seluruh kota; lihat saja</li>
         </ul>
     </div>

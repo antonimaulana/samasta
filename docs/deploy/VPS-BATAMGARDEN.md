@@ -102,6 +102,11 @@ php artisan storage:link
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan simtaman:preflight-pemutakhiran
+php artisan simtaman:backup --full --label=setup-production
+sudo mkdir -p /var/backups/samasta && sudo chown www-data:www-data /var/backups/samasta
+# Cron: * * * * * cd /var/www/samasta && php artisan schedule:run >> /dev/null 2>&1
+# Backup manual: bash scripts/vps-backup.sh
 ```
 
 ---

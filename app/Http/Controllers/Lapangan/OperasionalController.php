@@ -3,17 +3,18 @@
 namespace App\Http\Controllers\Lapangan;
 
 use App\Http\Controllers\Controller;
-use App\Models\PemeliharaanTaman;
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
-use App\Models\Taman;
+use App\Models\PemeliharaanTaman;
 use App\Support\ArmadaAssignment;
 use App\Support\LapanganGuestAccess;
 use App\Support\LapanganMenu;
+use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
-use App\Support\PemeliharaanTamanRecorder;
 use App\Support\PemangkasanProgresPdf;
+use App\Support\PemeliharaanTamanRecorder;
 use App\Support\PermohonanProgressRecorder;
+use App\Support\PetugasRosterBuilder;
 use App\Support\TimPelaksanaResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class OperasionalController extends Controller
 {
     public function showUnlock(Request $request): View|RedirectResponse
     {
-        if ($request->user()?->canWrite()) {
+        if ($request->user()?->canInputLapangan()) {
             return redirect()->route('lapangan.index');
         }
 
@@ -41,7 +42,7 @@ class OperasionalController extends Controller
 
     public function storeUnlock(Request $request): RedirectResponse
     {
-        if ($request->user()?->canWrite()) {
+        if ($request->user()?->canInputLapangan()) {
             return redirect()->route('lapangan.index');
         }
 
@@ -66,7 +67,7 @@ class OperasionalController extends Controller
     {
         LapanganGuestAccess::lock($request);
 
-        if ($request->user()?->canWrite()) {
+        if ($request->user()?->canInputLapangan()) {
             return redirect()->route('lapangan.index');
         }
 
@@ -103,6 +104,7 @@ class OperasionalController extends Controller
             'prefillTamanId' => $request->integer('taman_id') ?: null,
             'timWilayahKelurahan' => app(TimPelaksanaResolver::class)->kelurahanIdsByTeamName(),
             'armadaInventory' => ArmadaAssignment::inventory(),
+            'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
         ]);
     }
 
@@ -122,7 +124,7 @@ class OperasionalController extends Controller
 
         return redirect()
             ->route('lapangan.index')
-            ->with('success', 'Pemeliharaan rutin '.$menuItem['label'].' berhasil dicatat untuk '.\App\Support\OperasionalPelaksanaanTime::display($pemeliharaan->tanggal).'.');
+            ->with('success', 'Pemeliharaan rutin '.$menuItem['label'].' berhasil dicatat untuk '.OperasionalPelaksanaanTime::display($pemeliharaan->tanggal).'.');
     }
 
     public function indexPermohonan(Request $request): View
@@ -167,12 +169,13 @@ class OperasionalController extends Controller
     {
         $this->ensureCanUpdatePermohonan($request, $pemangkasan);
 
-        $pemangkasan->load(['taman', 'progres']);
+        $pemangkasan->load(['taman', 'progres.petugas']);
 
         return view('lapangan.permohonan.edit', [
             'menuItem' => LapanganMenu::find('permohonan', $request->user()),
             'permohonan' => $pemangkasan,
             'armadaInventory' => ArmadaAssignment::inventory(),
+            'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
         ]);
     }
 
@@ -209,7 +212,7 @@ class OperasionalController extends Controller
      */
     private function ensureCanWriteOperasional(Request $request, string $modelClass): void
     {
-        if ($request->user()?->canWrite()) {
+        if ($request->user()?->canInputLapangan()) {
             $this->authorize('create', $modelClass);
 
             return;
@@ -226,7 +229,7 @@ class OperasionalController extends Controller
             abort(403, 'Permohonan ini sudah selesai.');
         }
 
-        if ($request->user()?->canWrite()) {
+        if ($request->user()?->canInputLapangan()) {
             $this->authorize('update', $pemangkasan);
 
             if (! app(OperatorWilayahScope::class)->canAccess($request->user(), $pemangkasan)) {
@@ -243,7 +246,7 @@ class OperasionalController extends Controller
 
     private function ensureCanViewPermohonan(Request $request, Pemangkasan $pemangkasan): void
     {
-        if ($request->user()?->canWrite()) {
+        if ($request->user()?->canInputLapangan()) {
             $this->authorize('view', $pemangkasan);
 
             if (! app(OperatorWilayahScope::class)->canAccess($request->user(), $pemangkasan)) {

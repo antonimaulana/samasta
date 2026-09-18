@@ -73,15 +73,16 @@
         </div>
     </div>
 
-    <div>
-        <label for="jumlah_personil" class="mb-1 block text-sm font-medium text-gray-700">Jumlah Personil</label>
-        <input type="number" name="jumlah_personil" id="jumlah_personil" min="1" max="9999"
-               value="{{ old('jumlah_personil', $kinerja?->jumlah_personil) }}"
-               placeholder="Contoh: 8"
-               class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-        @error('jumlah_personil')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
+    <div class="md:col-span-2">
+        <label class="mb-2 block text-sm font-medium text-gray-700">Petugas Pelaksana *</label>
+        <x-petugas-picker
+            :team-name="$selectedTim"
+            :selected-ids="old('petugas_ids', $kinerja?->petugas?->pluck('id')?->all() ?? [])"
+            :rosters-by-team="$rostersByTeam ?? []"
+            :roster-url="route('admin.tim-pelaksanas.roster')"
+            :tim-select-id="filled($operatorTim ?? null) ? null : 'tim'"
+            :variant="request()->routeIs('lapangan.*') ? 'lapangan' : 'admin'"
+        />
     </div>
 
     <div>

@@ -3,12 +3,12 @@
 @endphp
 
 <section class="home-hero relative overflow-hidden text-white">
-    <img src="{{ asset('images/hero-taman-hijau.jpg') }}"
-         alt=""
+    <img src="{{ asset('images/hero-welcome-batam.jpg') }}"
+         alt="Panorama Kota Batam — taman, masjid, dan teluk Batam"
          aria-hidden="true"
          fetchpriority="high"
          decoding="async"
-         class="absolute inset-0 h-full w-full object-cover object-center">
+         class="absolute inset-0 h-full w-full object-cover object-[42%_38%] sm:object-[45%_40%]">
     <div class="home-hero__overlay pointer-events-none absolute inset-0"></div>
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.08)_0%,transparent_45%)]"></div>
 

@@ -8,6 +8,6 @@ class BibitPolicy extends AdminContentPolicy
 {
     public function import(User $user): bool
     {
-        return $user->canWrite();
+        return $user->canImportBulk();
     }
 }

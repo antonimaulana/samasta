@@ -13,12 +13,12 @@ class EnsureLapanganAccess
     {
         $user = $request->user();
 
-        if ($user?->canWrite()) {
+        if ($user?->canInputLapangan()) {
             return $next($request);
         }
 
-        if ($user && ! $user->canWrite()) {
-            abort(403, 'Halaman input lapangan hanya untuk petugas pelaksana.');
+        if ($user && ! $user->canInputLapangan()) {
+            abort(403, 'Halaman input lapangan hanya untuk Admin, Pengawas, atau Administrator.');
         }
 
         if (! LapanganGuestAccess::enabled()) {

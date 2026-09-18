@@ -7,14 +7,17 @@ use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
+use App\Models\User;
 use App\Support\ArmadaAssignment;
 use App\Support\JadwalLayananQuery;
 use App\Support\OperatorWilayahScope;
 use App\Support\PelaksanaScheduleConflictChecker;
-use App\Support\PermohonanProgresEntryRecorder;
 use App\Support\PemangkasanProgresPdf;
 use App\Support\PemangkasanSchedule;
+use App\Support\PermohonanProgresEntryRecorder;
+use App\Support\PetugasRosterBuilder;
 use App\Support\TableSearch;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -206,12 +209,13 @@ class PemangkasanController extends Controller
         $this->ensureProgresBelongsToPermohonan($pemangkasan, $pemangkasanProgres);
 
         $pemangkasan->load(['taman', 'progres']);
-        $pemangkasanProgres->load(['armadas']);
+        $pemangkasanProgres->load(['armadas', 'petugas']);
 
         return view('admin.pemangkasans.progres.edit', [
             'pemangkasan' => $pemangkasan,
             'progres' => $pemangkasanProgres,
             'armadaInventory' => ArmadaAssignment::inventory(),
+            'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
         ]);
     }
 
@@ -340,7 +344,7 @@ class PemangkasanController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Taman>
+     * @return Collection<int, Taman>
      */
     private function tamansForSelect()
     {
@@ -353,7 +357,7 @@ class PemangkasanController extends Controller
     /**
      * @return array{semua: int, hari_ini: int, besok: int, minggu_ini: int, rencana: int, diproses: int, terlambat: int}
      */
-    private function jadwalCountsForUser(?\App\Models\User $user, ?string $pelaksana, ?string $jenis): array
+    private function jadwalCountsForUser(?User $user, ?string $pelaksana, ?string $jenis): array
     {
         $scope = app(OperatorWilayahScope::class);
 

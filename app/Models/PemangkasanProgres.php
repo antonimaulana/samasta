@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\OperasionalDateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
@@ -43,6 +44,20 @@ class PemangkasanProgres extends Model
     public function armadas(): HasMany
     {
         return $this->hasMany(PemangkasanProgresArmada::class, 'pemangkasan_progres_id')->orderBy('urutan');
+    }
+
+    public function petugas(): BelongsToMany
+    {
+        return $this->belongsToMany(Petugas::class, 'pemangkasan_progres_petugas')->orderBy('nama');
+    }
+
+    public function petugasLabel(): string
+    {
+        if ($this->relationLoaded('petugas') && $this->petugas->isNotEmpty()) {
+            return $this->petugas->pluck('nama')->implode(', ');
+        }
+
+        return $this->jumlah_personil ? number_format((int) $this->jumlah_personil).' personil' : '—';
     }
 
     public function armadaPdfHtml(): ?string

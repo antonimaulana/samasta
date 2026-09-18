@@ -93,6 +93,7 @@
             @include('lapangan.permohonan._progress-form', [
                 'permohonan' => $permohonan,
                 'armadaInventory' => $armadaInventory,
+                'rostersByTeam' => $rostersByTeam ?? [],
             ])
 
             <div class="mt-8 space-y-3 border-t border-gray-100 pt-6">

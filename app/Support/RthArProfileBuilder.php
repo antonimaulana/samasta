@@ -30,8 +30,8 @@ class RthArProfileBuilder
     {
         $taman->loadMissing(['kelurahan.kecamatan', 'images']);
 
-        $dataFreshDays = config('simapan.ar.data_fresh_days', 90);
-        $maintenanceFreshDays = config('simapan.ar.maintenance_fresh_days', 60);
+        $dataFreshDays = config('simtaman.ar.data_fresh_days', 90);
+        $maintenanceFreshDays = config('simtaman.ar.maintenance_fresh_days', 60);
 
         $verifiedAt = $taman->data_verified_at;
         $isDataFresh = $verifiedAt !== null
@@ -73,7 +73,7 @@ class RthArProfileBuilder
                     ? count($fasilitasItems).' fasilitas tersedia'
                     : 'Belum ada data fasilitas',
             ],
-            'ar_model_url' => (string) config('simapan.ar.model_url'),
+            'ar_model_url' => (string) config('simtaman.ar.model_url'),
             'poster_url' => $taman->foto_url,
             'ar_scan_url' => route('rth.ar-scan', $taman),
             'web_detail_url' => route('tamans.show', $taman),

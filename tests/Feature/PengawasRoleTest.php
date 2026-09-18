@@ -30,6 +30,31 @@ class PengawasRoleTest extends TestCase
         $this->actingAs($pengawas)
             ->get(route('admin.tamans.create'))
             ->assertForbidden();
+
+        $this->actingAs($pengawas)
+            ->get(route('lapangan.index'))
+            ->assertOk();
+    }
+
+    public function test_pengawas_has_lapangan_input_permission(): void
+    {
+        $pengawas = User::factory()->create(['role' => User::ROLE_PENGAWAS]);
+
+        $this->assertTrue($pengawas->canInputLapangan());
+        $this->assertFalse($pengawas->canWrite());
+    }
+
+    public function test_pengawas_login_redirects_to_lapangan(): void
+    {
+        User::factory()->create([
+            'role' => User::ROLE_PENGAWAS,
+            'email' => 'pengawas-login@test.local',
+        ]);
+
+        $this->post(route('login'), [
+            'email' => 'pengawas-login@test.local',
+            'password' => 'password',
+        ])->assertRedirect(route('lapangan.index'));
     }
 
     public function test_role_labels_match_organizational_names(): void

@@ -61,4 +61,50 @@ class AdminAccessTest extends TestCase
         $this->get(route('aduan.success'))
             ->assertRedirect(route('aduan.create'));
     }
+
+    public function test_operator_can_access_ensiklopedia_but_not_sistem_or_dpa(): void
+    {
+        $operator = User::factory()->operatorTeams([], allWilayah: true)->create();
+
+        $this->actingAs($operator)
+            ->get(route('admin.ensiklopedia-kategoris.index'))
+            ->assertOk();
+
+        $this->actingAs($operator)
+            ->get(route('admin.users.index'))
+            ->assertForbidden();
+
+        $this->actingAs($operator)
+            ->get(route('admin.tim-pelaksanas.index'))
+            ->assertForbidden();
+
+        $this->actingAs($operator)
+            ->get(route('admin.dpa.dashboard'))
+            ->assertForbidden();
+    }
+
+    public function test_operator_cannot_bulk_import_bibit_or_taman(): void
+    {
+        $operator = User::factory()->operatorTeams([], allWilayah: true)->create();
+
+        $this->actingAs($operator)
+            ->get(route('admin.bibits.import'))
+            ->assertForbidden();
+
+        $this->actingAs($operator)
+            ->get(route('admin.tamans.import'))
+            ->assertForbidden();
+    }
+
+    public function test_operator_admin_nav_shows_ensiklopedia_not_sistem(): void
+    {
+        $operator = User::factory()->operatorTeams([], allWilayah: true)->create();
+
+        $this->actingAs($operator)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Ensiklopedia')
+            ->assertDontSee('Kelola Pengguna')
+            ->assertDontSee('Monitoring DPA');
+    }
 }

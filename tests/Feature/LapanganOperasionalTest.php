@@ -1,69 +1,45 @@
 <?php
 
-
-
 namespace Tests\Feature;
 
-
-
 use App\Models\Kelurahan;
-
+use App\Models\Pemangkasan;
 use App\Models\PemeliharaanTaman;
-
 use App\Models\Taman;
-
 use App\Models\TimPelaksana;
-
 use App\Models\User;
-
 use Database\Seeders\TimPelaksanaSeeder;
-
 use Database\Seeders\WilayahBatamSeeder;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Illuminate\Http\UploadedFile;
-
+use Tests\Support\PetugasTestHelpers;
 use Tests\TestCase;
 
-
-
 class LapanganOperasionalTest extends TestCase
-
 {
-
+    use PetugasTestHelpers;
     use RefreshDatabase;
 
-
-
     protected function setUp(): void
-
     {
 
         parent::setUp();
-
-
 
         $this->seed(WilayahBatamSeeder::class);
 
         $this->seed(TimPelaksanaSeeder::class);
 
-
-
         config([
 
-            'simapan.lapangan.pin' => '1234',
+            'simtaman.lapangan.pin' => '1234',
 
-            'simapan.lapangan.session_ttl_minutes' => 480,
+            'simtaman.lapangan.session_ttl_minutes' => 480,
 
         ]);
 
     }
 
-
-
     public function test_guest_is_redirected_to_pin_page_when_lapangan_pin_enabled(): void
-
     {
 
         $this->get(route('lapangan.index'))
@@ -72,15 +48,10 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_guest_without_pin_config_redirects_to_login(): void
-
     {
 
-        config(['simapan.lapangan.pin' => null]);
-
-
+        config(['simtaman.lapangan.pin' => null]);
 
         $this->get(route('lapangan.index'))
 
@@ -88,10 +59,7 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_guest_can_unlock_with_pin_and_access_menu(): void
-
     {
 
         $this->unlockLapangan();
@@ -108,17 +76,12 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_wrong_pin_is_rejected(): void
-
     {
 
         $this->post(route('lapangan.unlock.store'), ['pin' => '9999'])
 
             ->assertSessionHasErrors('pin');
-
-
 
         $this->get(route('lapangan.index'))
 
@@ -126,17 +89,12 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_guest_can_store_pemeliharaan_without_login(): void
-
     {
 
         $this->unlockLapangan();
 
-
-
-        $payload = [
+        $payload = $this->withPetugasForTeam([
 
             'tanggal' => now()->toDateString(),
 
@@ -146,9 +104,7 @@ class LapanganOperasionalTest extends TestCase
 
             'uraian_pekerjaan' => 'Pembersihan rutin tanpa login',
 
-        ];
-
-
+        ], 'Tim Wilayah 1');
 
         foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
 
@@ -156,15 +112,11 @@ class LapanganOperasionalTest extends TestCase
 
         }
 
-
-
         $this->post(route('lapangan.pemeliharaan.store', 'wilayah-1'), $payload)
 
             ->assertRedirect(route('lapangan.index'))
 
             ->assertSessionHas('success');
-
-
 
         $this->assertDatabaseHas('pemeliharaan_tamans', [
 
@@ -176,15 +128,10 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_viewer_cannot_access_lapangan(): void
-
     {
 
         $viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);
-
-
 
         $this->actingAs($viewer)
 
@@ -194,10 +141,7 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
-    public function test_operator_login_redirects_to_lapangan_menu(): void
-
+    public function test_operator_login_redirects_to_admin_backpanel(): void
     {
 
         $operator = User::factory()->create([
@@ -208,22 +152,17 @@ class LapanganOperasionalTest extends TestCase
 
         ]);
 
-
-
         $this->post(route('login'), [
 
             'email' => 'operator-lapangan@test.local',
 
             'password' => 'password',
 
-        ])->assertRedirect(route('lapangan.index'));
+        ])->assertRedirect(route('admin.dashboard'));
 
     }
 
-
-
     public function test_admin_login_still_redirects_to_admin_dashboard(): void
-
     {
 
         User::factory()->create([
@@ -233,8 +172,6 @@ class LapanganOperasionalTest extends TestCase
             'email' => 'admin-lapangan@test.local',
 
         ]);
-
-
 
         $this->post(route('login'), [
 
@@ -246,15 +183,10 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_admin_sees_all_lapangan_menu_items(): void
-
     {
 
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-
-
 
         $this->actingAs($admin)
 
@@ -274,17 +206,12 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_operator_menu_is_limited_to_assigned_team(): void
-
     {
 
         $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
 
         $operator = User::factory()->operatorTeams([$team1->id])->create();
-
-
 
         $this->actingAs($operator)
 
@@ -302,17 +229,12 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_operator_cannot_open_other_team_pemeliharaan_form(): void
-
     {
 
         $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
 
         $operator = User::factory()->operatorTeams([$team1->id])->create();
-
-
 
         $this->actingAs($operator)
 
@@ -322,19 +244,14 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     public function test_operator_can_store_pemeliharaan_for_own_team(): void
-
     {
 
         $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
 
         $operator = User::factory()->operatorTeams([$team1->id])->create();
 
-
-
-        $payload = [
+        $payload = $this->withPetugasForTeam([
 
             'tanggal' => now()->toDateString(),
 
@@ -344,17 +261,13 @@ class LapanganOperasionalTest extends TestCase
 
             'uraian_pekerjaan' => 'Pembersihan rutin dari lapangan',
 
-        ];
-
-
+        ], 'Tim Wilayah 1');
 
         foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
 
             $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
 
         }
-
-
 
         $this->actingAs($operator)
 
@@ -363,8 +276,6 @@ class LapanganOperasionalTest extends TestCase
             ->assertRedirect(route('lapangan.index'))
 
             ->assertSessionHas('success');
-
-
 
         $this->assertDatabaseHas('pemeliharaan_tamans', [
 
@@ -377,8 +288,6 @@ class LapanganOperasionalTest extends TestCase
         ]);
 
     }
-
-
 
     public function test_operator_can_update_permohonan_progress_from_lapangan(): void
     {
@@ -394,7 +303,7 @@ class LapanganOperasionalTest extends TestCase
             'deskripsi' => 'Deskripsi taman permohonan lapangan.',
         ]);
 
-        $permohonan = \App\Models\Pemangkasan::create([
+        $permohonan = Pemangkasan::create([
             'jenis_layanan' => 'Pemangkasan Pohon',
             'taman_id' => $taman->id,
             'lokasi_pohon' => $taman->nama_taman,
@@ -439,7 +348,7 @@ class LapanganOperasionalTest extends TestCase
 
         $this->assertDatabaseHas('pemangkasan_progres', [
             'pemangkasan_id' => $permohonan->id,
-            'jumlah_personil' => 5,
+            'jumlah_personil' => 2,
         ]);
     }
 
@@ -456,7 +365,7 @@ class LapanganOperasionalTest extends TestCase
             'deskripsi' => 'Deskripsi guest permohonan.',
         ]);
 
-        $permohonan = \App\Models\Pemangkasan::create([
+        $permohonan = Pemangkasan::create([
             'jenis_layanan' => 'Pemangkasan Pohon',
             'taman_id' => $taman->id,
             'lokasi_pohon' => $taman->nama_taman,
@@ -511,7 +420,7 @@ class LapanganOperasionalTest extends TestCase
             'deskripsi' => 'Deskripsi skip status.',
         ]);
 
-        $permohonan = \App\Models\Pemangkasan::create([
+        $permohonan = Pemangkasan::create([
             'jenis_layanan' => 'Pemangkasan Pohon',
             'taman_id' => $taman->id,
             'lokasi_pohon' => $taman->nama_taman,
@@ -554,7 +463,7 @@ class LapanganOperasionalTest extends TestCase
             'deskripsi' => 'Deskripsi selesai lapangan.',
         ]);
 
-        \App\Models\Pemangkasan::create([
+        Pemangkasan::create([
             'jenis_layanan' => 'Pemangkasan Pohon',
             'taman_id' => $taman->id,
             'lokasi_pohon' => $taman->nama_taman,
@@ -623,12 +532,9 @@ class LapanganOperasionalTest extends TestCase
     }
 
     public function test_pemeliharaan_form_hides_duplicate_admin_actions(): void
-
     {
 
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
-
-
 
         $this->actingAs($admin)
 
@@ -644,20 +550,17 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
-
-
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
     private function progressPayload(array $overrides = []): array
     {
-        $payload = [
+        $payload = $this->withPetugasForTeam([
             'tanggal_progres' => now()->toDateString(),
-            'jumlah_personil' => 5,
-        ];
+        ], 'Tim Wilayah 1', 2);
 
-        foreach (array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS) as $field) {
+        foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
             $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
         }
 
@@ -669,7 +572,4 @@ class LapanganOperasionalTest extends TestCase
         $this->post(route('lapangan.unlock.store'), ['pin' => $pin])
             ->assertRedirect(route('lapangan.index'));
     }
-
 }
-
-

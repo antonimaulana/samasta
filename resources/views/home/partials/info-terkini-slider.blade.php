@@ -20,7 +20,7 @@
     </div>
 
     <div class="info-terkini-panel overflow-hidden rounded-3xl border border-green-100 p-4 shadow-xl shadow-green-100/50 ring-1 ring-green-50 sm:p-6">
-        <div class="relative overflow-hidden rounded-2xl">
+        <div class="info-slide-viewport relative overflow-hidden rounded-2xl">
             <div id="info-slider-track" class="flex items-stretch transition-transform duration-500 ease-out">
             @php
                 $ensiklopediaSlideTags = $ensiklopediaKategoris
@@ -41,7 +41,7 @@
                 'heroLabel' => 'M² luas RTH terpelihara',
                 'statLeftValue' => number_format($rthTotalLokasi),
                 'statLeftLabel' => 'Lokasi',
-                'statRightValue' => '5',
+                'statRightValue' => (string) ($rthKategoriCount ?? 5),
                 'statRightLabel' => 'Kategori',
                 'heading' => 'Jumlah Luas Ruang Terbuka Hijau Kota Batam',
                 'description' => 'Disperakimtan mengelola taman kota, taman lingkungan, jalur hijau jalan, Kebun Raya Batam, dan TPU — seluruhnya dalam kondisi terpelihara.',

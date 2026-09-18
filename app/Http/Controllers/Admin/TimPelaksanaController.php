@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kelurahan;
 use App\Models\TimPelaksana;
+use App\Support\PetugasRosterBuilder;
 use App\Support\TimPelaksanaResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -60,6 +61,30 @@ class TimPelaksanaController extends Controller
         return redirect()
             ->route('admin.tim-pelaksanas.index')
             ->with('success', 'Wilayah kerja '.$timPelaksana->nama.' berhasil diperbarui.');
+    }
+
+    public function roster(Request $request, PetugasRosterBuilder $rosterBuilder): JsonResponse
+    {
+        $this->authorize('viewAny', TimPelaksana::class);
+
+        if ($request->filled('teams')) {
+            $teams = collect($request->input('teams'))
+                ->filter(fn ($team) => is_string($team) && $team !== '')
+                ->values()
+                ->all();
+
+            return response()->json([
+                'petugas' => $rosterBuilder->forTeamNames($teams),
+            ]);
+        }
+
+        $validated = $request->validate([
+            'tim' => ['required', 'string'],
+        ]);
+
+        return response()->json([
+            'petugas' => $rosterBuilder->forTeamName($validated['tim']),
+        ]);
     }
 
     public function suggest(Request $request, TimPelaksanaResolver $resolver): JsonResponse

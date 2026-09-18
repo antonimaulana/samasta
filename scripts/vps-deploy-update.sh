@@ -12,6 +12,11 @@ cd "$APP_DIR"
 echo "=== SIMTAMAN deploy update — $(date) ==="
 echo "Directory: $APP_DIR | Branch: $BRANCH"
 
+if [[ "${BACKUP_BEFORE_DEPLOY:-1}" == "1" ]]; then
+    echo "[backup] Snapshot sebelum pull..."
+    php artisan simtaman:backup --full --label=sebelum-deploy || echo "[WARN] Backup gagal — lanjut deploy (periksa manual)."
+fi
+
 git fetch origin
 git pull origin "$BRANCH"
 

@@ -100,6 +100,12 @@ class User extends Authenticatable
         return $this->isAdmin() || $this->isOperator();
     }
 
+    /** Pemeliharaan & progres permohonan di modul lapangan (Admin + Pengawas). */
+    public function canInputLapangan(): bool
+    {
+        return $this->canWrite() || $this->isPengawas();
+    }
+
     public function canDelete(): bool
     {
         return $this->isAdmin();
@@ -108,6 +114,29 @@ class User extends Authenticatable
     public function canManageUsers(): bool
     {
         return $this->isAdmin();
+    }
+
+    /** Menu Sistem: wilayah kerja, pengguna, log aktivitas. */
+    public function canManageSistem(): bool
+    {
+        return $this->canManageUsers();
+    }
+
+    /** Import CSV massal & operasi data sensitif setara administrator. */
+    public function canImportBulk(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    public function canAccessDpa(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    /** Backpanel operasional (bukan Pimpinan). */
+    public function canAccessAdminBackpanel(): bool
+    {
+        return $this->canWrite() || $this->isPengawas();
     }
 
     public function roleLabel(): string

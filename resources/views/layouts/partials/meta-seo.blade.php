@@ -2,7 +2,7 @@
     $metaDescription = trim($__env->yieldContent('meta_description', config('app.name').' — '.config('app.full_name').' Kota Batam.'));
     $metaTitle = trim($__env->yieldContent('title')).' — '.config('app.name');
     $metaUrl = url()->current();
-    $metaImage = asset('images/hero-taman-hijau.jpg');
+    $metaImage = asset('images/hero-welcome-batam.jpg');
 @endphp
 <meta name="description" content="{{ $metaDescription }}">
 <link rel="canonical" href="{{ $metaUrl }}">

@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('layanan:send-reminders')->dailyAt('07:00');
         $schedule->command('operational:send-digest')->dailyAt('07:30');
+        $schedule->command('simtaman:backup --full')->dailyAt('02:00');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
