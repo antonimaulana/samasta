@@ -34,37 +34,50 @@
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari nama taman, alamat, kategori, kontraktor...'])
 
-    <x-admin.data-table fixed class="taman-list-table">
-        <x-slot:header>
-            @include('admin.tamans.partials.list-mobile-sort', ['sortState' => $sortState])
-        </x-slot:header>
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        @include('admin.tamans.partials.list-mobile-sort', ['sortState' => $sortState])
 
-        <colgroup>
-            <col class="col-taman-nama" style="width: 28%">
-            <col class="col-taman-kategori" style="width: 14%">
-            <col class="col-taman-wilayah" style="width: 13%">
-            <col class="hidden md:table-column" style="width: 9%">
-            <col class="hidden md:table-column" style="width: 6%">
-            <col class="col-taman-status" style="width: 13%">
-            <col class="col-taman-aksi" style="width: 17%">
-        </colgroup>
-        @include('admin.tamans.partials.list-table-head', ['sortState' => $sortState])
-        <tbody class="divide-y divide-gray-100 bg-white">
+        <div class="md:hidden">
+            @include('admin.tamans.partials.list-mobile-header')
             @forelse ($tamans as $taman)
-                @include('admin.tamans.partials.list-table-row', ['taman' => $taman])
+                @include('admin.tamans.partials.list-mobile-card', ['taman' => $taman])
             @empty
-                <tr>
-                    <td colspan="7" class="px-4 py-10 text-center text-sm text-gray-500">
-                        Belum ada data taman.@if ($canWrite ?? auth()->user()?->canWrite()) <a href="{{ route('admin.tamans.create') }}" class="font-medium text-green-700 underline">Tambah sekarang</a>@endif
-                    </td>
-                </tr>
+                <p class="px-4 py-10 text-center text-sm text-gray-500">
+                    Belum ada data taman.@if ($canWrite ?? auth()->user()?->canWrite()) <a href="{{ route('admin.tamans.create') }}" class="font-medium text-green-700 underline">Tambah sekarang</a>@endif
+                </p>
             @endforelse
-        </tbody>
+        </div>
+
+        <div class="hidden md:block">
+            <x-admin.data-table fixed class="!rounded-none !border-0 !shadow-none">
+                <colgroup>
+                    <col style="width: 28%">
+                    <col style="width: 14%">
+                    <col style="width: 13%">
+                    <col style="width: 9%">
+                    <col style="width: 6%">
+                    <col style="width: 13%">
+                    <col style="width: 17%">
+                </colgroup>
+                @include('admin.tamans.partials.list-table-head', ['sortState' => $sortState])
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    @forelse ($tamans as $taman)
+                        @include('admin.tamans.partials.list-table-row', ['taman' => $taman])
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-10 text-center text-sm text-gray-500">
+                                Belum ada data taman.@if ($canWrite ?? auth()->user()?->canWrite()) <a href="{{ route('admin.tamans.create') }}" class="font-medium text-green-700 underline">Tambah sekarang</a>@endif
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </x-admin.data-table>
+        </div>
 
         @if ($tamans->hasPages())
-            <x-slot:footer>
+            <div class="border-t border-gray-200 px-4 py-3">
                 {{ $tamans->links() }}
-            </x-slot:footer>
+            </div>
         @endif
-    </x-admin.data-table>
+    </div>
 @endsection
