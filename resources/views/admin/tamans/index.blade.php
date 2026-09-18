@@ -34,19 +34,19 @@
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari nama taman, alamat, kategori, kontraktor...'])
 
-    <x-admin.data-table fixed>
+    <x-admin.data-table fixed class="taman-list-table">
         <x-slot:header>
             @include('admin.tamans.partials.list-mobile-sort', ['sortState' => $sortState])
         </x-slot:header>
 
         <colgroup>
-            <col style="width: 28%">
-            <col style="width: 14%">
-            <col style="width: 13%">
-            <col style="width: 9%">
+            <col class="col-taman-nama" style="width: 28%">
+            <col class="col-taman-kategori" style="width: 14%">
+            <col class="col-taman-wilayah" style="width: 13%">
+            <col class="hidden md:table-column" style="width: 9%">
             <col class="hidden md:table-column" style="width: 6%">
-            <col style="width: 13%">
-            <col style="width: 17%">
+            <col class="col-taman-status" style="width: 13%">
+            <col class="col-taman-aksi" style="width: 17%">
         </colgroup>
         @include('admin.tamans.partials.list-table-head', ['sortState' => $sortState])
         <tbody class="divide-y divide-gray-100 bg-white">

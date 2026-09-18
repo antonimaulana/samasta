@@ -21,3 +21,30 @@
 .leaflet-container {
     font: inherit;
 }
+
+@media (max-width: 767px) {
+    .taman-list-table table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .taman-list-table col.col-taman-nama {
+        width: 42%;
+    }
+
+    .taman-list-table col.col-taman-kategori {
+        width: 14%;
+    }
+
+    .taman-list-table col.col-taman-wilayah {
+        width: 18%;
+    }
+
+    .taman-list-table col.col-taman-status {
+        width: 16%;
+    }
+
+    .taman-list-table col.col-taman-aksi {
+        width: 10%;
+    }
+}
