@@ -18,7 +18,8 @@
                 transition: max-height 0.25s ease, opacity 0.2s ease;
             }
             .sidebar-menu-group:hover .sidebar-submenu,
-            .sidebar-menu-group.is-open .sidebar-submenu {
+            .sidebar-menu-group.is-open .sidebar-submenu,
+            .sidebar-menu-group:focus-within .sidebar-submenu {
                 max-height: min(75vh, 40rem);
                 opacity: 1;
                 pointer-events: auto;
@@ -28,6 +29,12 @@
                     max-height: 0;
                     opacity: 0;
                     pointer-events: none;
+                }
+                .sidebar-menu-group.is-open .sidebar-submenu,
+                .sidebar-menu-group:focus-within .sidebar-submenu {
+                    max-height: min(75vh, 40rem);
+                    opacity: 1;
+                    pointer-events: auto;
                 }
             }
             .sidebar-menu-trigger {
@@ -186,6 +193,7 @@
         </aside>
 
         @include('layouts.partials.mobile-nav-script')
+        @include('layouts.partials.sidebar-accordion-script')
         <script>
             window.onPageReady = window.onPageReady || function (fn) {
                 if (document.readyState === 'loading') {
@@ -196,6 +204,8 @@
             };
 
             window.onPageReady(function () {
+                initSidebarAccordion(document);
+
                 initMobileDrawer({
                     toggleId: 'admin-mobile-menu-toggle',
                     closeId: 'admin-mobile-menu-close',
@@ -208,25 +218,6 @@
                     color: '#ffffff',
                     shadow: '10px 0 40px rgba(0,0,0,0.25)',
                 });
-
-                const mobileDrawer = document.getElementById('admin-mobile-drawer');
-                if (mobileDrawer) {
-                    mobileDrawer.querySelectorAll('.sidebar-menu-group').forEach(function (group) {
-                        const trigger = group.querySelector('.sidebar-menu-trigger');
-                        if (!trigger) {
-                            return;
-                        }
-                        trigger.addEventListener('click', function () {
-                            const willOpen = !group.classList.contains('is-open');
-                            mobileDrawer.querySelectorAll('.sidebar-menu-group.is-open').forEach(function (other) {
-                                if (other !== group) {
-                                    other.classList.remove('is-open');
-                                }
-                            });
-                            group.classList.toggle('is-open', willOpen);
-                        });
-                    });
-                }
             });
         </script>
     @endunless

@@ -135,7 +135,7 @@
                 }
 
                 toggleEl.addEventListener('click', function (e) {
-                    if (desktopQuery.matches) return;
+                    e.preventDefault();
                     e.stopPropagation();
                     setOpen(dropdownEl.classList.contains('hidden'));
                 });
