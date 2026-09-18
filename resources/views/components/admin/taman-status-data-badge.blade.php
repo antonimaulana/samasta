@@ -12,12 +12,12 @@
     $dotClass = $isComplete ? 'bg-green-500' : 'bg-amber-500';
     $padding = match ($size) {
         'lg' => 'px-3 py-1.5 text-sm',
-        'table' => 'px-2 py-0.5 text-xs whitespace-nowrap',
-        default => 'px-2 py-0.5 text-xs whitespace-nowrap',
+        'table' => 'px-2 py-0.5 text-xs',
+        default => 'px-2 py-0.5 text-xs',
     };
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex items-center gap-1 rounded-full font-semibold ring-1 {$classes} {$padding}"]) }}>
-    <span class="inline-block h-2 w-2 rounded-full {{ $dotClass }}"></span>
-    {{ $text }}
+<span {{ $attributes->merge(['class' => "inline-flex max-w-full items-center gap-1 rounded-full font-semibold ring-1 {$classes} {$padding}"]) }}>
+    <span class="inline-block h-2 w-2 shrink-0 rounded-full {{ $dotClass }}"></span>
+    <span class="min-w-0">{{ $text }}</span>
 </span>

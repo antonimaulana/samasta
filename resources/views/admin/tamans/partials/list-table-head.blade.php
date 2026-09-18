@@ -8,7 +8,7 @@
     <tr>
         <x-admin.table-sort-header column="nama" label="Nama" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap" />
         @if ($showKategori)
-            <x-admin.table-sort-header column="kategori" label="Kategori" :sort="$sortState['sort']" :direction="$sortState['direction']" class="hidden whitespace-nowrap md:table-cell" />
+            <x-admin.table-sort-header column="kategori" label="Kategori" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap" />
         @endif
         <x-admin.table-sort-header column="wilayah" label="Wilayah" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap" />
         <x-admin.table-sort-header column="luasan" label="Luasan (M²)" align="right" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap" />

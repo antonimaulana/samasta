@@ -17,7 +17,7 @@
         @endif
     @endforeach
 
-    <div class="min-w-[220px] max-w-md">
+    <div class="w-full max-w-md sm:min-w-[220px]">
         <label for="table-search-input" class="mb-1 block text-sm font-medium text-gray-700">Cari</label>
         <input type="search" name="search" id="table-search-input"
                value="{{ request('search') }}"

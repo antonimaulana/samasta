@@ -52,9 +52,9 @@
         <thead class="bg-gray-50">
             <tr>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">No. Aduan</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
+                <th class="hidden px-4 py-3 text-left text-sm font-medium text-gray-700 sm:table-cell">Jenis</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pelapor</th>
+                <th class="hidden px-4 py-3 text-left text-sm font-medium text-gray-700 md:table-cell">Pelapor</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
                 <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
             </tr>
@@ -66,18 +66,22 @@
                                 <p class="font-mono text-xs font-bold text-gray-900">{{ $aduan->nomor_aduan }}</p>
                                 <p class="text-xs text-gray-500">{{ $aduan->created_at->format('d M Y H:i') }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="hidden px-4 py-3 sm:table-cell">
                                 <span class="rounded-full px-2 py-0.5 text-xs font-semibold {{ \App\Models\AduanMasyarakat::jenisBadgeClass($aduan->jenis_aduan) }}">
                                     {{ $aduan->jenis_aduan }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
-                                <p class="font-medium">{{ $aduan->lokasi }}</p>
+                            <td class="px-3 py-3 sm:px-4">
+                                <span class="mb-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold sm:hidden {{ \App\Models\AduanMasyarakat::jenisBadgeClass($aduan->jenis_aduan) }}">
+                                    {{ $aduan->jenis_aduan }}
+                                </span>
+                                <p class="break-words font-medium leading-snug">{{ $aduan->lokasi }}</p>
                                 @if ($aduan->taman)
-                                    <p class="text-xs text-gray-500">{{ $aduan->taman->nama_taman }}</p>
+                                    <p class="mt-0.5 break-words text-xs text-gray-500">{{ $aduan->taman->nama_taman }}</p>
                                 @endif
+                                <p class="mt-1 break-words text-xs text-gray-600 md:hidden">{{ $aduan->nama_pelapor }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="hidden px-4 py-3 md:table-cell">
                                 <p>{{ $aduan->nama_pelapor }}</p>
                                 @if ($aduan->kontak_pelapor)
                                     <p class="text-xs text-gray-500">{{ $aduan->kontak_pelapor }}</p>

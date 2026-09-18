@@ -199,28 +199,43 @@
                                 <span class="text-sm text-gray-500">{{ $items->count() }} taman · {{ number_format($items->sum('luasan'), 0, ',', '.') }} M²</span>
                             </div>
 
-                            <x-admin.data-table fixed>
-                                <colgroup>
-                                    <col style="width: 34%">
-                                    <col style="width: 16%">
-                                    <col style="width: 10%">
-                                    <col style="width: 8%">
-                                    <col style="width: 14%">
-                                    <col style="width: 18%">
-                                </colgroup>
-                                @include('admin.tamans.partials.list-table-head', [
-                                    'sortState' => $sortState,
-                                    'showKategori' => false,
-                                ])
-                                <tbody class="divide-y divide-gray-100">
+                            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                                <div class="md:hidden">
                                     @foreach ($items as $taman)
-                                        @include('admin.tamans.partials.list-table-row', [
+                                        @include('admin.tamans.partials.list-mobile-card', [
                                             'taman' => $taman,
                                             'showKategori' => false,
+                                            'showActions' => false,
                                         ])
                                     @endforeach
-                                </tbody>
-                            </x-admin.data-table>
+                                </div>
+                                <div class="hidden md:block">
+                                    <x-admin.data-table fixed class="!rounded-none !border-0 !shadow-none">
+                                        <colgroup>
+                                            <col style="width: 34%">
+                                            <col style="width: 16%">
+                                            <col style="width: 10%">
+                                            <col style="width: 8%">
+                                            <col style="width: 14%">
+                                            <col style="width: 18%">
+                                        </colgroup>
+                                        @include('admin.tamans.partials.list-table-head', [
+                                            'sortState' => $sortState,
+                                            'showKategori' => false,
+                                            'showActions' => false,
+                                        ])
+                                        <tbody class="divide-y divide-gray-100">
+                                            @foreach ($items as $taman)
+                                                @include('admin.tamans.partials.list-table-row', [
+                                                    'taman' => $taman,
+                                                    'showKategori' => false,
+                                                    'showActions' => false,
+                                                ])
+                                            @endforeach
+                                        </tbody>
+                                    </x-admin.data-table>
+                                </div>
+                            </div>
                         </div>
                     @endif
                 @endforeach
