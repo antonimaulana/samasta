@@ -13,12 +13,12 @@
     };
 @endphp
 
-<div class="flex flex-wrap items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-2.5 md:hidden">
-    <span class="text-xs font-medium text-gray-500">Urutkan:</span>
+<div class="flex flex-wrap items-center gap-1.5 border-b border-gray-200 bg-gray-50 px-3 py-1.5 md:hidden">
+    <span class="text-[11px] font-medium text-gray-500">Urutkan</span>
     @foreach (['nama' => 'Nama', 'status_data' => 'Status'] as $column => $label)
         @php $active = $sortState['sort'] === $column; @endphp
         <a href="{{ $makeSortUrl($column) }}"
-           class="rounded-full px-2.5 py-1 text-xs font-medium {{ $active ? 'bg-green-100 text-green-800' : 'bg-white text-gray-700 ring-1 ring-gray-200' }}">
+           class="rounded-md px-2 py-0.5 text-[11px] font-medium {{ $active ? 'bg-green-100 text-green-800' : 'bg-white text-gray-700 ring-1 ring-gray-200' }}">
             {{ $label }}
             @if ($active)
                 <span aria-hidden="true">{{ $sortState['direction'] === 'asc' ? '↑' : '↓' }}</span>

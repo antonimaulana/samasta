@@ -38,6 +38,7 @@
         @include('admin.tamans.partials.list-mobile-sort', ['sortState' => $sortState])
 
         <div class="md:hidden">
+            @include('admin.tamans.partials.list-mobile-header')
             @forelse ($tamans as $taman)
                 @include('admin.tamans.partials.list-mobile-card', ['taman' => $taman])
             @empty

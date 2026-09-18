@@ -201,6 +201,7 @@
 
                             <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                                 <div class="md:hidden">
+                                    @include('admin.tamans.partials.list-mobile-header', ['showActions' => false])
                                     @foreach ($items as $taman)
                                         @include('admin.tamans.partials.list-mobile-card', [
                                             'taman' => $taman,
