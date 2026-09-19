@@ -115,7 +115,7 @@
 
                 <div id="wilayah-resolve-notice" class="mb-2 hidden rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700"></div>
                 <div id="taman-location-map" class="overflow-hidden rounded-lg border border-gray-300 bg-gray-200"></div>
-                <p class="mt-2 text-xs text-gray-500">Kelurahan/kecamatan terisi otomatis setelah koordinat ditetapkan. Izinkan akses lokasi di browser/HP saat menggunakan GPS.</p>
+                <p class="mt-2 text-xs text-gray-500">Kelurahan/kecamatan terisi otomatis setelah koordinat ditetapkan. Tombol GPS hanya berfungsi jika situs dibuka lewat <strong>HTTPS</strong> (bukan <code class="text-[11px]">http://</code> IP). Tanpa HTTPS, gunakan klik peta atau isi latitude/longitude manual.</p>
             </div>
         </div>
     </x-admin.rth-section>

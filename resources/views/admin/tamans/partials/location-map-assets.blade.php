@@ -229,9 +229,38 @@
                 refreshMapSize();
             });
 
-            tagLocationBtn?.addEventListener('click', function () {
+            function gpsBlockedReason() {
+                if (!window.isSecureContext) {
+                    return 'Tag GPS membutuhkan HTTPS. Situs ini dibuka lewat HTTP (mis. alamat IP tanpa gembok/SSL), sehingga browser memblokir lokasi meskipun izin HP sudah aktif. Pasang HTTPS di server, atau gunakan klik peta / isi koordinat manual.';
+                }
                 if (!navigator.geolocation) {
-                    showWilayahNotice('Browser tidak mendukung GPS. Gunakan klik peta atau isi koordinat manual.', false);
+                    return 'Browser tidak mendukung GPS. Gunakan klik peta atau isi koordinat manual.';
+                }
+
+                return null;
+            }
+
+            function syncGpsButtonAvailability() {
+                const blocked = gpsBlockedReason();
+                if (!tagLocationBtn) {
+                    return;
+                }
+                if (blocked) {
+                    tagLocationBtn.disabled = true;
+                    tagLocationBtn.title = blocked;
+                    showWilayahNotice(blocked, false);
+                } else {
+                    tagLocationBtn.disabled = false;
+                    tagLocationBtn.removeAttribute('title');
+                }
+            }
+
+            syncGpsButtonAvailability();
+
+            tagLocationBtn?.addEventListener('click', function () {
+                const blocked = gpsBlockedReason();
+                if (blocked) {
+                    showWilayahNotice(blocked, false);
                     return;
                 }
 
@@ -256,9 +285,16 @@
                         }
                     },
                     function (error) {
-                        const message = error.code === error.PERMISSION_DENIED
-                            ? 'Akses lokasi ditolak. Aktifkan izin GPS/lokasi untuk situs ini.'
-                            : 'Tidak dapat mengambil GPS. Coba lagi atau tentukan titik di peta.';
+                        let message = 'Tidak dapat mengambil GPS. Coba lagi atau tentukan titik di peta.';
+                        if (error.code === error.PERMISSION_DENIED) {
+                            message = window.isSecureContext
+                                ? 'Akses lokasi ditolak. Di browser, buka ikon gembok/info di address bar → Izin → Lokasi → Izinkan, lalu muat ulang halaman.'
+                                : gpsBlockedReason() || message;
+                        } else if (error.code === error.TIMEOUT) {
+                            message = 'GPS timeout. Pastikan sinyal GPS/HP aktif, lalu coba lagi.';
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            message = 'Posisi GPS tidak tersedia. Coba di luar ruangan atau tentukan titik di peta.';
+                        }
                         showWilayahNotice(message, false);
                         tagLocationBtn.disabled = false;
                         if (tagLocationLabel) {
