@@ -11,7 +11,7 @@ class EnsureAdminManage
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user()?->canManageUsers()) {
-            abort(403, 'Hanya Administrator yang dapat mengakses menu Sistem dan Monitoring DPA.');
+            abort(403, 'Hanya Administrator yang dapat mengakses menu Sistem.');
         }
 
         return $next($request);

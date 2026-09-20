@@ -135,10 +135,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('evaluasi.kelengkapan-data.index');
     Route::get('evaluasi/kelengkapan-data/export/pdf', [EvaluasiKelengkapanDataController::class, 'exportPdf'])
         ->name('evaluasi.kelengkapan-data.export-pdf');
-    Route::get('evaluasi/rap-konsolidasi', [EvaluasiRapKonsolidasiController::class, 'index'])
-        ->name('evaluasi.rap-konsolidasi.index');
-    Route::get('evaluasi/rap-konsolidasi/export/pdf', [EvaluasiRapKonsolidasiController::class, 'exportPdf'])
-        ->name('evaluasi.rap-konsolidasi.export-pdf');
+    Route::middleware('admin.feature:rap_konsolidasi')->group(function () {
+        Route::get('evaluasi/rap-konsolidasi', [EvaluasiRapKonsolidasiController::class, 'index'])
+            ->name('evaluasi.rap-konsolidasi.index');
+        Route::get('evaluasi/rap-konsolidasi/export/pdf', [EvaluasiRapKonsolidasiController::class, 'exportPdf'])
+            ->name('evaluasi.rap-konsolidasi.export-pdf');
+    });
     Route::get('kinerja-pertamanan-laporan', function (Request $request) {
         return redirect()->route('admin.operasional-pertamanan-laporan.index', $request->query());
     })->name('kinerja-pertamanan-laporan.index');
@@ -179,7 +181,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::resource('users', UserController::class)->except(['show']);
 
-        Route::prefix('dpa')->name('dpa.')->group(function () {
+        Route::middleware('admin.feature:dpa_monitoring')->prefix('dpa')->name('dpa.')->group(function () {
             Route::get('/', [DpaDashboardController::class, 'index'])->name('dashboard');
             Route::get('tahun-anggarans/create', [DpaTahunAnggaranController::class, 'create'])->name('tahun-anggarans.create');
             Route::post('tahun-anggarans', [DpaTahunAnggaranController::class, 'store'])->name('tahun-anggarans.store');

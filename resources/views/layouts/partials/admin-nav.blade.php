@@ -1,5 +1,4 @@
 ﻿@php
-    $dpaActive = request()->routeIs('admin.dpa.*');
     $tamanActive = request()->routeIs('admin.tamans.*', 'admin.taman-laporan.*');
     $bibitActive = request()->routeIs('admin.bibits.*', 'admin.bibit-masuks.*', 'admin.bibit-keluars.*', 'admin.bibit-laporan.*');
     $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.alat-sarana-operasionals.*');
@@ -126,10 +125,6 @@
                class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.kelengkapan-data.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
                 Kelengkapan Data
             </a>
-            <a href="{{ route('admin.evaluasi.rap-konsolidasi.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm font-semibold {{ request()->routeIs('admin.evaluasi.rap-konsolidasi.*') ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-gray-200' }}">
-                RAP Konsolidasi
-            </a>
         </div>
     </div>
 
@@ -217,14 +212,6 @@
                 </a>
             </div>
         </div>
-
-        <div class="my-3 border-t border-gray-700"></div>
-        <p class="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Menu Monitoring DPA</p>
-
-        <a href="{{ route('admin.dpa.dashboard') }}"
-           class="block rounded-lg px-3 py-2 text-sm {{ $dpaActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-            Monitoring DPA
-        </a>
     @endif
 
         <a href="{{ route('home') }}"

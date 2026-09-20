@@ -58,4 +58,21 @@ return [
         'session_ttl_minutes' => (int) env('SIMTAMAN_LAPANGAN_SESSION_TTL', env('SIMAPAN_LAPANGAN_SESSION_TTL', 480)),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Fitur admin opsional (nonaktif = route 404, tidak tampil di menu)
+    |--------------------------------------------------------------------------
+    */
+
+    'features' => [
+        'rap_konsolidasi' => filter_var(
+            env('SIMTAMAN_FEATURE_RAP_KONSOLIDASI', false),
+            FILTER_VALIDATE_BOOL
+        ),
+        'dpa_monitoring' => filter_var(
+            env('SIMTAMAN_FEATURE_DPA_MONITORING', false),
+            FILTER_VALIDATE_BOOL
+        ),
+    ],
+
 ];

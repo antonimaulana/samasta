@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.audit' => \App\Http\Middleware\LogAdminActivity::class,
             'admin.viewer.scope' => \App\Http\Middleware\EnsureViewerScope::class,
             'lapangan.access' => \App\Http\Middleware\EnsureLapanganAccess::class,
+            'admin.feature' => \App\Http\Middleware\EnsureAdminFeature::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {

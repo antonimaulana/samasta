@@ -18,8 +18,21 @@ class EvaluasiRapKonsolidasiTest extends TestCase
     {
         parent::setUp();
 
+        config(['simtaman.features.rap_konsolidasi' => true]);
+
         $this->seed(WilayahBatamSeeder::class);
         $this->seed(TimPelaksanaSeeder::class);
+    }
+
+    public function test_rap_konsolidasi_returns_404_when_feature_disabled(): void
+    {
+        config(['simtaman.features.rap_konsolidasi' => false]);
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.evaluasi.rap-konsolidasi.index'))
+            ->assertNotFound();
     }
 
     public function test_admin_can_view_rap_konsolidasi_page(): void

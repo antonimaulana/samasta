@@ -22,7 +22,20 @@ class DpaMonitoringTest extends TestCase
     {
         parent::setUp();
 
+        config(['simtaman.features.dpa_monitoring' => true]);
+
         $this->seed(DpaDocumentTemplateSeeder::class);
+    }
+
+    public function test_dpa_routes_return_404_when_feature_disabled(): void
+    {
+        config(['simtaman.features.dpa_monitoring' => false]);
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dpa.dashboard'))
+            ->assertNotFound();
     }
 
     public function test_admin_can_access_dpa_dashboard(): void
