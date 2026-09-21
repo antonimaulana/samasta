@@ -26,8 +26,13 @@
             @foreach ($fields as $field)
                 @php
                     $label = \App\Models\PemeliharaanTaman::FOTO_FIELDS[$field];
-                    $hasExisting = filled($record?->{$field});
-                    $mustUpload = $required && ! $hasExisting;
+                    $storedPath = $record?->{$field};
+                    $hasStoredPath = filled($storedPath);
+                    $fotoUrl = $record instanceof \App\Models\PemeliharaanTaman
+                        ? $record->fotoUrl($field)
+                        : ($record instanceof \App\Models\PemangkasanProgres ? $record->fotoUrl($field) : null);
+                    $hasExistingFile = filled($fotoUrl);
+                    $mustUpload = $required && ! $hasExistingFile;
                 @endphp
                 <div @class([
                     'rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/50 p-4' => $isLapangan,
@@ -47,12 +52,22 @@
                     @error($field)
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
-                    @if ($hasExisting)
-                        <img src="{{ $record->fotoUrl($field) }}" alt="{{ $label }}"
-                             @class([
-                                 'mt-3 h-32 w-full rounded-lg border object-cover' => ! $isLapangan,
-                                 'mt-3 h-36 w-full rounded-xl border border-gray-200 object-cover shadow-sm' => $isLapangan,
-                             ])>
+                    @if ($hasExistingFile)
+                        <a href="{{ $fotoUrl }}" target="_blank" rel="noopener" class="mt-3 block">
+                            <img src="{{ $fotoUrl }}" alt="{{ $label }}"
+                                 @class([
+                                     'h-32 w-full rounded-lg border object-cover' => ! $isLapangan,
+                                     'h-36 w-full rounded-xl border border-gray-200 object-cover shadow-sm' => $isLapangan,
+                                 ])>
+                        </a>
+                        <p class="mt-1 text-xs text-gray-500">Ketuk foto untuk lihat ukuran penuh</p>
+                    @elseif ($hasStoredPath)
+                        <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                            File foto tercatat di database tetapi tidak ditemukan di server.
+                            Unggah ulang foto ini, atau minta admin menjalankan
+                            <code class="rounded bg-amber-100 px-1">php artisan storage:link</code>
+                            dan cek folder <code class="rounded bg-amber-100 px-1">storage/app/public</code>.
+                        </div>
                     @endif
                 </div>
             @endforeach

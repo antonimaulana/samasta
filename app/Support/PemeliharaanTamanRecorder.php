@@ -7,6 +7,8 @@ use App\Models\Taman;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -16,7 +18,7 @@ class PemeliharaanTamanRecorder
     {
         $validated = $this->validate($request, $user);
         $this->applyTamanLokasi($request, $validated);
-        $this->storeUploadedFotos($request, $validated);
+        $this->storeUploadedFotos($request, $validated, requireAll: true);
         $armadaRows = ArmadaAssignment::extractRows(
             $request,
             ArmadaAssignment::requiresArmadaForTim($validated['tim']),
@@ -131,14 +133,41 @@ class PemeliharaanTamanRecorder
     /**
      * @param  array<string, mixed>  $validated
      */
-    private function storeUploadedFotos(Request $request, array &$validated): void
+    private function storeUploadedFotos(Request $request, array &$validated, bool $requireAll = false): void
     {
         foreach (PemeliharaanTaman::fotoFieldKeys() as $field) {
+            if (($validated[$field] ?? null) instanceof UploadedFile) {
+                unset($validated[$field]);
+            }
+
             if (! $request->hasFile($field)) {
                 continue;
             }
 
-            $validated[$field] = $request->file($field)->store('pemeliharaan-taman', 'public');
+            $path = $request->file($field)->store('pemeliharaan-taman', 'public');
+
+            if (! $path || ! Storage::disk('public')->exists($path)) {
+                throw ValidationException::withMessages([
+                    $field => 'Foto gagal disimpan ke server. Periksa izin folder storage atau hubungi administrator.',
+                ]);
+            }
+
+            $validated[$field] = $path;
+        }
+
+        if (! $requireAll) {
+            return;
+        }
+
+        $missing = [];
+        foreach (PemeliharaanTaman::fotoFieldKeys() as $field) {
+            if (! filled($validated[$field] ?? null) || ! Storage::disk('public')->exists((string) $validated[$field])) {
+                $missing[$field] = 'Foto wajib belum tersimpan dengan benar. Unggah ulang.';
+            }
+        }
+
+        if ($missing !== []) {
+            throw ValidationException::withMessages($missing);
         }
     }
 

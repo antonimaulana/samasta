@@ -443,6 +443,10 @@ class PemeliharaanTamanController extends Controller
     private function storeUploadedFotos(Request $request, array &$validated, ?PemeliharaanTaman $kinerja = null): void
     {
         foreach (PemeliharaanTaman::fotoFieldKeys() as $field) {
+            if (($validated[$field] ?? null) instanceof \Illuminate\Http\UploadedFile) {
+                unset($validated[$field]);
+            }
+
             if (! $request->hasFile($field)) {
                 continue;
             }
@@ -451,7 +455,15 @@ class PemeliharaanTamanController extends Controller
                 Storage::disk('public')->delete($kinerja->{$field});
             }
 
-            $validated[$field] = $request->file($field)->store('pemeliharaan-taman', 'public');
+            $path = $request->file($field)->store('pemeliharaan-taman', 'public');
+
+            if (! $path || ! Storage::disk('public')->exists($path)) {
+                throw ValidationException::withMessages([
+                    $field => 'Foto gagal disimpan ke server. Periksa izin folder storage atau hubungi administrator.',
+                ]);
+            }
+
+            $validated[$field] = $path;
         }
     }
 

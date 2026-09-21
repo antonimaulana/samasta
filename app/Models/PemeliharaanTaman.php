@@ -208,11 +208,18 @@ class PemeliharaanTaman extends Model
     {
         $path = $this->{$field};
 
-        if (! $path) {
+        if (! $path || ! Storage::disk('public')->exists($path)) {
             return null;
         }
 
-        return asset('storage/'.$path);
+        return Storage::disk('public')->url($path);
+    }
+
+    public function hasFotoFile(string $field): bool
+    {
+        $path = $this->{$field};
+
+        return filled($path) && Storage::disk('public')->exists($path);
     }
 
     public function fotoBase64(string $field): ?string
