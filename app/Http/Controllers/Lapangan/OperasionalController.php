@@ -120,7 +120,11 @@ class OperasionalController extends Controller
 
         $request->merge(['tim' => $menuItem['tim']]);
 
-        $pemeliharaan = app(PemeliharaanTamanRecorder::class)->record($request, $request->user());
+        try {
+            $pemeliharaan = app(PemeliharaanTamanRecorder::class)->record($request, $request->user());
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception->redirectTo(route('lapangan.pemeliharaan.create', $menuItem['slug']));
+        }
 
         return redirect()
             ->route('lapangan.index')

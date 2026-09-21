@@ -220,6 +220,10 @@ function initSearchableSelects() {
         form.dataset.searchableSubmitBound = 'true';
 
         form.addEventListener('submit', function (event) {
+            if (form.id === 'lapangan-pemeliharaan-form' || form.dataset.lapanganSubmitOk === '1') {
+                return;
+            }
+
             form.querySelectorAll('[data-searchable-required="true"]').forEach(function (hidden) {
                 const container = hidden.closest('[data-searchable-select]');
 
@@ -237,6 +241,18 @@ function initSearchableSelects() {
                     event.preventDefault();
                     input?.focus();
                     input?.classList.add('border-red-500', 'ring-1', 'ring-red-500');
+
+                    let errorEl = container.querySelector('[data-searchable-error]');
+
+                    if (!errorEl) {
+                        errorEl = document.createElement('p');
+                        errorEl.dataset.searchableError = 'true';
+                        errorEl.className = 'mt-1 text-xs font-medium text-red-600';
+                        container.appendChild(errorEl);
+                    }
+
+                    errorEl.textContent = 'Pilih taman dari daftar (ketuk nama taman). Mengetik saja tidak cukup.';
+                    errorEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
             });
         });

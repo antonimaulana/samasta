@@ -5,6 +5,17 @@
     $isTimArmada = $selectedTim === \App\Models\PemeliharaanTaman::TIM_ARMADA;
 @endphp
 
+@if ($errors->any())
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p class="font-semibold">Form belum bisa disimpan:</p>
+        <ul class="mt-1 list-inside list-disc space-y-0.5">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="grid gap-6 md:grid-cols-2">
     <div>
         <x-operasional-pelaksanaan-datetime
@@ -177,8 +188,10 @@
                     if (isManual) {
                         tamanHiddenInput.value = '';
                         tamanHiddenInput.removeAttribute('data-searchable-required');
+                        tamanHiddenInput.removeAttribute('required');
                     } else {
                         tamanHiddenInput.setAttribute('data-searchable-required', 'true');
+                        tamanHiddenInput.setAttribute('required', 'required');
                     }
                 }
 
@@ -201,6 +214,18 @@
 
             lokasiLuarCheckbox?.addEventListener('change', toggleLokasiMode);
             toggleLokasiMode();
+
+            const pemeliharaanForm = document.getElementById('pemeliharaan-taman-form');
+            pemeliharaanForm?.addEventListener('submit', function (event) {
+                if (pemeliharaanForm.checkValidity()) {
+                    return;
+                }
+
+                event.preventDefault();
+                pemeliharaanForm.reportValidity();
+                const firstInvalid = pemeliharaanForm.querySelector(':invalid');
+                firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         });
     </script>
 @endpush

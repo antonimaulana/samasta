@@ -24,7 +24,18 @@
             </div>
         </div>
 
-        <form action="{{ route('lapangan.pemeliharaan.store', $menuItem['slug']) }}" method="POST" enctype="multipart/form-data">
+        <div id="lapangan-pemeliharaan-errors"
+             class="mb-4 hidden rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900"
+             role="alert">
+            <p class="font-bold">Belum bisa disimpan — lengkapi dulu:</p>
+            <ul class="mt-2 list-inside list-disc space-y-1" data-error-list></ul>
+        </div>
+
+        <form id="lapangan-pemeliharaan-form"
+              data-foto-fields="{{ json_encode(array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS)) }}"
+              action="{{ route('lapangan.pemeliharaan.store', $menuItem['slug']) }}"
+              method="POST"
+              enctype="multipart/form-data">
             @csrf
             @include('admin.pemeliharaan_tamans._form', [
                 'operatorTim' => $tim,
@@ -50,3 +61,7 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/lapangan-pemeliharaan-form.js') }}?v=2"></script>
+@endpush

@@ -87,7 +87,7 @@
         <p class="mt-1">{{ config('app.name') }} · Input Lapangan</p>
     </footer>
 
-    <script src="{{ asset('js/searchable-select.js') }}"></script>
+    <script src="{{ asset('js/searchable-select.js') }}?v=2"></script>
     @stack('scripts')
 </body>
 </html>

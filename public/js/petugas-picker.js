@@ -252,11 +252,17 @@
         fieldInput?.addEventListener('blur', function () {
             setTimeout(function () {
                 if (!root.contains(document.activeElement)) {
+                    addFromQueryExact();
                     hideDropdown();
                     currentQuery = '';
-                    syncField();
+                    syncInputs();
                 }
             }, 150);
+        });
+
+        root.addEventListener('petugas-picker:commit-query', function () {
+            addFromQueryExact();
+            syncInputs();
         });
 
         root.querySelector('[data-petugas-clear]')?.addEventListener('click', function () {
@@ -337,13 +343,20 @@
         }
 
         root.closest('form')?.addEventListener('submit', function (event) {
+            const form = event.currentTarget;
+            if (form?.id === 'lapangan-pemeliharaan-form' || form?.dataset.lapanganSubmitOk === '1') {
+                return;
+            }
+
             if (!required || roster.length === 0) {
                 return;
             }
 
             if (selected.size === 0) {
                 event.preventDefault();
-                alert('Pilih minimal satu petugas pelaksana.');
+                fieldInput?.focus();
+                fieldInput?.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                fieldInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         });
 
