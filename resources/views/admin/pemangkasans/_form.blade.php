@@ -8,6 +8,17 @@
     $tamans = $tamans ?? collect();
 @endphp
 
+@if ($errors->any())
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p class="font-semibold">Form belum bisa disimpan:</p>
+        <ul class="mt-1 list-inside list-disc space-y-0.5">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="grid gap-6 md:grid-cols-2">
     <div class="md:col-span-2">
         <label for="jenis_layanan" class="mb-1 block text-sm font-medium text-gray-700">Jenis Operasional *</label>
@@ -547,6 +558,18 @@
 
             if (pemangkasanForm) {
                 pemangkasanForm.addEventListener('submit', function (event) {
+                    if (selectedPelaksanaTeams().length === 0) {
+                        event.preventDefault();
+                        alert('Centang minimal satu tim pelaksana sebelum menyimpan.');
+                        return;
+                    }
+
+                    if (! pemangkasanForm.checkValidity()) {
+                        event.preventDefault();
+                        pemangkasanForm.reportValidity();
+                        return;
+                    }
+
                     if (scheduleConflicts.length === 0 || scheduleConflictConfirmed) {
                         return;
                     }
@@ -555,7 +578,11 @@
 
                     if (confirm(formatConflictMessage(scheduleConflicts))) {
                         scheduleConflictConfirmed = true;
-                        pemangkasanForm.submit();
+                        if (typeof pemangkasanForm.requestSubmit === 'function') {
+                            pemangkasanForm.requestSubmit();
+                        } else {
+                            pemangkasanForm.submit();
+                        }
                     }
                 });
             }

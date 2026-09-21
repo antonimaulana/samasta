@@ -108,8 +108,6 @@
 
                     variant="lapangan"
 
-                    :blank-initial="true"
-
                 />
 
                 <p class="mt-2 inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">

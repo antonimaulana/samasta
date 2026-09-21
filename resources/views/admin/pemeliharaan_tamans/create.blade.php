@@ -5,7 +5,7 @@
 
 @section('content')
     <div class="max-w-4xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <form action="{{ route('admin.pemeliharaan-tamans.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="pemeliharaan-taman-form" action="{{ route('admin.pemeliharaan-tamans.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @include('admin.pemeliharaan_tamans._form')
         </form>

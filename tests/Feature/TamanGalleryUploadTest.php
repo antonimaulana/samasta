@@ -59,6 +59,35 @@ class TamanGalleryUploadTest extends TestCase
         $this->assertSame(Taman::GALLERY_RECOMMENDED_HEIGHT, $size[1]);
     }
 
+    public function test_admin_can_upload_gallery_photo_larger_than_two_megabytes(): void
+    {
+        Storage::fake('public');
+        $this->seed(WilayahBatamSeeder::class);
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $kelurahan = Kelurahan::query()->first();
+        $this->assertNotNull($kelurahan);
+
+        $response = $this->actingAs($admin)->post(route('admin.tamans.store'), [
+            'nama_taman' => 'Taman Uji Foto Besar',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahan->id,
+            'luasan' => 1000,
+            'alamat' => 'Jl. Uji',
+            'deskripsi' => 'Deskripsi uji upload foto tanpa batas 2 MB.',
+            'fotos' => [
+                UploadedFile::fake()->image('besar.jpg', 1200, 800)->size(3072),
+            ],
+        ]);
+
+        $response->assertRedirect(route('admin.tamans.index'));
+        $response->assertSessionDoesntHaveErrors('fotos.0');
+
+        $this->assertTrue(
+            Taman::query()->where('nama_taman', 'Taman Uji Foto Besar')->exists()
+        );
+    }
+
     public function test_deleting_gallery_image_from_edit_redirects_back_to_edit(): void
     {
         Storage::fake('public');

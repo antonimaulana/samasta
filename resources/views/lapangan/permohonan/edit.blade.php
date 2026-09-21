@@ -79,7 +79,10 @@
     </div>
 
     <div class="lapangan-card p-5 sm:p-6">
-        <form action="{{ route('lapangan.permohonan.update', $permohonan) }}" method="POST" enctype="multipart/form-data">
+        <form id="lapangan-permohonan-progres-form"
+              action="{{ route('lapangan.permohonan.update', $permohonan) }}"
+              method="POST"
+              enctype="multipart/form-data">
             @csrf
 
             <div class="mb-5 flex items-center gap-2">
@@ -109,3 +112,24 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('lapangan-permohonan-progres-form');
+            if (!form) {
+                return;
+            }
+
+            form.addEventListener('submit', function (event) {
+                if (form.checkValidity()) {
+                    return;
+                }
+
+                event.preventDefault();
+                form.reportValidity();
+                form.querySelector(':invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+    </script>
+@endpush

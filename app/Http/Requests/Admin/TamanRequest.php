@@ -74,9 +74,10 @@ abstract class TamanRequest extends FormRequest
             'kontraktor' => ['nullable', 'string', 'max:255'],
             'konsultan_perencana' => ['nullable', 'string', 'max:255'],
             'data_verified_at' => ['nullable', 'date'],
-            'foto' => ['nullable', 'image', 'max:'.Taman::GALLERY_MAX_SIZE_KB],
+            // Size cap deferred until documentation team confirms the official limit.
+            'foto' => ['nullable', 'image'],
             'fotos' => ['nullable', 'array'],
-            'fotos.*' => ['image', 'max:'.Taman::GALLERY_MAX_SIZE_KB],
+            'fotos.*' => ['image'],
             'hapus_fotos' => ['nullable', 'array'],
             'hapus_fotos.*' => ['integer', 'exists:taman_images,id'],
         ];
@@ -88,7 +89,6 @@ abstract class TamanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'fotos.*.max' => 'Setiap foto maksimal '.Taman::GALLERY_MAX_SIZE_KB.' KB.',
             'fasilitas_items.*.kondisi.required' => 'Pilih kondisi untuk setiap fasilitas yang diisi.',
             'fasilitas_items.*.kondisi.in' => 'Kondisi fasilitas harus Baik, Rusak Ringan, atau Rusak Berat.',
             'fasilitas_items.*.nama.required' => 'Pilih fasilitas atau isi nama fasilitas.',

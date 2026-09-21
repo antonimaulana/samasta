@@ -58,8 +58,6 @@ class Taman extends Model
 
     public const GALLERY_RECOMMENDED_HEIGHT = 1080;
 
-    public const GALLERY_MAX_SIZE_KB = 2048;
-
     /** Pusat Kota Batam — default peta & koordinat kosong (1°N, 104°E). */
     public const DEFAULT_LATITUDE = 1.0456;
 

@@ -495,6 +495,42 @@ class LapanganOperasionalTest extends TestCase
             ->assertRedirect(route('lapangan.permohonan.index'));
     }
 
+    public function test_guest_can_store_pemeliharaan_with_taman_in_wilayah(): void
+    {
+        $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
+        $kelurahanTeam1 = $team1->kelurahans()->firstOrFail();
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Simpan Lapangan',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahanTeam1->id,
+            'luasan' => 500,
+            'alamat' => 'Alamat taman simpan lapangan',
+            'deskripsi' => 'Deskripsi taman.',
+        ]);
+
+        $this->unlockLapangan();
+
+        $payload = $this->withPetugasForTeam([
+            'tanggal' => now()->format('Y-m-d\TH:i'),
+            'taman_id' => $taman->id,
+            'uraian_pekerjaan' => 'Pembersihan dari form taman',
+        ], 'Tim Wilayah 1');
+
+        foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
+            $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
+        }
+
+        $this->post(route('lapangan.pemeliharaan.store', 'wilayah-1'), $payload)
+            ->assertRedirect(route('lapangan.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('pemeliharaan_tamans', [
+            'tim' => 'Tim Wilayah 1',
+            'taman_id' => $taman->id,
+        ]);
+    }
+
     public function test_lapangan_pemeliharaan_form_shows_team_scoped_locations(): void
     {
         $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
@@ -527,6 +563,7 @@ class LapanganOperasionalTest extends TestCase
             ->assertSee('Lokasi di luar wilayah pemeliharaan')
             ->assertSee($tamanWilayah1->nama_taman)
             ->assertSee('js/searchable-select.js', false)
+            ->assertSee('js/lapangan-pemeliharaan-form.js', false)
             ->assertSee('data-searchable-select', false)
             ->assertDontSee('Taman Lapangan W2');
     }
