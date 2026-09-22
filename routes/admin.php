@@ -53,6 +53,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::get('dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export-pdf');
     Route::get('tamans/resolve-wilayah', [AdminTamanController::class, 'resolveWilayah'])
         ->name('tamans.resolve-wilayah');
+    Route::get('tamans/export/csv', [AdminTamanController::class, 'exportCsv'])
+        ->name('tamans.export.csv');
     Route::get('tamans/import/template', [AdminTamanController::class, 'importTemplate'])
         ->name('tamans.import.template');
     Route::get('tamans/import', [AdminTamanController::class, 'importForm'])

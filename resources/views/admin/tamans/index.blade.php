@@ -8,6 +8,10 @@
         <p class="text-sm text-gray-600">Kelola data RTH/taman yang terdaftar di sistem.</p>
         <div class="flex flex-wrap gap-2">
         <x-admin.can-manage-users>
+        <a href="{{ route('admin.tamans.export.csv', request()->only(['status_data', 'search'])) }}"
+           class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-100">
+            Export CSV
+        </a>
         <a href="{{ route('admin.tamans.import') }}"
            class="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm font-medium text-green-800 hover:bg-green-100">
             Import CSV

@@ -14,6 +14,7 @@ use App\Support\OperatorWilayahScope;
 use App\Support\TamanTableSort;
 use App\Support\TableSearch;
 use App\Support\KelurahanResolver;
+use App\Support\TamanCsvExporter;
 use App\Support\TamanCsvImporter;
 use App\Support\TamanGalleryImageNormalizer;
 use Illuminate\Database\Eloquent\Builder;
@@ -81,6 +82,42 @@ class TamanController extends Controller
             'message' => $kelurahan
                 ? 'Wilayah terdeteksi dari koordinat.'
                 : 'Wilayah tidak dapat dideteksi. Pilih kelurahan secara manual.',
+        ]);
+    }
+
+    public function exportCsv(Request $request, TamanCsvExporter $exporter): StreamedResponse
+    {
+        $this->authorize('import', Taman::class);
+
+        $scope = app(OperatorWilayahScope::class);
+
+        $query = TableSearch::apply(
+            $scope->scopeTamans(
+                Taman::query()->with(['kelurahan.kecamatan', 'images']),
+                $request->user(),
+            ),
+            $request,
+            ['nama_taman', 'alamat', 'kategori', 'deskripsi', 'kontraktor', 'konsultan_perencana'],
+        )
+            ->when(
+                in_array($request->input('status_data'), [Taman::STATUS_DATA_LENGKAP, Taman::STATUS_DATA_BELUM_LENGKAP], true),
+                fn ($q) => $q->where('status_data', $request->input('status_data'))
+            )
+            ->orderBy('nama_taman');
+
+        $filename = 'data-taman-'.now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($exporter, $query) {
+            $handle = fopen('php://output', 'w');
+
+            if ($handle === false) {
+                return;
+            }
+
+            $exporter->writeToStream($handle, $query);
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 

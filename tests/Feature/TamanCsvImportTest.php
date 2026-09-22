@@ -33,7 +33,7 @@ class TamanCsvImportTest extends TestCase
         $content = $response->streamedContent();
 
         $this->assertStringContainsString("sep=;\r\n", $content);
-        $this->assertStringContainsString('nama_taman;kategori;kecamatan;kelurahan;luasan;alamat;latitude;longitude;deskripsi;fasilitas;tahun_pembangunan;nilai_pembangunan;kontraktor;konsultan_perencana;data_verified_at', $content);
+        $this->assertStringContainsString('id;nama_taman;status_data;kolom_belum_lengkap;kategori;kecamatan;kelurahan;luasan;alamat;latitude;longitude;deskripsi;fasilitas;tahun_pembangunan;nilai_pembangunan;kontraktor;konsultan_perencana;data_verified_at;jumlah_foto_galeri', $content);
     }
 
     public function test_import_accepts_semicolon_delimited_csv(): void

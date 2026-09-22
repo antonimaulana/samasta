@@ -33,6 +33,13 @@ class TamanCsvImporter
         'data_verified_at',
     ];
 
+    /** Kolom baca-only dari export — diabaikan saat import. */
+    public const EXPORT_META_HEADERS = [
+        'status_data',
+        'kolom_belum_lengkap',
+        'jumlah_foto_galeri',
+    ];
+
     /** @var array<string, string> */
     private const HEADER_ALIASES = [
         'nama_tam' => 'nama_taman',
@@ -43,6 +50,11 @@ class TamanCsvImporter
         'konsultan' => 'konsultan_perencana',
         'data_verified' => 'data_verified_at',
         'verified_at' => 'data_verified_at',
+        'kolom_kosong' => 'kolom_belum_lengkap',
+        'field_kosong' => 'kolom_belum_lengkap',
+        'status' => 'status_data',
+        'jumlah_foto' => 'jumlah_foto_galeri',
+        'foto_galeri' => 'jumlah_foto_galeri',
     ];
 
     /** @var list<string> */
@@ -50,6 +62,29 @@ class TamanCsvImporter
         ...self::REQUIRED_HEADERS,
         ...self::OPTIONAL_FILE_HEADERS,
     ];
+
+    /**
+     * @return list<string>
+     */
+    public function exportHeaders(): array
+    {
+        return [
+            'id',
+            ...self::HEADERS,
+            ...self::EXPORT_META_HEADERS,
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function importableHeaders(): array
+    {
+        return [
+            'id',
+            ...self::HEADERS,
+        ];
+    }
 
     /**
      * @return array{imported: int, updated: int, skipped: int, errors: list<string>}
@@ -110,6 +145,8 @@ class TamanCsvImporter
             }
 
             $data = $this->mapRow($header, $row);
+            $tamanId = $this->normalizeOptionalId($data['id'] ?? null);
+            unset($data['id'], $data['status_data'], $data['kolom_belum_lengkap'], $data['jumlah_foto_galeri']);
             $data = $this->nullifyEmptyFields($data);
             $data['luasan'] = $this->normalizeLuasan($data['luasan'] ?? null);
             $data['nilai_pembangunan'] = $this->normalizeNilaiPembangunan($data['nilai_pembangunan'] ?? null);
@@ -122,6 +159,13 @@ class TamanCsvImporter
             $data['data_verified_at'] = $this->normalizeDataVerifiedAt($data['data_verified_at'] ?? null);
             $data = $this->nullifyEmptyFields($data);
             $validator = Validator::make($data, $this->rules(), $this->validationMessages());
+
+            if ($tamanId !== null && ! Taman::query()->whereKey($tamanId)->exists()) {
+                $errors[] = 'Baris '.$rowNumber.': ID taman '.$tamanId.' tidak ditemukan.';
+                $skipped++;
+
+                continue;
+            }
 
             if ($validator->fails()) {
                 $errors[] = 'Baris '.$rowNumber.': '.implode(' ', $validator->errors()->all());
@@ -144,9 +188,7 @@ class TamanCsvImporter
             $rawFasilitas = $payload['fasilitas'] ?? null;
             $payload['fasilitas'] = Taman::normalizeFasilitasArray($this->parseFasilitas($rawFasilitas));
 
-            $existing = Taman::query()
-                ->whereRaw('LOWER(TRIM(nama_taman)) = ?', [mb_strtolower(trim($payload['nama_taman']))])
-                ->first();
+            $existing = $this->resolveExistingTaman($tamanId, $payload['nama_taman']);
 
             if ($existing) {
                 $updatePayload = $this->prepareUpdatePayload($payload, filled($rawFasilitas));
@@ -183,9 +225,12 @@ class TamanCsvImporter
     public function templateRows(): array
     {
         return [
-            self::HEADERS,
+            $this->exportHeaders(),
             [
+                '',
                 'Taman Contoh Batam',
+                '',
+                '',
                 'Taman Kota',
                 'Batam Kota',
                 'Belian',
@@ -200,8 +245,41 @@ class TamanCsvImporter
                 'PT Contoh Kontraktor',
                 'PT Contoh Konsultan',
                 '2026-08-23 10:00',
+                '',
             ],
         ];
+    }
+
+    private function normalizeOptionalId(mixed $value): ?int
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        $normalized = $this->normalizeIntegerString(trim((string) $value));
+
+        if ($normalized === null) {
+            return null;
+        }
+
+        $id = (int) $normalized;
+
+        return $id > 0 ? $id : null;
+    }
+
+    private function resolveExistingTaman(?int $id, string $namaTaman): ?Taman
+    {
+        if ($id !== null) {
+            $byId = Taman::query()->find($id);
+
+            if ($byId) {
+                return $byId;
+            }
+        }
+
+        return Taman::query()
+            ->whereRaw('LOWER(TRIM(nama_taman)) = ?', [mb_strtolower(trim($namaTaman))])
+            ->first();
     }
 
     /**
@@ -354,7 +432,7 @@ class TamanCsvImporter
             return self::HEADER_ALIASES[$column];
         }
 
-        foreach (self::HEADERS as $known) {
+        foreach ($this->exportHeaders() as $known) {
             if (str_starts_with($known, $column) && strlen($column) >= 4) {
                 return $known;
             }
@@ -684,11 +762,15 @@ class TamanCsvImporter
      */
     private function mapRow(array $header, array $row): array
     {
-        $mapped = [];
+        $allowed = array_merge($this->importableHeaders(), self::EXPORT_META_HEADERS);
+        $mapped = array_fill_keys($allowed, null);
 
-        foreach (self::HEADERS as $column) {
-            $index = array_search($column, $header, true);
-            $value = $index === false ? null : ($row[$index] ?? null);
+        foreach ($header as $index => $column) {
+            if (! array_key_exists($column, $mapped)) {
+                continue;
+            }
+
+            $value = $row[$index] ?? null;
             $mapped[$column] = is_string($value) ? trim($value) : (filled($value) ? trim((string) $value) : null);
         }
 
@@ -773,6 +855,7 @@ class TamanCsvImporter
         $update = [];
 
         foreach ([
+            'nama_taman',
             'kategori',
             'alamat',
             'latitude',
