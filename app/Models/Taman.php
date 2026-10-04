@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class Taman extends Model
 {
@@ -57,6 +58,9 @@ class Taman extends Model
     public const GALLERY_RECOMMENDED_WIDTH = 1920;
 
     public const GALLERY_RECOMMENDED_HEIGHT = 1080;
+
+    /** Batas unggah per file (kilobyte) — 10 MB. */
+    public const GALLERY_MAX_UPLOAD_KILOBYTES = 10240;
 
     /** Pusat Kota Batam — default peta & koordinat kosong (1°N, 104°E). */
     public const DEFAULT_LATITUDE = 1.0456;
@@ -500,14 +504,19 @@ class Taman extends Model
     public function getFotoUrlAttribute(): ?string
     {
         if ($this->relationLoaded('images') && $this->images->isNotEmpty()) {
-            return $this->images->first()->url;
+            $url = $this->images->first()->url;
+
+            return filled($url) ? $url : null;
         }
 
         if ($this->images()->exists()) {
-            return $this->images()->first()->url;
+            $first = $this->images()->first();
+            if ($first && filled($first->url)) {
+                return $first->url;
+            }
         }
 
-        if ($this->foto) {
+        if ($this->foto && Storage::disk('public')->exists($this->foto)) {
             return asset('storage/'.$this->foto);
         }
 
@@ -516,9 +525,13 @@ class Taman extends Model
 
     public function getGalleryUrlsAttribute(): array
     {
-        $urls = $this->images->map(fn (TamanImage $image) => $image->url)->all();
+        $urls = $this->images
+            ->map(fn (TamanImage $image) => $image->url)
+            ->filter()
+            ->values()
+            ->all();
 
-        if ($urls === [] && $this->foto) {
+        if ($urls === [] && $this->foto && Storage::disk('public')->exists($this->foto)) {
             return [asset('storage/'.$this->foto)];
         }
 

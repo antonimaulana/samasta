@@ -74,10 +74,9 @@ abstract class TamanRequest extends FormRequest
             'kontraktor' => ['nullable', 'string', 'max:255'],
             'konsultan_perencana' => ['nullable', 'string', 'max:255'],
             'data_verified_at' => ['nullable', 'date'],
-            // Size cap deferred until documentation team confirms the official limit.
-            'foto' => ['nullable', 'image'],
-            'fotos' => ['nullable', 'array'],
-            'fotos.*' => ['image'],
+            'foto' => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:'.Taman::GALLERY_MAX_UPLOAD_KILOBYTES],
+            'fotos' => ['nullable', 'array', 'max:20'],
+            'fotos.*' => ['file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:'.Taman::GALLERY_MAX_UPLOAD_KILOBYTES],
             'hapus_fotos' => ['nullable', 'array'],
             'hapus_fotos.*' => ['integer', 'exists:taman_images,id'],
         ];
@@ -95,6 +94,13 @@ abstract class TamanRequest extends FormRequest
             'fasilitas_items.*.nama.max' => 'Nama fasilitas maksimal '.Taman::FASILITAS_NAMA_MAX_LENGTH.' karakter.',
             'fasilitas_items.*.nama_custom.max' => 'Nama fasilitas maksimal '.Taman::FASILITAS_NAMA_MAX_LENGTH.' karakter.',
             'data_verified_at.date' => 'Format waktu pemutakhiran tidak valid.',
+            'foto.max' => 'Foto profil maksimal 10 MB per file.',
+            'foto.mimes' => 'Foto profil harus JPG, PNG, atau WebP.',
+            'foto.image' => 'Foto profil harus berupa gambar.',
+            'fotos.max' => 'Maksimal 20 foto dapat diunggah sekaligus.',
+            'fotos.*.max' => 'Setiap foto maksimal 10 MB.',
+            'fotos.*.mimes' => 'Foto galeri harus JPG, PNG, atau WebP.',
+            'fotos.*.image' => 'Setiap file galeri harus berupa gambar.',
         ];
     }
 

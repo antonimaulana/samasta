@@ -188,7 +188,8 @@ sudo supervisorctl restart samasta-worker:* 2>/dev/null || true
 | `ORG/samasta` not found | Placeholder docs lama | Pakai git@github.com:antonimaulana/samasta.git |
 | `Permission denied (publickey)` git@github | Deploy key belum ditambah | Ulangi bagian 2 |
 | `git: command not found` (Windows) | Git belum install | Install Git, restart terminal |
-| `.env` ikut ter-commit | .gitignore diabaikan | `git rm --cached .env` lalu commit |
+| `.env` ikut ter-commit | `.gitignore` diabaikan / `git add -f` | `.\scripts\remove-env-from-git-track.ps1` lalu commit; baca **KEAMANAN-ENV-DAN-GIT.md** |
+| Commit ditolak hook | `.env` atau rahasia ter-staging | Perbaiki staging; `composer check-secrets` |
 
 ---
 
@@ -196,6 +197,9 @@ sudo supervisorctl restart samasta-worker:* 2>/dev/null || true
 
 | File | Fungsi |
 |------|--------|
+| `docs/deploy/KEAMANAN-ENV-DAN-GIT.md` | `.env`, rotasi rahasia, filter-repo |
+| `scripts/check-secrets-not-in-git.php` | Cek tracked/staged + `composer check-secrets-history` |
+| `scripts/install-git-hooks.ps1` | Pre-commit blok `.env` |
 | `scripts/setup-github.ps1` | Init + push dari Windows |
 | `scripts/vps-setup-deploy-key.sh` | Generate deploy key di VPS |
 | `scripts/vps-deploy-update.sh` | Pull + deploy di VPS |

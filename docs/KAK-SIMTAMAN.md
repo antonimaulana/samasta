@@ -248,6 +248,8 @@ Fase 6 — Deploy Produksi  : VPS, Nginx, SSL, backup, monitoring
 | C — Spesifikasi Environment | `docs/SPESIFIKASI-TEKNIS-ENVIRONMENT.md` |
 | D — Panduan Deploy VPS | `docs/deploy/VPS-BATAMGARDEN.md` |
 | E — Analisis RAP vs SIMTAMAN | `docs/ANALISIS-RAP-vs-SIMTAMAN.docx` |
+| F — Flowchart rancangan (1 halaman, lampiran KAK) | `docs/LAMPIRAN-KAK-FLOWCHART-SIMTAMAN-1-HALAMAN.md` / `.docx` |
+| G — Flowchart lengkap | `docs/FLOWCHART-RANCANGAN-SISTEM-SIMTAMAN.md` |
 
 ---
 

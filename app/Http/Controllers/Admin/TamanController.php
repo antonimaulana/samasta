@@ -21,7 +21,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -201,16 +204,21 @@ class TamanController extends Controller
     {
         $validated = $request->validatedTamanPayload();
 
-        if ($request->hasFile('foto')) {
-            $validated['foto'] = app(TamanGalleryImageNormalizer::class)->normalizeAndStore(
-                $request->file('foto'),
-                'tamans',
-            );
+        try {
+            if ($request->hasFile('foto')) {
+                $validated['foto'] = $this->normalizeProfilePhoto($request->file('foto'), 'foto');
+            }
+
+            $taman = DB::transaction(function () use ($validated, $request) {
+                $taman = Taman::create($validated);
+                $this->storeGalleryImages($taman, $request->file('fotos', []));
+
+                return $taman;
+            });
+        } catch (ValidationException $e) {
+            throw $e;
         }
 
-        $taman = Taman::create($validated);
-
-        $this->storeGalleryImages($taman, $request->file('fotos', []));
         $taman->refresh()->load('images', 'kelurahan');
         $taman->syncStatusData();
 
@@ -247,21 +255,24 @@ class TamanController extends Controller
     {
         $validated = $request->validatedTamanPayload();
 
-        if ($request->hasFile('foto')) {
-            if ($taman->foto) {
-                Storage::disk('public')->delete($taman->foto);
+        try {
+            if ($request->hasFile('foto')) {
+                if ($taman->foto) {
+                    Storage::disk('public')->delete($taman->foto);
+                }
+
+                $validated['foto'] = $this->normalizeProfilePhoto($request->file('foto'), 'foto');
             }
 
-            $validated['foto'] = app(TamanGalleryImageNormalizer::class)->normalizeAndStore(
-                $request->file('foto'),
-                'tamans',
-            );
+            DB::transaction(function () use ($taman, $validated, $request) {
+                $taman->update($validated);
+                $this->deleteGalleryImages($taman, $request->input('hapus_fotos', []));
+                $this->storeGalleryImages($taman, $request->file('fotos', []));
+            });
+        } catch (ValidationException $e) {
+            throw $e;
         }
 
-        $taman->update($validated);
-
-        $this->deleteGalleryImages($taman, $request->input('hapus_fotos', []));
-        $this->storeGalleryImages($taman, $request->file('fotos', []));
         $taman->refresh()->load('images', 'kelurahan');
         $taman->syncStatusData();
 
@@ -308,20 +319,65 @@ class TamanController extends Controller
             ->with('success', 'Foto galeri berhasil dihapus.');
     }
 
-    /**
-     * @param  array<int, \Illuminate\Http\UploadedFile|null>  $files
-     */
-    private function storeGalleryImages(Taman $taman, array $files): void
+    private function normalizeProfilePhoto(UploadedFile $file, string $field): string
     {
-        foreach ($files as $file) {
-            if (! $file) {
-                continue;
+        try {
+            return app(TamanGalleryImageNormalizer::class)->normalizeAndStore($file, 'tamans');
+        } catch (\Throwable $e) {
+            throw ValidationException::withMessages([
+                $field => $e instanceof \InvalidArgumentException
+                    ? $e->getMessage()
+                    : 'Gagal mengunggah foto: '.$e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * @param  array<int, UploadedFile|null>|UploadedFile|null  $files
+     */
+    private function storeGalleryImages(Taman $taman, array|UploadedFile|null $files): void
+    {
+        if ($files instanceof UploadedFile) {
+            $files = [$files];
+        }
+
+        $files = array_values(array_filter(
+            is_array($files) ? $files : [],
+            static fn ($file): bool => $file instanceof UploadedFile,
+        ));
+
+        if ($files === []) {
+            return;
+        }
+
+        $normalizer = app(TamanGalleryImageNormalizer::class);
+        $storedPaths = [];
+
+        try {
+            foreach ($files as $index => $file) {
+                if (! $file->isValid()) {
+                    throw new \InvalidArgumentException(
+                        'File foto #'.($index + 1).' gagal diunggah. Pastikan setiap file maks. 10 MB (JPG/PNG/WebP) dan post_max_size server mencukupi.'
+                    );
+                }
+
+                $storedPaths[] = $normalizer->normalizeAndStore($file);
             }
 
-            $path = app(TamanGalleryImageNormalizer::class)->normalizeAndStore($file);
+            foreach ($storedPaths as $path) {
+                $taman->images()->create([
+                    'path_foto' => $path,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            foreach ($storedPaths as $path) {
+                Storage::disk('public')->delete($path);
+            }
 
-            $taman->images()->create([
-                'path_foto' => $path,
+            throw ValidationException::withMessages([
+                'fotos' => $e instanceof \InvalidArgumentException
+                    ? $e->getMessage()
+                    : 'Gagal mengunggah foto galeri: '.$e->getMessage(),
             ]);
         }
     }

@@ -50,6 +50,12 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "check-secrets": [
+            "@php scripts/check-secrets-not-in-git.php"
+        ],
+        "check-secrets-history": [
+            "@php scripts/check-secrets-not-in-git.php --history"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

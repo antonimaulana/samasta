@@ -13,12 +13,20 @@ class TamanGalleryImageNormalizer
      */
     public function normalizeAndStore(UploadedFile $file, string $directory = 'taman_galeri'): string
     {
-        PdfExport::ensureGdLoaded();
+        if (! extension_loaded('gd')) {
+            throw new \InvalidArgumentException(
+                'Ekstensi PHP GD belum aktif di server. Hubungi administrator untuk mengaktifkan extension=gd.'
+            );
+        }
 
         $source = $this->loadImage($file);
         if ($source === null) {
-            throw new \InvalidArgumentException('Format foto tidak didukung atau file rusak.');
+            throw new \InvalidArgumentException(
+                'Format foto tidak didukung atau file rusak. Gunakan JPG, PNG, atau WebP (maks. '.(Taman::GALLERY_MAX_UPLOAD_KILOBYTES / 1024).' MB).'
+            );
         }
+
+        $source = $this->applyExifOrientation($file, $source);
 
         [$cropX, $cropY, $cropW, $cropH] = self::coverCropRect(
             imagesx($source),
@@ -60,7 +68,7 @@ class TamanGalleryImageNormalizer
 
         $path = trim($directory, '/').'/'.Str::uuid()->toString().'.jpg';
         if (! \Illuminate\Support\Facades\Storage::disk('public')->put($path, $binary)) {
-            throw new \RuntimeException('Gagal menulis file foto ke storage.');
+            throw new \RuntimeException('Gagal menulis file foto ke storage. Pastikan php artisan storage:link sudah dijalankan.');
         }
 
         return $path;
@@ -107,13 +115,14 @@ class TamanGalleryImageNormalizer
     private function loadImage(UploadedFile $file): ?\GdImage
     {
         $path = $file->getRealPath();
-        if ($path === false) {
+        if ($path === false || ! is_readable($path)) {
             return null;
         }
 
-        $mime = $file->getMimeType() ?? '';
+        $mime = strtolower($file->getMimeType() ?? '');
+        $extension = strtolower($file->getClientOriginalExtension());
 
-        return match (true) {
+        $fromMime = match (true) {
             str_contains($mime, 'jpeg'), str_contains($mime, 'jpg') => @imagecreatefromjpeg($path) ?: null,
             str_contains($mime, 'png') => @imagecreatefrompng($path) ?: null,
             str_contains($mime, 'webp') => function_exists('imagecreatefromwebp')
@@ -121,5 +130,64 @@ class TamanGalleryImageNormalizer
                 : null,
             default => null,
         };
+
+        if ($fromMime instanceof \GdImage) {
+            return $fromMime;
+        }
+
+        return match ($extension) {
+            'jpg', 'jpeg' => @imagecreatefromjpeg($path) ?: null,
+            'png' => @imagecreatefrompng($path) ?: null,
+            'webp' => function_exists('imagecreatefromwebp')
+                ? (@imagecreatefromwebp($path) ?: null)
+                : null,
+            default => null,
+        };
+    }
+
+    /**
+     * @param  \GdImage  $image
+     * @return \GdImage
+     */
+    private function applyExifOrientation(UploadedFile $file, \GdImage $image): \GdImage
+    {
+        if (! function_exists('exif_read_data')) {
+            return $image;
+        }
+
+        $path = $file->getRealPath();
+        if ($path === false) {
+            return $image;
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, ['jpg', 'jpeg'], true)) {
+            return $image;
+        }
+
+        $exif = @exif_read_data($path);
+        if (! is_array($exif) || empty($exif['Orientation'])) {
+            return $image;
+        }
+
+        $angle = match ((int) $exif['Orientation']) {
+            3 => 180,
+            6 => -90,
+            8 => 90,
+            default => 0,
+        };
+
+        if ($angle === 0) {
+            return $image;
+        }
+
+        $rotated = imagerotate($image, $angle, 0);
+        if ($rotated instanceof \GdImage) {
+            imagedestroy($image);
+
+            return $rotated;
+        }
+
+        return $image;
     }
 }

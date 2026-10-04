@@ -1,11 +1,8 @@
-* text=auto eol=lf
+# Jangan sertakan file environment saat git archive / export
+.env export-ignore
+.env.* export-ignore
+!.env.example
+!docs/deploy/.env.production.example
 
-*.blade.php diff=html
-*.css diff=css
-*.html diff=html
-*.md diff=markdown
-*.php diff=php
-
-/.github export-ignore
-CHANGELOG.md export-ignore
-.styleci.yml export-ignore
+# Hook shell tetap LF
+scripts/git-hooks/* text eol=lf

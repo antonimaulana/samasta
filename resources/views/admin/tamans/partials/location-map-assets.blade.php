@@ -319,22 +319,70 @@
 
             const fotosInput = document.getElementById('fotos');
             const previewContainer = document.getElementById('foto-preview');
+            const fotoClientError = document.getElementById('foto-upload-client-error');
+            const maxMb = fotosInput ? parseInt(fotosInput.getAttribute('data-max-mb') || '10', 10) : 10;
+            const maxBytes = maxMb * 1024 * 1024;
+
+            function validateFotoFiles(fileList) {
+                if (!fotoClientError) return true;
+                fotoClientError.classList.add('hidden');
+                fotoClientError.textContent = '';
+
+                const files = Array.from(fileList || []);
+                if (files.length > 20) {
+                    fotoClientError.textContent = 'Maksimal 20 foto per unggah.';
+                    fotoClientError.classList.remove('hidden');
+                    return false;
+                }
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (!file.type.startsWith('image/')) {
+                        fotoClientError.textContent = 'Hanya file gambar (JPG, PNG, WebP) yang didukung.';
+                        fotoClientError.classList.remove('hidden');
+                        return false;
+                    }
+                    if (file.size > maxBytes) {
+                        fotoClientError.textContent = 'File "' + file.name + '" melebihi ' + maxMb + ' MB.';
+                        fotoClientError.classList.remove('hidden');
+                        return false;
+                    }
+                }
+
+                return true;
+            }
 
             if (fotosInput && previewContainer) {
                 fotosInput.addEventListener('change', function () {
                     previewContainer.innerHTML = '';
+                    if (!validateFotoFiles(this.files)) {
+                        this.value = '';
+                        return;
+                    }
+
                     Array.from(this.files).forEach(function (file) {
                         if (!file.type.startsWith('image/')) return;
                         const reader = new FileReader();
                         reader.onload = function (event) {
                             const wrapper = document.createElement('div');
                             wrapper.className = 'overflow-hidden rounded-lg border border-gray-200 bg-gray-50';
-                            wrapper.innerHTML = `<div class="overflow-hidden"><img src="${event.target.result}" alt="${file.name}" class="aspect-[16/9] w-full object-cover object-center"></div><p class="truncate border-t border-gray-100 px-2 py-1.5 text-[11px] text-gray-500">${file.name}</p>`;
+                            const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+                            wrapper.innerHTML = '<div class="overflow-hidden"><img src="' + event.target.result + '" alt="" class="aspect-[16/9] w-full object-cover object-center"></div><p class="truncate border-t border-gray-100 px-2 py-1.5 text-[11px] text-gray-500">' + file.name + ' · ' + sizeMb + ' MB</p>';
                             previewContainer.appendChild(wrapper);
                         };
                         reader.readAsDataURL(file);
                     });
                 });
+
+                const tamanForm = fotosInput.closest('form');
+                if (tamanForm) {
+                    tamanForm.addEventListener('submit', function (event) {
+                        if (!validateFotoFiles(fotosInput.files)) {
+                            event.preventDefault();
+                            fotosInput.focus();
+                        }
+                    });
+                }
             }
         });
     </script>

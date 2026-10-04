@@ -8,14 +8,14 @@
 ])
 
 @php
-    $images = $taman->images;
-    $hasLegacyFoto = $taman->foto && $images->isEmpty();
-    $items = $images->isNotEmpty()
-        ? $images->map(fn ($image) => ['url' => $image->url, 'alt' => $taman->nama_taman])->all()
-        : ($hasLegacyFoto ? [['url' => $taman->foto_url, 'alt' => $taman->nama_taman]] : []);
+    $taman->loadMissing('images');
+    $items = collect($taman->gallery_urls)
+        ->map(fn (string $url) => ['url' => $url, 'alt' => $taman->nama_taman])
+        ->all();
     $count = count($items);
     $galleryId = 'taman-gallery-'.$taman->id;
     $isPublic = $variant === 'public';
+    $useSlider = $count > 1;
 
     $shellClass = $isPublic
         ? 'border-green-50 bg-gradient-to-r from-green-50 to-emerald-50'
@@ -49,7 +49,7 @@
     $frameRadiusClass = ($nested && ! $isPublic && $constrained)
         ? 'rounded-lg'
         : ($nested ? '' : 'rounded-xl');
-    $imageClass = 'aspect-[16/9] w-full object-cover object-center';
+    $imageClass = 'aspect-[16/9] h-full w-full object-cover object-center';
     $headerClass = $nested && ! $isPublic
         ? 'text-xs font-semibold uppercase tracking-wide text-gray-500'
         : ($isPublic ? 'text-lg font-bold' : 'text-base font-semibold').' '.$titleClass;
@@ -83,7 +83,7 @@
                     Tidak ada foto
                 @endif
             </div>
-        @elseif ($count === 1)
+        @elseif (! $useSlider)
             <div class="overflow-hidden {{ $frameRadiusClass }} {{ $frameClass }}">
                 <img src="{{ $items[0]['url'] }}"
                      alt="{{ $items[0]['alt'] }}"
@@ -94,23 +94,25 @@
                      class="{{ $imageClass }}">
             </div>
         @else
-            <div class="swiper {{ $galleryId }}-swiper aspect-[16/9] overflow-hidden {{ $frameRadiusClass }} {{ $frameClass }}">
-                <div class="swiper-wrapper">
-                    @foreach ($items as $index => $item)
-                        <div class="swiper-slide">
-                            <img src="{{ $item['url'] }}"
-                                 alt="{{ $item['alt'] }}"
-                                 width="{{ \App\Models\Taman::GALLERY_RECOMMENDED_WIDTH }}"
-                                 height="{{ \App\Models\Taman::GALLERY_RECOMMENDED_HEIGHT }}"
-                                 decoding="async"
-                                 @if ($index === 0) fetchpriority="high" @else loading="lazy" @endif
-                                 class="{{ $imageClass }}">
-                        </div>
-                    @endforeach
+            <div class="relative {{ $frameRadiusClass }} {{ $frameClass }}">
+                <div class="swiper {{ $galleryId }}-swiper aspect-[16/9] w-full overflow-hidden">
+                    <div class="swiper-wrapper">
+                        @foreach ($items as $index => $item)
+                            <div class="swiper-slide !h-auto">
+                                <img src="{{ $item['url'] }}"
+                                     alt="{{ $item['alt'] }} — foto {{ $index + 1 }}"
+                                     width="{{ \App\Models\Taman::GALLERY_RECOMMENDED_WIDTH }}"
+                                     height="{{ \App\Models\Taman::GALLERY_RECOMMENDED_HEIGHT }}"
+                                     decoding="async"
+                                     @if ($index === 0) fetchpriority="high" @else loading="lazy" @endif
+                                     class="{{ $imageClass }}">
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="swiper-button-prev {{ $navClass }} {{ (!$isPublic ? '!h-8 !w-8' : '') }}"></div>
+                    <div class="swiper-button-next {{ $navClass }} {{ (!$isPublic ? '!h-8 !w-8' : '') }}"></div>
+                    <div class="swiper-pagination {{ $isPublic ? '!bottom-3' : '!bottom-2' }}"></div>
                 </div>
-                <div class="swiper-button-prev {{ $navClass }} {{ (!$isPublic ? '!h-7 !w-7' : '') }}"></div>
-                <div class="swiper-button-next {{ $navClass }} {{ (!$isPublic ? '!h-7 !w-7' : '') }}"></div>
-                <div class="swiper-pagination {{ $isPublic ? '!bottom-3' : '!bottom-2' }}"></div>
             </div>
 
         @once
@@ -126,6 +128,19 @@
                         width: 0.375rem;
                         height: 0.375rem;
                     }
+
+                    [class*="-swiper"] .swiper-pagination-fraction {
+                        color: #fff;
+                        background: rgba(0, 0, 0, 0.45);
+                        border-radius: 9999px;
+                        padding: 0.15rem 0.55rem;
+                        font-size: 0.7rem;
+                        font-weight: 600;
+                        width: auto;
+                        left: auto;
+                        right: 0.75rem;
+                        bottom: 0.75rem;
+                    }
                 </style>
             @endpush
             @push('scripts')
@@ -139,20 +154,31 @@
                     window.tamanGalleryInstances = window.tamanGalleryInstances || {};
 
                     const galleryId = @json($galleryId);
+                    const slideCount = @json($count);
                     const swiperSelector = '.' + galleryId + '-swiper';
 
                     if (window.tamanGalleryInstances[galleryId]) {
-                        return;
+                        window.tamanGalleryInstances[galleryId].destroy(true, true);
                     }
 
                     window.tamanGalleryInstances[galleryId] = new Swiper(swiperSelector, {
-                        loop: true,
-                        autoplay: { delay: 4000, disableOnInteraction: false },
-                        pagination: { el: swiperSelector + ' .swiper-pagination', clickable: true },
+                        loop: slideCount > 2,
+                        rewind: slideCount === 2,
+                        slidesPerView: 1,
+                        spaceBetween: 0,
+                        autoHeight: false,
+                        autoplay: slideCount > 1 ? { delay: 4500, disableOnInteraction: false } : false,
+                        pagination: {
+                            el: swiperSelector + ' .swiper-pagination',
+                            clickable: true,
+                            type: slideCount > 1 ? 'fraction' : 'bullets',
+                        },
                         navigation: {
                             nextEl: swiperSelector + ' .swiper-button-next',
                             prevEl: swiperSelector + ' .swiper-button-prev',
                         },
+                        keyboard: { enabled: true },
+                        a11y: { enabled: true },
                     });
                 });
             </script>

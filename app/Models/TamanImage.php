@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class TamanImage extends Model
 {
@@ -17,8 +18,16 @@ class TamanImage extends Model
         return $this->belongsTo(Taman::class);
     }
 
-    public function getUrlAttribute(): string
+    public function getUrlAttribute(): ?string
     {
+        if (! filled($this->path_foto)) {
+            return null;
+        }
+
+        if (! Storage::disk('public')->exists($this->path_foto)) {
+            return null;
+        }
+
         return asset('storage/'.$this->path_foto);
     }
 }

@@ -1,0 +1,4 @@
+#!/bin/sh
+# Pasang: php scripts/install-git-hooks.php  (atau .\scripts\install-git-hooks.ps1)
+
+php scripts/check-secrets-not-in-git.php || exit 1

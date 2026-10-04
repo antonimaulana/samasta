@@ -122,12 +122,22 @@
 
     <x-admin.rth-section
         title="Galeri Foto Taman"
-        description="Unggah foto profil taman (JPG, PNG, WebP).">
+        description="Unggah satu atau beberapa foto profil taman. Jika lebih dari satu foto, tampilan publik memakai slider.">
         <div>
             <x-admin.form.label for="fotos">Upload Foto Baru</x-admin.form.label>
             <input type="file" name="fotos[]" id="fotos" accept="image/jpeg,image/png,image/webp" multiple
-                   class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-emerald-800 hover:file:bg-emerald-100">
-            <p class="mt-1 text-sm text-gray-500">Pilih satu atau lebih foto.</p>
+                   data-max-mb="{{ (int) (\App\Models\Taman::GALLERY_MAX_UPLOAD_KILOBYTES / 1024) }}"
+                   class="@error('fotos') border-red-500 ring-1 ring-red-300 @enderror @error('fotos.*') border-red-500 ring-1 ring-red-300 @enderror w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 file:mr-3 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-emerald-800 hover:file:bg-emerald-100">
+            <p class="mt-1 text-sm text-gray-500">Pilih beberapa file sekaligus (Ctrl/Shift). Format JPG, PNG, WebP — maks. {{ \App\Models\Taman::GALLERY_MAX_UPLOAD_KILOBYTES / 1024 }} MB per foto, hingga 20 foto per simpan.</p>
+            @error('fotos')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+            @foreach ($errors->get('fotos.*') as $messages)
+                @foreach ((array) $messages as $message)
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @endforeach
+            @endforeach
+            <p id="foto-upload-client-error" class="mt-2 hidden text-sm text-red-600" role="alert"></p>
             <div id="foto-preview" class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"></div>
         </div>
 

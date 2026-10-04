@@ -59,8 +59,12 @@ class TamanGalleryUploadTest extends TestCase
         $this->assertSame(Taman::GALLERY_RECOMMENDED_HEIGHT, $size[1]);
     }
 
-    public function test_admin_can_upload_gallery_photo_larger_than_two_megabytes(): void
+    public function test_admin_can_upload_gallery_photo_up_to_ten_megabytes(): void
     {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension required for gallery normalization.');
+        }
+
         Storage::fake('public');
         $this->seed(WilayahBatamSeeder::class);
 
@@ -74,9 +78,9 @@ class TamanGalleryUploadTest extends TestCase
             'kelurahan_id' => $kelurahan->id,
             'luasan' => 1000,
             'alamat' => 'Jl. Uji',
-            'deskripsi' => 'Deskripsi uji upload foto tanpa batas 2 MB.',
+            'deskripsi' => 'Deskripsi uji upload foto hingga 10 MB.',
             'fotos' => [
-                UploadedFile::fake()->image('besar.jpg', 1200, 800)->size(3072),
+                UploadedFile::fake()->image('besar.jpg', 1200, 800)->size(9000),
             ],
         ]);
 
@@ -86,6 +90,73 @@ class TamanGalleryUploadTest extends TestCase
         $this->assertTrue(
             Taman::query()->where('nama_taman', 'Taman Uji Foto Besar')->exists()
         );
+    }
+
+    public function test_admin_cannot_upload_gallery_photo_over_ten_megabytes(): void
+    {
+        Storage::fake('public');
+        $this->seed(WilayahBatamSeeder::class);
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $kelurahan = Kelurahan::query()->first();
+        $this->assertNotNull($kelurahan);
+
+        $response = $this->actingAs($admin)->post(route('admin.tamans.store'), [
+            'nama_taman' => 'Taman Uji Foto Terlalu Besar',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahan->id,
+            'luasan' => 1000,
+            'alamat' => 'Jl. Uji',
+            'deskripsi' => 'Deskripsi uji batas ukuran.',
+            'fasilitas_items' => [
+                ['nama' => 'Jogging Track', 'kondisi' => 'Baik'],
+            ],
+            'fotos' => [
+                UploadedFile::fake()->image('terlalu-besar.jpg', 800, 600)->size(Taman::GALLERY_MAX_UPLOAD_KILOBYTES + 512),
+            ],
+        ]);
+
+        $response->assertSessionHasErrors('fotos.0');
+        $this->assertFalse(
+            Taman::query()->where('nama_taman', 'Taman Uji Foto Terlalu Besar')->exists()
+        );
+    }
+
+    public function test_admin_can_upload_multiple_gallery_photos_at_once(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('GD extension required for gallery normalization.');
+        }
+
+        Storage::fake('public');
+        $this->seed(WilayahBatamSeeder::class);
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $kelurahan = Kelurahan::query()->first();
+        $this->assertNotNull($kelurahan);
+
+        $response = $this->actingAs($admin)->post(route('admin.tamans.store'), [
+            'nama_taman' => 'Taman Uji Multi Foto',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahan->id,
+            'luasan' => 1000,
+            'alamat' => 'Jl. Uji',
+            'deskripsi' => 'Deskripsi uji multi upload.',
+            'fasilitas_items' => [
+                ['nama' => 'Jogging Track', 'kondisi' => 'Baik'],
+            ],
+            'fotos' => [
+                UploadedFile::fake()->image('a.jpg', 1600, 900),
+                UploadedFile::fake()->image('b.jpg', 1200, 800),
+                UploadedFile::fake()->image('c.jpg', 900, 1600),
+            ],
+        ]);
+
+        $response->assertRedirect(route('admin.tamans.index'));
+
+        $taman = Taman::query()->where('nama_taman', 'Taman Uji Multi Foto')->first();
+        $this->assertNotNull($taman);
+        $this->assertCount(3, $taman->images);
     }
 
     public function test_deleting_gallery_image_from_edit_redirects_back_to_edit(): void

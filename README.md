@@ -22,6 +22,15 @@ npm install && npm run build
 php artisan serve
 ```
 
+**Keamanan:** file `.env` **tidak boleh** masuk Git. Setelah clone, pasang hook lokal:
+
+```bash
+php scripts/install-git-hooks.php   # Windows: .\scripts\install-git-hooks.ps1
+composer check-secrets
+```
+
+Panduan lengkap (rotasi rahasia jika pernah ter-push): `docs/deploy/KEAMANAN-ENV-DAN-GIT.md`.
+
 Variabel penting di `.env`:
 
 ```env
@@ -34,6 +43,8 @@ APP_FULL_NAME="Sistem Informasi Manajemen Pertamanan"
 - **KAK (Kerangka Acuan Kerja):** `docs/KAK-SIMTAMAN.md`
 - **Desain basis data:** `docs/DESAIN-BASIS-DATA-SIMTAMAN.md`
 - **Arsitektur sistem:** `docs/ARSITEKTUR-SISTEM-SIMTAMAN.md`
+- **Flowchart rancangan sistem:** `docs/FLOWCHART-RANCANGAN-SISTEM-SIMTAMAN.md`
+- **Lampiran KAK flowchart (1 halaman):** `docs/LAMPIRAN-KAK-FLOWCHART-SIMTAMAN-1-HALAMAN.md` — `php scripts/generate-lampiran-flowchart-kak-docx.php`
 - Spesifikasi environment: `docs/SPESIFIKASI-TEKNIS-ENVIRONMENT.md`
 - Deploy VPS: `docs/deploy/`
 - Generate PDF arsitektur: `php artisan docs:architecture-pdf`

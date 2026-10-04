@@ -9,6 +9,8 @@ Disperakimtan Kota Batam · Versi 1.0 · September 2026
 
 SIMTAMAN dibangun sebagai **aplikasi web monolith** berbasis **Laravel 12** dengan pola **server-side rendering (SSR)**. Seluruh logika bisnis, autentikasi, dan render HTML berada di satu codebase, di-deploy sebagai unit tunggal di VPS pemerintah.
 
+**Flowchart rancangan sistem (Mermaid):** [`FLOWCHART-RANCANGAN-SISTEM-SIMTAMAN.md`](FLOWCHART-RANCANGAN-SISTEM-SIMTAMAN.md) — konteks aktör, routing, RBAC, alur taman/operasional/evaluasi, dan deploy.
+
 ### 1.1 Prinsip Desain
 
 | Prinsip | Penerapan |

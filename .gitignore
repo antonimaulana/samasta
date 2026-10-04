@@ -1,8 +1,15 @@
 *.log
 .DS_Store
+
+# Environment (rahasia — jangan pernah di Git; lihat docs/deploy/KEAMANAN-ENV-DAN-GIT.md)
 .env
+.env.*
+!.env.example
+!**/.env.*.example
 .env.backup
 .env.production
+.env.local
+.env.staging
 .phpactor.json
 .phpunit.result.cache
 /.fleet
