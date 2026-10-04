@@ -5,9 +5,13 @@ namespace App\Http\Requests\Admin;
 use App\Models\Taman;
 use App\Support\OperatorWilayahScope;
 use App\Support\TamanWilayahAssigner;
+use App\Support\UploadedFileErrorMessage;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
+
 abstract class TamanRequest extends FormRequest
 {
     public function authorize(): bool
@@ -76,7 +80,7 @@ abstract class TamanRequest extends FormRequest
             'data_verified_at' => ['nullable', 'date'],
             'foto' => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:'.Taman::GALLERY_MAX_UPLOAD_KILOBYTES],
             'fotos' => ['nullable', 'array', 'max:20'],
-            'fotos.*' => ['file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:'.Taman::GALLERY_MAX_UPLOAD_KILOBYTES],
+            'fotos.*' => ['nullable', 'file', 'image', 'mimes:jpeg,jpg,png,webp', 'max:'.Taman::GALLERY_MAX_UPLOAD_KILOBYTES],
             'hapus_fotos' => ['nullable', 'array'],
             'hapus_fotos.*' => ['integer', 'exists:taman_images,id'],
         ];
@@ -101,7 +105,47 @@ abstract class TamanRequest extends FormRequest
             'fotos.*.max' => 'Setiap foto maksimal 10 MB.',
             'fotos.*.mimes' => 'Foto galeri harus JPG, PNG, atau WebP.',
             'fotos.*.image' => 'Setiap file galeri harus berupa gambar.',
+            'foto.uploaded' => 'Foto profil gagal diunggah ke server. Periksa ukuran (maks. 10 MB) dan limit upload PHP/Nginx.',
+            'fotos.*.uploaded' => 'Salah satu foto gagal diunggah ke server. Periksa ukuran (maks. 10 MB per file) dan limit upload PHP/Nginx.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($this->multipartPostExceedsServerLimit()) {
+                $validator->errors()->add('fotos', UploadedFileErrorMessage::postTooLargeHint());
+            }
+
+            $foto = $this->file('foto');
+            if ($foto instanceof UploadedFile && ! $foto->isValid()) {
+                $validator->errors()->add('foto', UploadedFileErrorMessage::for($foto));
+            }
+
+            foreach ($this->file('fotos', []) as $index => $file) {
+                if (! $file instanceof UploadedFile || $file->isValid()) {
+                    continue;
+                }
+
+                $key = 'fotos.'.$index;
+                $validator->errors()->add($key, UploadedFileErrorMessage::for($file));
+            }
+        });
+    }
+
+    private function multipartPostExceedsServerLimit(): bool
+    {
+        $contentLength = (int) ($this->server('CONTENT_LENGTH') ?? 0);
+        if ($contentLength < 1) {
+            return false;
+        }
+
+        $contentType = (string) $this->header('Content-Type', '');
+        if (! str_contains($contentType, 'multipart/form-data')) {
+            return false;
+        }
+
+        return $contentLength > UploadedFileErrorMessage::postMaxBytes();
     }
 
     /**

@@ -132,10 +132,12 @@
             @error('fotos')
                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
             @enderror
-            @foreach ($errors->get('fotos.*') as $messages)
-                @foreach ((array) $messages as $message)
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @endforeach
+            @foreach ($errors->getMessages() as $field => $messages)
+                @if (str_starts_with($field, 'fotos.'))
+                    @foreach ((array) $messages as $message)
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @endforeach
+                @endif
             @endforeach
             <p id="foto-upload-client-error" class="mt-2 hidden text-sm text-red-600" role="alert"></p>
             <div id="foto-preview" class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"></div>
