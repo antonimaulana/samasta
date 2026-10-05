@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Taman;
 use App\Models\User;
+use App\Support\UploadedFileErrorMessage;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -75,6 +76,22 @@ class PemutakhiranPreflightCommand extends Command
             $fail('storage/app/public tidak writable — upload foto gagal.');
         } else {
             $pass('Direktori upload writable');
+        }
+
+        $uploadMaxBytes = UploadedFileErrorMessage::iniSizeToBytes(ini_get('upload_max_filesize') ?: '0');
+        $postMaxBytes = UploadedFileErrorMessage::iniSizeToBytes(ini_get('post_max_size') ?: '0');
+        $requiredBytes = Taman::GALLERY_MAX_UPLOAD_KILOBYTES * 1024;
+        if ($uploadMaxBytes < $requiredBytes || $postMaxBytes < $requiredBytes) {
+            $fail(
+                'PHP upload_max_filesize='.(ini_get('upload_max_filesize') ?: '?')
+                .', post_max_size='.(ini_get('post_max_size') ?: '?')
+                .' — kurang untuk foto 10 MB (edit php.ini FPM, lihat docs/deploy/PHP-UPLOAD-LIMITS.md)'
+            );
+        } else {
+            $pass(
+                'Limit upload PHP OK (upload_max_filesize='.(ini_get('upload_max_filesize') ?: '?')
+                .', post_max_size='.(ini_get('post_max_size') ?: '?').')'
+            );
         }
 
         if (! Schema::hasTable('tamans')) {

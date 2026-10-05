@@ -2,14 +2,19 @@
 
 namespace App\Support;
 
+use App\Models\Taman;
 use Illuminate\Http\UploadedFile;
 
 class UploadedFileErrorMessage
 {
     public static function for(UploadedFile $file): string
     {
+        $uploadMax = ini_get('upload_max_filesize') ?: '?';
+        $appMaxMb = (int) (Taman::GALLERY_MAX_UPLOAD_KILOBYTES / 1024);
+
         return match ($file->getError()) {
-            UPLOAD_ERR_INI_SIZE => 'File melebihi batas upload_max_filesize di server PHP. Minta admin naikkan limit (min. 10M) lalu reload PHP-FPM.',
+            UPLOAD_ERR_INI_SIZE => 'File ditolak PHP sebelum masuk aplikasi: upload_max_filesize server saat ini '.$uploadMax
+                .' (aplikasi mengizinkan hingga '.$appMaxMb.' MB per foto). Naikkan upload_max_filesize & post_max_size di php.ini FPM (disarankan 20M), reload PHP-FPM — lihat docs/deploy/PHP-UPLOAD-LIMITS.md',
             UPLOAD_ERR_FORM_SIZE => 'File melebihi batas ukuran yang diizinkan form.',
             UPLOAD_ERR_PARTIAL => 'Upload terputus. Coba lagi dengan koneksi stabil atau unggah satu per satu.',
             UPLOAD_ERR_NO_FILE => 'Tidak ada file yang terkirim.',

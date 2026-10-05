@@ -67,6 +67,10 @@ git clone git@github.com:antonimaulana/samasta.git .
 
 # 3. Update ke depan
 bash scripts/vps-deploy-update.sh
+
+# 4. Foto taman gagal di atas ~2 MB (limit PHP default)
+sudo bash scripts/vps-set-upload-limits.sh
+# Panduan: docs/deploy/PHP-UPLOAD-LIMITS.md
 ```
 
 **Jangan pakai** `https://github.com/ORG/samasta.git` — itu placeholder dokumentasi lama.
