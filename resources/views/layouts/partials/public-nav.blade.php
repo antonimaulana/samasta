@@ -1,6 +1,6 @@
 @php
 
-    $jelajahiActive = request()->routeIs('tamans.*', 'rth.*');
+    $jelajahiActive = request()->routeIs('tamans.*', 'rth.*', 'peraturan.*');
 
     $masukanActive = request()->routeIs('masukan.*', 'aduan.*', 'survey.*');
 

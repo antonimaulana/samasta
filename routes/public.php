@@ -5,6 +5,7 @@ use App\Http\Controllers\AduanMasyarakatController;
 use App\Http\Controllers\EnsiklopediaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MasukanController;
+use App\Http\Controllers\PeraturanController;
 use App\Http\Controllers\RthController;
 use App\Http\Controllers\SurveyKepuasanController;
 use App\Http\Controllers\TamanController;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::redirect('/beranda', '/')->name('beranda');
+
+Route::get('/peraturan', [PeraturanController::class, 'index'])->name('peraturan.index');
 
 Route::get('/rth-kota-batam', [RthController::class, 'index'])->name('rth.index');
 

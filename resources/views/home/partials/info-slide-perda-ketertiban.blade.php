@@ -1,5 +1,5 @@
 @php
-    $href = $href ?? route('masukan.index');
+    $href = $href ?? route('peraturan.index');
     $larangan = \App\Support\PerdaKetertibanUmum::laranganTaman();
     $sanksi = \App\Support\PerdaKetertibanUmum::sanksi();
 @endphp
@@ -8,8 +8,8 @@
     <div class="info-slide-card info-slide-card--perda group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-lg shadow-emerald-200/60 ring-1 ring-emerald-100 transition hover:-translate-y-0.5 hover:shadow-xl md:flex-row md:items-stretch">
         <a href="{{ $href }}"
            class="absolute inset-0 z-0 rounded-2xl"
-           aria-label="Ketertiban Umum di Taman dan Ruang Hijau — Laporkan pelanggaran">
-            <span class="sr-only">Laporkan pelanggaran</span>
+           aria-label="Ketertiban Umum di Taman dan Ruang Hijau — Baca ringkasan peraturan">
+            <span class="sr-only">Baca ringkasan peraturan</span>
         </a>
 
         <div class="info-slide-left relative z-10 flex w-full flex-col justify-between bg-gradient-to-br from-teal-600 via-emerald-600 to-green-700 p-4 text-white sm:p-5 md:w-[32%] md:flex-shrink-0 lg:w-[30%] pointer-events-none">
@@ -63,7 +63,7 @@
             </div>
 
             <span class="relative z-10 mt-4 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 transition group-hover:gap-3 sm:mt-5">
-                Laporkan pelanggaran
+                Baca ringkasan lengkap
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>

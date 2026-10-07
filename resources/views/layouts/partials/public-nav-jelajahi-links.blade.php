@@ -10,3 +10,7 @@
    class="{{ $linkClass }} {{ request()->routeIs('rth.*') ? 'bg-lime-100 text-green-700' : 'text-gray-700' }}">
     Statistik RTH
 </a>
+<a href="{{ route('peraturan.index') }}"
+   class="{{ $linkClass }} {{ request()->routeIs('peraturan.*') ? 'bg-lime-100 text-green-700' : 'text-gray-700' }}">
+    Peraturan
+</a>

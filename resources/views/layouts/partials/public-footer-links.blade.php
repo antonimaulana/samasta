@@ -4,6 +4,7 @@
     <span class="w-full text-center text-xs font-semibold uppercase tracking-wide text-gray-400 sm:w-auto sm:text-left">Jelajahi</span>
     <a href="{{ route('tamans.index') }}" class="transition hover:text-green-600">Jelajahi Taman</a>
     <a href="{{ route('rth.index') }}" class="transition hover:text-green-600">RTH Kota Batam</a>
+    <a href="{{ route('peraturan.index') }}" class="transition hover:text-green-600">Peraturan</a>
     <a href="{{ route('ensiklopedia.index') }}" class="transition hover:text-green-600">Ensiklopedia</a>
     <span class="hidden text-gray-300 sm:inline">|</span>
     <a href="{{ route('login') }}" class="transition hover:text-green-600">Portal Admin</a>
