@@ -80,10 +80,11 @@
                 <div class="flex flex-wrap gap-2">
                     @foreach (\App\Models\Taman::kategoriPinLegend() as $kat => $color)
                         <button type="button"
-                                class="map-kategori-toggle inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-lime-50"
+                                class="map-kategori-toggle inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition hover:opacity-90"
+                                style="{{ \App\Models\Taman::kategoriBadgeInlineStyle($kat) }}"
                                 data-kategori="{{ $kat }}"
                                 data-active="true">
-                            <span class="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white" style="background:{{ $color }}"></span>
+                            <span class="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white/80" style="background:{{ $color }}"></span>
                             {{ $kat }}
                         </button>
                     @endforeach
@@ -120,7 +121,7 @@
         <style>
             .taman-map-popup { min-width: 220px; max-width: 260px; }
             .taman-map-popup img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; }
-            .taman-map-popup .popup-kategori { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-bottom: 6px; }
+            .taman-map-popup .popup-kategori { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-bottom: 6px; border: 1px solid transparent; }
             .taman-map-popup .popup-fasilitas { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
             .taman-map-popup .popup-fasilitas span { font-size: 10px; background: #ecfdf5; color: #166534; padding: 2px 6px; border-radius: 999px; }
             .taman-map-popup .popup-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -216,7 +217,7 @@
                     return `
                         <div class="taman-map-popup">
                             ${point.foto ? '<img src="' + escapeHtml(point.foto) + '" alt="">' : ''}
-                            <span class="popup-kategori" style="background:${point.pinColor}22;color:${point.pinColor}">${escapeHtml(point.kategori)}</span>
+                            <span class="popup-kategori" style="background:${point.pinColor}22;color:${point.pinColor};border-color:${point.pinColor}44">${escapeHtml(point.kategori)}</span>
                             <strong>${escapeHtml(point.nama)}</strong>
                             ${point.alamat ? '<p style="font-size:11px;color:#666;margin:4px 0 0">' + escapeHtml(point.alamat) + '</p>' : ''}
                             ${fasilitasHtml ? '<div class="popup-fasilitas">' + fasilitasHtml + '</div>' : ''}

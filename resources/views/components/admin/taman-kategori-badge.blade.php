@@ -2,6 +2,4 @@
     'kategori',
 ])
 
-<span {{ $attributes->merge(['class' => 'inline-flex max-w-full items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-medium text-emerald-800']) }} title="{{ $kategori }}">
-    <span class="min-w-0 truncate">{{ $kategori }}</span>
-</span>
+<x-taman-kategori-badge :kategori="$kategori" size="sm" {{ $attributes }} />

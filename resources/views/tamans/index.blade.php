@@ -172,7 +172,7 @@
 
                     <div class="p-5">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-medium text-teal-800">{{ $taman->kategori }}</span>
+                            <x-taman-kategori-badge :kategori="$taman->kategori" />
                             @if ($nearbyMode && isset($taman->distance_km))
                                 <span class="rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-bold text-white">
                                     {{ \App\Support\GeoDistance::format($taman->distance_km) }}

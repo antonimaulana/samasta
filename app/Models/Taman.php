@@ -206,7 +206,7 @@ class Taman extends Model
     }
 
     /**
-     * Koordinat untuk tombol rute / Waze / hitung jarak — lebih permisif dari {@see normalizedMapCoordinates()}
+     * Koordinat untuk tombol rute Google Maps / hitung jarak — lebih permisif dari {@see normalizedMapCoordinates()}
      * (placeholder atau di luar bounds Batam tetap dipakai agar navigasi tidak hilang di profil publik).
      *
      * @return array{lat: float, lng: float}|null
@@ -350,13 +350,21 @@ class Taman extends Model
     {
         return match ($kategori) {
             'Taman Kota' => '#16a34a',
+            'Kebun Raya' => '#059669',
+            'TPU' => '#7c3aed',
             'Taman Lingkungan' => '#0891b2',
             'Jalur Hijau Jalan' => '#d97706',
             'RTH Jalur Hijau' => '#d97706',
-            'TPU' => '#7c3aed',
-            'Kebun Raya' => '#059669',
-            default => '#16a34a',
+            default => '#64748b',
         };
+    }
+
+    /** Gaya inline badge/label — selaras dengan popup peta (`pinColor` + alpha 22/44). */
+    public static function kategoriBadgeInlineStyle(string $kategori): string
+    {
+        $hex = self::kategoriPinColor($kategori);
+
+        return "background-color: {$hex}22; color: {$hex}; border-color: {$hex}44;";
     }
 
     /**

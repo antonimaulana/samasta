@@ -25,9 +25,6 @@
         $googleNavUrl = $parkLat !== null && $parkLng !== null
             ? \App\Support\ParkNavigation::googleDirectionsUrl($parkLat, $parkLng)
             : \App\Support\ParkNavigation::googleMapsSearchUrl($navQuery);
-        $wazeNavUrl = $parkLat !== null && $parkLng !== null
-            ? \App\Support\ParkNavigation::wazeUrl($parkLat, $parkLng)
-            : \App\Support\ParkNavigation::wazeSearchUrl($navQuery);
     @endphp
 
     <article class="overflow-hidden rounded-3xl bg-white shadow-xl shadow-green-100/60 ring-1 ring-green-100">
@@ -38,9 +35,7 @@
                 <div>
                     <h1 class="text-3xl font-black text-green-900 sm:text-4xl">{{ $taman->nama_taman }}</h1>
                     <div class="mt-4 flex flex-wrap items-center gap-3">
-                        <span class="rounded-full bg-gradient-to-r from-lime-100 to-green-100 px-3 py-1 text-sm font-bold text-green-800 ring-1 ring-green-200">
-                            {{ $taman->kategori }}
-                        </span>
+                        <x-taman-kategori-badge :kategori="$taman->kategori" size="md" />
                         @if ($taman->luasan > 0)
                             <span class="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-100">
                                 {{ number_format($taman->luasan, 0, ',', '.') }} M²
@@ -125,11 +120,6 @@
                            target="_blank" rel="noopener noreferrer"
                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-lime-500 to-green-500 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-green-400/30 transition hover:from-lime-400 hover:to-green-400">
                             🗺️ Rute Google Maps
-                        </a>
-                        <a href="{{ $wazeNavUrl }}"
-                           target="_blank" rel="noopener noreferrer"
-                           class="inline-flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-800 transition hover:bg-blue-100">
-                            Waze
                         </a>
                     </div>
 

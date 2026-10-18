@@ -29,7 +29,7 @@ class PublicTamanNavigationTest extends TestCase
             ->assertOk()
             ->assertSee('Lokasi & Navigasi', false)
             ->assertSee('Rute Google Maps')
-            ->assertSee('Waze')
+            ->assertDontSee('Waze')
             ->assertSee('Hitung jarak dari lokasi saya')
             ->assertSee('id="map"', false)
             ->assertSee('leaflet@1.9.4/dist/leaflet.js', false);
@@ -51,7 +51,7 @@ class PublicTamanNavigationTest extends TestCase
             ->assertOk()
             ->assertSee('Lokasi & Navigasi', false)
             ->assertSee('Rute Google Maps')
-            ->assertSee('Waze')
+            ->assertDontSee('Waze')
             ->assertSee('Koordinat belum lengkap');
     }
 }
