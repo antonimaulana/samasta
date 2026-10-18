@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\TamanCompleteness;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,12 +14,13 @@ class Taman extends Model
 {
     protected $table = 'tamans';
 
+    /** Urutan tampilan daftar (admin Kelola Taman & portal Jelajahi Taman). */
     public const KATEGORI = [
         'Taman Kota',
+        'Kebun Raya',
+        'TPU',
         'Taman Lingkungan',
         'Jalur Hijau Jalan',
-        'TPU',
-        'Kebun Raya',
     ];
 
     public const FASILITAS_KONDISI = [
@@ -46,6 +48,28 @@ class Taman extends Model
         'Museum',
         'Pos Jaga',
     ];
+
+    /**
+     * Urutan daftar: kategori (sesuai {@see KATEGORI}) lalu nama taman A–Z.
+     */
+    public static function applyDisplayOrder(Builder $query, string $kategoriDirection = 'asc'): Builder
+    {
+        $cases = [];
+        $bindings = [];
+
+        foreach (self::KATEGORI as $index => $category) {
+            $cases[] = 'WHEN kategori = ? THEN ?';
+            $bindings[] = $category;
+            $bindings[] = $index;
+        }
+
+        $caseSql = 'CASE '.implode(' ', $cases).' ELSE 999 END';
+        $direction = strtolower($kategoriDirection) === 'desc' ? 'DESC' : 'ASC';
+
+        return $query
+            ->orderByRaw("({$caseSql}) {$direction}", $bindings)
+            ->orderBy('nama_taman', 'asc');
+    }
 
     public const STATUS_DATA_LENGKAP = 'lengkap';
 

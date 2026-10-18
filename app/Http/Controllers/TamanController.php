@@ -170,7 +170,8 @@ class TamanController extends Controller
 
 
 
-        $query = Taman::query()->with('images')->latest();
+        $query = Taman::query()->with('images');
+        Taman::applyDisplayOrder($query);
 
 
 

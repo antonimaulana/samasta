@@ -17,19 +17,7 @@ class TamanTableSort
         return [
             'nama' => 'nama_taman',
             'kategori' => function (Builder $q, string $direction): void {
-                $cases = [];
-                $bindings = [];
-
-                foreach (Taman::KATEGORI as $index => $category) {
-                    $cases[] = 'WHEN kategori = ? THEN ?';
-                    $bindings[] = $category;
-                    $bindings[] = $index;
-                }
-
-                $caseSql = 'CASE '.implode(' ', $cases).' ELSE 999 END';
-
-                $q->orderByRaw("({$caseSql}) ".($direction === 'desc' ? 'DESC' : 'ASC'), $bindings)
-                    ->orderBy('nama_taman', 'asc');
+                Taman::applyDisplayOrder($q, $direction);
             },
             'wilayah' => function (Builder $q, string $direction): void {
                 $q->orderBy(
