@@ -106,9 +106,16 @@ class TamanIndexSortTest extends TestCase
             'deskripsi' => 'Deskripsi kota A',
         ]);
 
-        $this->actingAs($admin)
+        $response = $this->actingAs($admin)
             ->get(route('admin.tamans.index'))
-            ->assertOk()
-            ->assertSeeInOrder(['Alpha Kota', 'Beta Kota', 'Zebra Lingkungan']);
+            ->assertOk();
+
+        /** @var \Illuminate\Pagination\LengthAwarePaginator $tamans */
+        $tamans = $response->viewData('tamans');
+
+        $this->assertSame(
+            ['Alpha Kota', 'Beta Kota', 'Zebra Lingkungan'],
+            $tamans->getCollection()->pluck('nama_taman')->all(),
+        );
     }
 }

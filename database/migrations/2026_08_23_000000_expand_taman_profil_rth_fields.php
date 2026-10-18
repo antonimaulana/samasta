@@ -35,7 +35,10 @@ return new class extends Migration
             }
         });
 
-        if (Schema::hasColumn('tamans', 'kelengkapan_label')) {
+        if (
+            Schema::hasColumn('tamans', 'kelengkapan_label')
+            && Schema::getConnection()->getDriverName() !== 'sqlite'
+        ) {
             DB::statement("ALTER TABLE tamans MODIFY kelengkapan_label VARCHAR(20) NOT NULL DEFAULT 'merah'");
         }
 

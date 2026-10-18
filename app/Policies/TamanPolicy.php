@@ -19,4 +19,10 @@ class TamanPolicy extends AdminContentPolicy
     {
         return $user->canImportBulk();
     }
+
+    /** Export CSV — sama cakupan wilayah & filter seperti daftar Kelola Taman. */
+    public function export(User $user): bool
+    {
+        return $user->canWrite();
+    }
 }

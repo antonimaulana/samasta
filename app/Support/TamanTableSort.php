@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Kelurahan;
 use App\Models\Taman;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -31,11 +32,20 @@ class TamanTableSort
                     ->orderBy('nama_taman', 'asc');
             },
             'wilayah' => function (Builder $q, string $direction): void {
-                $q->leftJoin('kelurahans as sort_kelurahan', 'tamans.kelurahan_id', '=', 'sort_kelurahan.id')
-                    ->leftJoin('kecamatans as sort_kecamatan', 'sort_kelurahan.kecamatan_id', '=', 'sort_kecamatan.id')
-                    ->orderBy('sort_kecamatan.nama', $direction)
-                    ->orderBy('sort_kelurahan.nama', $direction)
-                    ->select('tamans.*');
+                $q->orderBy(
+                    Kelurahan::query()
+                        ->select('kecamatans.nama')
+                        ->join('kecamatans', 'kecamatans.id', '=', 'kelurahans.kecamatan_id')
+                        ->whereColumn('kelurahans.id', 'tamans.kelurahan_id')
+                        ->limit(1),
+                    $direction,
+                )->orderBy(
+                    Kelurahan::query()
+                        ->select('kelurahans.nama')
+                        ->whereColumn('kelurahans.id', 'tamans.kelurahan_id')
+                        ->limit(1),
+                    $direction,
+                )->orderBy('nama_taman', 'asc');
             },
             'luasan' => 'luasan',
             'tahun' => 'tahun_pembangunan',

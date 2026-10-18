@@ -12,7 +12,7 @@
                 unggah foto per taman setelah import selesai.
             </p>
             <div class="mt-4 flex flex-wrap gap-2">
-                <a href="{{ route('admin.tamans.export.csv', request()->only(['status_data', 'search'])) }}"
+                <a href="{{ route('admin.tamans.export.csv') }}"
                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
                     Export Data Taman (CSV)
                 </a>
@@ -22,9 +22,9 @@
                 </a>
             </div>
             <p class="mt-3 text-xs leading-relaxed text-blue-800/90">
-                <strong>Export Data Taman</strong> mengunduh semua taman yang ada (kolom terisi + kolom kosong).
-                Isi sel yang kosong di Excel, lalu import kembali file yang sama — baris dengan <code class="rounded bg-blue-100 px-1">id</code>
-                akan memperbarui taman yang sama (hanya kolom yang Anda isi).
+                <strong>Export di halaman ini</strong> mengunduh <em>semua</em> taman di database (tanpa filter pencarian).
+                Untuk export yang sama persis dengan daftar <a href="{{ route('admin.tamans.index') }}" class="font-semibold underline">Kelola Taman</a>
+                (wilayah, filter, urutan kolom), gunakan tombol <strong>Export CSV</strong> di sana — jumlah baris = total lokasi di layar.
             </p>
         </div>
 

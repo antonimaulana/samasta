@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Kelurahan;
 use App\Models\Taman;
 use App\Models\User;
+use App\Support\AdminTamanListQuery;
 use App\Support\TamanCsvExporter;
 use App\Support\TamanCsvImporter;
 use Database\Seeders\WilayahBatamSeeder;
@@ -46,7 +47,8 @@ class TamanCsvExportTest extends TestCase
         $response->assertOk();
         $content = $response->streamedContent();
 
-        $this->assertStringContainsString('id;nama_taman;status_data;kolom_belum_lengkap', $content);
+        $this->assertStringContainsString('id;nama_taman;kategori;', $content);
+        $this->assertStringContainsString('status_data;kolom_belum_lengkap', $content);
         $this->assertStringContainsString('Taman Export CSV', $content);
         $this->assertStringContainsString((string) $taman->id, $content);
         $this->assertStringContainsString('Belum Lengkap', $content);
@@ -96,5 +98,100 @@ class TamanCsvExportTest extends TestCase
         $this->assertSame('Jl. Diisi Lewat Reimport', $taman->alamat);
         $this->assertSame('Taman Kota', $taman->kategori);
         $this->assertSame($kelurahan->id, $taman->kelurahan_id);
+    }
+
+    public function test_export_includes_all_scoped_tamans_when_ordered_by_name(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $kelurahan = Kelurahan::query()->firstOrFail();
+
+        foreach (['Zulu Taman', 'Alpha Taman', 'Mike Taman'] as $nama) {
+            Taman::query()->create([
+                'nama_taman' => $nama,
+                'kategori' => 'Taman Kota',
+                'kelurahan_id' => $kelurahan->id,
+                'luasan' => 100,
+                'alamat' => 'Jl. '.$nama,
+                'latitude' => Taman::defaultLatitude(),
+                'longitude' => Taman::defaultLongitude(),
+                'deskripsi' => 'Deskripsi',
+                'fasilitas' => [['nama' => 'Playground', 'kondisi' => 'Baik']],
+            ])->syncStatusData();
+        }
+
+        $response = $this->actingAs($admin)
+            ->get(route('admin.tamans.export.csv'));
+
+        $response->assertOk();
+        $lines = array_values(array_filter(
+            explode("\n", str_replace("\r\n", "\n", $response->streamedContent())),
+            fn (string $line) => trim($line) !== '',
+        ));
+
+        $this->assertSame('sep=;', ltrim($lines[0], "\xEF\xBB\xBF"));
+        $this->assertCount(5, $lines, 'Expected sep, header, and 3 data rows');
+        $this->assertSame(3, AdminTamanListQuery::count(request()));
+    }
+
+    public function test_export_row_reflects_stored_attributes_and_computed_status(): void
+    {
+        $kelurahan = Kelurahan::query()->firstOrFail();
+
+        $taman = Taman::query()->create([
+            'nama_taman' => 'Taman Nilai DB',
+            'kategori' => 'Taman Lingkungan',
+            'kelurahan_id' => $kelurahan->id,
+            'luasan' => 0,
+            'alamat' => '  Jl. Tersimpan  ',
+            'latitude' => '1.111111',
+            'longitude' => '104.222222',
+            'deskripsi' => '<p>HTML deskripsi</p>',
+            'fasilitas' => [],
+            'status_data' => Taman::STATUS_DATA_LENGKAP,
+        ]);
+
+        $row = app(TamanCsvExporter::class)->rowFor($taman->fresh(['kelurahan.kecamatan', 'images']));
+        $headers = app(TamanCsvImporter::class)->exportHeaders();
+        $byHeader = array_combine($headers, $row);
+
+        $this->assertSame('Belum Lengkap', $byHeader['status_data']);
+        $this->assertStringContainsString('Luasan', (string) $byHeader['kolom_belum_lengkap']);
+        $this->assertSame('0', $byHeader['luasan']);
+        $this->assertSame('Jl. Tersimpan', $byHeader['alamat']);
+        $this->assertSame('1.111111', $byHeader['latitude']);
+        $this->assertSame('<p>HTML deskripsi</p>', $byHeader['deskripsi']);
+        $this->assertSame('0', $byHeader['jumlah_foto_galeri']);
+    }
+
+    public function test_export_row_count_matches_admin_taman_list_query(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $kelurahan = Kelurahan::query()->firstOrFail();
+
+        Taman::query()->create([
+            'nama_taman' => 'Taman TPU Export',
+            'kategori' => 'TPU',
+            'kelurahan_id' => $kelurahan->id,
+            'luasan' => 1000,
+            'alamat' => 'Jl. TPU',
+            'latitude' => Taman::defaultLatitude(),
+            'longitude' => Taman::defaultLongitude(),
+            'deskripsi' => 'Deskripsi TPU',
+            'fasilitas' => [['nama' => 'Makam', 'kondisi' => 'Baik']],
+        ])->syncStatusData();
+
+        $this->actingAs($admin);
+
+        $expected = AdminTamanListQuery::count(request());
+        $response = $this->get(route('admin.tamans.export.csv'));
+        $response->assertOk();
+
+        $lines = array_values(array_filter(
+            explode("\n", str_replace("\r\n", "\n", $response->streamedContent())),
+            fn (string $line) => trim($line) !== '',
+        ));
+
+        $this->assertSame($expected, max(0, count($lines) - 2));
+        $this->assertStringContainsString(';TPU;', $response->streamedContent());
     }
 }

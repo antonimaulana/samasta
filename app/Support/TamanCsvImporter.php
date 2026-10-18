@@ -229,8 +229,6 @@ class TamanCsvImporter
             [
                 '',
                 'Taman Contoh Batam',
-                '',
-                '',
                 'Taman Kota',
                 'Batam Kota',
                 'Belian',
@@ -245,7 +243,9 @@ class TamanCsvImporter
                 'PT Contoh Kontraktor',
                 'PT Contoh Konsultan',
                 '2026-08-23 10:00',
-                '',
+                'Belum Lengkap',
+                'Galeri foto',
+                '0',
             ],
         ];
     }

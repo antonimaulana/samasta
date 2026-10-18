@@ -59,6 +59,16 @@ class OperatorWilayahScopeTest extends TestCase
             ->assertOk()
             ->assertSee($tamanWilayah1->nama_taman)
             ->assertDontSee($tamanWilayah2->nama_taman);
+
+        $response = $this->get(route('admin.tamans.export.csv'));
+        $response->assertOk();
+        $lines = array_values(array_filter(
+            explode("\n", str_replace("\r\n", "\n", $response->streamedContent())),
+            fn (string $line) => trim($line) !== '',
+        ));
+        $this->assertSame(1, max(0, count($lines) - 2));
+        $this->assertStringContainsString($tamanWilayah1->nama_taman, $response->streamedContent());
+        $this->assertStringNotContainsString($tamanWilayah2->nama_taman, $response->streamedContent());
     }
 
     public function test_operator_with_multiple_teams_sees_both_wilayah(): void

@@ -3,7 +3,6 @@
 namespace App\Support;
 
 use App\Models\Taman;
-use Illuminate\Database\Eloquent\Builder;
 
 class TamanCsvExporter
 {
@@ -13,10 +12,10 @@ class TamanCsvExporter
     ) {}
 
     /**
-     * @param  Builder<Taman>  $query
      * @param  resource  $handle
+     * @param  list<int>  $tamanIds
      */
-    public function writeToStream($handle, Builder $query): void
+    public function writeToStream($handle, array $tamanIds): void
     {
         if (! is_resource($handle)) {
             return;
@@ -26,11 +25,27 @@ class TamanCsvExporter
         fprintf($handle, 'sep=%s'.PHP_EOL, $this->importer->templateDelimiter());
         fputcsv($handle, $this->importer->exportHeaders(), $this->importer->templateDelimiter());
 
-        $query->chunkById(200, function ($tamans) use ($handle) {
-            foreach ($tamans as $taman) {
+        if ($tamanIds === []) {
+            return;
+        }
+
+        foreach (array_chunk($tamanIds, 200) as $idChunk) {
+            $byId = Taman::query()
+                ->with(['kelurahan.kecamatan', 'images'])
+                ->whereIn('id', $idChunk)
+                ->get()
+                ->keyBy('id');
+
+            foreach ($idChunk as $id) {
+                $taman = $byId->get($id);
+
+                if ($taman === null) {
+                    continue;
+                }
+
                 fputcsv($handle, $this->rowFor($taman), $this->importer->templateDelimiter());
             }
-        });
+        }
     }
 
     /**
@@ -40,14 +55,15 @@ class TamanCsvExporter
     {
         $taman->loadMissing('kelurahan.kecamatan', 'images');
 
-        $missing = collect($this->completeness->breakdown($taman))
+        $breakdown = $this->completeness->breakdown($taman);
+        $missing = collect($breakdown)
             ->where('filled', false)
             ->pluck('label')
             ->implode('; ');
 
         $galleryCount = $taman->images->count() + (filled($taman->foto) ? 1 : 0);
-
-        $statusLabel = $taman->status_data === Taman::STATUS_DATA_LENGKAP
+        $computedStatus = $this->completeness->statusFor($taman);
+        $statusLabel = $computedStatus === Taman::STATUS_DATA_LENGKAP
             ? 'Lengkap'
             : 'Belum Lengkap';
 
@@ -56,27 +72,59 @@ class TamanCsvExporter
             'nama_taman' => $taman->nama_taman,
             'status_data' => $statusLabel,
             'kolom_belum_lengkap' => $missing !== '' ? $missing : null,
-            'kategori' => $taman->kategori ?: null,
-            'kecamatan' => $taman->kelurahan?->kecamatan?->nama,
-            'kelurahan' => $taman->kelurahan?->nama,
-            'luasan' => (int) $taman->luasan > 0 ? (string) (int) $taman->luasan : null,
-            'alamat' => filled(trim((string) $taman->alamat)) ? $taman->alamat : null,
-            'latitude' => filled($taman->latitude) ? $taman->latitude : null,
-            'longitude' => filled($taman->longitude) ? $taman->longitude : null,
-            'deskripsi' => filled(trim(strip_tags((string) $taman->deskripsi))) ? $taman->deskripsi : null,
+            'kategori' => $this->exportKategori($taman->kategori),
+            'kecamatan' => $this->exportText($taman->kelurahan?->kecamatan?->nama),
+            'kelurahan' => $this->exportText($taman->kelurahan?->nama),
+            'luasan' => (string) (int) $taman->luasan,
+            'alamat' => $this->exportText($taman->alamat),
+            'latitude' => $this->exportText($taman->latitude),
+            'longitude' => $this->exportText($taman->longitude),
+            'deskripsi' => $this->exportText($taman->deskripsi),
             'fasilitas' => $this->formatFasilitas($taman),
-            'tahun_pembangunan' => filled($taman->tahun_pembangunan) ? (string) (int) $taman->tahun_pembangunan : null,
-            'nilai_pembangunan' => filled($taman->nilai_pembangunan) ? (string) (int) $taman->nilai_pembangunan : null,
-            'kontraktor' => filled($taman->kontraktor) ? $taman->kontraktor : null,
-            'konsultan_perencana' => filled($taman->konsultan_perencana) ? $taman->konsultan_perencana : null,
+            'tahun_pembangunan' => $taman->tahun_pembangunan !== null
+                ? (string) (int) $taman->tahun_pembangunan
+                : null,
+            'nilai_pembangunan' => $taman->nilai_pembangunan !== null
+                ? (string) (int) $taman->nilai_pembangunan
+                : null,
+            'kontraktor' => $this->exportText($taman->kontraktor),
+            'konsultan_perencana' => $this->exportText($taman->konsultan_perencana),
             'data_verified_at' => $taman->data_verified_at?->format('Y-m-d H:i'),
-            'jumlah_foto_galeri' => $galleryCount > 0 ? (string) $galleryCount : '0',
+            'jumlah_foto_galeri' => (string) $galleryCount,
         ];
 
         return collect($this->importer->exportHeaders())
             ->map(fn (string $header) => $byHeader[$header] ?? null)
             ->values()
             ->all();
+    }
+
+    private function exportText(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $text = trim((string) $value);
+
+        return $text === '' ? null : $text;
+    }
+
+    private function exportKategori(mixed $value): ?string
+    {
+        $text = $this->exportText($value);
+
+        if ($text === null) {
+            return null;
+        }
+
+        foreach (Taman::KATEGORI as $kategori) {
+            if (strcasecmp($text, $kategori) === 0) {
+                return $kategori;
+            }
+        }
+
+        return $text;
     }
 
     private function formatFasilitas(Taman $taman): ?string

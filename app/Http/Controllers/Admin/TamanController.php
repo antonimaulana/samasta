@@ -9,7 +9,7 @@ use App\Models\Kelurahan;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Models\TamanImage;
-use App\Support\OperationalAlertService;
+use App\Support\AdminTamanListQuery;
 use App\Support\OperatorWilayahScope;
 use App\Support\TamanTableSort;
 use App\Support\TableSearch;
@@ -37,24 +37,11 @@ class TamanController extends Controller
 
     public function index(Request $request): View
     {
-        $scope = app(OperatorWilayahScope::class);
+        $sortState = TamanTableSort::apply(AdminTamanListQuery::build($request), $request);
+        $tamans = AdminTamanListQuery::paginated($request)->withQueryString();
+        $listTotal = $tamans->total();
 
-        $query = TableSearch::apply(
-            $scope->scopeTamans(Taman::with(['images', 'kelurahan.kecamatan']), $request->user()),
-            $request,
-            ['nama_taman', 'alamat', 'kategori', 'deskripsi', 'kontraktor', 'konsultan_perencana']
-        )
-            ->when($request->input('alert') === 'incomplete', fn ($q) => app(OperationalAlertService::class)->filterIncompleteTamans($q))
-            ->when(
-                in_array($request->input('status_data'), [Taman::STATUS_DATA_LENGKAP, Taman::STATUS_DATA_BELUM_LENGKAP], true),
-                fn ($q) => $q->where('status_data', $request->input('status_data'))
-            );
-
-        $sortState = TamanTableSort::apply($query, $request);
-
-        $tamans = $query->paginate(10)->withQueryString();
-
-        return view('admin.tamans.index', compact('tamans', 'sortState'));
+        return view('admin.tamans.index', compact('tamans', 'sortState', 'listTotal'));
     }
 
     public function importForm(): View
@@ -90,37 +77,25 @@ class TamanController extends Controller
 
     public function exportCsv(Request $request, TamanCsvExporter $exporter): StreamedResponse
     {
-        $this->authorize('import', Taman::class);
+        $this->authorize('export', Taman::class);
 
-        $scope = app(OperatorWilayahScope::class);
+        $ids = AdminTamanListQuery::orderedIds($request);
+        $rowCount = count($ids);
 
-        $query = TableSearch::apply(
-            $scope->scopeTamans(
-                Taman::query()->with(['kelurahan.kecamatan', 'images']),
-                $request->user(),
-            ),
-            $request,
-            ['nama_taman', 'alamat', 'kategori', 'deskripsi', 'kontraktor', 'konsultan_perencana'],
-        )
-            ->when(
-                in_array($request->input('status_data'), [Taman::STATUS_DATA_LENGKAP, Taman::STATUS_DATA_BELUM_LENGKAP], true),
-                fn ($q) => $q->where('status_data', $request->input('status_data'))
-            )
-            ->orderBy('nama_taman');
+        $filename = 'data-taman-'.$rowCount.'-lokasi-'.now()->format('Y-m-d_His').'.csv';
 
-        $filename = 'data-taman-'.now()->format('Y-m-d_His').'.csv';
-
-        return response()->streamDownload(function () use ($exporter, $query) {
+        return response()->streamDownload(function () use ($exporter, $ids) {
             $handle = fopen('php://output', 'w');
 
             if ($handle === false) {
                 return;
             }
 
-            $exporter->writeToStream($handle, $query);
+            $exporter->writeToStream($handle, $ids);
             fclose($handle);
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
+            'X-Export-Row-Count' => (string) $rowCount,
         ]);
     }
 
