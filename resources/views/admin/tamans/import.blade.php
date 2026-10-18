@@ -12,20 +12,11 @@
                 unggah foto per taman setelah import selesai.
             </p>
             <div class="mt-4 flex flex-wrap gap-2">
-                <a href="{{ route('admin.tamans.export.csv') }}"
-                   class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-                    Export Data Taman (CSV)
-                </a>
                 <a href="{{ route('admin.tamans.import.template') }}"
                    class="inline-flex items-center gap-2 rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-50">
                     Unduh Template Kosong
                 </a>
             </div>
-            <p class="mt-3 text-xs leading-relaxed text-blue-800/90">
-                <strong>Export di halaman ini</strong> mengunduh <em>semua</em> taman di database (tanpa filter pencarian).
-                Untuk export yang sama persis dengan daftar <a href="{{ route('admin.tamans.index') }}" class="font-semibold underline">Kelola Taman</a>
-                (wilayah, filter, urutan kolom), gunakan tombol <strong>Export CSV</strong> di sana — jumlah baris = total lokasi di layar.
-            </p>
         </div>
 
         @if ($errors->any())
@@ -83,7 +74,9 @@
             <p class="mt-1 text-sm text-gray-600">
                 Hanya <code class="rounded bg-gray-100 px-1">nama_taman</code> wajib diisi per baris (taman baru).
                 Kolom lain boleh dikosongkan — data akan masuk dengan status <strong>Belum Lengkap</strong>.
-                Untuk memperbarui taman yang sudah ada, gunakan file <strong>Export Data Taman</strong> (kolom <code class="rounded bg-gray-100 px-1">id</code> jangan diubah)
+                Untuk memperbarui taman yang sudah ada, gunakan file <strong>Export CSV</strong> dari
+                <a href="{{ route('admin.tamans.index') }}" class="font-medium text-green-700 underline">Kelola Taman</a>
+                (kolom <code class="rounded bg-gray-100 px-1">id</code> jangan diubah)
                 atau pastikan <code class="rounded bg-gray-100 px-1">nama_taman</code> sama — hanya kolom yang Anda isi di CSV yang diperbarui.
                 Kolom <code class="rounded bg-gray-100 px-1">status_data</code>, <code class="rounded bg-gray-100 px-1">kolom_belum_lengkap</code>, dan
                 <code class="rounded bg-gray-100 px-1">jumlah_foto_galeri</code> hanya panduan (diabaikan saat import). Foto galeri tetap diunggah lewat form taman.
