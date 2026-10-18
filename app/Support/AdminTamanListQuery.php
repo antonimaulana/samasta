@@ -91,10 +91,18 @@ class AdminTamanListQuery
     }
 
     /**
-     * @return list<string>
+     * Query string untuk link export — semua filter aktif di URL + jumlah baris yang ditampilkan.
+     *
+     * @return array<string, mixed>
      */
-    public static function exportQueryKeys(): array
+    public static function exportQueryFromRequest(Request $request): array
     {
-        return ['status_data', 'search', 'alert', 'sort', 'direction'];
+        $query = collect($request->query())
+            ->except(['page'])
+            ->all();
+
+        $query['list_total'] = self::count($request);
+
+        return $query;
     }
 }

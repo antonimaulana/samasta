@@ -288,13 +288,21 @@ class TamanCsvImporter
      */
     private function readHeader($handle): array
     {
-        $firstLine = fgets($handle);
+        while (($firstLine = fgets($handle)) !== false) {
+            $firstLine = $this->stripBom($firstLine);
+            $trimmed = trim($firstLine);
 
-        if ($firstLine === false) {
+            if ($trimmed === '' || str_starts_with($trimmed, '#')) {
+                continue;
+            }
+
+            break;
+        }
+
+        if (! isset($firstLine) || $firstLine === false) {
             return [null, ','];
         }
 
-        $firstLine = $this->stripBom($firstLine);
         $delimiter = ',';
 
         if (preg_match('/^sep=(.*)$/i', trim($firstLine), $matches) === 1) {

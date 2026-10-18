@@ -64,6 +64,11 @@ return [
     |--------------------------------------------------------------------------
     */
 
+    'export_csv' => [
+        /** Naikkan saat format/aturan export CSV berubah (header X-Simtaman-Export-Build). */
+        'build' => 2,
+    ],
+
     'features' => [
         'rap_konsolidasi' => filter_var(
             env('SIMTAMAN_FEATURE_RAP_KONSOLIDASI', false),

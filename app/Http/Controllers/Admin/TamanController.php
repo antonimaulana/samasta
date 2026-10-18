@@ -32,7 +32,9 @@ class TamanController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(Taman::class, 'taman');
+        $this->authorizeResource(Taman::class, 'taman', [
+            'except' => ['exportCsv', 'importForm', 'import', 'importTemplate', 'resolveWilayah'],
+        ]);
     }
 
     public function index(Request $request): View
@@ -81,21 +83,30 @@ class TamanController extends Controller
 
         $ids = AdminTamanListQuery::orderedIds($request);
         $rowCount = count($ids);
+        $expectedTotal = $request->has('list_total')
+            ? (int) $request->input('list_total')
+            : null;
+
+        if ($expectedTotal !== null && $expectedTotal !== $rowCount) {
+            abort(409, 'Jumlah export ('.$rowCount.') tidak sama dengan daftar ('.$expectedTotal.'). Muat ulang halaman Kelola Taman lalu export lagi. Jika masih gagal, jalankan deploy ulang (versi export belum terbaru).');
+        }
 
         $filename = 'data-taman-'.$rowCount.'-lokasi-'.now()->format('Y-m-d_His').'.csv';
+        $exportBuild = (string) config('simtaman.export_csv.build', 2);
 
-        return response()->streamDownload(function () use ($exporter, $ids) {
+        return response()->streamDownload(function () use ($exporter, $ids, $rowCount, $exportBuild) {
             $handle = fopen('php://output', 'w');
 
             if ($handle === false) {
                 return;
             }
 
-            $exporter->writeToStream($handle, $ids);
+            $exporter->writeToStream($handle, $ids, $rowCount, $exportBuild);
             fclose($handle);
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'X-Export-Row-Count' => (string) $rowCount,
+            'X-Simtaman-Export-Build' => $exportBuild,
         ]);
     }
 

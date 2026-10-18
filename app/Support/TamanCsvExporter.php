@@ -15,13 +15,17 @@ class TamanCsvExporter
      * @param  resource  $handle
      * @param  list<int>  $tamanIds
      */
-    public function writeToStream($handle, array $tamanIds): void
+    public function writeToStream($handle, array $tamanIds, ?int $declaredRowCount = null, ?string $exportBuild = null): void
     {
         if (! is_resource($handle)) {
             return;
         }
 
         fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+        $rowCount = $declaredRowCount ?? count($tamanIds);
+        $build = $exportBuild ?? (string) config('simtaman.export_csv.build', 2);
+        fprintf($handle, '# simtaman_export build=%s rows=%d'.PHP_EOL, $build, $rowCount);
         fprintf($handle, 'sep=%s'.PHP_EOL, $this->importer->templateDelimiter());
         fputcsv($handle, $this->importer->exportHeaders(), $this->importer->templateDelimiter());
 

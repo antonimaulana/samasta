@@ -8,7 +8,7 @@
         <p class="text-sm text-gray-600">Kelola data RTH/taman yang terdaftar di sistem.</p>
         <div class="flex flex-wrap gap-2">
         <x-admin.can-write>
-        <a href="{{ route('admin.tamans.export.csv', request()->only(\App\Support\AdminTamanListQuery::exportQueryKeys())) }}"
+        <a href="{{ route('admin.tamans.export.csv', \App\Support\AdminTamanListQuery::exportQueryFromRequest(request())) }}"
            class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-100">
             Export CSV ({{ number_format($listTotal ?? 0) }} lokasi)
         </a>
@@ -43,7 +43,7 @@
     <p class="mb-3 text-sm text-gray-600">
         Total lokasi sesuai filter: <strong>{{ number_format($listTotal ?? 0) }}</strong>
         @if (($listTotal ?? 0) > 0)
-            <span class="text-gray-500">— export CSV memuat jumlah yang sama.</span>
+            <span class="text-gray-500">— export CSV memuat jumlah yang sama (file: <code class="text-xs">data-taman-{{ $listTotal }}-lokasi-….csv</code>).</span>
         @endif
     </p>
 

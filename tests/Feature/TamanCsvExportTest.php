@@ -128,8 +128,9 @@ class TamanCsvExportTest extends TestCase
             fn (string $line) => trim($line) !== '',
         ));
 
-        $this->assertSame('sep=;', ltrim($lines[0], "\xEF\xBB\xBF"));
-        $this->assertCount(5, $lines, 'Expected sep, header, and 3 data rows');
+        $this->assertStringContainsString('simtaman_export build=2', ltrim($lines[0], "\xEF\xBB\xBF"));
+        $this->assertSame('sep=;', $lines[1]);
+        $this->assertCount(6, $lines, 'Expected meta, sep, header, and 3 data rows');
         $this->assertSame(3, AdminTamanListQuery::count(request()));
     }
 
@@ -191,7 +192,7 @@ class TamanCsvExportTest extends TestCase
             fn (string $line) => trim($line) !== '',
         ));
 
-        $this->assertSame($expected, max(0, count($lines) - 2));
+        $this->assertSame($expected, max(0, count($lines) - 3));
         $this->assertStringContainsString(';TPU;', $response->streamedContent());
     }
 }
