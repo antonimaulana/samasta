@@ -32,17 +32,22 @@ class PetugasPelaksanaTest extends TestCase
         $team = TimPelaksana::query()->where('nama', 'Tim Wilayah 1')->firstOrFail();
 
         $this->actingAs($admin)
-            ->post(route('admin.tim-pelaksanas.petugas.store', $team), [
-                'nama' => 'Petugas Baru',
-                'jabatan' => 'Operator',
-                'is_inti' => '1',
+            ->post(route('admin.tim-pelaksanas.store'), [
+                'nama' => 'Tim Uji Petugas',
+                'nama_pengawas' => 'Pengawas Uji',
+                'memiliki_wilayah_kerja' => '0',
+                'members' => [
+                    ['nama' => 'Petugas Baru', 'jabatan' => 'Operator', 'nip' => '197208172025211085'],
+                ],
             ])
-            ->assertRedirect();
+            ->assertRedirect(route('admin.tim-pelaksanas.index'));
+
+        $newTeam = TimPelaksana::query()->where('nama', 'Tim Uji Petugas')->firstOrFail();
 
         $this->assertDatabaseHas('petugas', [
-            'tim_pelaksana_id' => $team->id,
+            'tim_pelaksana_id' => $newTeam->id,
             'nama' => 'Petugas Baru',
-            'is_inti' => true,
+            'nip' => '197208172025211085',
         ]);
     }
 

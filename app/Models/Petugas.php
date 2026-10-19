@@ -13,6 +13,7 @@ class Petugas extends Model
     protected $fillable = [
         'tim_pelaksana_id',
         'nama',
+        'nip',
         'jabatan',
         'is_inti',
         'is_pengawas',

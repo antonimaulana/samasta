@@ -28,7 +28,6 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OperasionalPertamananLaporanController;
 use App\Http\Controllers\Admin\PemangkasanController;
 use App\Http\Controllers\Admin\PemeliharaanTamanController;
-use App\Http\Controllers\Admin\PetugasController;
 use App\Http\Controllers\Admin\SurveyKepuasanController as AdminSurveyKepuasanController;
 use App\Http\Controllers\Admin\TamanController as AdminTamanController;
 use App\Http\Controllers\Admin\TamanLaporanController;
@@ -173,13 +172,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::resource('ensiklopedia-artikels', EnsiklopediaArtikelController::class)->except(['show']);
 
     Route::middleware('admin.manage')->group(function () {
+        Route::get('tim-pelaksanas/create', [TimPelaksanaController::class, 'create'])->name('tim-pelaksanas.create');
+        Route::post('tim-pelaksanas', [TimPelaksanaController::class, 'store'])->name('tim-pelaksanas.store');
         Route::get('tim-pelaksanas', [TimPelaksanaController::class, 'index'])->name('tim-pelaksanas.index');
-        Route::get('tim-pelaksanas/{tim_pelaksana}/wilayah', [TimPelaksanaController::class, 'editWilayah'])->name('tim-pelaksanas.wilayah.edit');
-        Route::put('tim-pelaksanas/{tim_pelaksana}/wilayah', [TimPelaksanaController::class, 'updateWilayah'])->name('tim-pelaksanas.wilayah.update');
-        Route::get('tim-pelaksanas/{tim_pelaksana}/petugas', [PetugasController::class, 'index'])->name('tim-pelaksanas.petugas.index');
-        Route::post('tim-pelaksanas/{tim_pelaksana}/petugas', [PetugasController::class, 'store'])->name('tim-pelaksanas.petugas.store');
-        Route::put('tim-pelaksanas/{tim_pelaksana}/petugas/{petugas}', [PetugasController::class, 'update'])->name('tim-pelaksanas.petugas.update');
-        Route::delete('tim-pelaksanas/{tim_pelaksana}/petugas/{petugas}', [PetugasController::class, 'destroy'])->name('tim-pelaksanas.petugas.destroy');
+        Route::get('tim-pelaksanas/{tim_pelaksana}/edit', [TimPelaksanaController::class, 'edit'])->name('tim-pelaksanas.edit');
+        Route::put('tim-pelaksanas/{tim_pelaksana}', [TimPelaksanaController::class, 'update'])->name('tim-pelaksanas.update');
+        Route::delete('tim-pelaksanas/{tim_pelaksana}', [TimPelaksanaController::class, 'destroy'])->name('tim-pelaksanas.destroy');
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::resource('users', UserController::class)->except(['show']);
 

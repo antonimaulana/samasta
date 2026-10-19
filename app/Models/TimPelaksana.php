@@ -42,6 +42,12 @@ class TimPelaksana extends Model
         return $this->petugas()->where('aktif', true);
     }
 
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'tim_pelaksana_user')
+            ->withTimestamps();
+    }
+
     /**
      * Set wilayah kerja; each kelurahan may only belong to one tim.
      *

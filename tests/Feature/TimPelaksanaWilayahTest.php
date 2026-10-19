@@ -96,9 +96,20 @@ class TimPelaksanaWilayahTest extends TestCase
 
         $this->assertNotNull($kelurahan);
 
+        $members = $team1->petugas()->get()->map(fn ($p) => [
+            'id' => $p->id,
+            'nama' => $p->nama,
+            'nip' => $p->nip,
+            'jabatan' => $p->jabatan,
+        ])->all();
+
         $this->actingAs($admin)
-            ->put(route('admin.tim-pelaksanas.wilayah.update', $team1), [
+            ->put(route('admin.tim-pelaksanas.update', $team1), [
+                'nama' => $team1->nama,
+                'nama_pengawas' => $team1->nama_pengawas,
+                'memiliki_wilayah_kerja' => '1',
                 'kelurahan_ids' => [$kelurahan->id],
+                'members' => $members,
             ])
             ->assertRedirect(route('admin.tim-pelaksanas.index'));
 

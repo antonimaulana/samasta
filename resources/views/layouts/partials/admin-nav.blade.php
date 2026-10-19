@@ -200,7 +200,7 @@
             <div class="sidebar-submenu">
                 <a href="{{ route('admin.tim-pelaksanas.index') }}"
                    class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.tim-pelaksanas.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                    Wilayah Kerja
+                    Tim Kerja
                 </a>
                 <a href="{{ route('admin.users.index') }}"
                    class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.users.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">

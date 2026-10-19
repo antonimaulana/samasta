@@ -21,4 +21,19 @@ class TimPelaksanaPolicy
     {
         return $user->canManageUsers();
     }
+
+    public function create(User $user): bool
+    {
+        return $user->canManageUsers();
+    }
+
+    public function update(User $user, TimPelaksana $timPelaksana): bool
+    {
+        return $user->canManageUsers();
+    }
+
+    public function delete(User $user, TimPelaksana $timPelaksana): bool
+    {
+        return $user->canManageUsers();
+    }
 }
