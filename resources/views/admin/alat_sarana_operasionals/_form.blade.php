@@ -79,10 +79,11 @@
         </div>
         <div>
             <label for="sopir" class="mb-1 block text-sm font-medium text-gray-700">Sopir</label>
-            <input type="text" name="sopir" id="sopir"
-                   value="{{ old('sopir', $item?->sopir ?? '') }}"
-                   placeholder="Nama sopir"
-                   class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
+            <x-admin.armada-sopir-select
+                name="sopir"
+                id="sopir"
+                :selected="old('sopir', $item?->sopir ?? '')"
+            />
             @error('sopir')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -120,7 +121,7 @@
 
         function toggleArmadaFields() {
             const show = armadaJenis.includes(jenisSelect?.value ?? '');
-            armadaFields?.querySelectorAll('#no_plat, #sopir').forEach(function (input) {
+            armadaFields?.querySelectorAll('#no_plat, #sopir, select[name="sopir"]').forEach(function (input) {
                 input.required = show;
                 input.closest('div')?.classList.toggle('hidden', ! show);
             });

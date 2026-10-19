@@ -7,16 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PemeliharaanTamanArmada extends Model
 {
-    /** @var list<string> */
-    public const SOPIR_OPTIONS = [
-        'Misriwahyudi',
-        'Darmani',
-        'Hisar',
-        'Hendrik',
-        'Zazid',
-        'Eko',
-    ];
-
     protected $fillable = [
         'pemeliharaan_taman_id',
         'alat_sarana_operasional_id',

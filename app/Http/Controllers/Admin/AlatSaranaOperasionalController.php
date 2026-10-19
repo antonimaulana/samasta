@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlatSaranaOperasional;
+use App\Support\ArmadaSopirOptions;
 use App\Support\ArmadaUsageHistory;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,6 @@ class AlatSaranaOperasionalController extends Controller
     public function index(Request $request): View
     {
         $items = AlatSaranaOperasional::query()
-            ->when($request->filled('peruntukan'), fn ($q) => $q->where('peruntukan', $request->input('peruntukan')))
             ->when($request->filled('jenis'), fn ($q) => $q->where('jenis', $request->input('jenis')))
             ->when($request->filled('kondisi'), fn ($q) => $q->where('kondisi', $request->input('kondisi')))
             ->tap(fn ($q) => TableSearch::apply($q, $request, ['nama', 'jenis', 'peruntukan', 'kondisi', 'keterangan']))
@@ -90,21 +90,18 @@ class AlatSaranaOperasionalController extends Controller
      */
     private function validated(Request $request): array
     {
+        $isArmadaJenis = AlatSaranaOperasional::isArmadaJenis((string) $request->input('jenis'));
+
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'jenis' => ['required', Rule::in(AlatSaranaOperasional::JENIS)],
             'no_plat' => [
-                Rule::requiredIf(fn () => AlatSaranaOperasional::isArmadaJenis((string) $request->input('jenis'))),
+                Rule::requiredIf(fn () => $isArmadaJenis),
                 'nullable',
                 'string',
                 'max:20',
             ],
-            'sopir' => [
-                Rule::requiredIf(fn () => AlatSaranaOperasional::isArmadaJenis((string) $request->input('jenis'))),
-                'nullable',
-                'string',
-                'max:100',
-            ],
+            'sopir' => ArmadaSopirOptions::validationRules($isArmadaJenis),
             'jumlah' => ['required', 'integer', 'min:1', 'max:99999'],
             'peruntukan' => ['required', Rule::in(AlatSaranaOperasional::timOptions())],
             'kondisi' => ['required', Rule::in(AlatSaranaOperasional::KONDISI)],

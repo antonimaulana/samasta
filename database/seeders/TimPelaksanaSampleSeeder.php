@@ -66,6 +66,10 @@ class TimPelaksanaSampleSeeder extends Seeder
             'Tim Armada' => [
                 ['nama' => 'Munasir', 'is_pengawas' => true, 'is_inti' => true],
                 ['nama' => 'Hendra Sopir', 'jabatan' => 'Sopir', 'is_inti' => true],
+                ['nama' => 'Misriwahyudi', 'jabatan' => 'Sopir', 'is_inti' => true],
+                ['nama' => 'Darmani', 'jabatan' => 'Sopir', 'is_inti' => true],
+                ['nama' => 'Hisar', 'jabatan' => 'Sopir', 'is_inti' => true],
+                ['nama' => 'Zazid', 'jabatan' => 'Sopir', 'is_inti' => true],
             ],
         ];
 

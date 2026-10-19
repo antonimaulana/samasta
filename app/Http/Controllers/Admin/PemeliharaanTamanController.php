@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AlatSaranaOperasional;
 use App\Models\PemeliharaanTaman;
-use App\Models\PemeliharaanTamanArmada;
 use App\Models\Taman;
 use App\Models\User;
+use App\Support\ArmadaSopirOptions;
 use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
 use App\Support\PetugasAssignment;
@@ -319,11 +319,11 @@ class PemeliharaanTamanController extends Controller
                 'integer',
                 Rule::exists('alat_sarana_operasionals', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
             ];
-            $rules['armada.*.sopir'] = ['required', Rule::in(PemeliharaanTamanArmada::SOPIR_OPTIONS)];
+            $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(true);
         } else {
             $rules['armada'] = ['nullable', 'array'];
             $rules['armada.*.alat_sarana_operasional_id'] = ['nullable', 'integer', 'exists:alat_sarana_operasionals,id'];
-            $rules['armada.*.sopir'] = ['nullable', 'string', Rule::in(PemeliharaanTamanArmada::SOPIR_OPTIONS)];
+            $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(false);
         }
 
         if ($isLokasiLuar) {
@@ -388,11 +388,11 @@ class PemeliharaanTamanController extends Controller
                 'integer',
                 Rule::exists('alat_sarana_operasionals', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
             ];
-            $rules['armada.*.sopir'] = ['required', Rule::in(PemeliharaanTamanArmada::SOPIR_OPTIONS)];
+            $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(true);
         } else {
             $rules['armada'] = ['nullable', 'array'];
             $rules['armada.*.alat_sarana_operasional_id'] = ['nullable', 'integer', 'exists:alat_sarana_operasionals,id'];
-            $rules['armada.*.sopir'] = ['nullable', 'string', Rule::in(PemeliharaanTamanArmada::SOPIR_OPTIONS)];
+            $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(false);
         }
 
         if ($isLokasiLuar) {

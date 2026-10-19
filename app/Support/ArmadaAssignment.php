@@ -4,7 +4,6 @@ namespace App\Support;
 
 use App\Models\AlatSaranaOperasional;
 use App\Models\PemeliharaanTaman;
-use App\Models\PemeliharaanTamanArmada;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -35,14 +34,14 @@ class ArmadaAssignment
                     'integer',
                     Rule::exists('alat_sarana_operasionals', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
                 ],
-                'armada.*.sopir' => ['required', Rule::in(PemeliharaanTamanArmada::SOPIR_OPTIONS)],
+                'armada.*.sopir' => ArmadaSopirOptions::validationRules(true),
             ];
         }
 
         return [
             'armada' => ['nullable', 'array'],
             'armada.*.alat_sarana_operasional_id' => ['nullable', 'integer', 'exists:alat_sarana_operasionals,id'],
-            'armada.*.sopir' => ['nullable', 'string', Rule::in(PemeliharaanTamanArmada::SOPIR_OPTIONS)],
+            'armada.*.sopir' => ArmadaSopirOptions::validationRules(false),
         ];
     }
 

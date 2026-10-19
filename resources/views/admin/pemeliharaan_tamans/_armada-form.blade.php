@@ -1,8 +1,9 @@
 @php
+    $isLapanganArmada = request()->routeIs('lapangan.*');
     $armadaInventory = $armadaInventory ?? collect();
     $armadaVisibility = $armadaVisibility ?? 'tim-select';
     $armadaRequired = $armadaRequired ?? true;
-    $sopirOptions = \App\Models\PemeliharaanTamanArmada::SOPIR_OPTIONS;
+    $sopirOptions = \App\Support\ArmadaSopirOptions::names();
     $armadaRows = $armadaRows ?? old('armada', $kinerja?->armadas?->map(fn ($row) => [
         'alat_sarana_operasional_id' => $row->alat_sarana_operasional_id ?? '',
         'sopir' => $row->sopir ?? '',
@@ -16,9 +17,11 @@
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
             <h3 class="text-sm font-bold text-green-800">Data Armada</h3>
-            <p class="mt-1 text-xs text-gray-500">
-                Pilih armada dari inventaris Alat/Sarana Operasional (Tim Armada) dan tentukan sopir{{ $armadaRequired ? '.' : ' — opsional.' }}
-            </p>
+            @unless($isLapanganArmada)
+                <p class="mt-1 text-xs text-gray-500">
+                    Pilih armada dari inventaris Alat/Sarana Operasional (Tim Armada) dan tentukan sopir{{ $armadaRequired ? '.' : ' — opsional.' }}
+                </p>
+            @endunless
         </div>
         <button type="button" id="add-armada-row"
                 class="rounded-lg border border-green-300 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-50">
@@ -71,13 +74,11 @@
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">Sopir{{ $armadaRequired ? ' *' : '' }}</label>
-                        <select name="armada[{{ $index }}][sopir]"
-                                class="armada-sopir w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-                            <option value="">Pilih sopir</option>
-                            @foreach ($sopirOptions as $sopir)
-                                <option value="{{ $sopir }}" @selected($selectedSopir === $sopir)>{{ $sopir }}</option>
-                            @endforeach
-                        </select>
+                        <x-admin.armada-sopir-select
+                            name="armada[{{ $index }}][sopir]"
+                            :selected="old('armada.'.$index.'.sopir', $selectedSopir)"
+                            :required="$armadaRequired"
+                        />
                         @error('armada.'.$index.'.sopir')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

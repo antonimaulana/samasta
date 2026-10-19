@@ -17,16 +17,6 @@
     <div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <form method="GET" class="flex flex-wrap items-end gap-3 p-5">
             <div>
-                <label for="peruntukan" class="mb-1 block text-xs font-medium text-gray-600">Peruntukan (Tim)</label>
-                <select name="peruntukan" id="peruntukan"
-                        class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-                    <option value="">Semua tim</option>
-                    @foreach (\App\Models\AlatSaranaOperasional::timOptions() as $tim)
-                        <option value="{{ $tim }}" @selected(request('peruntukan') === $tim)>{{ $tim }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
                 <label for="jenis" class="mb-1 block text-xs font-medium text-gray-600">Jenis</label>
                 <select name="jenis" id="jenis"
                         class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
@@ -53,7 +43,7 @@
                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
             </div>
             <button type="submit" class="rounded-lg bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-900">Terapkan</button>
-            @if (request()->anyFilled(['peruntukan', 'jenis', 'kondisi', 'search']))
+            @if (request()->anyFilled(['jenis', 'kondisi', 'search']))
                 <a href="{{ route('admin.alat-sarana-operasionals.index') }}"
                    class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Reset</a>
             @endif

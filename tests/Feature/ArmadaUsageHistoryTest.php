@@ -6,6 +6,7 @@ use App\Models\AlatSaranaOperasional;
 use App\Models\Kelurahan;
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
+use App\Models\Petugas;
 use App\Models\PemeliharaanTaman;
 use App\Models\PemeliharaanTamanArmada;
 use App\Models\Taman;
@@ -238,6 +239,10 @@ class ArmadaUsageHistoryTest extends TestCase
         $this->post(route('lapangan.unlock.store'), ['pin' => '1234'])
             ->assertRedirect(route('lapangan.index'));
 
+        $petugasArmadaId = Petugas::query()
+            ->whereHas('timPelaksana', fn ($query) => $query->where('nama', PemeliharaanTaman::TIM_ARMADA))
+            ->value('id');
+
         $fotoPayload = [];
         foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
             $fotoPayload[$field] = \Illuminate\Http\UploadedFile::fake()->image($field.'.jpg');
@@ -247,6 +252,7 @@ class ArmadaUsageHistoryTest extends TestCase
             'status' => 'Diproses',
             'tanggal_progres' => '2026-08-28T08:00',
             'jumlah_personil' => 4,
+            'petugas_ids' => [$petugasArmadaId],
             'armada' => [
                 ['alat_sarana_operasional_id' => $armada->id, 'sopir' => 'Darmani'],
             ],
@@ -268,12 +274,13 @@ class ArmadaUsageHistoryTest extends TestCase
             'status' => 'Diproses',
             'tanggal_progres' => '2026-08-29T09:00',
             'jumlah_personil' => 3,
+            'petugas_ids' => [$petugasArmadaId],
         ], $fotoPayload))->assertRedirect();
 
         $this->assertDatabaseCount('pemangkasan_progres_armadas', 1);
         $this->assertDatabaseHas('pemangkasan_progres', [
             'pemangkasan_id' => $permohonan->id,
-            'jumlah_personil' => 3,
+            'jumlah_personil' => 1,
         ]);
     }
 }
