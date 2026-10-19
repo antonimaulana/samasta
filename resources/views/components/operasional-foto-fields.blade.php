@@ -60,7 +60,9 @@
                                      'h-36 w-full rounded-xl border border-gray-200 object-cover shadow-sm' => $isLapangan,
                                  ])>
                         </a>
-                        <p class="mt-1 text-xs text-gray-500">Ketuk foto untuk lihat ukuran penuh</p>
+                        @unless($isLapangan)
+                            <p class="mt-1 text-xs text-gray-500">Ketuk foto untuk lihat ukuran penuh</p>
+                        @endunless
                     @elseif ($hasStoredPath)
                         <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
                             File foto tercatat di database tetapi tidak ditemukan di server.

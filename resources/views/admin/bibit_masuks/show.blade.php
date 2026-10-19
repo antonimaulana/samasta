@@ -53,12 +53,20 @@
                     </div>
                 </dl>
 
-                @if ($masuk->foto_url)
+                @if ($masuk->hasFotoPath())
                     <div class="mt-6">
                         <h3 class="text-sm font-semibold text-gray-700">Foto bukti</h3>
-                        <a href="{{ $masuk->foto_url }}" target="_blank" rel="noopener">
-                            <img src="{{ $masuk->foto_url }}" alt="Foto stok masuk" class="mt-2 max-h-96 rounded-lg border object-cover">
-                        </a>
+                        @if ($masuk->foto_url)
+                            <a href="{{ $masuk->foto_url }}" target="_blank" rel="noopener" class="mt-2 inline-block">
+                                <img src="{{ $masuk->foto_url }}" alt="Foto stok masuk" class="max-h-96 rounded-lg border border-gray-200 object-cover shadow-sm">
+                            </a>
+                        @else
+                            <div class="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                                File foto tercatat di database tetapi tidak ditemukan di server.
+                                Minta admin menjalankan <code class="rounded bg-amber-100 px-1">php artisan storage:link</code>
+                                atau unggah ulang foto lewat menu Edit.
+                            </div>
+                        @endif
                     </div>
                 @endif
 

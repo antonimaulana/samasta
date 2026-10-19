@@ -66,9 +66,11 @@
     @if ($showPicker)
         <div data-petugas-active-wrap class="{{ ($hasRoster || $awaitingTeam) ? '' : 'hidden' }}">
             <div class="relative">
-                <label class="mb-1 block {{ $labelClass }}">
-                    Petugas pelaksana
-                </label>
+                @unless($isLapangan)
+                    <label class="mb-1 block {{ $labelClass }}">
+                        Petugas pelaksana
+                    </label>
+                @endunless
                 <input type="text"
                        data-petugas-field
                        autocomplete="off"

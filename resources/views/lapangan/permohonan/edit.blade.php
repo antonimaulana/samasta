@@ -6,8 +6,6 @@
 @section('content')
     <x-lapangan.back-link :href="route('lapangan.permohonan.index')" label="Kembali ke daftar" />
 
-    <x-lapangan.k3-banner />
-
     <div class="lapangan-card mb-5 p-5">
         <div class="flex flex-wrap items-center gap-2">
             <span class="text-2xl" aria-hidden="true">{{ \App\Models\Pemangkasan::layananIcon($permohonan->jenis_layanan) }}</span>
@@ -84,14 +82,6 @@
               method="POST"
               enctype="multipart/form-data">
             @csrf
-
-            <div class="mb-5 flex items-center gap-2">
-                <span class="flex h-8 w-8 items-center justify-center rounded-full lapangan-step-active text-sm font-black">✎</span>
-                <div>
-                    <h2 class="text-base font-black text-gray-900">Form Progres Hari Ini</h2>
-                    <p class="text-xs text-gray-500">Isi progres harian, lalu konfirmasi status di bagian bawah form</p>
-                </div>
-            </div>
 
             @include('lapangan.permohonan._progress-form', [
                 'permohonan' => $permohonan,

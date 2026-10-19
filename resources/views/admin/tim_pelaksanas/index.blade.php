@@ -49,7 +49,7 @@
                     <td class="px-4 py-3 text-center text-sm text-gray-700">
                         {{ $team->memiliki_wilayah_kerja ? number_format($team->kelurahans_count) : '—' }}
                     </td>
-                    <td class="px-4 py-3 text-center text-sm text-gray-700">{{ number_format($team->petugas_count) }}</td>
+                    <td class="px-4 py-3 text-center text-sm text-gray-700">{{ number_format($team->petugas_count ?? 0) }}</td>
                     <td class="px-4 py-3 text-right text-sm">
                         <a href="{{ route('admin.tim-pelaksanas.edit', $team) }}"
                            class="rounded border border-green-300 px-3 py-1 font-medium text-green-800 hover:bg-green-50">

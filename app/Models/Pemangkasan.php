@@ -15,7 +15,7 @@ class Pemangkasan extends Model
 
     public const KATEGORI = ['Instruksi', 'Laporan Masyarakat', 'Survei Lapangan'];
 
-    public const JENIS_LAYANAN = ['Pemangkasan Pohon', 'Penanganan Pohon Tumbang', 'Pemasangan Mini Garden'];
+    public const JENIS_LAYANAN = ['Pemangkasan Pohon', 'Gotong Royong', 'Penanganan Pohon Tumbang', 'Pemasangan Mini Garden'];
 
     protected $fillable = [
         'jenis_layanan',

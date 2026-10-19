@@ -223,7 +223,7 @@
     @endforeach
 
     <div class="footer">
-        Dicetak otomatis dari Sistem {{ config('app.name') }} · {{ now()->format('d/m/Y H:i') }} WIB · Progres #{{ $progres->id }}
+        Dicetak otomatis dari Sistem {{ config('app.name') }} · {{ now()->format('d/m/Y H:i') }} WIB
     </div>
 </body>
 </html>

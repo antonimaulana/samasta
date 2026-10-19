@@ -80,7 +80,7 @@
             </a>
             <a href="{{ route('admin.alat-sarana-operasionals.index') }}"
                class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.alat-sarana-operasionals.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Alat/Sarana
+                Alat & Sarana
             </a>
             <a href="{{ route('admin.operasional-pertamanan-laporan.index') }}"
                class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.operasional-pertamanan-laporan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">

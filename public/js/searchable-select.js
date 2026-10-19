@@ -224,6 +224,10 @@ function initSearchableSelects() {
                 return;
             }
 
+            if (form.dataset.pemeliharaanSubmitOk === '1') {
+                return;
+            }
+
             form.querySelectorAll('[data-searchable-required="true"]').forEach(function (hidden) {
                 const container = hidden.closest('[data-searchable-select]');
 

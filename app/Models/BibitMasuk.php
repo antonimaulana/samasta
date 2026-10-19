@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class BibitMasuk extends Model
 {
@@ -34,12 +35,23 @@ class BibitMasuk extends Model
         return $this->belongsTo(Bibit::class);
     }
 
+    public function hasFotoPath(): bool
+    {
+        return filled($this->foto);
+    }
+
     public function getFotoUrlAttribute(): ?string
     {
-        if (! $this->foto) {
+        if (! filled($this->foto)) {
             return null;
         }
 
-        return asset('storage/'.$this->foto);
+        $path = str_replace('\\', '/', (string) $this->foto);
+
+        if (! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($path);
     }
 }

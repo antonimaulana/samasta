@@ -175,12 +175,12 @@
         @if ($kinerja->relationLoaded('petugas') && $kinerja->petugas->isNotEmpty())
             <tr>
                 <th>Petugas Pelaksana</th>
-                <td>{{ $kinerja->petugasLabel() }} ({{ $kinerja->petugas->count() }} orang)</td>
+                <td>{{ $kinerja->petugasLabel() }} ({{ $kinerja->petugas->count() }} personil)</td>
             </tr>
         @elseif ($kinerja->jumlah_personil)
             <tr>
                 <th>Jumlah Personil</th>
-                <td>{{ $kinerja->jumlah_personil }} orang</td>
+                <td>{{ $kinerja->jumlah_personil }} personil</td>
             </tr>
         @endif
         @if ($kinerja->progressSummaryLabel())
@@ -239,7 +239,7 @@
     @endforeach
 
     <div class="footer">
-        Dicetak otomatis dari Sistem {{ config('app.name') }} · {{ now()->format('d/m/Y H:i') }} WIB · ID #{{ $kinerja->id }}
+        Dicetak otomatis dari Sistem {{ config('app.name') }} · {{ now()->format('d/m/Y H:i') }} WIB
     </div>
 </body>
 </html>

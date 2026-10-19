@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\TimPelaksana;
 use App\Models\User;
+use Database\Seeders\TimPelaksanaSeeder;
+use Database\Seeders\WilayahBatamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -42,6 +44,21 @@ class PengawasRoleTest extends TestCase
 
         $this->assertTrue($pengawas->canInputLapangan());
         $this->assertFalse($pengawas->canWrite());
+    }
+
+    public function test_pengawas_wilayah_1_can_open_pemeliharaan_input(): void
+    {
+        $this->seed(WilayahBatamSeeder::class);
+        $this->seed(TimPelaksanaSeeder::class);
+
+        $tim = TimPelaksana::query()->where('nama', 'Tim Wilayah 1')->firstOrFail();
+        $pengawas = User::factory()->create(['role' => User::ROLE_PENGAWAS]);
+        $pengawas->timPelaksanas()->sync([$tim->id]);
+
+        $this->actingAs($pengawas)
+            ->get(route('lapangan.pemeliharaan.create', 'wilayah-1'))
+            ->assertOk()
+            ->assertSee('Wilayah 1', false);
     }
 
     public function test_pengawas_login_redirects_to_lapangan(): void

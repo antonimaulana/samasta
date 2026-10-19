@@ -105,7 +105,6 @@
 
             if (personilInput) {
                 personilInput.value = selected.size > 0 ? String(selected.size) : '';
-                personilInput.disabled = roster.length === 0;
             }
 
             syncField();
@@ -115,11 +114,23 @@
             activeWrap?.classList.toggle('hidden', !hasRoster && !awaitingTeam);
             manualFallback?.classList.toggle('hidden', hasRoster || awaitingTeam);
 
+            const useManual = !hasRoster && !awaitingTeam;
+            manualFallback?.querySelectorAll('input, select, textarea').forEach(function (input) {
+                input.disabled = !useManual;
+                if (input.name === 'jumlah_personil') {
+                    input.required = useManual && required;
+                }
+            });
+
             if (fieldInput) {
                 fieldInput.disabled = awaitingTeam || !hasRoster;
                 fieldInput.placeholder = awaitingTeam
                     ? 'Pilih tim pelaksana terlebih dahulu'
                     : (hasRoster ? 'Ketik sebagian nama, pilih dari daftar. Beberapa nama dipisah ;' : 'Daftar petugas belum diatur');
+            }
+
+            if (personilInput) {
+                personilInput.disabled = !hasRoster || awaitingTeam;
             }
         }
 
@@ -342,21 +353,47 @@
             }
         }
 
+        root.addEventListener('petugas-picker:commit', function () {
+            parseFieldInput();
+            syncInputs();
+        });
+
         root.closest('form')?.addEventListener('submit', function (event) {
             const form = event.currentTarget;
             if (form?.id === 'lapangan-pemeliharaan-form' || form?.dataset.lapanganSubmitOk === '1') {
                 return;
             }
 
+            if (form?.dataset.pemeliharaanSubmitOk === '1') {
+                parseFieldInput();
+                syncInputs();
+                return;
+            }
+
+            parseFieldInput();
+            syncInputs();
+
             if (!required || roster.length === 0) {
                 return;
             }
 
-            if (selected.size === 0) {
+            const syncedIds = root.querySelectorAll('[data-petugas-inputs] input[name="petugas_ids[]"]');
+
+            if (syncedIds.length === 0 && selected.size === 0) {
                 event.preventDefault();
                 fieldInput?.focus();
                 fieldInput?.classList.add('border-red-500', 'ring-2', 'ring-red-200');
                 fieldInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                let messageEl = root.querySelector('[data-petugas-submit-error]');
+                if (!messageEl) {
+                    messageEl = document.createElement('p');
+                    messageEl.dataset.petugasSubmitError = 'true';
+                    messageEl.className = 'mt-2 text-sm font-medium text-red-600';
+                    root.appendChild(messageEl);
+                }
+
+                messageEl.textContent = 'Pilih minimal satu petugas pelaksana.';
             }
         });
 

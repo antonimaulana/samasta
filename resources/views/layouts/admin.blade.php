@@ -60,7 +60,7 @@
                     <div class="flex items-center gap-3">
                         @include('layouts.partials.app-logo', ['size' => 'sm'])
                         <div>
-                            <p class="text-lg font-semibold">Admin {{ config('app.name') }}</p>
+                            <p class="text-lg font-semibold">{{ config('app.name') }}</p>
                             <p class="text-xs text-gray-400">{{ config('app.full_name') }}</p>
                         </div>
                     </div>
@@ -111,14 +111,15 @@
                                     📥 <span class="hidden sm:inline">{{ $masukanBaruCount }} masukan baru</span><span class="sm:hidden">{{ $masukanBaruCount }}</span>
                                 </a>
                             @endif
-                            @include('layouts.partials.admin-notifications')
                         @endunless
 
                         <span class="hidden text-sm text-gray-500 md:inline">{{ auth()->user()->name }}</span>
-                        <span class="rounded-full {{ ($isViewer ?? false) ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600' }} px-2 py-0.5 text-[10px] font-bold">{{ $authUserRole ?? 'User' }}</span>
-                        <form action="{{ route('logout') }}" method="POST">
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="text-sm text-red-600 hover:underline">Keluar</button>
+                            <button type="submit"
+                                    class="rounded-lg border-2 border-green-300 bg-white px-4 py-2 text-sm font-bold text-green-600 transition hover:bg-lime-50">
+                                Keluar
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -179,7 +180,7 @@
                 <div class="flex items-center gap-3">
                     @include('layouts.partials.app-logo', ['size' => 'sm'])
                     <div>
-                        <p class="font-semibold">Admin {{ config('app.name') }}</p>
+                        <p class="font-semibold">{{ config('app.name') }}</p>
                         <p class="text-xs text-gray-400">Panel Manajemen Hijau</p>
                     </div>
                 </div>

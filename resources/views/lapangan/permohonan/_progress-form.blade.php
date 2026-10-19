@@ -90,10 +90,6 @@
 
         <p class="lapangan-section-title text-sm font-black text-gray-900">1. Data progres hari ini</p>
 
-        <p class="mt-1 text-xs text-gray-500">Ubah tanggal jika mengisi progres hari lain dalam jadwal.</p>
-
-
-
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
 
             <div>
@@ -119,7 +115,6 @@
             </div>
 
             <div class="sm:col-span-2">
-                <label class="mb-2 block text-sm font-bold text-gray-700">Petugas pelaksana *</label>
                 <x-petugas-picker
                     :team-names="$permohonan->pelaksana ?? []"
                     :selected-ids="old('petugas_ids', [])"
@@ -136,14 +131,6 @@
         @unless ($isMiniGarden)
 
             <div id="foto-dokumentasi-section" class="{{ $showWorkPhotos ? '' : 'hidden' }}">
-
-                <div id="foto-hint-banner" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-900">
-
-                    📸 <strong>6 foto wajib</strong> — 2 foto per tahap (Sebelum, Saat, Sesudah), sama seperti pemeliharaan rutin.
-
-                </div>
-
-
 
                 <x-operasional-foto-fields
 
@@ -231,10 +218,6 @@
 
         <p class="lapangan-section-title text-sm font-black text-blue-900">Konfirmasi status pekerjaan</p>
 
-        <p class="mt-1 text-xs text-blue-800">Isi progres di atas terlebih dahulu, lalu tentukan langkah selanjutnya di bawah.</p>
-
-
-
         <div class="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-white px-4 py-3">
 
             <span class="text-[10px] font-bold uppercase tracking-wide text-gray-500">Status saat ini</span>
@@ -249,17 +232,9 @@
 
             <input type="hidden" name="status" id="status" value="Diproses">
 
-            <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm text-amber-950">
+            <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm font-bold text-amber-950">
 
-                <p class="font-bold">🚀 Mulai pekerjaan</p>
-
-                <p class="mt-1 text-xs leading-relaxed">
-
-                    Simpan form ini untuk memulai pekerjaan. Status akan berubah ke <strong>Diproses</strong>
-
-                    dan progres hari ini tercatat sebagai hari pertama.
-
-                </p>
+                🚀 Mulai pekerjaan
 
             </div>
 
@@ -290,8 +265,6 @@
         <div id="tanggal-penyelesaian-section" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 {{ $currentStatus === 'Selesai' ? '' : 'hidden' }}">
 
             <label for="tanggal_penyelesaian" class="mb-1 block text-sm font-black text-emerald-900">Tanggal penyelesaian *</label>
-
-            <p class="mb-2 text-xs text-emerald-800">Isi tanggal pekerjaan benar-benar selesai.</p>
 
             <input type="date" name="tanggal_penyelesaian" id="tanggal_penyelesaian"
 

@@ -1,5 +1,6 @@
 @php
     $kinerja = $kinerja ?? null;
+    $isLapanganForm = request()->routeIs('lapangan.*');
     $isLokasiLuar = filter_var(old('lokasi_luar', ($kinerja && ! $kinerja->taman_id) ? '1' : '0'), FILTER_VALIDATE_BOOLEAN);
     $selectedTim = old('tim', $kinerja?->tim ?? ($operatorTim ?? ''));
     $isTimArmada = $selectedTim === \App\Models\PemeliharaanTaman::TIM_ARMADA;
@@ -21,6 +22,7 @@
         <x-operasional-pelaksanaan-datetime
             name="tanggal"
             :value="$kinerja?->tanggal"
+            :variant="$isLapanganForm ? 'lapangan' : 'admin'"
         />
     </div>
 
@@ -29,7 +31,9 @@
         @if (filled($operatorTim ?? null))
             <input type="hidden" name="tim" id="tim" value="{{ $operatorTim }}">
             <p class="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">{{ $operatorTim }}</p>
-            <p class="mt-1 text-xs text-gray-500">Tim ditetapkan sesuai wilayah kerja akun operator.</p>
+            @unless($isLapanganForm)
+                <p class="mt-1 text-xs text-gray-500">Tim ditetapkan sesuai wilayah kerja akun operator.</p>
+            @endunless
         @elseif (filled($operatorTimOptions ?? null))
             <select name="tim" id="tim" required
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
@@ -66,7 +70,7 @@
                 :tamans="$tamans ?? collect()"
                 :selected="old('taman_id', $kinerja?->taman_id ?? ($prefillTamanId ?? ''))"
                 :required="true"
-                :hint="filled($timWilayahKelurahan ?? null) ? 'Daftar lokasi difilter sesuai wilayah kerja tim pelaksana yang dipilih.' : 'Ketik untuk memfilter, lalu pilih taman dari daftar.'"
+                :hint="$isLapanganForm ? null : (filled($timWilayahKelurahan ?? null) ? 'Daftar lokasi difilter sesuai wilayah kerja tim pelaksana yang dipilih.' : 'Ketik untuk memfilter, lalu pilih taman dari daftar.')"
             />
             @error('taman_id')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -85,7 +89,9 @@
     </div>
 
     <div class="md:col-span-2">
-        <label class="mb-2 block text-sm font-medium text-gray-700">Petugas Pelaksana *</label>
+        @unless($isLapanganForm)
+            <label class="mb-2 block text-sm font-medium text-gray-700">Petugas Pelaksana *</label>
+        @endunless
         <x-petugas-picker
             :team-name="$selectedTim"
             :selected-ids="old('petugas_ids', $kinerja?->petugas?->pluck('id')?->all() ?? [])"
@@ -141,7 +147,11 @@
     @enderror
 </div>
 
-<x-operasional-foto-fields :record="$kinerja" :required="! $kinerja" />
+<x-operasional-foto-fields
+    :record="$kinerja"
+    :required="! $kinerja"
+    :variant="$isLapanganForm ? 'lapangan' : 'admin'"
+/>
 
 @unless($hideFormActions ?? false)
 <div class="mt-6 flex gap-3">
@@ -217,6 +227,15 @@
 
             const pemeliharaanForm = document.getElementById('pemeliharaan-taman-form');
             pemeliharaanForm?.addEventListener('submit', function (event) {
+                pemeliharaanForm.querySelectorAll('.petugas-picker').forEach(function (root) {
+                    root.dispatchEvent(new CustomEvent('petugas-picker:commit', { bubbles: true }));
+                });
+
+                if (pemeliharaanForm.hasAttribute('novalidate')) {
+                    pemeliharaanForm.dataset.pemeliharaanSubmitOk = '1';
+                    return;
+                }
+
                 if (pemeliharaanForm.checkValidity()) {
                     return;
                 }
@@ -225,7 +244,7 @@
                 pemeliharaanForm.reportValidity();
                 const firstInvalid = pemeliharaanForm.querySelector(':invalid');
                 firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
+            }, true);
         });
     </script>
 @endpush

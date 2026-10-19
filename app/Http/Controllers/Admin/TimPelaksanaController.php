@@ -12,6 +12,7 @@ use App\Support\TimPelaksanaSaver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -21,11 +22,13 @@ class TimPelaksanaController extends Controller
     {
         $this->authorize('viewAny', TimPelaksana::class);
 
-        $teams = TimPelaksana::query()
-            ->withCount(['kelurahans', 'petugas'])
-            ->orderBy('urutan')
-            ->orderBy('nama')
-            ->get();
+        $query = TimPelaksana::query()->withCount('kelurahans');
+
+        if (Schema::hasTable('petugas')) {
+            $query->withCount('petugas');
+        }
+
+        $teams = $query->orderBy('urutan')->orderBy('nama')->get();
 
         return view('admin.tim_pelaksanas.index', compact('teams'));
     }

@@ -29,6 +29,52 @@ class PemeliharaanWilayahFilterTest extends TestCase
         $this->seed(TimPelaksanaSeeder::class);
     }
 
+    public function test_admin_can_update_pemeliharaan_without_reuploading_photos(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $team1Kelurahan = TimPelaksana::where('nama', 'Tim Wilayah 1')->first()->kelurahans()->first();
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Update Admin',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $team1Kelurahan->id,
+            'luasan' => 500,
+            'alamat' => 'Alamat update admin',
+            'deskripsi' => 'Deskripsi test update admin pemeliharaan.',
+        ]);
+
+        $storePayload = $this->withPetugasForTeam([
+            'tanggal' => now()->format('Y-m-d\TH:i'),
+            'tim' => 'Tim Wilayah 1',
+            'taman_id' => $taman->id,
+            'uraian_pekerjaan' => 'Uraian awal',
+        ], 'Tim Wilayah 1');
+
+        foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
+            $storePayload[$field] = UploadedFile::fake()->image($field.'.jpg');
+        }
+
+        $this->actingAs($admin)->post(route('admin.pemeliharaan-tamans.store'), $storePayload);
+
+        $record = PemeliharaanTaman::query()->where('taman_id', $taman->id)->firstOrFail();
+        $petugasIds = $this->petugasIdsForTeam('Tim Wilayah 1');
+
+        $this->actingAs($admin)
+            ->put(route('admin.pemeliharaan-tamans.update', $record), [
+                'tanggal' => now()->addHour()->format('Y-m-d\TH:i'),
+                'tim' => 'Tim Wilayah 1',
+                'taman_id' => $taman->id,
+                'uraian_pekerjaan' => 'Uraian diperbarui admin',
+                'petugas_ids' => $petugasIds,
+            ])
+            ->assertRedirect(route('admin.pemeliharaan-tamans.index', [
+                'tanggal_mulai' => now()->addHour()->toDateString(),
+                'tanggal_selesai' => now()->addHour()->toDateString(),
+            ]));
+
+        $this->assertSame('Uraian diperbarui admin', $record->fresh()->uraian_pekerjaan);
+    }
+
     public function test_create_form_includes_tim_wilayah_mapping(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
