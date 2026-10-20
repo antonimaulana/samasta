@@ -33,12 +33,6 @@
                         <dd class="font-medium text-gray-900">{{ $item->no_plat }}</dd>
                     </div>
                 @endif
-                @if ($item->sopir)
-                    <div class="flex justify-between gap-4 border-b border-gray-100 pb-3">
-                        <dt class="text-gray-500">Sopir Default</dt>
-                        <dd class="font-medium text-gray-900">{{ $item->sopir }}</dd>
-                    </div>
-                @endif
                 <div class="flex justify-between gap-4 border-b border-gray-100 pb-3">
                     <dt class="text-gray-500">Jumlah</dt>
                     <dd class="font-medium text-gray-900">{{ number_format($item->jumlah) }}</dd>

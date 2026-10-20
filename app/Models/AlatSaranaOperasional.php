@@ -14,6 +14,8 @@ class AlatSaranaOperasional extends Model
         'Dump Truck',
         'Truck',
         'Crane',
+        'Tangki Air',
+        'Pick Up',
         'Kendaraan Operasional',
         'Lainnya',
     ];
@@ -29,6 +31,8 @@ class AlatSaranaOperasional extends Model
         'Dump Truck',
         'Truck',
         'Crane',
+        'Tangki Air',
+        'Pick Up',
         'Kendaraan Operasional',
     ];
 

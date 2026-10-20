@@ -66,28 +66,16 @@
         @enderror
     </div>
 
-    <div id="armada-detail-fields" class="contents">
-        <div>
-            <label for="no_plat" class="mb-1 block text-sm font-medium text-gray-700">No. Plat</label>
-            <input type="text" name="no_plat" id="no_plat"
-                   value="{{ old('no_plat', $item?->no_plat ?? '') }}"
-                   placeholder="BP 1234 AB"
-                   class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-            @error('no_plat')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
-        <div>
-            <label for="sopir" class="mb-1 block text-sm font-medium text-gray-700">Sopir</label>
-            <x-admin.armada-sopir-select
-                name="sopir"
-                id="sopir"
-                :selected="old('sopir', $item?->sopir ?? '')"
-            />
-            @error('sopir')
-                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-            @enderror
-        </div>
+    <div id="armada-detail-fields" class="hidden">
+        <label for="no_plat" class="mb-1 block text-sm font-medium text-gray-700">No. Plat *</label>
+        <input type="text" name="no_plat" id="no_plat"
+               value="{{ old('no_plat', $item?->no_plat ?? '') }}"
+               placeholder="BP 1234 AB"
+               class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
+        @error('no_plat')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+        <p class="mt-1 text-xs text-gray-500">Sopir ditetapkan saat penggunaan armada di kegiatan operasional, bukan di inventaris.</p>
     </div>
 
     <div class="md:col-span-2">
@@ -121,10 +109,11 @@
 
         function toggleArmadaFields() {
             const show = armadaJenis.includes(jenisSelect?.value ?? '');
-            armadaFields?.querySelectorAll('#no_plat, #sopir, select[name="sopir"]').forEach(function (input) {
-                input.required = show;
-                input.closest('div')?.classList.toggle('hidden', ! show);
-            });
+            const platInput = document.getElementById('no_plat');
+            if (platInput) {
+                platInput.required = show;
+            }
+            armadaFields?.classList.toggle('hidden', ! show);
         }
 
         jenisSelect?.addEventListener('change', toggleArmadaFields);

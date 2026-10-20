@@ -83,8 +83,7 @@
     </main>
 
     <footer class="border-t border-green-100 bg-white/60 py-4 text-center text-xs text-gray-500 backdrop-blur">
-        <p class="font-medium text-green-800">Kerja aman · Taman asri · Batam hijau 🌱</p>
-        <p class="mt-1">{{ config('app.name') }} · Input Lapangan</p>
+        <p>{{ config('app.name') }} · Input Lapangan</p>
     </footer>
 
     <script src="{{ asset('js/searchable-select.js') }}?v=2"></script>

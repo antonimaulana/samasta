@@ -16,8 +16,6 @@
         </div>
 
         <div class="p-6">
-            <x-lapangan.k3-banner />
-
             <form action="{{ route('lapangan.unlock.store') }}" method="POST" class="space-y-5">
                 @csrf
                 <div>
@@ -47,10 +45,8 @@
 
             <p class="mt-6 text-center text-sm text-gray-500">
                 Punya akun petugas?
-                <a href="{{ route('login') }}" class="font-bold text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-800">Login di sini</a>
+                <a href="{{ route('login') }}" class="font-bold text-green-700 underline decoration-green-300 underline-offset-2 hover:text-green-800">Masuk di sini</a>
             </p>
         </div>
     </div>
-
-    <x-lapangan.motivation-banner />
 @endsection

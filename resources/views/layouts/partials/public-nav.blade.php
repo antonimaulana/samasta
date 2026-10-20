@@ -98,7 +98,7 @@
 
            class="ml-1 rounded-lg border-2 border-green-300 bg-white px-4 py-2 text-sm font-bold text-green-600 transition hover:bg-lime-50">
 
-            Login
+            Masuk
 
         </a>
 
@@ -164,7 +164,7 @@
 
                    class="block rounded-xl border-2 border-green-300 px-4 py-3 text-center text-sm font-bold text-green-600">
 
-                    Login Admin
+                    Masuk
 
                 </a>
 

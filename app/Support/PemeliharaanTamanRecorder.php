@@ -144,15 +144,7 @@ class PemeliharaanTamanRecorder
                 continue;
             }
 
-            $path = $request->file($field)->store('pemeliharaan-taman', 'public');
-
-            if (! $path || ! Storage::disk('public')->exists($path)) {
-                throw ValidationException::withMessages([
-                    $field => 'Foto gagal disimpan ke server. Periksa izin folder storage atau hubungi administrator.',
-                ]);
-            }
-
-            $validated[$field] = $path;
+            $validated[$field] = OperasionalFotoStorage::storePemeliharaan($request->file($field), $field);
         }
 
         if (! $requireAll) {

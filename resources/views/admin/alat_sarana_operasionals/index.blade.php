@@ -76,9 +76,6 @@
                                 @if ($item->no_plat)
                                     <p class="mt-0.5 text-xs text-gray-500">Plat: {{ $item->no_plat }}</p>
                                 @endif
-                                @if ($item->sopir)
-                                    <p class="mt-0.5 text-xs text-gray-500">Sopir: {{ $item->sopir }}</p>
-                                @endif
                             </td>
                             <td class="px-4 py-3 text-center text-gray-700">{{ number_format($item->jumlah) }}</td>
                             <td class="px-4 py-3">

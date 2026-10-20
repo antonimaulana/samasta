@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Naikkan batas upload PHP-FPM + cek Nginx untuk foto taman (max 10 MB di app, server disarankan 20M).
+# Naikkan batas upload PHP-FPM + Nginx (operasional: 6×4 MB foto + form; default 48M).
 # Jalankan di VPS: sudo bash scripts/vps-set-upload-limits.sh
 #
 # Opsional env:
@@ -7,9 +7,9 @@
 
 set -euo pipefail
 
-UPLOAD_LIMIT="${UPLOAD_LIMIT:-20M}"
-POST_LIMIT="${POST_LIMIT:-20M}"
-NGINX_BODY="${NGINX_BODY:-20M}"
+UPLOAD_LIMIT="${UPLOAD_LIMIT:-48M}"
+POST_LIMIT="${POST_LIMIT:-48M}"
+NGINX_BODY="${NGINX_BODY:-48M}"
 
 if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
     echo "Jalankan dengan sudo: sudo bash scripts/vps-set-upload-limits.sh"
@@ -50,7 +50,7 @@ fi
 
 mkdir -p "$FPM_CONF_D"
 cat > "$DROP_IN" <<EOF
-; SIMTAMAN — foto taman hingga 10 MB per file (buffer server 20M)
+; SIMTAMAN — foto operasional hingga 4 MB × 6 file (buffer server 48M)
 upload_max_filesize = ${UPLOAD_LIMIT}
 post_max_size = ${POST_LIMIT}
 max_file_uploads = 25
@@ -75,7 +75,8 @@ echo ""
 echo "=== Nginx client_max_body_size ==="
 NGINX_UPDATED=0
 if command -v nginx >/dev/null 2>&1; then
-    mapfile -t CONF_FILES < <(grep -Rl "root.*samasta\|sitaman\|samasta/public" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null | head -5 || true)
+    # Edit hanya sites-available (bukan sites-enabled) agar backup sed tidak jadi vhost ganda.
+    mapfile -t CONF_FILES < <(grep -Rl "root.*samasta\|samasta/public" /etc/nginx/sites-available 2>/dev/null | grep -Ev '\.bak' || true)
     if [[ ${#CONF_FILES[@]} -eq 0 ]]; then
         echo "[WARN] File vhost Nginx SIMTAMAN tidak terdeteksi otomatis."
         echo "       Tambahkan manual di server block: client_max_body_size ${NGINX_BODY};"
@@ -90,6 +91,8 @@ if command -v nginx >/dev/null 2>&1; then
             echo "[OK] Nginx: ${f} → client_max_body_size ${NGINX_BODY}"
             NGINX_UPDATED=1
         done
+        # Backup sed tidak boleh tinggal di sites-enabled (duplicate default_server).
+        find /etc/nginx/sites-enabled -maxdepth 1 -name '*.bak-simtaman' -delete 2>/dev/null || true
         if [[ "$NGINX_UPDATED" -eq 1 ]]; then
             nginx -t
             systemctl reload nginx

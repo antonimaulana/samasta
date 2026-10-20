@@ -89,44 +89,10 @@
         </div>
     </div>
 
-    <div class="sidebar-menu-group {{ $evaluasiActive ? 'is-open' : '' }}">
-        <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $evaluasiActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-            <span>Evaluasi</span>
-            <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-        </button>
-        <div class="sidebar-submenu">
-            <a href="{{ route('admin.evaluasi.pemeliharaan.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.pemeliharaan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Pemeliharaan per Taman
-            </a>
-            <a href="{{ route('admin.evaluasi.armada.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.armada.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Utilisasi Armada
-            </a>
-            <a href="{{ route('admin.evaluasi.kinerja-tim.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.kinerja-tim.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Kinerja Tim
-            </a>
-            <a href="{{ route('admin.evaluasi.operasional-permohonan.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.operasional-permohonan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Operasional Permohonan
-            </a>
-            <a href="{{ route('admin.evaluasi.rth-terpelihara.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.rth-terpelihara.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                RTH Terpelihara
-            </a>
-            <a href="{{ route('admin.evaluasi.masukan-masyarakat.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.masukan-masyarakat.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Masukan Masyarakat
-            </a>
-            <a href="{{ route('admin.evaluasi.kelengkapan-data.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.evaluasi.kelengkapan-data.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Kelengkapan Data
-            </a>
-        </div>
-    </div>
+    <a href="{{ route('admin.evaluasi.index') }}"
+       class="block rounded-lg px-3 py-2 text-sm {{ $evaluasiActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
+        Evaluasi
+    </a>
 
     <div class="sidebar-menu-group {{ $masyarakatActive ? 'is-open' : '' }}">
         <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $masyarakatActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">

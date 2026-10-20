@@ -114,6 +114,7 @@
                 <select name="armada[__INDEX__][sopir]"
                         class="armada-sopir w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
                     <option value="">Pilih sopir</option>
+                    <option value="{{ \App\Support\ArmadaSopirOptions::UNASSIGNED }}">{{ \App\Support\ArmadaSopirOptions::UNASSIGNED }}</option>
                     @foreach ($sopirOptions as $sopir)
                         <option value="{{ $sopir }}">{{ $sopir }}</option>
                     @endforeach

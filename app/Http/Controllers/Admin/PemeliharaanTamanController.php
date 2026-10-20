@@ -8,6 +8,7 @@ use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Models\User;
 use App\Support\ArmadaSopirOptions;
+use App\Support\OperasionalFotoStorage;
 use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
 use App\Support\PetugasAssignment;
@@ -455,15 +456,7 @@ class PemeliharaanTamanController extends Controller
                 Storage::disk('public')->delete($kinerja->{$field});
             }
 
-            $path = $request->file($field)->store('pemeliharaan-taman', 'public');
-
-            if (! $path || ! Storage::disk('public')->exists($path)) {
-                throw ValidationException::withMessages([
-                    $field => 'Foto gagal disimpan ke server. Periksa izin folder storage atau hubungi administrator.',
-                ]);
-            }
-
-            $validated[$field] = $path;
+            $validated[$field] = OperasionalFotoStorage::storePemeliharaan($request->file($field), $field);
         }
     }
 

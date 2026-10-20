@@ -18,6 +18,9 @@
     {{ $attributes->merge(['class' => $class.' armada-sopir'])->except(['selected', 'required', 'inputClass', 'selectClass']) }}
 >
     <option value="">Pilih sopir</option>
+    <option value="{{ \App\Support\ArmadaSopirOptions::UNASSIGNED }}" @selected($selectedValue === \App\Support\ArmadaSopirOptions::UNASSIGNED)>
+        Belum ada sopir
+    </option>
     @foreach ($options as $sopir)
         <option value="{{ $sopir }}" @selected($selectedValue === $sopir)>{{ $sopir }}</option>
     @endforeach

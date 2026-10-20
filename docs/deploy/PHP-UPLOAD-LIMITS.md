@@ -44,8 +44,8 @@ Contoh masalah: `upload_max_filesize => 2M` — foto 3 MB akan **selalu gagal** 
 | Setting | Min. | Disarankan |
 |---------|------|------------|
 | `upload_max_filesize` | 10M | **20M** |
-| `post_max_size` | 10M | **20M** (harus ≥ total semua file + form dalam satu submit) |
-| Nginx `client_max_body_size` | 10M | **20M** |
+| `post_max_size` | 10M | **48M** untuk form operasional (6 foto × 4 MB) |
+| Nginx `client_max_body_size` | 10M | **48M** (sama dengan post_max_size) |
 
 ## Ubah PHP 8.x FPM (Ubuntu)
 
@@ -101,6 +101,21 @@ sudo nginx -t && sudo systemctl reload nginx
 
 `post_max_size` harus muat **semua foto + field form** dalam satu klik Simpan.  
 Contoh: 5 × 8 MB ≈ 40 MB → set `post_max_size` dan `client_max_body_size` **min. 48M** atau unggah **batch lebih kecil**.
+
+**Pemeliharaan operasional (6 foto wajib):** validasi Laravel **4 MB per foto** → satu submit bisa ~24 MB. Jika `post_max_size` hanya 20M, unggah bisa gagal dengan pesan simpan ke storage.
+
+## Izin folder storage (live)
+
+Jika pesan *foto gagal disimpan ke server* muncul padahal limit upload sudah cukup:
+
+```bash
+cd /var/www/samasta
+sudo chown -R www-data:www-data storage bootstrap/cache
+sudo chmod -R ug+rwx storage bootstrap/cache
+php artisan storage:link
+```
+
+Pastikan `storage/app/public/pemeliharaan-taman` dapat ditulis user PHP-FPM (`www-data`).
 
 ## Setelah ubah konfigurasi
 

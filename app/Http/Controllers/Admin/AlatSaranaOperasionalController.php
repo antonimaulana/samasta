@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AlatSaranaOperasional;
-use App\Support\ArmadaSopirOptions;
 use App\Support\ArmadaUsageHistory;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
@@ -101,7 +100,6 @@ class AlatSaranaOperasionalController extends Controller
                 'string',
                 'max:20',
             ],
-            'sopir' => ArmadaSopirOptions::validationRules($isArmadaJenis),
             'jumlah' => ['required', 'integer', 'min:1', 'max:99999'],
             'peruntukan' => ['required', Rule::in(AlatSaranaOperasional::timOptions())],
             'kondisi' => ['required', Rule::in(AlatSaranaOperasional::KONDISI)],
@@ -110,7 +108,6 @@ class AlatSaranaOperasionalController extends Controller
             'nama' => 'nama alat/armada',
             'jenis' => 'jenis',
             'no_plat' => 'nomor plat',
-            'sopir' => 'sopir',
             'jumlah' => 'jumlah',
             'peruntukan' => 'peruntukan (tim)',
             'kondisi' => 'kondisi',
@@ -119,8 +116,9 @@ class AlatSaranaOperasionalController extends Controller
 
         if (! AlatSaranaOperasional::isArmadaJenis($validated['jenis'])) {
             $validated['no_plat'] = null;
-            $validated['sopir'] = null;
         }
+
+        $validated['sopir'] = null;
 
         return $validated;
     }

@@ -7,6 +7,8 @@ use Illuminate\Validation\Rule;
 
 class ArmadaSopirOptions
 {
+    public const UNASSIGNED = 'Belum ada sopir';
+
     /**
      * @return list<string>
      */
@@ -24,13 +26,24 @@ class ArmadaSopirOptions
     /**
      * @return list<string|Rule>
      */
+    /**
+     * @return list<string>
+     */
+    public static function allowedValues(): array
+    {
+        return [...self::names(), self::UNASSIGNED];
+    }
+
+    /**
+     * @return list<string|Rule>
+     */
     public static function validationRules(bool $required): array
     {
-        $allowed = self::names();
+        $allowed = self::allowedValues();
 
-        if ($allowed === []) {
+        if (self::names() === []) {
             return $required
-                ? ['required', 'string', 'max:100']
+                ? ['required', 'string', Rule::in([self::UNASSIGNED])]
                 : ['nullable', 'string', 'max:100'];
         }
 

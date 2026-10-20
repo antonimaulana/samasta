@@ -14,23 +14,10 @@
             <p class="text-sm text-green-100">Selamat {{ now()->hour < 12 ? 'pagi' : (now()->hour < 15 ? 'siang' : (now()->hour < 18 ? 'sore' : 'malam')) }},</p>
             <h2 class="mt-1 text-2xl font-black tracking-tight">{{ $greeting }} 👋</h2>
             <p class="mt-2 text-sm leading-relaxed text-green-50/95">
-                Pilih menu di bawah untuk mencatat pekerjaan lapangan hari ini.
-                Cukup ikuti langkah-langkahnya — tidak perlu khawatir, form akan memandu Anda.
+                Pilih menu di bawah untuk mencatat pekerjaan lapangan hari ini. Cukup ikuti langkah-langkahnya, form akan memandu Anda.
             </p>
-            @if (auth()->user()?->wilayahLabel())
-                <span class="mt-3 inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-                    📍 Wilayah: {{ auth()->user()->wilayahLabel() }}
-                </span>
-            @elseif ($guestMode)
-                <span class="mt-3 inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-                    🔓 Mode tanpa login — pilih tim sesuai pekerjaan Anda
-                </span>
-            @endif
         </div>
     </div>
-
-    <x-lapangan.motivation-banner />
-    <x-lapangan.k3-banner />
 
     <div class="mb-3 flex items-center justify-between">
         <p class="lapangan-section-title text-sm font-bold text-gray-800">Menu Pekerjaan</p>
@@ -77,9 +64,4 @@
             <p class="mt-2 text-sm text-gray-500">Hubungi administrator untuk mendapatkan akses tim.</p>
         </div>
     @endif
-
-    <div class="mt-6 rounded-2xl border border-dashed border-green-200 bg-green-50/50 px-4 py-4 text-center text-xs text-green-800">
-        <p class="font-semibold">💡 Tips cepat</p>
-        <p class="mt-1 leading-relaxed">Isi data saat masih di lokasi kerja agar foto dan personil akurat. Jangan lupa APD sebelum mulai!</p>
-    </div>
 @endsection

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\Dpa\TahunAnggaranController as DpaTahunAnggaranCo
 use App\Http\Controllers\Admin\EnsiklopediaArtikelController;
 use App\Http\Controllers\Admin\EnsiklopediaKategoriController;
 use App\Http\Controllers\Admin\EvaluasiArmadaController;
+use App\Http\Controllers\Admin\EvaluasiDashboardController;
 use App\Http\Controllers\Admin\EvaluasiKelengkapanDataController;
 use App\Http\Controllers\Admin\EvaluasiKinerjaTimController;
 use App\Http\Controllers\Admin\EvaluasiMasukanMasyarakatController;
@@ -108,6 +109,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('operasional-pertamanan-laporan.index');
     Route::get('operasional-pertamanan-laporan/export/pdf', [OperasionalPertamananLaporanController::class, 'exportPdf'])
         ->name('operasional-pertamanan-laporan.export-pdf');
+    Route::get('evaluasi', [EvaluasiDashboardController::class, 'index'])
+        ->name('evaluasi.index');
     Route::get('evaluasi/pemeliharaan', [EvaluasiPemeliharaanController::class, 'index'])
         ->name('evaluasi.pemeliharaan.index');
     Route::get('evaluasi/pemeliharaan/export/pdf', [EvaluasiPemeliharaanController::class, 'exportPdf'])
