@@ -28,18 +28,16 @@
             <div class="grid gap-10 lg:grid-cols-5 lg:items-center">
                 <div class="lg:col-span-3">
                     <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-2 text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
-                        <span class="text-lg">📚</span>
-                        Pusat Pengetahuan Hijau
+                        {{ $portalHero['hero_badge'] ?? '📚 Pusat Pengetahuan Hijau' }}
                     </div>
                     <h1 class="text-4xl font-black leading-tight drop-shadow-sm sm:text-5xl">
-                        Ensiklopedia
+                        {{ $portalHero['hero_title'] ?? 'Ensiklopedia' }}
                         <span class="mt-1 block bg-gradient-to-r from-yellow-200 via-lime-100 to-white bg-clip-text text-transparent">
                             {{ config('app.name') }}
                         </span>
                     </h1>
                     <p class="mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg">
-                        Pelajari program pemerintah, jenis tanaman, dan tips penghijauan —
-                        sumber edukasi resmi seputar pertamanan &amp; RTH Kota Batam.
+                        {{ $portalHero['hero_description'] ?? '' }}
                     </p>
 
                     {{-- Pencarian --}}
@@ -51,7 +49,7 @@
                                           d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/>
                                 </svg>
                             </span>
-                            <input type="search" id="ensiklopedia-search" placeholder="Cari artikel, topik, atau kata kunci..."
+                            <input type="search" id="ensiklopedia-search" placeholder="{{ $portalHero['search_placeholder'] ?? 'Cari artikel, topik, atau kata kunci...' }}"
                                    class="w-full rounded-xl border-0 bg-gray-50 py-3.5 pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-lime-400">
                         </div>
                     </div>
@@ -144,13 +142,13 @@
             <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-400 to-purple-500 text-lg text-white shadow-md">✨</div>
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-widest text-violet-600">Interaktif</p>
-                    <h2 class="text-2xl font-black text-gray-900">Belajar Sambil Berinteraksi</h2>
+                    <p class="text-xs font-bold uppercase tracking-widest text-violet-600">{{ $portalHero['interaktif_subtitle'] ?? 'Interaktif' }}</p>
+                    <h2 class="text-2xl font-black text-gray-900">{{ $portalHero['interaktif_title'] ?? 'Belajar Sambil Berinteraksi' }}</h2>
                 </div>
             </div>
             <a href="{{ route('ensiklopedia.quiz') }}"
                class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 px-5 py-2.5 text-sm font-bold text-white shadow-md transition hover:from-violet-400 hover:to-purple-500">
-                🧠 Mulai Kuis Tanaman
+                {{ $portalHero['quiz_button_label'] ?? '🧠 Mulai Kuis Tanaman' }}
             </a>
         </div>
 

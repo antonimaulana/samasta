@@ -6,7 +6,13 @@
 @section('content')
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm text-gray-600">Kelola kategori konten ensiklopedia di situs publik.</p>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
+            @if ($canManageUsers ?? false)
+                <a href="{{ route('admin.ensiklopedia-portal.edit') }}"
+                   class="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-800 hover:bg-violet-100">
+                    Konten Portal & Kuis
+                </a>
+            @endif
             <a href="{{ route('admin.ensiklopedia-artikels.index') }}"
                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                 Kelola Artikel

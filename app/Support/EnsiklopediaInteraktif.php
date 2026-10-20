@@ -10,7 +10,6 @@ class EnsiklopediaInteraktif
     {
         $month = (int) Carbon::now()->month;
 
-        // Pola umum iklim tropis Batam: hujan Oktober–April, kemarau Mei–September
         return in_array($month, [5, 6, 7, 8, 9], true) ? 'kemarau' : 'hujan';
     }
 
@@ -19,22 +18,17 @@ class EnsiklopediaInteraktif
      */
     public static function musimInfo(): array
     {
-        return match (self::musim()) {
-            'kemarau' => [
-                'key' => 'kemarau',
-                'label' => 'Musim Kemarau',
-                'icon' => '☀️',
-                'deskripsi' => 'Periode lebih kering — fokus pada penyiraman efisien, mulsa, dan perlindungan tanaman dari panas.',
-                'warna' => 'amber',
-            ],
-            default => [
-                'key' => 'hujan',
-                'label' => 'Musim Hujan',
-                'icon' => '🌧️',
-                'deskripsi' => 'Periode curah hujan tinggi — perhatikan drainase, cegah genangan, dan manfaatkan air hujan.',
-                'warna' => 'sky',
-            ],
-        };
+        $key = self::musim();
+        $config = EnsiklopediaPortalConfig::interaktif();
+        $source = $key === 'kemarau' ? ($config['musim_kemarau'] ?? []) : ($config['musim_hujan'] ?? []);
+
+        return [
+            'key' => $key,
+            'label' => $source['label'] ?? ($key === 'kemarau' ? 'Musim Kemarau' : 'Musim Hujan'),
+            'icon' => $source['icon'] ?? ($key === 'kemarau' ? '☀️' : '🌧️'),
+            'deskripsi' => $source['deskripsi'] ?? '',
+            'warna' => $source['warna'] ?? ($key === 'kemarau' ? 'amber' : 'sky'),
+        ];
     }
 
     /**
@@ -42,7 +36,19 @@ class EnsiklopediaInteraktif
      */
     public static function artikelSlugsMusim(): array
     {
-        return match (self::musim()) {
+        $config = EnsiklopediaPortalConfig::interaktif();
+        $musim = self::musim();
+        $slugs = $config['artikel_slugs_musim'][$musim] ?? [];
+
+        return is_array($slugs) ? array_values($slugs) : self::artikelSlugsMusimStatic($musim);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function artikelSlugsMusimStatic(string $musim): array
+    {
+        return match ($musim) {
             'kemarau' => [
                 'pohon-penghasil-oksigen',
                 'urban-heat-island',
@@ -63,7 +69,19 @@ class EnsiklopediaInteraktif
      */
     public static function tipsMusim(): array
     {
-        return match (self::musim()) {
+        $config = EnsiklopediaPortalConfig::interaktif();
+        $musim = self::musim();
+        $tips = $config['tips_musim'][$musim] ?? [];
+
+        return is_array($tips) && $tips !== [] ? $tips : self::tipsMusimStatic($musim);
+    }
+
+    /**
+     * @return list<array{icon: string, judul: string, isi: string}>
+     */
+    public static function tipsMusimStatic(string $musim): array
+    {
+        return match ($musim) {
             'kemarau' => [
                 ['icon' => '💧', 'judul' => 'Siram pagi/sore', 'isi' => 'Hindari siang hari agar air tidak cepat menguap. Siram ke pangkal batang, bukan hanya daun.'],
                 ['icon' => '🪵', 'judul' => 'Gunakan mulsa', 'isi' => 'Taburkan serasah atau cocopeat di permukaan media untuk menjaga kelembapan tanah.'],
@@ -84,6 +102,16 @@ class EnsiklopediaInteraktif
      */
     public static function tipsBerkebun(): array
     {
+        $tips = EnsiklopediaPortalConfig::interaktif()['tips_berkebun'] ?? [];
+
+        return is_array($tips) && $tips !== [] ? $tips : self::tipsBerkebunStatic();
+    }
+
+    /**
+     * @return list<array{icon: string, judul: string, isi: string}>
+     */
+    public static function tipsBerkebunStatic(): array
+    {
         return [
             ['icon' => '🪴', 'judul' => 'Mulai dari pot kecil', 'isi' => 'Pemula bisa mulai dengan sayuran daun atau tanaman hias dalam pot — lebih mudah dikontrol.'],
             ['icon' => '☀️', 'judul' => 'Kenali cahaya tanaman', 'isi' => 'Tanaman matahari penuh butuh 6+ jam cahaya; tanaman teduh cukup 2–4 jam pagi.'],
@@ -98,6 +126,16 @@ class EnsiklopediaInteraktif
      * @return list<string>
      */
     public static function faktaEdukasi(): array
+    {
+        $fakta = EnsiklopediaPortalConfig::interaktif()['fakta_edukasi'] ?? [];
+
+        return is_array($fakta) && $fakta !== [] ? array_values($fakta) : self::faktaEdukasiStatic();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function faktaEdukasiStatic(): array
     {
         return [
             '1 pohon dewasa dapat menyerap ~22 kg CO₂ per tahun.',
@@ -119,6 +157,16 @@ class EnsiklopediaInteraktif
      * @return list<array{pertanyaan: string, opsi: list<string>, jawaban: int, penjelasan: string}>
      */
     public static function kuis(): array
+    {
+        $kuis = EnsiklopediaPortalConfig::interaktif()['kuis'] ?? [];
+
+        return is_array($kuis) && $kuis !== [] ? $kuis : self::kuisStatic();
+    }
+
+    /**
+     * @return list<array{pertanyaan: string, opsi: list<string>, jawaban: int, penjelasan: string}>
+     */
+    public static function kuisStatic(): array
     {
         return [
             [

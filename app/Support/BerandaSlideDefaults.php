@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Support;
+
+use App\Models\BerandaSlide;
+
+class BerandaSlideDefaults
+{
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function slides(): array
+    {
+        return [
+            [
+                'slug' => 'rth-kota',
+                'jenis' => BerandaSlide::JENIS_STANDARD,
+                'is_active' => true,
+                'urutan' => 10,
+                'title_attr' => 'RTH Kota Batam',
+                'route_name' => 'rth.index',
+                'left_gradient' => 'from-lime-400 via-green-400 to-emerald-500',
+                'badge' => 'Disperakimtan',
+                'hero_mode' => 'single',
+                'hero_live_preset' => 'rth',
+                'show_stats' => true,
+                'heading' => 'Jumlah Luas Ruang Terbuka Hijau Kota Batam',
+                'description' => 'Disperakimtan mengelola taman kota, taman lingkungan, jalur hijau jalan, Kebun Raya Batam, dan TPU — seluruhnya dalam kondisi terpelihara.',
+                'tags' => ['Taman Kota', 'Taman Lingkungan', 'Jalur Hijau', 'Kebun Raya', 'TPU'],
+                'tag_classes' => 'bg-lime-100 text-green-700 ring-lime-200',
+                'cta_text' => 'Baca data lengkap',
+            ],
+            [
+                'slug' => 'simponi',
+                'jenis' => BerandaSlide::JENIS_SIMPONI,
+                'is_active' => true,
+                'urutan' => 20,
+                'title_attr' => 'Layanan Pemakaman Simponi',
+                'href' => 'https://simponi.batam.go.id',
+                'heading' => 'Sistem Informasi Pemakaman Online (Simponi)',
+                'description' => 'Ajukan dan kelola layanan pemakaman di Tempat Pemakaman Umum (TPU) Kota Batam secara online melalui portal resmi Pemerintah Kota Batam.',
+                'badge' => 'Layanan Pemakaman',
+                'cta_text' => 'Kunjungi simponi.batam.go.id',
+                'tags' => ['TPU Kota Batam', 'Layanan Online', 'Pemakaman'],
+                'config' => [
+                    'external_url' => 'https://simponi.batam.go.id',
+                ],
+            ],
+            [
+                'slug' => 'perda-ketertiban',
+                'jenis' => BerandaSlide::JENIS_PERDA,
+                'is_active' => true,
+                'urutan' => 30,
+                'title_attr' => 'Perda Ketertiban Umum',
+                'route_name' => 'peraturan.index',
+                'heading' => 'Ketertiban Umum di Taman & Ruang Hijau',
+                'description' => 'Pelanggaran dapat dikenai teguran, kerja sosial, denda administratif, hingga pembongkaran bangunan liar.',
+                'cta_text' => 'Baca ringkasan lengkap',
+            ],
+            [
+                'slug' => 'kegiatan-pertamanan',
+                'jenis' => BerandaSlide::JENIS_STANDARD,
+                'is_active' => true,
+                'urutan' => 40,
+                'title_attr' => 'Kegiatan Pertamanan',
+                'route_name' => 'masukan.index',
+                'left_gradient' => 'from-green-500 via-emerald-500 to-teal-600',
+                'badge' => 'Kegiatan Pertamanan',
+                'hero_mode' => 'dual',
+                'hero_live_preset' => 'operasional_dual',
+                'show_stats' => false,
+                'heading' => 'Kegiatan Pertamanan Kota Batam',
+                'description' => 'Ringkasan kegiatan pemangkasan pohon dan penanganan pohon tumbang yang telah diselesaikan tim Disperakimtan di seluruh Kota Batam.',
+                'tags' => ['Pemangkasan Pohon', 'Penanganan Pohon Tumbang', 'Penghijauan', 'Keselamatan Publik'],
+                'tag_classes' => 'bg-emerald-100 text-emerald-800 ring-emerald-200',
+                'cta_text' => 'Ajukan layanan pertamanan',
+            ],
+            [
+                'slug' => 'ensiklopedia',
+                'jenis' => BerandaSlide::JENIS_STANDARD,
+                'is_active' => true,
+                'urutan' => 50,
+                'title_attr' => 'Ensiklopedia',
+                'route_name' => 'ensiklopedia.index',
+                'left_gradient' => 'from-emerald-400 via-teal-400 to-green-500',
+                'badge' => 'Pusat Pengetahuan',
+                'hero_mode' => 'single',
+                'hero_live_preset' => 'ensiklopedia',
+                'show_stats' => true,
+                'heading' => 'Ensiklopedia '.config('app.name'),
+                'description' => 'Pelajari program pemerintah, tanaman & flora, serta edukasi lingkungan seputar pertamanan dan penghijauan Kota Batam.',
+                'tag_classes' => 'bg-teal-100 text-teal-800 ring-teal-200',
+                'cta_text' => 'Jelajahi ensiklopedia',
+            ],
+            [
+                'slug' => 'aduan-masyarakat',
+                'jenis' => BerandaSlide::JENIS_STANDARD,
+                'is_active' => true,
+                'urutan' => 60,
+                'title_attr' => 'Aduan Masyarakat',
+                'route_name' => 'masukan.index',
+                'left_gradient' => 'from-orange-400 via-amber-400 to-red-500',
+                'badge' => 'Layanan Publik',
+                'hero_mode' => 'single',
+                'hero_live_preset' => 'aduan',
+                'show_stats' => true,
+                'card_ring' => 'ring-orange-100',
+                'card_shadow' => 'shadow-orange-200/60 hover:shadow-orange-300/50',
+                'heading' => 'Laporkan Kondisi Taman & Tanaman',
+                'heading_hover' => 'group-hover:text-orange-600',
+                'description' => 'Temukan tanaman rusak, cabang berbahaya, atau fasilitas taman tidak layak? Kirim aduan dengan foto dan lokasi — tim Disperakimtan akan menindaklanjuti.',
+                'tags' => ['Tanaman Rusak', 'Tanaman Berbahaya', 'Fasilitas Rusak', 'Kebersihan'],
+                'tag_classes' => 'bg-orange-100 text-orange-800 ring-orange-200',
+                'cta_text' => 'Buat aduan sekarang',
+                'cta_color' => 'text-orange-600',
+            ],
+        ];
+    }
+}

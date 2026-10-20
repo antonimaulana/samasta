@@ -14,8 +14,10 @@ use App\Http\Controllers\Admin\Dpa\DpaController as AdminDpaController;
 use App\Http\Controllers\Admin\Dpa\PaketPekerjaanController as DpaPaketPekerjaanController;
 use App\Http\Controllers\Admin\Dpa\PenyediaController as DpaPenyediaController;
 use App\Http\Controllers\Admin\Dpa\TahunAnggaranController as DpaTahunAnggaranController;
+use App\Http\Controllers\Admin\BerandaSlideController;
 use App\Http\Controllers\Admin\EnsiklopediaArtikelController;
 use App\Http\Controllers\Admin\EnsiklopediaKategoriController;
+use App\Http\Controllers\Admin\EnsiklopediaPortalController;
 use App\Http\Controllers\Admin\EvaluasiArmadaController;
 use App\Http\Controllers\Admin\EvaluasiDashboardController;
 use App\Http\Controllers\Admin\EvaluasiKelengkapanDataController;
@@ -182,6 +184,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         Route::put('tim-pelaksanas/{tim_pelaksana}', [TimPelaksanaController::class, 'update'])->name('tim-pelaksanas.update');
         Route::delete('tim-pelaksanas/{tim_pelaksana}', [TimPelaksanaController::class, 'destroy'])->name('tim-pelaksanas.destroy');
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('beranda-slides', [BerandaSlideController::class, 'index'])->name('beranda-slides.index');
+        Route::get('beranda-slides/{beranda_slide}/edit', [BerandaSlideController::class, 'edit'])->name('beranda-slides.edit');
+        Route::put('beranda-slides/{beranda_slide}', [BerandaSlideController::class, 'update'])->name('beranda-slides.update');
+        Route::patch('beranda-slides/{beranda_slide}/toggle', [BerandaSlideController::class, 'toggle'])->name('beranda-slides.toggle');
+        Route::post('beranda-slides/reorder', [BerandaSlideController::class, 'reorder'])->name('beranda-slides.reorder');
+        Route::get('ensiklopedia-portal', [EnsiklopediaPortalController::class, 'edit'])->name('ensiklopedia-portal.edit');
+        Route::put('ensiklopedia-portal', [EnsiklopediaPortalController::class, 'update'])->name('ensiklopedia-portal.update');
         Route::resource('users', UserController::class)->except(['show']);
 
         Route::middleware('admin.feature:dpa_monitoring')->prefix('dpa')->name('dpa.')->group(function () {

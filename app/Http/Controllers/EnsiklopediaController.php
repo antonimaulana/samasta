@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EnsiklopediaArtikel;
 use App\Models\EnsiklopediaKategori;
 use App\Support\EnsiklopediaInteraktif;
+use App\Support\EnsiklopediaPortalConfig;
 use Illuminate\View\View;
 
 class EnsiklopediaController extends Controller
@@ -34,13 +35,14 @@ class EnsiklopediaController extends Controller
             ->sortBy(fn (EnsiklopediaArtikel $artikel) => array_search($artikel->slug, $slugsMusim, true))
             ->values();
 
-        return view('ensiklopedia.index', compact(
-            'kategori',
-            'totalArtikel',
-            'highlightArtikel',
-            'musimInfo',
-            'artikelMusiman',
-        ));
+        return view('ensiklopedia.index', [
+            'kategori' => $kategori,
+            'totalArtikel' => $totalArtikel,
+            'highlightArtikel' => $highlightArtikel,
+            'musimInfo' => $musimInfo,
+            'artikelMusiman' => $artikelMusiman,
+            'portalHero' => EnsiklopediaPortalConfig::heroFormDefaults(),
+        ]);
     }
 
     public function quiz(): View

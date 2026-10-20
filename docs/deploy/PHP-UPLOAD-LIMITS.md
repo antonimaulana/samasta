@@ -110,7 +110,8 @@ Jika pesan *foto gagal disimpan ke server* muncul padahal limit upload sudah cuk
 
 ```bash
 cd /var/www/samasta
-sudo chown -R www-data:www-data storage bootstrap/cache
+# Deploy user (GardenBatam) + PHP-FPM (www-data) — keduanya harus bisa menulis
+sudo chown -R "$USER:www-data" storage bootstrap/cache
 sudo chmod -R ug+rwx storage bootstrap/cache
 php artisan storage:link
 ```

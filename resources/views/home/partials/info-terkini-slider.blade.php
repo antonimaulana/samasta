@@ -22,121 +22,58 @@
     <div class="info-terkini-panel overflow-hidden rounded-3xl border border-green-100 p-4 shadow-xl shadow-green-100/50 ring-1 ring-green-50 sm:p-6">
         <div class="info-slide-viewport relative overflow-hidden rounded-2xl">
             <div id="info-slider-track" class="flex items-stretch transition-transform duration-500 ease-out">
-            @php
-                $ensiklopediaSlideTags = $ensiklopediaKategoris
-                    ->map(fn ($kat) => trim($kat->icon.' '.$kat->nama))
-                    ->all();
-
-                if ($ensiklopediaSlideTags === []) {
-                    $ensiklopediaSlideTags = ['Program Pemerintah', 'Tanaman & Flora', 'Edukasi'];
-                }
-            @endphp
-
-            @include('home.partials.info-slide-card', [
-                'href' => route('rth.index'),
-                'titleAttr' => 'RTH Kota Batam',
-                'leftGradient' => 'from-lime-400 via-green-400 to-emerald-500',
-                'badge' => 'Disperakimtan',
-                'heroValue' => number_format($rthTotalLuas, 0, ',', '.'),
-                'heroLabel' => 'M² luas RTH terpelihara',
-                'statLeftValue' => number_format($rthTotalLokasi),
-                'statLeftLabel' => 'Lokasi',
-                'statRightValue' => (string) ($rthKategoriCount ?? 5),
-                'statRightLabel' => 'Kategori',
-                'heading' => 'Jumlah Luas Ruang Terbuka Hijau Kota Batam',
-                'description' => 'Disperakimtan mengelola taman kota, taman lingkungan, jalur hijau jalan, Kebun Raya Batam, dan TPU — seluruhnya dalam kondisi terpelihara.',
-                'tags' => ['Taman Kota', 'Taman Lingkungan', 'Jalur Hijau', 'Kebun Raya', 'TPU'],
-                'tagClasses' => 'bg-lime-100 text-green-700 ring-lime-200',
-                'ctaText' => 'Baca data lengkap',
-            ])
-
-            @include('home.partials.info-slide-simponi')
-
-            @include('home.partials.info-slide-perda-ketertiban')
-
-            @include('home.partials.info-slide-card', [
-                'href' => route('masukan.index'),
-                'titleAttr' => 'Kegiatan Pertamanan',
-                'leftGradient' => 'from-green-500 via-emerald-500 to-teal-600',
-                'badge' => 'Kegiatan Pertamanan',
-                'heroMode' => 'dual',
-                'heroDualLeftValue' => number_format($operasionalPemangkasanSelesai),
-                'heroDualLeftLabel' => 'Pemangkasan Pohon',
-                'heroDualRightValue' => number_format($operasionalPohonTumbangSelesai),
-                'heroDualRightLabel' => 'Penanganan Pohon Tumbang',
-                'showStats' => false,
-                'heading' => 'Kegiatan Pertamanan Kota Batam',
-                'description' => 'Ringkasan kegiatan pemangkasan pohon dan penanganan pohon tumbang yang telah diselesaikan tim Disperakimtan di seluruh Kota Batam.',
-                'tags' => ['Pemangkasan Pohon', 'Penanganan Pohon Tumbang', 'Penghijauan', 'Keselamatan Publik'],
-                'tagClasses' => 'bg-emerald-100 text-emerald-800 ring-emerald-200',
-                'ctaText' => 'Ajukan layanan pertamanan',
-            ])
-
-            @include('home.partials.info-slide-card', [
-                'href' => route('ensiklopedia.index'),
-                'titleAttr' => 'Ensiklopedia',
-                'leftGradient' => 'from-emerald-400 via-teal-400 to-green-500',
-                'badge' => 'Pusat Pengetahuan',
-                'heroValue' => number_format($ensiklopediaTotalArtikel),
-                'heroLabel' => 'Artikel edukasi tersedia',
-                'statLeftValue' => $ensiklopediaKategoris->count(),
-                'statLeftLabel' => 'Topik',
-                'statRightValue' => '📚',
-                'statRightLabel' => 'Ensiklopedia',
-                'heading' => 'Ensiklopedia '.config('app.name'),
-                'description' => 'Pelajari program pemerintah, tanaman & flora, serta edukasi lingkungan seputar pertamanan dan penghijauan Kota Batam.',
-                'tags' => $ensiklopediaSlideTags,
-                'tagClasses' => 'bg-teal-100 text-teal-800 ring-teal-200',
-                'ctaText' => 'Jelajahi ensiklopedia',
-            ])
-
-            @include('home.partials.info-slide-card', [
-                'href' => route('masukan.index'),
-                'titleAttr' => 'Aduan Masyarakat',
-                'cardRing' => 'ring-orange-100',
-                'cardShadow' => 'shadow-orange-200/60 hover:shadow-orange-300/50',
-                'leftGradient' => 'from-orange-400 via-amber-400 to-red-500',
-                'badge' => 'Layanan Publik',
-                'heroValue' => number_format($aduanTotal),
-                'heroLabel' => 'Aduan masuk',
-                'statLeftValue' => number_format($aduanSelesai),
-                'statLeftLabel' => 'Selesai',
-                'statRightValue' => number_format($aduanBulanIni),
-                'statRightLabel' => 'Bulan ini',
-                'heading' => 'Laporkan Kondisi Taman & Tanaman',
-                'headingHover' => 'group-hover:text-orange-600',
-                'description' => 'Temukan tanaman rusak, cabang berbahaya, atau fasilitas taman tidak layak? Kirim aduan dengan foto dan lokasi — tim Disperakimtan akan menindaklanjuti.',
-                'tags' => ['Tanaman Rusak', 'Tanaman Berbahaya', 'Fasilitas Rusak', 'Kebersihan'],
-                'tagClasses' => 'bg-orange-100 text-orange-800 ring-orange-200',
-                'ctaText' => 'Buat aduan sekarang',
-                'ctaColor' => 'text-orange-600',
-            ])
+                @forelse ($berandaSlides ?? [] as $slideProps)
+                    @php $slide = $slideProps['slide']; @endphp
+                    @if ($slide->jenis === \App\Models\BerandaSlide::JENIS_SIMPONI)
+                        @include('home.partials.info-slide-simponi', [
+                            'href' => $slideProps['href'],
+                            'heading' => $slide->heading,
+                            'description' => $slide->description,
+                            'badge' => $slide->badge,
+                            'ctaText' => $slide->cta_text,
+                            'tags' => $slide->tags ?? [],
+                        ])
+                    @elseif ($slide->jenis === \App\Models\BerandaSlide::JENIS_PERDA)
+                        @include('home.partials.info-slide-perda-ketertiban', ['href' => $slideProps['href']])
+                    @else
+                        @include('home.partials.info-slide-card', collect($slideProps)->except('slide')->all())
+                    @endif
+                @empty
+                    <p class="w-full p-8 text-center text-sm text-gray-500">Belum ada slide beranda aktif.</p>
+                @endforelse
             </div>
         </div>
     </div>
 
-    <div class="mt-6 flex items-center justify-center gap-4 sm:mt-8">
-        <button type="button" id="info-slider-prev-mobile"
-                class="flex h-8 w-8 items-center justify-center rounded-full border border-green-200 bg-white text-green-600 sm:hidden"
-                aria-label="Slide sebelumnya">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
-            </svg>
-        </button>
-        <div id="info-slider-dots" class="flex gap-2">
-            <button type="button" class="info-slider-dot h-2.5 w-8 rounded-full bg-green-500 transition-all" data-index="0" aria-label="Slide RTH"></button>
-            <button type="button" class="info-slider-dot h-2.5 w-2.5 rounded-full bg-green-200 transition-all" data-index="1" aria-label="Slide Layanan Pemakaman Simponi"></button>
-            <button type="button" class="info-slider-dot h-2.5 w-2.5 rounded-full bg-green-200 transition-all" data-index="2" aria-label="Slide Perda Ketertiban Umum"></button>
-            <button type="button" class="info-slider-dot h-2.5 w-2.5 rounded-full bg-green-200 transition-all" data-index="3" aria-label="Slide Kegiatan Pertamanan"></button>
-            <button type="button" class="info-slider-dot h-2.5 w-2.5 rounded-full bg-green-200 transition-all" data-index="4" aria-label="Slide Ensiklopedia"></button>
-            <button type="button" class="info-slider-dot h-2.5 w-2.5 rounded-full bg-green-200 transition-all" data-index="5" aria-label="Slide Aduan Masyarakat"></button>
+    @php $slideCount = isset($berandaSlides) ? $berandaSlides->count() : 0; @endphp
+    @if ($slideCount > 0)
+        <div class="mt-6 flex items-center justify-center gap-4 sm:mt-8">
+            <button type="button" id="info-slider-prev-mobile"
+                    class="flex h-8 w-8 items-center justify-center rounded-full border border-green-200 bg-white text-green-600 sm:hidden"
+                    aria-label="Slide sebelumnya">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div id="info-slider-dots" class="flex gap-2">
+                @foreach ($berandaSlides as $index => $slideProps)
+                    <button type="button"
+                            @class([
+                                'info-slider-dot h-2.5 rounded-full transition-all',
+                                'w-8 bg-green-500' => $index === 0,
+                                'w-2.5 bg-green-200' => $index !== 0,
+                            ])
+                            data-index="{{ $index }}"
+                            aria-label="Slide {{ $slideProps['slide']->title_attr }}"></button>
+                @endforeach
+            </div>
+            <button type="button" id="info-slider-next-mobile"
+                    class="flex h-8 w-8 items-center justify-center rounded-full border border-green-200 bg-white text-green-600 sm:hidden"
+                    aria-label="Slide berikutnya">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
         </div>
-        <button type="button" id="info-slider-next-mobile"
-                class="flex h-8 w-8 items-center justify-center rounded-full border border-green-200 bg-white text-green-600 sm:hidden"
-                aria-label="Slide berikutnya">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
-            </svg>
-        </button>
-    </div>
+    @endif
 </section>

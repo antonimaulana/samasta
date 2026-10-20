@@ -12,6 +12,28 @@ cd "$APP_DIR"
 echo "=== SIMTAMAN deploy update — $(date) ==="
 echo "Directory: $APP_DIR | Branch: $BRANCH"
 
+# Composer menjalankan `php artisan package:discover` — butuh storage/logs & bootstrap/cache writable.
+ensure_writable_dirs() {
+    mkdir -p storage/logs \
+        storage/framework/cache/data \
+        storage/framework/sessions \
+        storage/framework/views \
+        storage/app/public \
+        bootstrap/cache
+
+    local owner="${DEPLOY_USER:-${SUDO_USER:-$USER}}"
+    if [[ "$(id -u)" -eq 0 ]]; then
+        chown -R "${owner}:www-data" storage bootstrap/cache
+        chmod -R ug+rwx storage bootstrap/cache
+    elif sudo -n true 2>/dev/null; then
+        sudo chown -R "${owner}:www-data" storage bootstrap/cache
+        sudo chmod -R ug+rwx storage bootstrap/cache
+    else
+        echo "[WARN] Tanpa sudo — pastikan $USER dan www-data bisa menulis storage/ & bootstrap/cache/"
+    fi
+}
+ensure_writable_dirs
+
 if [[ "${BACKUP_BEFORE_DEPLOY:-1}" == "1" ]]; then
     echo "[backup] Snapshot sebelum pull..."
     php artisan simtaman:backup --full --label=sebelum-deploy || echo "[WARN] Backup gagal — lanjut deploy (periksa manual)."
