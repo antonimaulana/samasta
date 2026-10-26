@@ -5,7 +5,7 @@
     $masyarakatActive = request()->routeIs('admin.aduan-masyarakats.*', 'admin.survey-kepuasan.*');
     $ensiklopediaActive = request()->routeIs('admin.ensiklopedia-kategoris.*', 'admin.ensiklopedia-artikels.*');
     $evaluasiActive = request()->routeIs('admin.evaluasi.*');
-    $sistemActive = request()->routeIs('admin.tim-pelaksanas.*', 'admin.users.*', 'admin.activity-logs.*', 'admin.beranda-slides.*', 'admin.ensiklopedia-portal.*');
+    $sistemActive = request()->routeIs('admin.tim-pelaksanas.*', 'admin.users.*', 'admin.activity-logs.*', 'admin.beranda-slides.*', 'admin.faq.*', 'admin.ensiklopedia-portal.*');
 @endphp
 
 <nav class="space-y-1 px-4 py-4">
@@ -179,6 +179,10 @@
                 <a href="{{ route('admin.beranda-slides.index') }}"
                    class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.beranda-slides.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
                     Slide Beranda
+                </a>
+                <a href="{{ route('admin.faq.index') }}"
+                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.faq.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                    FAQ Beranda
                 </a>
                 <a href="{{ route('admin.ensiklopedia-portal.edit') }}"
                    class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.ensiklopedia-portal.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">

@@ -15,12 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('slug')->unique();
             $table->string('jenis', 20)->default('standard');
+            $table->string('visual_mode', 20)->default('live');
             $table->boolean('is_active')->default(true);
             $table->unsignedSmallInteger('urutan')->default(0);
             $table->string('title_attr');
             $table->string('route_name')->nullable();
             $table->string('href')->nullable();
             $table->string('left_gradient')->nullable();
+            $table->string('image_path')->nullable();
+            $table->string('image_alt')->nullable();
             $table->string('badge')->nullable();
             $table->string('hero_mode', 20)->default('single');
             $table->string('hero_live_preset', 40)->nullable();

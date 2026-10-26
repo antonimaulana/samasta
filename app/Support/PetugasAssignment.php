@@ -84,6 +84,67 @@ class PetugasAssignment
         return app(PetugasRosterBuilder::class)->forTeamNames($teamNames) !== [];
     }
 
+    public static function rosterExistsForOperasionalWilayah(): bool
+    {
+        return app(PetugasRosterBuilder::class)->forOperasionalWilayah() !== [];
+    }
+
+    /**
+     * @return list<int>
+     */
+    public static function validateForOperasionalWilayah(array $petugasIds): array
+    {
+        if ($petugasIds === []) {
+            return [];
+        }
+
+        $allowedIds = collect(app(PetugasRosterBuilder::class)->forOperasionalWilayah())
+            ->pluck('id')
+            ->all();
+
+        $invalid = array_diff($petugasIds, $allowedIds);
+
+        if ($invalid !== []) {
+            throw ValidationException::withMessages([
+                'petugas_ids' => 'Ada petugas yang bukan anggota tim wilayah aktif.',
+            ]);
+        }
+
+        return $petugasIds;
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    public static function applyValidatedPersonilOperasionalWilayah(array &$validated, Request $request): void
+    {
+        if (! self::rosterExistsForOperasionalWilayah()) {
+            return;
+        }
+
+        $petugasIds = self::validateForOperasionalWilayah(self::extractIds($request));
+
+        if ($petugasIds === []) {
+            throw ValidationException::withMessages([
+                'petugas_ids' => 'Pilih minimal satu petugas pelaksana.',
+            ]);
+        }
+
+        $validated['jumlah_personil'] = count($petugasIds);
+    }
+
+    public static function syncFromRequestOperasionalWilayah(Model $record, Request $request): void
+    {
+        if (! self::rosterExistsForOperasionalWilayah()) {
+            $record->petugas()->sync([]);
+
+            return;
+        }
+
+        $petugasIds = self::validateForOperasionalWilayah(self::extractIds($request));
+        self::sync($record, $petugasIds);
+    }
+
     /**
      * @param  array<string, mixed>  $validated
      * @param  list<string>  $teamNames

@@ -99,6 +99,12 @@ class TimPelaksanaController extends Controller
     {
         $this->authorize('viewAny', TimPelaksana::class);
 
+        if ($request->query('scope') === 'operasional-wilayah') {
+            return response()->json([
+                'petugas' => $rosterBuilder->forOperasionalWilayah(),
+            ]);
+        }
+
         if ($request->filled('teams')) {
             $teams = collect($request->input('teams'))
                 ->filter(fn ($team) => is_string($team) && $team !== '')

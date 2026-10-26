@@ -52,6 +52,24 @@ class PetugasRosterBuilder
     }
 
     /**
+     * Semua petugas aktif dari tim yang punya wilayah kerja (Tim Wilayah 1–4, dll.).
+     *
+     * @return list<array{id: int, nama: string, jabatan: ?string, is_inti: bool, is_pengawas: bool, tim: string}>
+     */
+    public function forOperasionalWilayah(): array
+    {
+        return TimPelaksana::query()
+            ->where('aktif', true)
+            ->where('memiliki_wilayah_kerja', true)
+            ->orderBy('urutan')
+            ->orderBy('nama')
+            ->get()
+            ->flatMap(fn (TimPelaksana $team) => $this->forTeam($team))
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return array<string, list<array{id: int, nama: string, jabatan: ?string, is_inti: bool, is_pengawas: bool, tim: string}>>
      */
     public function allActiveByTeam(): array

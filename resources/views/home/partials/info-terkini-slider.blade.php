@@ -19,22 +19,15 @@
         </div>
     </div>
 
-    <div class="info-terkini-panel overflow-hidden rounded-3xl border border-green-100 p-4 shadow-xl shadow-green-100/50 ring-1 ring-green-50 sm:p-6">
+    <div class="info-terkini-panel overflow-hidden rounded-3xl border border-green-100 p-3 shadow-xl shadow-green-100/50 ring-1 ring-green-50 sm:p-4">
         <div class="info-slide-viewport relative overflow-hidden rounded-2xl">
             <div id="info-slider-track" class="flex items-stretch transition-transform duration-500 ease-out">
                 @forelse ($berandaSlides ?? [] as $slideProps)
                     @php $slide = $slideProps['slide']; @endphp
                     @if ($slide->jenis === \App\Models\BerandaSlide::JENIS_SIMPONI)
-                        @include('home.partials.info-slide-simponi', [
-                            'href' => $slideProps['href'],
-                            'heading' => $slide->heading,
-                            'description' => $slide->description,
-                            'badge' => $slide->badge,
-                            'ctaText' => $slide->cta_text,
-                            'tags' => $slide->tags ?? [],
-                        ])
+                        @include('home.partials.info-slide-simponi', collect($slideProps)->except('slide')->all())
                     @elseif ($slide->jenis === \App\Models\BerandaSlide::JENIS_PERDA)
-                        @include('home.partials.info-slide-perda-ketertiban', ['href' => $slideProps['href']])
+                        @include('home.partials.info-slide-perda-ketertiban', collect($slideProps)->except('slide')->all())
                     @else
                         @include('home.partials.info-slide-card', collect($slideProps)->except('slide')->all())
                     @endif
@@ -77,3 +70,5 @@
         </div>
     @endif
 </section>
+
+@include('home.partials.info-terkini-slider-script')

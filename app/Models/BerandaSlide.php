@@ -12,15 +12,28 @@ class BerandaSlide extends Model
 
     public const JENIS_PERDA = 'perda';
 
+    public const VISUAL_LIVE = 'live';
+
+    public const VISUAL_GRADIENT = 'gradient';
+
+    public const VISUAL_IMAGE = 'image';
+
+    public const VISUAL_ASSET = 'asset';
+
+    public const VISUAL_TEMPLATE = 'template';
+
     protected $fillable = [
         'slug',
         'jenis',
+        'visual_mode',
         'is_active',
         'urutan',
         'title_attr',
         'route_name',
         'href',
         'left_gradient',
+        'image_path',
+        'image_alt',
         'badge',
         'hero_mode',
         'hero_live_preset',

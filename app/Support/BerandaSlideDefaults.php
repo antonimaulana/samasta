@@ -15,6 +15,7 @@ class BerandaSlideDefaults
             [
                 'slug' => 'rth-kota',
                 'jenis' => BerandaSlide::JENIS_STANDARD,
+                'visual_mode' => BerandaSlide::VISUAL_LIVE,
                 'is_active' => true,
                 'urutan' => 10,
                 'title_attr' => 'RTH Kota Batam',
@@ -33,6 +34,7 @@ class BerandaSlideDefaults
             [
                 'slug' => 'simponi',
                 'jenis' => BerandaSlide::JENIS_SIMPONI,
+                'visual_mode' => BerandaSlide::VISUAL_ASSET,
                 'is_active' => true,
                 'urutan' => 20,
                 'title_attr' => 'Layanan Pemakaman Simponi',
@@ -44,11 +46,13 @@ class BerandaSlideDefaults
                 'tags' => ['TPU Kota Batam', 'Layanan Online', 'Pemakaman'],
                 'config' => [
                     'external_url' => 'https://simponi.batam.go.id',
+                    'visual_asset' => 'images/logo-simponi.png',
                 ],
             ],
             [
                 'slug' => 'perda-ketertiban',
                 'jenis' => BerandaSlide::JENIS_PERDA,
+                'visual_mode' => BerandaSlide::VISUAL_TEMPLATE,
                 'is_active' => true,
                 'urutan' => 30,
                 'title_attr' => 'Perda Ketertiban Umum',
@@ -60,6 +64,7 @@ class BerandaSlideDefaults
             [
                 'slug' => 'kegiatan-pertamanan',
                 'jenis' => BerandaSlide::JENIS_STANDARD,
+                'visual_mode' => BerandaSlide::VISUAL_LIVE,
                 'is_active' => true,
                 'urutan' => 40,
                 'title_attr' => 'Kegiatan Pertamanan',
@@ -78,6 +83,7 @@ class BerandaSlideDefaults
             [
                 'slug' => 'ensiklopedia',
                 'jenis' => BerandaSlide::JENIS_STANDARD,
+                'visual_mode' => BerandaSlide::VISUAL_LIVE,
                 'is_active' => true,
                 'urutan' => 50,
                 'title_attr' => 'Ensiklopedia',
@@ -95,6 +101,7 @@ class BerandaSlideDefaults
             [
                 'slug' => 'aduan-masyarakat',
                 'jenis' => BerandaSlide::JENIS_STANDARD,
+                'visual_mode' => BerandaSlide::VISUAL_LIVE,
                 'is_active' => true,
                 'urutan' => 60,
                 'title_attr' => 'Aduan Masyarakat',

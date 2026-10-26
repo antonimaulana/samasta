@@ -24,6 +24,9 @@
     'tagClasses' => 'bg-lime-100 text-green-700 ring-lime-200',
     'ctaText',
     'ctaColor' => 'text-green-600',
+    'visualMode' => 'live',
+    'imageUrl' => null,
+    'imageAlt' => '',
     'extra' => null,
     'externalLinkUrl' => null,
     'externalLinkLabel' => null,
@@ -46,18 +49,27 @@
             <span class="sr-only">{{ $ctaText }}</span>
         </a>
 
+        @if ($visualMode === 'image' && $imageUrl)
+            <div class="info-slide-visual info-slide-media relative z-10 w-full bg-gradient-to-br from-slate-50 to-green-50 md:w-[38%] lg:w-[36%] pointer-events-none">
+                <img src="{{ $imageUrl }}" alt="{{ $imageAlt }}"
+                     class="info-slide-media__img"
+                     loading="lazy" decoding="async">
+            </div>
+        @else
         <div @class([
-            'info-slide-left relative z-10 flex w-full flex-col justify-between p-5 text-white sm:p-6 md:w-[38%] md:flex-shrink-0 lg:w-[36%] pointer-events-none',
+            'info-slide-left info-slide-media relative z-10 flex w-full flex-col justify-between text-white md:w-[38%] lg:w-[36%] pointer-events-none',
             'bg-gradient-to-br',
             $leftGradient,
         ])>
             <div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15 blur-2xl"></div>
 
-            <span class="relative inline-flex w-fit rounded-full bg-white/25 px-3 py-1 text-[10px] font-bold uppercase tracking-wide backdrop-blur-sm sm:text-xs">
-                {{ $badge }}
-            </span>
+            @if ($badge)
+                <span class="relative inline-flex w-fit rounded-full bg-white/25 px-3 py-1 text-[10px] font-bold uppercase tracking-wide backdrop-blur-sm sm:text-xs">
+                    {{ $badge }}
+                </span>
+            @endif
 
-            <div class="relative mt-5 flex flex-1 flex-col justify-center">
+            <div class="info-slide-hero relative flex flex-1 flex-col justify-center">
                 @if ($heroMode === 'dual')
                     <div class="info-slide-metrics">
                         <div class="info-slide-metric">
@@ -78,7 +90,7 @@
                 @endif
 
                 @if ($showStats)
-                    <div class="info-slide-stats mt-5 border-t border-white/20 pt-5">
+                    <div class="info-slide-stats border-t border-white/20">
                         <div class="info-slide-metrics">
                             <div class="info-slide-metric">
                                 <p class="info-slide-value">{{ $statLeftValue }}</p>
@@ -94,17 +106,23 @@
                 @endif
             </div>
         </div>
+        @endif
 
-        <div class="info-slide-right relative z-10 flex min-h-0 flex-1 flex-col p-5 sm:p-6 md:p-7 pointer-events-none">
+        <div class="info-slide-right relative z-10 flex min-h-0 flex-1 flex-col pointer-events-none">
             <div class="flex-1">
-                <h3 @class(['text-lg font-bold leading-snug text-gray-900 transition sm:text-xl', $headingHover])>
+                @if ($visualMode === 'image' && $badge)
+                    <span class="mb-2 inline-flex rounded-full bg-lime-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-green-800 sm:text-xs">
+                        {{ $badge }}
+                    </span>
+                @endif
+                <h3 @class(['text-base font-bold leading-snug text-gray-900 transition sm:text-lg', $headingHover])>
                     {{ $heading }}
                 </h3>
-                <p class="mt-2 text-sm leading-relaxed text-gray-600">
+                <p class="info-slide-description mt-1.5 text-sm leading-relaxed text-gray-600">
                     {{ $description }}
                 </p>
                 @if ($tags !== [])
-                    <div class="mt-4 flex flex-wrap gap-2">
+                    <div class="info-slide-tags flex flex-wrap gap-1.5">
                         @foreach (array_slice($tags, 0, 4) as $tag)
                             <span @class(['rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 sm:px-3 sm:text-xs', $tagClasses])>{{ $tag }}</span>
                         @endforeach
@@ -128,7 +146,7 @@
                 @endif
             </div>
 
-            <span @class(['relative z-10 mt-5 inline-flex items-center gap-2 text-sm font-bold transition group-hover:gap-3 sm:mt-6', $ctaColor])>
+            <span @class(['info-slide-cta relative z-10 inline-flex items-center gap-2 text-sm font-bold transition group-hover:gap-3', $ctaColor])>
                 {{ $ctaText }}
                 @if ($isExternalHref)
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

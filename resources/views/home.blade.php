@@ -4,7 +4,7 @@
 
 @section('title', 'Beranda')
 
-@section('meta_description', config('app.name').' — Portal profil pertamanan, peta taman interaktif, ensiklopedia hijau, dan layanan aduan pertamanan Kota Batam.')
+@section('meta_description', config('app.name').' — Portal profil pertamanan, peta taman interaktif, FAQ layanan, dan aduan pertamanan Kota Batam.')
 
 @push('styles')
     @vite(['resources/css/home.css'])
@@ -31,7 +31,7 @@
 
         <div class="section-leaf-divider" aria-hidden="true"></div>
 
-        @include('home.partials.ensiklopedia-teaser')
+        @include('home.partials.faq-beranda')
     </div>
 @endsection
 

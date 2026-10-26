@@ -22,15 +22,26 @@ class BerandaSlidePresenter
 
         if ($slide->jenis === BerandaSlide::JENIS_SIMPONI) {
             $props['href'] = $slide->config['external_url'] ?? $slide->href ?? 'https://simponi.batam.go.id';
+            $props += $this->visualProps($slide);
+            $props['badge'] = $slide->badge ?? 'Layanan Pemakaman';
+            $props['heading'] = $slide->heading;
+            $props['description'] = $slide->description;
+            $props['ctaText'] = $slide->cta_text;
+            $props['tags'] = $slide->tags ?? [];
 
             return $props;
         }
 
         if ($slide->jenis === BerandaSlide::JENIS_PERDA) {
+            $props['heading'] = $slide->heading;
+            $props['description'] = $slide->description;
+            $props['ctaText'] = $slide->cta_text;
+            $props['badge'] = $slide->badge;
+
             return $props;
         }
 
-        $props = array_merge($props, [
+        $props = array_merge($props, $this->visualProps($slide), [
             'leftGradient' => $slide->left_gradient ?? 'from-lime-400 via-green-400 to-emerald-500',
             'badge' => $slide->badge ?? '',
             'heroMode' => $slide->hero_mode ?? 'single',
@@ -46,7 +57,9 @@ class BerandaSlidePresenter
             'cardShadow' => $slide->card_shadow ?? 'shadow-green-200/60 hover:shadow-green-300/50',
         ]);
 
-        $this->applyLivePreset($props, $slide, $homeStats, $ensiklopediaKategoris);
+        if (($slide->visual_mode ?? BerandaSlide::VISUAL_LIVE) === BerandaSlide::VISUAL_LIVE) {
+            $this->applyLivePreset($props, $slide, $homeStats, $ensiklopediaKategoris);
+        }
 
         if ($props['heroMode'] === 'dual' && empty($slide->hero_live_preset)) {
             $props['heroDualLeftValue'] = $slide->hero_dual_left_value ?? '';
@@ -169,5 +182,29 @@ class BerandaSlidePresenter
         }
 
         return $slide->tags ?? [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function visualProps(BerandaSlide $slide): array
+    {
+        $mode = $slide->visual_mode ?? BerandaSlide::VISUAL_LIVE;
+        $imageUrl = null;
+
+        if ($slide->image_path) {
+            $imageUrl = asset('storage/'.$slide->image_path);
+        } elseif ($mode === BerandaSlide::VISUAL_ASSET) {
+            $asset = $slide->config['visual_asset'] ?? null;
+            if (is_string($asset) && $asset !== '') {
+                $imageUrl = asset($asset);
+            }
+        }
+
+        return [
+            'visualMode' => $mode,
+            'imageUrl' => $imageUrl,
+            'imageAlt' => $slide->image_alt ?: $slide->heading,
+        ];
     }
 }

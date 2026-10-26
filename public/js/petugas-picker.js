@@ -19,6 +19,8 @@
         const rosterUrl = root.dataset.rosterUrl || '';
         const timSelectId = root.dataset.timSelectId || '';
         const fixedTeams = parseJson(root.dataset.fixedTeams, []);
+        const rosterScope = root.dataset.rosterScope || 'team';
+        const isOperasionalWilayah = rosterScope === 'operasional-wilayah';
         const required = root.dataset.required === '1';
         let awaitingTeam = root.dataset.awaitingTeam === '1';
         let currentQuery = '';
@@ -180,8 +182,12 @@
                 const option = document.createElement('button');
                 option.type = 'button';
                 option.className = 'block w-full px-4 py-2.5 text-left text-sm hover:bg-green-50';
+                const timLabel = isOperasionalWilayah && item.tim
+                    ? '<span class="ml-2 text-xs font-medium text-green-700">' + item.tim + '</span>'
+                    : '';
                 option.innerHTML = [
                     '<span class="font-semibold text-gray-900">' + item.nama + '</span>',
+                    timLabel,
                     item.jabatan ? '<span class="ml-2 text-xs text-gray-500">' + item.jabatan + '</span>' : '',
                 ].join('');
 
@@ -290,17 +296,12 @@
             }
         });
 
-        async function loadRosterForTeams(teams) {
-            if (!teams.length || !rosterUrl) {
+        async function loadRosterFromUrl(queryString) {
+            if (!rosterUrl) {
                 return;
             }
 
-            const params = new URLSearchParams();
-            teams.forEach(function (team) {
-                params.append('teams[]', team);
-            });
-
-            const response = await fetch(rosterUrl + '?' + params.toString(), {
+            const response = await fetch(rosterUrl + '?' + queryString, {
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 credentials: 'same-origin',
             });
@@ -329,7 +330,33 @@
             hideDropdown();
         }
 
-        if (timSelectId) {
+        async function loadRosterForTeams(teams) {
+            if (!teams.length || !rosterUrl) {
+                return;
+            }
+
+            const params = new URLSearchParams();
+            teams.forEach(function (team) {
+                params.append('teams[]', team);
+            });
+
+            await loadRosterFromUrl(params.toString());
+        }
+
+        async function loadOperasionalWilayahRoster() {
+            await loadRosterFromUrl('scope=operasional-wilayah');
+        }
+
+        if (isOperasionalWilayah) {
+            awaitingTeam = false;
+            togglePickerMode(roster.length > 0);
+            if (fieldInput) {
+                fieldInput.disabled = false;
+            }
+            if (roster.length === 0) {
+                loadOperasionalWilayahRoster();
+            }
+        } else if (timSelectId) {
             const timSelect = document.getElementById(timSelectId);
             timSelect?.addEventListener('change', function () {
                 const team = timSelect.value;

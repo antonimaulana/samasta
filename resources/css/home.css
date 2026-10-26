@@ -100,16 +100,154 @@
         linear-gradient(to top, rgba(6, 47, 34, 0.65) 0%, transparent 48%);
 }
 
-.info-slide-card {
-    min-height: 18rem;
+#info-terkini-slider {
+    --info-slide-media-height: 14rem;
 }
+@media (min-width: 768px) {
+    #info-terkini-slider {
+        --info-slide-media-height: 17.5rem;
+    }
+}
+
+.info-slide-card {
+    min-height: 0;
+}
+
+#info-terkini-slider .info-slide-media {
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    height: var(--info-slide-media-height);
+    min-height: var(--info-slide-media-height);
+    max-height: var(--info-slide-media-height);
+}
+
+@media (min-width: 768px) {
+    #info-terkini-slider .info-slide-card {
+        align-items: stretch;
+    }
+
+    #info-terkini-slider .info-slide-media {
+        height: auto;
+        max-height: none;
+        min-height: var(--info-slide-media-height);
+        align-self: stretch;
+    }
+
+    /* Panel visual menempel ke tepi atas kartu (selaras area konten kanan) */
+    #info-terkini-slider .info-slide-visual,
+    #info-terkini-slider .info-slide-simponi-logo {
+        margin-top: 0;
+    }
+
+    #info-terkini-slider .info-slide-right {
+        padding-top: 1.125rem;
+    }
+}
+
+#info-terkini-slider .info-slide-left.info-slide-media {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#info-terkini-slider .info-slide-media__img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+#info-terkini-slider .info-slide-media--contain .info-slide-media__img {
+    object-fit: contain;
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+}
+
+#info-terkini-slider .info-slide-description {
+    overflow: visible;
+    text-align: justify;
+    text-wrap: pretty;
+    word-break: break-word;
+    hyphens: auto;
+}
+
 #info-terkini-slider .info-slide-viewport {
     touch-action: pan-y;
+}
+#info-terkini-slider .info-slide-left,
+#info-terkini-slider .info-slide-right {
+    padding: 1rem;
+}
+@media (min-width: 640px) {
+    #info-terkini-slider .info-slide-left,
+    #info-terkini-slider .info-slide-right {
+        padding: 1.125rem 1.25rem;
+    }
+}
+#info-terkini-slider .info-slide-left .info-slide-hero {
+    margin-top: 0.75rem;
+}
+#info-terkini-slider .info-slide-stats {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+}
+#info-terkini-slider .info-slide-cta {
+    margin-top: 0.875rem;
+}
+@media (min-width: 640px) {
+    #info-terkini-slider .info-slide-cta {
+        margin-top: 1rem;
+    }
+}
+#info-terkini-slider .info-slide-tags {
+    margin-top: 0.625rem;
+}
+#info-terkini-slider .info-slide-card--perda .info-slide-perda-list {
+    gap: 0.375rem;
+}
+#info-terkini-slider .info-slide-card--perda .info-slide-perda-list li {
+    padding: 0.375rem 0.625rem;
+}
+#info-terkini-slider .info-slide-card--perda .info-slide-perda-list p:last-child {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+#info-terkini-slider .info-slide-simponi-logo {
+    padding: 0;
+}
+#info-terkini-slider .info-slide-simponi-logo__frame {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+#info-terkini-slider .info-slide-simponi-logo__frame .info-slide-media__img {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    padding: 0;
 }
 
 #info-slider-track {
     align-items: stretch;
     will-change: transform;
+    transition: transform 0.5s ease-out;
 }
 
 #info-terkini-slider .info-slide {
@@ -119,29 +257,23 @@
     box-sizing: border-box;
 }
 @media (min-width: 768px) {
-    .info-slide-card {
-        min-height: 15rem;
-    }
-    .info-slide-card--perda {
-        min-height: 14.5rem;
-    }
     #info-terkini-slider .info-terkini-panel {
-        min-height: 15rem;
+        min-height: auto;
     }
 }
 .info-slide-value {
-    font-size: 1.875rem;
+    font-size: 1.5rem;
     line-height: 1;
     font-weight: 900;
     letter-spacing: -0.02em;
 }
 @media (min-width: 768px) {
     .info-slide-value {
-        font-size: 2.25rem;
+        font-size: 1.875rem;
     }
 }
 .info-slide-label {
-    margin-top: 0.375rem;
+    margin-top: 0.25rem;
     font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1.35;
@@ -171,4 +303,196 @@
 }
 .info-terkini-panel {
     background: linear-gradient(180deg, #ffffff 0%, #f7fdf9 100%);
+}
+
+/* FAQ beranda */
+.faq-beranda {
+    position: relative;
+}
+.faq-beranda__header {
+    margin-bottom: 1.75rem;
+}
+@media (min-width: 640px) {
+    .faq-beranda__header {
+        margin-bottom: 2rem;
+    }
+}
+.faq-beranda__badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #ecfccb 0%, #d1fae5 100%);
+    padding: 0.35rem 0.85rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #166534;
+    box-shadow: 0 1px 2px rgba(22, 101, 52, 0.08), inset 0 0 0 1px rgba(34, 197, 94, 0.25);
+}
+.faq-beranda__title {
+    margin-top: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 900;
+    line-height: 1.2;
+    color: #111827;
+}
+@media (min-width: 640px) {
+    .faq-beranda__title {
+        font-size: 1.875rem;
+    }
+}
+.faq-beranda__subtitle {
+    margin: 0.75rem auto 0;
+    max-width: 42rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: #4b5563;
+}
+.faq-beranda__search-wrap {
+    margin-bottom: 1.25rem;
+}
+.faq-beranda__search {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    margin: 0 auto;
+    border-radius: 1rem;
+    border: 2px solid #bbf7d0;
+    background: #fff;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    font-size: 0.9375rem;
+    color: #111827;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.08);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2316a34a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 0.85rem center;
+    background-size: 1.125rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.faq-beranda__search:focus {
+    outline: none;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+.faq-beranda__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    max-width: 48rem;
+    margin: 0 auto;
+}
+.faq-item {
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid #dcfce7;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(22, 101, 52, 0.06);
+    transition: box-shadow 0.25s, border-color 0.25s;
+}
+.faq-item.hidden {
+    display: none;
+}
+.faq-item.is-open {
+    border-color: #86efac;
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.12);
+}
+.faq-item__trigger {
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.125rem;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+@media (min-width: 640px) {
+    .faq-item__trigger {
+        padding: 1.125rem 1.25rem;
+    }
+}
+.faq-item__trigger:hover {
+    background: #f0fdf4;
+}
+.faq-item__q {
+    flex: 1;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: #14532d;
+}
+@media (min-width: 640px) {
+    .faq-item__q {
+        font-size: 1rem;
+    }
+}
+.faq-item__icon {
+    position: relative;
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: #ecfccb;
+    transition: transform 0.25s, background 0.25s;
+}
+.faq-item__icon::before,
+.faq-item__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.65rem;
+    height: 2px;
+    background: #15803d;
+    border-radius: 1px;
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s;
+}
+.faq-item__icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+.faq-item.is-open .faq-item__icon {
+    background: #22c55e;
+    transform: rotate(180deg);
+}
+.faq-item.is-open .faq-item__icon::before,
+.faq-item.is-open .faq-item__icon::after {
+    background: #fff;
+}
+.faq-item.is-open .faq-item__icon::after {
+    transform: translate(-50%, -50%) rotate(0deg);
+    opacity: 0;
+}
+.faq-item__panel {
+    border-top: 1px solid #ecfdf5;
+}
+.faq-item__answer {
+    padding: 0 1.125rem 1.125rem;
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: #374151;
+    text-align: justify;
+    text-wrap: pretty;
+}
+@media (min-width: 640px) {
+    .faq-item__answer {
+        padding: 0 1.25rem 1.25rem;
+        font-size: 0.9375rem;
+    }
+}
+.faq-beranda__empty {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+.faq-beranda__empty.hidden {
+    display: none;
 }

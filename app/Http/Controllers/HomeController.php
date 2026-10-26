@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\BerandaSlide;
 use App\Support\BerandaSlidePresenter;
-use App\Support\EnsiklopediaInteraktif;
+use App\Models\Faq;
+use App\Models\FaqSetting;
+use App\Support\FaqDefaults;
 use App\Support\HomePageData;
+use Illuminate\Support\Facades\Schema;
 use App\Support\PemerintahKotaBatam;
 use App\Support\PenjagaHijauKota;
 use App\Support\PublicRthStatisticsBuilder;
@@ -35,11 +38,32 @@ class HomeController extends Controller
             'rthTotalLokasi' => $rthStats['totalTaman'],
             'rthKategoriCount' => count($rthStats['kategoriCards'] ?? []),
             'ensiklopediaKategoris' => $ensiklopediaKategoris,
-            'faktaEdukasi' => EnsiklopediaInteraktif::faktaEdukasi(),
+            'faqSetting' => $this->faqSettingForHome(),
+            'faqs' => $this->faqsForHome(),
             'penjagaHijauGallery' => PenjagaHijauKota::gallery(),
             'pimpinanKota' => PemerintahKotaBatam::pimpinan(),
             'visiMisiKota' => PemerintahKotaBatam::visiMisi(),
-            'totalKuisPertanyaan' => count(EnsiklopediaInteraktif::kuis()),
         ]);
+    }
+
+    private function faqSettingForHome(): FaqSetting
+    {
+        if (! Schema::hasTable('faq_settings')) {
+            return new FaqSetting(FaqDefaults::settings());
+        }
+
+        return FaqSetting::current();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Faq>|\Illuminate\Support\Collection<int, never>
+     */
+    private function faqsForHome()
+    {
+        if (! Schema::hasTable('faqs')) {
+            return collect();
+        }
+
+        return Faq::activeOrdered();
     }
 }

@@ -16,6 +16,7 @@ use App\Support\PemeliharaanTamanRecorder;
 use App\Support\PermohonanProgressRecorder;
 use App\Support\PetugasRosterBuilder;
 use App\Support\TimPelaksanaResolver;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -246,6 +247,17 @@ class OperasionalController extends Controller
         if (! LapanganGuestAccess::isUnlocked($request)) {
             abort(403);
         }
+    }
+
+    public function petugasRoster(Request $request, PetugasRosterBuilder $rosterBuilder): JsonResponse
+    {
+        if ($request->query('scope') !== 'operasional-wilayah') {
+            abort(404);
+        }
+
+        return response()->json([
+            'petugas' => $rosterBuilder->forOperasionalWilayah(),
+        ]);
     }
 
     private function ensureCanViewPermohonan(Request $request, Pemangkasan $pemangkasan): void

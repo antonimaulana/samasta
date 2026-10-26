@@ -7,24 +7,30 @@
     'timSelectId' => null,
     'variant' => 'admin',
     'required' => true,
+    'rosterScope' => 'team',
 ])
 
 @php
+    $rosterScope = in_array($rosterScope, ['team', 'operasional-wilayah'], true) ? $rosterScope : 'team';
     $teams = collect($teamNames)->filter()->values();
     if ($teams->isEmpty() && filled($teamName)) {
         $teams = collect([$teamName]);
     }
 
-    $initialRoster = $teams->isEmpty()
-        ? []
-        : collect($rostersByTeam)
-            ->only($teams->all())
-            ->flatten(1)
-            ->values()
-            ->all();
+    if ($rosterScope === 'operasional-wilayah') {
+        $initialRoster = app(\App\Support\PetugasRosterBuilder::class)->forOperasionalWilayah();
+    } else {
+        $initialRoster = $teams->isEmpty()
+            ? []
+            : collect($rostersByTeam)
+                ->only($teams->all())
+                ->flatten(1)
+                ->values()
+                ->all();
 
-    if ($initialRoster === [] && $teams->isNotEmpty()) {
-        $initialRoster = app(\App\Support\PetugasRosterBuilder::class)->forTeamNames($teams->all());
+        if ($initialRoster === [] && $teams->isNotEmpty()) {
+            $initialRoster = app(\App\Support\PetugasRosterBuilder::class)->forTeamNames($teams->all());
+        }
     }
 
     $selected = collect(old('petugas_ids', $selectedIds))
@@ -44,8 +50,9 @@
     $isLapangan = $variant === 'lapangan';
     $hasRoster = count($initialRoster) > 0;
     $isDynamic = filled($timSelectId);
-    $showPicker = $hasRoster || $isDynamic;
-    $awaitingTeam = $isDynamic && $teams->isEmpty();
+    $isOperasionalWilayah = $rosterScope === 'operasional-wilayah';
+    $showPicker = $hasRoster || $isDynamic || $isOperasionalWilayah;
+    $awaitingTeam = $isDynamic && $teams->isEmpty() && ! $isOperasionalWilayah;
     $pickerId = 'petugas-picker-'.uniqid();
     $inputClass = $isLapangan
         ? 'w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-base'
@@ -61,6 +68,7 @@
      data-initial-roster="{{ json_encode($initialRoster) }}"
      data-initial-selected="{{ json_encode($selected) }}"
      data-required="{{ $required ? '1' : '0' }}"
+     data-roster-scope="{{ $rosterScope }}"
      data-awaiting-team="{{ $awaitingTeam ? '1' : '0' }}">
 
     @if ($showPicker)
@@ -76,7 +84,7 @@
                        autocomplete="off"
                        value="{{ $initialDisplay }}"
                        @disabled($awaitingTeam)
-                       placeholder="{{ $awaitingTeam ? 'Pilih tim pelaksana terlebih dahulu' : 'Ketik sebagian nama, pilih dari daftar. Beberapa nama dipisah ;' }}"
+                       placeholder="{{ $awaitingTeam ? 'Pilih tim pelaksana terlebih dahulu' : ($isOperasionalWilayah ? 'Ketik nama petugas (semua tim wilayah). Beberapa nama dipisah ;' : 'Ketik sebagian nama, pilih dari daftar. Beberapa nama dipisah ;') }}"
                        class="{{ $inputClass }} focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
                 <ul data-petugas-dropdown
                     class="absolute z-20 mt-1 hidden max-h-56 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-lg">

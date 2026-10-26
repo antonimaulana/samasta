@@ -96,10 +96,14 @@
             :team-name="$selectedTim"
             :selected-ids="old('petugas_ids', $kinerja?->petugas?->pluck('id')?->all() ?? [])"
             :rosters-by-team="$rostersByTeam ?? []"
-            :roster-url="route('admin.tim-pelaksanas.roster')"
+            :roster-url="request()->routeIs('lapangan.*') ? route('lapangan.tim-pelaksanas.roster') : route('admin.tim-pelaksanas.roster')"
             :tim-select-id="filled($operatorTim ?? null) ? null : 'tim'"
+            roster-scope="operasional-wilayah"
             :variant="request()->routeIs('lapangan.*') ? 'lapangan' : 'admin'"
         />
+        @unless($isLapanganForm)
+            <p class="mt-1.5 text-xs text-gray-500">Daftar mencakup petugas aktif dari semua tim wilayah (Tim Wilayah 1–4).</p>
+        @endunless
     </div>
 
     <div>
