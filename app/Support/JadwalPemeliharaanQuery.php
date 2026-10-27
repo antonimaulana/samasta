@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\PemeliharaanTaman;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class JadwalPemeliharaanQuery
 {
@@ -14,19 +15,28 @@ class JadwalPemeliharaanQuery
     }
 
     /**
+     * SQL expression: tanggal akhir jadwal (inklusif) dari kolom tanggal + total_hari.
+     */
+    public static function scheduleEndDateSql(): string
+    {
+        return match (Schema::getConnection()->getDriverName()) {
+            'sqlite' => "date(date(tanggal), '+' || (COALESCE(total_hari, 1) - 1) || ' days')",
+            default => 'DATE_ADD(DATE(tanggal), INTERVAL (COALESCE(total_hari, 1) - 1) DAY)',
+        };
+    }
+
+    /**
      * Kegiatan multi-hari yang aktif pada tanggal tertentu.
      */
     public static function overlapsDate(Builder $query, Carbon|string $date): Builder
     {
         $dateString = Carbon::parse($date)->toDateString();
+        $endDate = self::scheduleEndDateSql();
 
         return $query
             ->where('persentase_progres', '<', 100)
             ->whereDate('tanggal', '<=', $dateString)
-            ->whereRaw(
-                "date(date(tanggal), '+' || (COALESCE(total_hari, 1) - 1) || ' days') >= ?",
-                [$dateString],
-            );
+            ->whereRaw("{$endDate} >= ?", [$dateString]);
     }
 
     public static function hariIni(?string $tim = null): Builder
@@ -47,24 +57,22 @@ class JadwalPemeliharaanQuery
 
     public static function diproses(?string $tim = null): Builder
     {
+        $endDate = self::scheduleEndDateSql();
+
         return self::applyTim(
             self::belumSelesai()
                 ->where('persentase_progres', '>', 0)
-                ->whereRaw(
-                    "date(date(tanggal), '+' || (COALESCE(total_hari, 1) - 1) || ' days') >= ?",
-                    [today()->toDateString()],
-                ),
+                ->whereRaw("{$endDate} >= ?", [today()->toDateString()]),
             $tim,
         )->orderByDesc('tanggal');
     }
 
     public static function terlambat(?string $tim = null): Builder
     {
+        $endDate = self::scheduleEndDateSql();
+
         return self::applyTim(
-            self::belumSelesai()->whereRaw(
-                "date(date(tanggal), '+' || (COALESCE(total_hari, 1) - 1) || ' days') < ?",
-                [today()->toDateString()],
-            ),
+            self::belumSelesai()->whereRaw("{$endDate} < ?", [today()->toDateString()]),
             $tim,
         )->orderBy('tanggal');
     }
