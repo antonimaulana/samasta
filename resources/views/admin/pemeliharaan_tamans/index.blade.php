@@ -9,6 +9,25 @@
         </div>
     @endif
 
+    @if (! empty($jadwalView))
+        @php
+            $jadwalLabels = [
+                'hari_ini' => 'Hari Ini',
+                'besok' => 'Besok (H-1)',
+                'diproses' => 'Sedang Diproses',
+                'terlambat' => 'Terlambat',
+            ];
+        @endphp
+        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            Filter jadwal: <strong>{{ $jadwalLabels[$jadwalView] ?? $jadwalView }}</strong>
+            @if (request('tim'))
+                · Tim <strong>{{ request('tim') }}</strong>
+            @endif
+            <a href="{{ route('admin.pemeliharaan-tamans.index', $taman ? ['taman_id' => $taman->id] : []) }}"
+               class="ml-2 font-semibold underline">Reset</a>
+        </div>
+    @endif
+
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
             @if ($taman)

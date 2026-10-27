@@ -17,7 +17,7 @@
 </head>
 <body class="min-h-screen @yield('body_class', 'bg-green-50') text-gray-900 antialiased">
     <header class="sticky top-0 z-50 border-b border-green-200/60 bg-white/90 backdrop-blur-lg shadow-sm shadow-green-100/50">
-        <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
             <a href="{{ route('home') }}" class="group flex min-w-0 items-center gap-3">
                 @include('layouts.partials.app-logo', ['class' => 'transition group-hover:scale-105'])
                 <div class="min-w-0">
@@ -32,7 +32,7 @@
 
             <button type="button"
                     id="public-mobile-menu-toggle"
-                    class="relative z-[51] h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-xl border border-green-200 bg-white text-green-700 shadow-sm"
+                    class="relative z-[51] inline-flex h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-xl border border-green-200 bg-white text-green-700 shadow-sm md:hidden"
                     aria-label="Buka menu"
                     aria-expanded="false"
                     aria-controls="public-mobile-drawer">
@@ -48,7 +48,7 @@
 
     @yield('hero')
 
-    <main class="@yield('main_class', 'mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8')">
+    <main class="@yield('main_class', 'mx-auto max-w-7xl px-3 py-6 sm:px-6 sm:py-8 lg:px-8')">
         @if (session('success'))
             <div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
                 {{ session('success') }}

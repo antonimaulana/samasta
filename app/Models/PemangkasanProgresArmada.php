@@ -9,7 +9,7 @@ class PemangkasanProgresArmada extends Model
 {
     protected $fillable = [
         'pemangkasan_progres_id',
-        'alat_sarana_operasional_id',
+        'armada_id',
         'jenis_armada',
         'no_plat',
         'sopir',
@@ -28,14 +28,14 @@ class PemangkasanProgresArmada extends Model
         return $this->belongsTo(PemangkasanProgres::class, 'pemangkasan_progres_id');
     }
 
-    public function alatSarana(): BelongsTo
+    public function armada(): BelongsTo
     {
-        return $this->belongsTo(AlatSaranaOperasional::class, 'alat_sarana_operasional_id');
+        return $this->belongsTo(Armada::class);
     }
 
     public function namaArmadaLabel(): string
     {
-        $nama = $this->alatSarana?->nama;
+        $nama = $this->armada?->nama;
 
         if (filled($nama)) {
             return $nama.' - '.$this->jenis_armada;

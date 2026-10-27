@@ -128,19 +128,15 @@
 
            class="mt-3 rounded-xl px-4 py-3 text-sm font-semibold {{ $masukanActive ? 'bg-lime-100 text-green-700' : 'text-gray-700 hover:bg-lime-50' }}">
 
-            💬 Masukan Masyarakat
+            Masukan
 
         </a>
-
-
-
-        <p class="mt-3 px-4 text-xs font-bold uppercase tracking-wider text-gray-400">Informasi</p>
 
         <a href="{{ route('ensiklopedia.index') }}"
 
            class="rounded-xl px-4 py-3 text-sm font-semibold {{ request()->routeIs('ensiklopedia.*') ? 'bg-lime-100 text-green-700' : 'text-gray-700 hover:bg-lime-50' }}">
 
-            📚 Ensiklopedia
+            Ensiklopedia
 
         </a>
 

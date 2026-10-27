@@ -57,8 +57,6 @@
     </table>
 </div>
 
-<p class="mt-4 text-xs leading-relaxed text-gray-500">
-    <strong>Catatan metodologi:</strong> Baris A–B dihitung dari taman terdaftar yang pemutakhirannya ≤ tahun kolom (atau belum diverifikasi).
-    Baris C mengacu luasan RTRW ({{ PublicRthStatisticsBuilder::formatArea($rtrwLuasan) }} m²).
-    Luas terpelihara (E) = luas dikelola (A) dikurangi penyesuaian tidak terpelihara sesuai kebijakan internal Dinas.
+<p class="mt-3 text-xs leading-relaxed text-gray-500">
+    A–B: taman dengan pemutakhiran ≤ tahun kolom. C: RTRW {{ PublicRthStatisticsBuilder::formatArea($rtrwLuasan) }} m². E: luas dikelola (A) setelah penyesuaian internal.
 </p>

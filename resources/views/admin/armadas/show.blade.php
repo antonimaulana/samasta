@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 
 @section('title', $item->nama)
-@section('header', 'Detail Alat/Sarana')
+@section('header', 'Detail Armada')
 
 @section('content')
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <a href="{{ route('admin.alat-sarana-operasionals.index') }}"
+        <a href="{{ route('admin.armadas.index') }}"
            class="text-sm font-medium text-green-700 hover:text-green-800">
-            ← Kembali ke daftar
+            ← Kembali ke daftar armada
         </a>
         <div class="flex flex-wrap gap-2">
             <x-admin.can-write>
-                <a href="{{ route('admin.alat-sarana-operasionals.edit', $item) }}"
+                <a href="{{ route('admin.armadas.edit', $item) }}"
                    class="rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50">
                     Edit
                 </a>

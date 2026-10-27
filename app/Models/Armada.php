@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class AlatSaranaOperasional extends Model
+class Armada extends Model
 {
     public const JENIS = [
         'Alat Manual',
@@ -89,7 +89,7 @@ class AlatSaranaOperasional extends Model
 
     public function permohonanPenggunaan(): HasMany
     {
-        return $this->hasMany(PemangkasanProgresArmada::class, 'alat_sarana_operasional_id');
+        return $this->hasMany(PemangkasanProgresArmada::class);
     }
 
     public function isArmada(): bool

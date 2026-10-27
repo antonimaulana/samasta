@@ -38,7 +38,7 @@ class PermohonanProgressRecorder
 
     /**
      * @param  array<string, mixed>  $validated
-     * @param  list<array{alat_sarana_operasional_id: int, jenis_armada: string, no_plat: string, sopir: string}>  $armadaRows
+     * @param  list<array{armada_id: int, jenis_armada: string, no_plat: string, sopir: string}>  $armadaRows
      */
     private function recordDailyProgress(
         Pemangkasan $permohonan,

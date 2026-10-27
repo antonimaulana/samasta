@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\AlatSaranaOperasional;
+use App\Models\Armada;
 use App\Models\Kelurahan;
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
@@ -33,7 +33,7 @@ class ArmadaUsageHistoryTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $kelurahanId = Kelurahan::query()->value('id');
 
-        $armada = AlatSaranaOperasional::create([
+        $armada = Armada::create([
             'nama' => 'Dump Truck Alpha',
             'jenis' => 'Dump Truck',
             'no_plat' => 'BP 1234 AB',
@@ -62,7 +62,7 @@ class ArmadaUsageHistoryTest extends TestCase
 
         PemeliharaanTamanArmada::create([
             'pemeliharaan_taman_id' => $pemeliharaan->id,
-            'alat_sarana_operasional_id' => $armada->id,
+            'armada_id' => $armada->id,
             'jenis_armada' => 'Dump Truck',
             'no_plat' => 'BP 1234 AB',
             'sopir' => 'Darmani',
@@ -93,7 +93,7 @@ class ArmadaUsageHistoryTest extends TestCase
         ]);
 
         $progres->armadas()->create([
-            'alat_sarana_operasional_id' => $armada->id,
+            'armada_id' => $armada->id,
             'jenis_armada' => 'Dump Truck',
             'no_plat' => 'BP 1234 AB',
             'sopir' => 'Hisar',
@@ -101,7 +101,7 @@ class ArmadaUsageHistoryTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get(route('admin.alat-sarana-operasionals.show', $armada))
+            ->get(route('admin.armadas.show', $armada))
             ->assertOk()
             ->assertSee('Riwayat Penggunaan Armada')
             ->assertSee('Pemeliharaan Rutin')
@@ -117,7 +117,7 @@ class ArmadaUsageHistoryTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $kelurahanId = Kelurahan::query()->value('id');
 
-        $armada = AlatSaranaOperasional::create([
+        $armada = Armada::create([
             'nama' => 'Crane Beta',
             'jenis' => 'Crane',
             'no_plat' => 'BP 5678 CD',
@@ -150,7 +150,7 @@ class ArmadaUsageHistoryTest extends TestCase
                 'pelaksana' => [PemeliharaanTaman::TIM_ARMADA],
                 'status' => 'Rencana',
                 'armada' => [
-                    ['alat_sarana_operasional_id' => $armada->id, 'sopir' => 'Zazid'],
+                    ['armada_id' => $armada->id, 'sopir' => 'Zazid'],
                 ],
             ])
             ->assertRedirect(route('admin.pemangkasans.index'));
@@ -200,7 +200,7 @@ class ArmadaUsageHistoryTest extends TestCase
     {
         $this->seed(TimPelaksanaSeeder::class);
 
-        $armada = AlatSaranaOperasional::create([
+        $armada = Armada::create([
             'nama' => 'Dump Truck Gamma',
             'jenis' => 'Dump Truck',
             'no_plat' => 'BP 9999 XY',
@@ -254,7 +254,7 @@ class ArmadaUsageHistoryTest extends TestCase
             'jumlah_personil' => 4,
             'petugas_ids' => [$petugasArmadaId],
             'armada' => [
-                ['alat_sarana_operasional_id' => $armada->id, 'sopir' => 'Darmani'],
+                ['armada_id' => $armada->id, 'sopir' => 'Darmani'],
             ],
         ], $fotoPayload))->assertRedirect();
 
@@ -262,7 +262,7 @@ class ArmadaUsageHistoryTest extends TestCase
         $this->assertNotNull($entry);
         $this->assertDatabaseHas('pemangkasan_progres_armadas', [
             'pemangkasan_progres_id' => $entry->id,
-            'alat_sarana_operasional_id' => $armada->id,
+            'armada_id' => $armada->id,
             'sopir' => 'Darmani',
         ]);
 

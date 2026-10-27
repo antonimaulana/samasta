@@ -2,7 +2,7 @@
 
 namespace App\Support\Evaluasi;
 
-use App\Models\AlatSaranaOperasional;
+use App\Models\Armada;
 use App\Models\PemangkasanProgresArmada;
 use App\Models\PemeliharaanTamanArmada;
 use App\Models\User;
@@ -19,18 +19,18 @@ class ArmadaUtilisasiReportBuilder
     {
         [$from, $to, $labelPeriode, $bulan, $tahun, $mode, $dari, $sampai] = ReportPeriod::resolve($request);
 
-        $armadaMaster = AlatSaranaOperasional::query()
+        $armadaMaster = Armada::query()
             ->armadaInventory()
             ->orderBy('nama')
             ->get();
 
         $pemeliharaanRows = PemeliharaanTamanArmada::query()
-            ->with(['pemeliharaanTaman.taman', 'alatSarana'])
+            ->with(['pemeliharaanTaman.taman', 'armada'])
             ->whereHas('pemeliharaanTaman', fn ($q) => $q->whereBetween('tanggal', [$from, $to]))
             ->get();
 
         $permohonanRows = PemangkasanProgresArmada::query()
-            ->with(['progres.pemangkasan.taman', 'alatSarana'])
+            ->with(['progres.pemangkasan.taman', 'armada'])
             ->whereHas('progres', fn ($q) => $q->whereBetween('tanggal', [$from, $to]))
             ->get();
 
@@ -66,7 +66,7 @@ class ArmadaUtilisasiReportBuilder
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, AlatSaranaOperasional>  $armadaMaster
+     * @param  \Illuminate\Support\Collection<int, Armada>  $armadaMaster
      * @param  \Illuminate\Support\Collection<int, PemeliharaanTamanArmada>  $pemeliharaanRows
      * @param  \Illuminate\Support\Collection<int, PemangkasanProgresArmada>  $permohonanRows
      * @return Collection<int, array<string, mixed>>
@@ -76,10 +76,10 @@ class ArmadaUtilisasiReportBuilder
         Collection $pemeliharaanRows,
         Collection $permohonanRows,
     ): Collection {
-        $pemeliharaanByArmada = $pemeliharaanRows->groupBy('alat_sarana_operasional_id');
-        $permohonanByArmada = $permohonanRows->groupBy('alat_sarana_operasional_id');
+        $pemeliharaanByArmada = $pemeliharaanRows->groupBy('armada_id');
+        $permohonanByArmada = $permohonanRows->groupBy('armada_id');
 
-        return $armadaMaster->map(function (AlatSaranaOperasional $armada) use ($pemeliharaanByArmada, $permohonanByArmada) {
+        return $armadaMaster->map(function (Armada $armada) use ($pemeliharaanByArmada, $permohonanByArmada) {
             $pemeliharaan = $pemeliharaanByArmada->get($armada->id, collect());
             $permohonan = $permohonanByArmada->get($armada->id, collect());
 
@@ -95,7 +95,7 @@ class ArmadaUtilisasiReportBuilder
                     ->sort()
                     ->values()
                     ->all(),
-                'url' => route('admin.alat-sarana-operasionals.show', $armada),
+                'url' => route('admin.armadas.show', $armada),
             ];
         })->sortByDesc('total_penugasan')->values();
     }

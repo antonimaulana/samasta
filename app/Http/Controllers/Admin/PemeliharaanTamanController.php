@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AlatSaranaOperasional;
+use App\Models\Armada;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Models\User;
 use App\Support\ArmadaSopirOptions;
+use App\Support\JadwalPemeliharaanQuery;
 use App\Support\OperasionalFotoStorage;
 use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
@@ -49,16 +50,23 @@ class PemeliharaanTamanController extends Controller
 
         [$tanggalMulai, $tanggalSelesai] = $this->resolveDateRange($request, $taman !== null);
 
+        $jadwalView = $request->filled('view') ? (string) $request->input('view') : null;
+        $timFilter = $request->filled('tim') ? (string) $request->input('tim') : null;
+
+        $baseQuery = $jadwalView
+            ? JadwalPemeliharaanQuery::forView($jadwalView, $timFilter)
+            : PemeliharaanTaman::query();
+
         $kinerjas = $scope->scopePemeliharaan(
-            PemeliharaanTaman::query()->with(['taman', 'armadas']),
+            $baseQuery->with(['taman', 'armadas']),
             $request->user(),
         )
             ->when($taman, fn ($q) => $q->where('taman_id', $taman->id))
-            ->when(! $taman || $this->hasDateRangeFilter($request), function ($q) use ($tanggalMulai, $tanggalSelesai) {
+            ->when(! $jadwalView && (! $taman || $this->hasDateRangeFilter($request)), function ($q) use ($tanggalMulai, $tanggalSelesai) {
                 $q->whereDate('tanggal', '>=', $tanggalMulai)
                     ->whereDate('tanggal', '<=', $tanggalSelesai);
             })
-            ->when($request->filled('tim'), fn ($q) => $q->where('tim', $request->tim))
+            ->when(! $jadwalView && $request->filled('tim'), fn ($q) => $q->where('tim', $request->tim))
             ->tap(fn ($q) => TableSearch::apply($q, $request, ['lokasi_pelaksanaan', 'uraian_pekerjaan', 'tim']))
             ->orderByDesc('tanggal')
             ->orderBy('tim')
@@ -89,6 +97,7 @@ class PemeliharaanTamanController extends Controller
             'tanggalSelesai' => $tanggalSelesai->toDateString(),
             'ringkasanTim' => $ringkasanTim,
             'taman' => $taman,
+            'jadwalView' => $jadwalView,
         ]);
     }
 
@@ -193,7 +202,7 @@ class PemeliharaanTamanController extends Controller
 
         $kinerjas = app(OperatorWilayahScope::class)->scopePemeliharaan(
             PemeliharaanTaman::query()
-                ->with(['armadas.alatSarana', 'taman'])
+                ->with(['armadas.armada', 'taman'])
                 ->whereDate('tanggal', '>=', $tanggalMulai)
                 ->whereDate('tanggal', '<=', $tanggalSelesai)
                 ->when($validated['tim'] ?? null, fn ($q, $tim) => $q->where('tim', $tim)),
@@ -232,7 +241,7 @@ class PemeliharaanTamanController extends Controller
         $this->ensureGdLoaded();
 
         $html = view('admin.pemeliharaan_tamans.pdf_operasional', [
-            'kinerja' => $pemeliharaanTaman->load(['armadas.alatSarana', 'taman', 'petugas']),
+            'kinerja' => $pemeliharaanTaman->load(['armadas.armada', 'taman', 'petugas']),
         ])->render();
 
         $slug = str($pemeliharaanTaman->lokasi_pelaksanaan)->slug('-')->limit(30, '');
@@ -315,15 +324,15 @@ class PemeliharaanTamanController extends Controller
 
         if ($request->input('tim') === PemeliharaanTaman::TIM_ARMADA) {
             $rules['armada'] = ['required', 'array', 'min:1'];
-            $rules['armada.*.alat_sarana_operasional_id'] = [
+            $rules['armada.*.armada_id'] = [
                 'required',
                 'integer',
-                Rule::exists('alat_sarana_operasionals', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
+                Rule::exists('armadas', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
             ];
             $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(true);
         } else {
             $rules['armada'] = ['nullable', 'array'];
-            $rules['armada.*.alat_sarana_operasional_id'] = ['nullable', 'integer', 'exists:alat_sarana_operasionals,id'];
+            $rules['armada.*.armada_id'] = ['nullable', 'integer', 'exists:armadas,id'];
             $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(false);
         }
 
@@ -344,7 +353,7 @@ class PemeliharaanTamanController extends Controller
             'persentase_progres' => 'persentase progres',
             'uraian_pekerjaan' => 'uraian pekerjaan',
             'armada' => 'data armada',
-            'armada.*.alat_sarana_operasional_id' => 'nama armada',
+            'armada.*.armada_id' => 'nama armada',
             'armada.*.sopir' => 'sopir',
         ];
 
@@ -384,15 +393,15 @@ class PemeliharaanTamanController extends Controller
 
         if ($request->input('tim') === PemeliharaanTaman::TIM_ARMADA) {
             $rules['armada'] = ['required', 'array', 'min:1'];
-            $rules['armada.*.alat_sarana_operasional_id'] = [
+            $rules['armada.*.armada_id'] = [
                 'required',
                 'integer',
-                Rule::exists('alat_sarana_operasionals', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
+                Rule::exists('armadas', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
             ];
             $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(true);
         } else {
             $rules['armada'] = ['nullable', 'array'];
-            $rules['armada.*.alat_sarana_operasional_id'] = ['nullable', 'integer', 'exists:alat_sarana_operasionals,id'];
+            $rules['armada.*.armada_id'] = ['nullable', 'integer', 'exists:armadas,id'];
             $rules['armada.*.sopir'] = ArmadaSopirOptions::validationRules(false);
         }
 
@@ -413,7 +422,7 @@ class PemeliharaanTamanController extends Controller
             'persentase_progres' => 'persentase progres',
             'uraian_pekerjaan' => 'uraian pekerjaan',
             'armada' => 'data armada',
-            'armada.*.alat_sarana_operasional_id' => 'nama armada',
+            'armada.*.armada_id' => 'nama armada',
             'armada.*.sopir' => 'sopir',
         ];
 
@@ -553,12 +562,12 @@ class PemeliharaanTamanController extends Controller
     }
 
     /**
-     * @return array{armadaInventory: Collection<int, AlatSaranaOperasional>}
+     * @return array{armadaInventory: Collection<int, Armada>}
      */
     private function armadaFormData(): array
     {
         return [
-            'armadaInventory' => AlatSaranaOperasional::query()
+            'armadaInventory' => Armada::query()
                 ->armadaInventory()
                 ->orderBy('nama')
                 ->get(['id', 'nama', 'jenis']),
@@ -566,7 +575,7 @@ class PemeliharaanTamanController extends Controller
     }
 
     /**
-     * @return list<array{alat_sarana_operasional_id: int, jenis_armada: string, no_plat: string, sopir: string}>
+     * @return list<array{armada_id: int, jenis_armada: string, no_plat: string, sopir: string}>
      */
     private function extractArmadaRows(Request $request, string $tim): array
     {
@@ -575,24 +584,24 @@ class PemeliharaanTamanController extends Controller
         }
 
         $inputRows = collect($request->input('armada', []))
-            ->filter(fn ($row) => filled($row['alat_sarana_operasional_id'] ?? null))
+            ->filter(fn ($row) => filled($row['armada_id'] ?? null))
             ->values();
 
         $ids = $inputRows
-            ->pluck('alat_sarana_operasional_id')
+            ->pluck('armada_id')
             ->map(fn ($id) => (int) $id)
             ->unique()
             ->values();
 
-        $inventory = AlatSaranaOperasional::query()
+        $inventory = Armada::query()
             ->armadaInventory()
             ->whereIn('id', $ids)
             ->get()
             ->keyBy('id');
 
         return $inputRows->map(function (array $row) use ($inventory) {
-            $id = (int) $row['alat_sarana_operasional_id'];
-            /** @var AlatSaranaOperasional|null $item */
+            $id = (int) $row['armada_id'];
+            /** @var Armada|null $item */
             $item = $inventory->get($id);
 
             if (! $item) {
@@ -600,16 +609,16 @@ class PemeliharaanTamanController extends Controller
             }
 
             return [
-                'alat_sarana_operasional_id' => $item->id,
+                'armada_id' => $item->id,
                 'jenis_armada' => $item->jenis,
-                'no_plat' => '',
+                'no_plat' => (string) ($item->no_plat ?? ''),
                 'sopir' => (string) ($row['sopir'] ?? ''),
             ];
         })->filter()->values()->all();
     }
 
     /**
-     * @param  list<array{alat_sarana_operasional_id: int, jenis_armada: string, no_plat: string, sopir: string}>  $rows
+     * @param  list<array{armada_id: int, jenis_armada: string, no_plat: string, sopir: string}>  $rows
      */
     private function syncArmadas(PemeliharaanTaman $pemeliharaan, array $rows): void
     {

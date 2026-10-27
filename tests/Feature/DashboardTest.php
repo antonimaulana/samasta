@@ -17,8 +17,23 @@ class DashboardTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Ringkasan Operasional Dinas')
-            ->assertSee('Kepuasan Masyarakat');
+            ->assertSee('Dashboard Operasional')
+            ->assertSee('Dinas Perumahan, Kawasan Permukiman dan Pertamanan')
+            ->assertSee('Bidang Pertamanan dan Pemakaman')
+            ->assertSee('Operasional Baik')
+            ->assertSee('Unduh Ringkasan')
+            ->assertSee('Data Taman')
+            ->assertSee('Data Bibit')
+            ->assertSee('Data Armada')
+            ->assertSee('Data Petugas')
+            ->assertSee('Operasional Pertamanan')
+            ->assertSee('Pemeliharaan Rutin')
+            ->assertSee('Operasional Permohonan')
+            ->assertSee('Catatan Operasional')
+            ->assertSee('Kepuasan Masyarakat')
+            ->assertSee('Masukan Masyarakat')
+            ->assertDontSee('Analisis Detail')
+            ->assertDontSee('Antrian Kerja Hari Ini');
     }
 
     public function test_viewer_dashboard_shows_pimpinan_mode(): void

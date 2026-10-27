@@ -1,7 +1,7 @@
 ﻿@php
     $tamanActive = request()->routeIs('admin.tamans.*', 'admin.taman-laporan.*');
     $bibitActive = request()->routeIs('admin.bibits.*', 'admin.bibit-masuks.*', 'admin.bibit-keluars.*', 'admin.bibit-laporan.*');
-    $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.alat-sarana-operasionals.*');
+    $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.armadas.*');
     $masyarakatActive = request()->routeIs('admin.aduan-masyarakats.*', 'admin.survey-kepuasan.*');
     $evaluasiActive = request()->routeIs('admin.evaluasi.*');
     $sistemActive = request()->routeIs(
@@ -15,128 +15,121 @@
         'admin.ensiklopedia-artikels.*',
         'admin.ensiklopedia-portal.*',
     );
+    $tautanActive = request()->routeIs('lapangan.*');
+    $lapanganActive = request()->routeIs('lapangan.*');
+
+    $navTop = fn (bool $active): string => 'admin-nav-link'.($active ? ' admin-nav-link--active' : '');
+    $navTrigger = fn (bool $active): string => 'admin-nav-link admin-nav-link--trigger'.($active ? ' admin-nav-link--section-active' : '');
+    $navSub = fn (bool $active): string => 'admin-nav-sublink'.($active ? ' admin-nav-sublink--active' : '');
 @endphp
 
-<nav class="space-y-1 px-4 py-4">
+<nav class="admin-nav space-y-0.5 px-2 py-3">
     @if ($canWrite ?? false)
-        <p class="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Menu Operasional</p>
+        <p class="admin-nav-section-label">Menu</p>
     @endif
 
-    <a href="{{ route('admin.dashboard') }}"
-       class="block rounded-lg px-3 py-2 text-sm {{ request()->routeIs('admin.dashboard') ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-        Dashboard
+    <a href="{{ route('admin.dashboard') }}" class="{{ $navTop(request()->routeIs('admin.dashboard')) }}">
+        <x-admin.nav-icon name="dashboard" />
+        <span class="min-w-0 flex-1">Dashboard</span>
     </a>
+
     <div class="sidebar-menu-group {{ $tamanActive ? 'is-open' : '' }}">
-        <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $tamanActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-            <span>Data Taman</span>
-            <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <button type="button" class="sidebar-menu-trigger {{ $navTrigger($tamanActive) }}">
+            <x-admin.nav-icon name="taman" />
+            <span class="min-w-0 flex-1 text-left">Data Taman</span>
+            <svg class="sidebar-chevron h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
         <div class="sidebar-submenu">
-            <a href="{{ route('admin.tamans.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.tamans.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+            <a href="{{ route('admin.tamans.index') }}" class="{{ $navSub(request()->routeIs('admin.tamans.*')) }}">
                 Kelola Taman
             </a>
-            <a href="{{ route('admin.taman-laporan.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.taman-laporan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+            <a href="{{ route('admin.taman-laporan.index') }}" class="{{ $navSub(request()->routeIs('admin.taman-laporan.*')) }}">
                 Laporan Taman
             </a>
         </div>
     </div>
 
     <div class="sidebar-menu-group {{ $bibitActive ? 'is-open' : '' }}">
-        <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $bibitActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-            <span>Data Bibit</span>
-            <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <button type="button" class="sidebar-menu-trigger {{ $navTrigger($bibitActive) }}">
+            <x-admin.nav-icon name="bibit" />
+            <span class="min-w-0 flex-1 text-left">Data Bibit</span>
+            <svg class="sidebar-chevron h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
         <div class="sidebar-submenu">
-            <a href="{{ route('admin.bibits.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.bibits.*', 'admin.bibit-masuks.*', 'admin.bibit-keluars.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+            <a href="{{ route('admin.bibits.index') }}" class="{{ $navSub(request()->routeIs('admin.bibits.*', 'admin.bibit-masuks.*', 'admin.bibit-keluars.*')) }}">
                 Kelola Bibit
             </a>
-            <a href="{{ route('admin.bibit-laporan.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.bibit-laporan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+            <a href="{{ route('admin.bibit-laporan.index') }}" class="{{ $navSub(request()->routeIs('admin.bibit-laporan.*')) }}">
                 Laporan Bibit
             </a>
         </div>
     </div>
 
     <div class="sidebar-menu-group {{ $operasionalActive ? 'is-open' : '' }}">
-        <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $operasionalActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-            <span class="flex min-w-0 flex-1 flex-nowrap items-center gap-1.5 pr-1">
-                <span class="whitespace-nowrap text-sm leading-tight">Operasional Pertamanan</span>
+        <button type="button" class="sidebar-menu-trigger {{ $navTrigger($operasionalActive) }}">
+            <x-admin.nav-icon name="operasional" />
+            <span class="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+                <span class="min-w-0">Operasional Pertamanan</span>
                 @if (($jadwalTerlambatCount ?? 0) > 0)
-                    <span class="inline-flex shrink-0 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                        {{ $jadwalTerlambatCount > 99 ? '99+' : $jadwalTerlambatCount }}
-                    </span>
+                    <span class="admin-nav-badge">{{ $jadwalTerlambatCount > 99 ? '99+' : $jadwalTerlambatCount }}</span>
                 @endif
             </span>
-            <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="sidebar-chevron h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
         <div class="sidebar-submenu">
-            <a href="{{ route('admin.pemeliharaan-tamans.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.pemeliharaan-tamans.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+            <a href="{{ route('admin.pemeliharaan-tamans.index') }}" class="{{ $navSub(request()->routeIs('admin.pemeliharaan-tamans.*')) }}">
                 Pemeliharaan Rutin
             </a>
-            <a href="{{ route('admin.pemangkasans.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.pemangkasans.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+            <a href="{{ route('admin.pemangkasans.index') }}" class="{{ $navSub(request()->routeIs('admin.pemangkasans.*')) }}">
                 Permohonan
             </a>
-            <a href="{{ route('admin.alat-sarana-operasionals.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.alat-sarana-operasionals.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                Alat & Sarana
+            <a href="{{ route('admin.armadas.index') }}" class="{{ $navSub(request()->routeIs('admin.armadas.*')) }}">
+                Armada
             </a>
-            <a href="{{ route('admin.operasional-pertamanan-laporan.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.operasional-pertamanan-laporan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+            <a href="{{ route('admin.operasional-pertamanan-laporan.index') }}" class="{{ $navSub(request()->routeIs('admin.operasional-pertamanan-laporan.*')) }}">
                 Laporan Operasional
             </a>
         </div>
     </div>
 
-    <a href="{{ route('admin.evaluasi.index') }}"
-       class="block rounded-lg px-3 py-2 text-sm {{ $evaluasiActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-        Evaluasi
+    <a href="{{ route('admin.evaluasi.index') }}" class="{{ $navTop($evaluasiActive) }}">
+        <x-admin.nav-icon name="chart" />
+        <span class="min-w-0 flex-1">Evaluasi</span>
     </a>
 
     <div class="sidebar-menu-group {{ $masyarakatActive ? 'is-open' : '' }}">
-        <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $masyarakatActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-            <span class="flex items-center gap-2">
-                Masukan
+        <button type="button" class="sidebar-menu-trigger {{ $navTrigger($masyarakatActive) }}">
+            <x-admin.nav-icon name="chat" />
+            <span class="flex min-w-0 flex-1 items-center gap-1.5 text-left">
+                <span>Masukan</span>
                 @if (($masukanBaruCount ?? 0) > 0)
-                    <span class="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white" title="Masukan belum ditinjau">
-                        {{ $masukanBaruCount > 99 ? '99+' : $masukanBaruCount }}
-                    </span>
+                    <span class="admin-nav-badge" title="Masukan belum ditinjau">{{ $masukanBaruCount > 99 ? '99+' : $masukanBaruCount }}</span>
                 @endif
             </span>
-            <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="sidebar-chevron h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
         </button>
         <div class="sidebar-submenu">
-            <a href="{{ route('admin.aduan-masyarakats.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.aduan-masyarakats.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                <span class="flex items-center justify-between gap-2">
-                    Aduan Masyarakat
+            <a href="{{ route('admin.aduan-masyarakats.index') }}" class="{{ $navSub(request()->routeIs('admin.aduan-masyarakats.*')) }}">
+                <span class="flex min-w-0 flex-1 items-center justify-between gap-2">
+                    <span>Aduan Masyarakat</span>
                     @if (($aduanBaruCount ?? 0) > 0)
-                        <span class="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                            {{ $aduanBaruCount > 99 ? '99+' : $aduanBaruCount }}
-                        </span>
+                        <span class="admin-nav-badge">{{ $aduanBaruCount > 99 ? '99+' : $aduanBaruCount }}</span>
                     @endif
                 </span>
             </a>
-            <a href="{{ route('admin.survey-kepuasan.index') }}"
-               class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.survey-kepuasan.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                <span class="flex items-center justify-between gap-2">
-                    Survey Kepuasan
+            <a href="{{ route('admin.survey-kepuasan.index') }}" class="{{ $navSub(request()->routeIs('admin.survey-kepuasan.*')) }}">
+                <span class="flex min-w-0 flex-1 items-center justify-between gap-2">
+                    <span>Survey Kepuasan</span>
                     @if (($surveyBaruCount ?? 0) > 0)
-                        <span class="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                            {{ $surveyBaruCount > 99 ? '99+' : $surveyBaruCount }}
-                        </span>
+                        <span class="admin-nav-badge">{{ $surveyBaruCount > 99 ? '99+' : $surveyBaruCount }}</span>
                     @endif
                 </span>
             </a>
@@ -145,49 +138,56 @@
 
     @if ($canManageUsers ?? false)
         <div class="sidebar-menu-group {{ $sistemActive ? 'is-open' : '' }}">
-            <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $sistemActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-                <span>Sistem</span>
-                <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" class="sidebar-menu-trigger {{ $navTrigger($sistemActive) }}">
+                <x-admin.nav-icon name="cog" />
+                <span class="min-w-0 flex-1 text-left">Sistem</span>
+                <svg class="sidebar-chevron h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
             <div class="sidebar-submenu">
-                <a href="{{ route('admin.tim-pelaksanas.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.tim-pelaksanas.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                <a href="{{ route('admin.tim-pelaksanas.index') }}" class="{{ $navSub(request()->routeIs('admin.tim-pelaksanas.*')) }}">
                     Tim Kerja
                 </a>
-                <a href="{{ route('admin.users.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.users.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                <a href="{{ route('admin.users.index') }}" class="{{ $navSub(request()->routeIs('admin.users.*')) }}">
                     Kelola Pengguna
                 </a>
-                <a href="{{ route('admin.activity-logs.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.activity-logs.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                <a href="{{ route('admin.activity-logs.index') }}" class="{{ $navSub(request()->routeIs('admin.activity-logs.*')) }}">
                     Log Aktivitas
                 </a>
-                <a href="{{ route('admin.beranda-slides.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.beranda-slides.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                <a href="{{ route('admin.beranda-slides.index') }}" class="{{ $navSub(request()->routeIs('admin.beranda-slides.*')) }}">
                     Slide Beranda
                 </a>
-                <a href="{{ route('admin.faq.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.faq.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                <a href="{{ route('admin.faq.index') }}" class="{{ $navSub(request()->routeIs('admin.faq.*')) }}">
                     FAQ Beranda
                 </a>
-                <a href="{{ route('admin.ensiklopedia-pengaturan.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.ensiklopedia-pengaturan.*', 'admin.ensiklopedia-kategoris.*', 'admin.ensiklopedia-artikels.*', 'admin.ensiklopedia-portal.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                <a href="{{ route('admin.ensiklopedia-pengaturan.index') }}" class="{{ $navSub(request()->routeIs('admin.ensiklopedia-pengaturan.*', 'admin.ensiklopedia-kategoris.*', 'admin.ensiklopedia-artikels.*', 'admin.ensiklopedia-portal.*')) }}">
                     Ensiklopedia
                 </a>
             </div>
         </div>
     @endif
 
-        <a href="{{ route('home') }}"
-           class="block rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gray-800">
-            Lihat Situs Publik
-        </a>
-        @if (auth()->user()?->canInputLapangan())
-            <a href="{{ route('lapangan.index') }}"
-               class="mt-2 block rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-600">
-                Input Lapangan
+    <div class="sidebar-menu-group {{ $tautanActive ? 'is-open' : '' }}">
+        <button type="button" class="sidebar-menu-trigger {{ $navTrigger($tautanActive) }}">
+            <x-admin.nav-icon name="link" />
+            <span class="min-w-0 flex-1 text-left">Tautan</span>
+            <svg class="sidebar-chevron h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+        <div class="sidebar-submenu">
+            <a href="{{ route('home') }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="{{ $navSub(false) }}">
+                Laman Publik
             </a>
-        @endif
-    </nav>
+            @if (auth()->user()?->canInputLapangan())
+                <a href="{{ route('lapangan.index') }}" class="{{ $navSub($lapanganActive) }}">
+                    Input Lapangan
+                </a>
+            @endif
+        </div>
+    </div>
+</nav>

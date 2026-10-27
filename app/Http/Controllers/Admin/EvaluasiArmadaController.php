@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AlatSaranaOperasional;
+use App\Models\Armada;
 use App\Support\Evaluasi\ArmadaUtilisasiReportBuilder;
 use App\Support\PdfExport;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ class EvaluasiArmadaController extends Controller
     public function __construct()
     {
         $this->middleware(function ($request, $next) {
-            $this->authorize('viewAny', AlatSaranaOperasional::class);
+            $this->authorize('viewAny', Armada::class);
 
             return $next($request);
         });

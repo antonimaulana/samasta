@@ -19,6 +19,7 @@
     background:
         radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34, 197, 94, 0.12), transparent),
         linear-gradient(to bottom, #ecfdf5 0%, #ffffff 40%, #f0fdf4 100%);
+    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .lapangan-header {

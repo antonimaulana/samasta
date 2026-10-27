@@ -31,7 +31,7 @@ class PemangkasanProgresPdf
         PdfExport::ensureGdLoaded();
 
         $entry = self::resolveEntry($permohonan, $progres);
-        $entry->loadMissing(['armadas.alatSarana']);
+        $entry->loadMissing(['armadas.armada']);
         $permohonan->loadMissing(['taman']);
 
         return PdfExport::download(

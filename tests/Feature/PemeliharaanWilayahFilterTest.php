@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\AlatSaranaOperasional;
+use App\Models\Armada;
 use App\Models\Kelurahan;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
@@ -183,7 +183,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
-        $dumpTruck = AlatSaranaOperasional::create([
+        $dumpTruck = Armada::create([
             'nama' => 'Dump Truck BP 1234 AB',
             'jenis' => 'Dump Truck',
             'no_plat' => 'BP 1234 AB',
@@ -192,7 +192,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
             'peruntukan' => 'Tim Armada',
             'kondisi' => 'Baik',
         ]);
-        $crane = AlatSaranaOperasional::create([
+        $crane = Armada::create([
             'nama' => 'Crane BP 5678 CD',
             'jenis' => 'Crane',
             'no_plat' => 'BP 5678 CD',
@@ -211,7 +211,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
             'total_hari' => 3,
             'persentase_progres' => 25,
             'uraian_pekerjaan' => 'Pengangkutan material',
-        ], 'Tim Armada', 2);
+        ], 'Tim Wilayah 1', 2);
 
         foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
             $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
@@ -222,12 +222,13 @@ class PemeliharaanWilayahFilterTest extends TestCase
             ->assertSessionHasErrors('armada');
 
         $payload['armada'] = [
-            ['alat_sarana_operasional_id' => $dumpTruck->id, 'sopir' => 'Misriwahyudi'],
-            ['alat_sarana_operasional_id' => $crane->id, 'sopir' => 'Darmani'],
+            ['armada_id' => $dumpTruck->id, 'sopir' => 'Misriwahyudi'],
+            ['armada_id' => $crane->id, 'sopir' => 'Darmani'],
         ];
 
         $this->actingAs($admin)
             ->post(route('admin.pemeliharaan-tamans.store'), $payload)
+            ->assertSessionHasNoErrors()
             ->assertRedirect();
 
         $record = PemeliharaanTaman::query()->where('lokasi_pelaksanaan', 'Depo Armada')->first();
@@ -237,7 +238,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
         $this->assertCount(2, $record->armadas);
         $this->assertDatabaseHas('pemeliharaan_taman_armadas', [
             'pemeliharaan_taman_id' => $record->id,
-            'alat_sarana_operasional_id' => $dumpTruck->id,
+            'armada_id' => $dumpTruck->id,
             'jenis_armada' => 'Dump Truck',
             'sopir' => 'Misriwahyudi',
         ]);

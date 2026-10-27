@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\AlatSaranaOperasional;
+use App\Models\Armada;
 use App\Models\Kelurahan;
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
@@ -33,7 +33,7 @@ class EvaluasiArmadaTest extends TestCase
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $kelurahanId = Kelurahan::query()->value('id');
 
-        $armada = AlatSaranaOperasional::create([
+        $armada = Armada::create([
             'nama' => 'Dump Truck Evaluasi',
             'jenis' => 'Dump Truck',
             'no_plat' => 'BP 1111 EV',
@@ -63,7 +63,7 @@ class EvaluasiArmadaTest extends TestCase
 
         PemeliharaanTamanArmada::create([
             'pemeliharaan_taman_id' => $pemeliharaan->id,
-            'alat_sarana_operasional_id' => $armada->id,
+            'armada_id' => $armada->id,
             'jenis_armada' => 'Dump Truck',
             'no_plat' => 'BP 1111 EV',
             'sopir' => 'Darmani',
@@ -95,7 +95,7 @@ class EvaluasiArmadaTest extends TestCase
 
         PemangkasanProgresArmada::create([
             'pemangkasan_progres_id' => $progres->id,
-            'alat_sarana_operasional_id' => $armada->id,
+            'armada_id' => $armada->id,
             'jenis_armada' => 'Dump Truck',
             'no_plat' => 'BP 1111 EV',
             'sopir' => 'Hisar',

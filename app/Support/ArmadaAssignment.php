@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-use App\Models\AlatSaranaOperasional;
+use App\Models\Armada;
 use App\Models\PemeliharaanTaman;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -11,11 +11,11 @@ use Illuminate\Validation\Rule;
 class ArmadaAssignment
 {
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, AlatSaranaOperasional>
+     * @return \Illuminate\Database\Eloquent\Collection<int, Armada>
      */
     public static function inventory(): \Illuminate\Database\Eloquent\Collection
     {
-        return AlatSaranaOperasional::query()
+        return Armada::query()
             ->armadaInventory()
             ->orderBy('nama')
             ->get(['id', 'nama', 'jenis']);
@@ -29,10 +29,10 @@ class ArmadaAssignment
         if ($required) {
             return [
                 'armada' => ['required', 'array', 'min:1'],
-                'armada.*.alat_sarana_operasional_id' => [
+                'armada.*.armada_id' => [
                     'required',
                     'integer',
-                    Rule::exists('alat_sarana_operasionals', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
+                    Rule::exists('armadas', 'id')->where('peruntukan', PemeliharaanTaman::TIM_ARMADA),
                 ],
                 'armada.*.sopir' => ArmadaSopirOptions::validationRules(true),
             ];
@@ -40,7 +40,7 @@ class ArmadaAssignment
 
         return [
             'armada' => ['nullable', 'array'],
-            'armada.*.alat_sarana_operasional_id' => ['nullable', 'integer', 'exists:alat_sarana_operasionals,id'],
+            'armada.*.armada_id' => ['nullable', 'integer', 'exists:armadas,id'],
             'armada.*.sopir' => ArmadaSopirOptions::validationRules(false),
         ];
     }
@@ -52,18 +52,18 @@ class ArmadaAssignment
     {
         return [
             'armada' => 'data armada',
-            'armada.*.alat_sarana_operasional_id' => 'nama armada',
+            'armada.*.armada_id' => 'nama armada',
             'armada.*.sopir' => 'sopir',
         ];
     }
 
     /**
-     * @return list<array{alat_sarana_operasional_id: int, jenis_armada: string, no_plat: string, sopir: string}>
+     * @return list<array{armada_id: int, jenis_armada: string, no_plat: string, sopir: string}>
      */
     public static function extractRows(Request $request, bool $required = false): array
     {
         $inputRows = collect($request->input('armada', []))
-            ->filter(fn ($row) => filled($row['alat_sarana_operasional_id'] ?? null))
+            ->filter(fn ($row) => filled($row['armada_id'] ?? null))
             ->values();
 
         if ($inputRows->isEmpty()) {
@@ -71,20 +71,20 @@ class ArmadaAssignment
         }
 
         $ids = $inputRows
-            ->pluck('alat_sarana_operasional_id')
+            ->pluck('armada_id')
             ->map(fn ($id) => (int) $id)
             ->unique()
             ->values();
 
-        $inventory = AlatSaranaOperasional::query()
+        $inventory = Armada::query()
             ->armadaInventory()
             ->whereIn('id', $ids)
             ->get()
             ->keyBy('id');
 
         return $inputRows->map(function (array $row) use ($inventory) {
-            $id = (int) $row['alat_sarana_operasional_id'];
-            /** @var AlatSaranaOperasional|null $item */
+            $id = (int) $row['armada_id'];
+            /** @var Armada|null $item */
             $item = $inventory->get($id);
 
             if (! $item) {
@@ -92,7 +92,7 @@ class ArmadaAssignment
             }
 
             return [
-                'alat_sarana_operasional_id' => $item->id,
+                'armada_id' => $item->id,
                 'jenis_armada' => $item->jenis,
                 'no_plat' => (string) ($item->no_plat ?? ''),
                 'sopir' => (string) ($row['sopir'] ?? ''),
@@ -101,7 +101,7 @@ class ArmadaAssignment
     }
 
     /**
-     * @param  list<array{alat_sarana_operasional_id: int, jenis_armada: string, no_plat: string, sopir: string}>  $rows
+     * @param  list<array{armada_id: int, jenis_armada: string, no_plat: string, sopir: string}>  $rows
      */
     public static function sync(Model $owner, array $rows, string $relation = 'armadas'): void
     {

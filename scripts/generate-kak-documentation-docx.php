@@ -49,7 +49,7 @@ $paragraphs = [
     ['style' => 'table_header', 'text' => "Domain\tTabel Utama\tFungsi"],
     ['style' => 'table_row', 'text' => "Wilayah & Organisasi\tkecamatans, kelurahans, tim_pelaksanas, petugas, users\tReferensi wilayah Batam, tim pelaksana, roster petugas, RBAC"],
     ['style' => 'table_row', 'text' => "Master RTH\ttamans, taman_images, rth_kategoris\tProfil taman, galeri, kategori RTH publik"],
-    ['style' => 'table_row', 'text' => "Operasional\tpemeliharaan_tamans, pemangkasans, pemangkasan_progres, alat_sarana_operasionals\tPemeliharaan rutin, permohonan layanan, progres harian, inventaris armada"],
+    ['style' => 'table_row', 'text' => "Operasional\tpemeliharaan_tamans, pemangkasans, pemangkasan_progres, armadas\tPemeliharaan rutin, permohonan layanan, progres harian, inventaris armada"],
     ['style' => 'table_row', 'text' => "Petugas (pivot)\tpemeliharaan_taman_petugas, pemangkasan_progres_petugas\tAssignment petugas lapangan per kegiatan"],
     ['style' => 'table_row', 'text' => "Bibit\tbibits, bibit_masuks, bibit_keluars\tStok pembibitan masuk/keluar"],
     ['style' => 'table_row', 'text' => "Masyarakat\taduan_masyarakats, survey_kepuasans\tAduan publik dan survey kepuasan"],

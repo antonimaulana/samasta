@@ -9,61 +9,15 @@
     @stack('styles')
     @unless ($isViewer ?? false)
         @include('layouts.partials.mobile-nav-styles')
-        <style>
-            .sidebar-menu-group .sidebar-submenu {
-                overflow: hidden;
-                max-height: 0;
-                opacity: 0;
-                pointer-events: none;
-                transition: max-height 0.25s ease, opacity 0.2s ease;
-            }
-            .sidebar-menu-group:hover .sidebar-submenu,
-            .sidebar-menu-group.is-open .sidebar-submenu,
-            .sidebar-menu-group:focus-within .sidebar-submenu {
-                max-height: min(75vh, 40rem);
-                opacity: 1;
-                pointer-events: auto;
-            }
-            @media (max-width: 767px) {
-                .sidebar-menu-group:hover .sidebar-submenu {
-                    max-height: 0;
-                    opacity: 0;
-                    pointer-events: none;
-                }
-                .sidebar-menu-group.is-open .sidebar-submenu,
-                .sidebar-menu-group:focus-within .sidebar-submenu {
-                    max-height: min(75vh, 40rem);
-                    opacity: 1;
-                    pointer-events: auto;
-                }
-            }
-            .sidebar-menu-trigger {
-                border: 0;
-                background: transparent;
-                font: inherit;
-            }
-            .sidebar-menu-group:hover .sidebar-chevron,
-            .sidebar-menu-group.is-open .sidebar-chevron {
-                transform: rotate(180deg);
-            }
-            .sidebar-chevron {
-                transition: transform 0.2s ease;
-            }
-        </style>
+        @include('layouts.partials.admin-sidebar-styles')
     @endunless
 </head>
 <body class="min-h-screen {{ ($isViewer ?? false) ? 'bg-gradient-to-b from-emerald-50/80 via-gray-50 to-gray-100' : 'bg-gray-100' }} text-gray-900">
     <div class="flex min-h-screen">
         @unless ($isViewer ?? false)
-            <aside class="hidden w-64 flex-shrink-0 bg-gray-900 text-white md:block">
-                <div class="border-b border-gray-800 px-6 py-5">
-                    <div class="flex items-center gap-3">
-                        @include('layouts.partials.app-logo', ['size' => 'sm'])
-                        <div>
-                            <p class="text-lg font-semibold">{{ config('app.name') }}</p>
-                            <p class="text-xs text-gray-400">{{ config('app.full_name') }}</p>
-                        </div>
-                    </div>
+            <aside id="admin-desktop-sidebar" class="hidden w-60 shrink-0 border-r border-gray-800 bg-gray-900 text-white md:block">
+                <div class="border-b border-gray-800 px-3 py-3.5">
+                    @include('layouts.partials.admin-sidebar-brand')
                 </div>
                 @include('layouts.partials.admin-nav')
             </aside>
@@ -84,7 +38,7 @@
                         @else
                             <button type="button"
                                     id="admin-mobile-menu-toggle"
-                                    class="relative z-[51] h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                                    class="relative z-[51] inline-flex h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 md:hidden"
                                     aria-label="Buka menu admin"
                                     aria-expanded="false"
                                     aria-controls="admin-mobile-drawer">
@@ -92,7 +46,17 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                                 </svg>
                             </button>
-                            <h1 class="truncate text-lg font-semibold sm:text-xl">@yield('header', 'Dashboard')</h1>
+                            <button type="button"
+                                    id="admin-sidebar-toggle"
+                                    class="hidden h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                                    aria-label="Tampilkan menu samping"
+                                    aria-expanded="true"
+                                    aria-controls="admin-desktop-sidebar">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                            <h1 class="truncate text-base font-semibold sm:text-lg md:text-xl">@yield('header', 'Dashboard')</h1>
                         @endif
                     </div>
 
@@ -176,15 +140,11 @@
         {{-- Admin mobile drawer --}}
         <div id="admin-mobile-backdrop" style="display:none" aria-hidden="true"></div>
         <aside id="admin-mobile-drawer" style="display:none" aria-hidden="true">
-            <div class="flex items-center justify-between border-b border-gray-800 px-5 py-4">
-                <div class="flex items-center gap-3">
-                    @include('layouts.partials.app-logo', ['size' => 'sm'])
-                    <div>
-                        <p class="font-semibold">{{ config('app.name') }}</p>
-                        <p class="text-xs text-gray-400">Panel Manajemen Hijau</p>
-                    </div>
+            <div class="flex items-center justify-between gap-2 border-b border-gray-800 px-4 py-3.5">
+                <div class="min-w-0 flex-1">
+                    @include('layouts.partials.admin-sidebar-brand')
                 </div>
-                <button type="button" id="admin-mobile-menu-close" class="rounded-lg p-2 text-gray-400 hover:bg-gray-800" aria-label="Tutup menu">
+                <button type="button" id="admin-mobile-menu-close" class="shrink-0 rounded-lg p-2 text-gray-400 hover:bg-gray-800" aria-label="Tutup menu">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -207,6 +167,30 @@
             window.onPageReady(function () {
                 initSidebarAccordion(document);
 
+                var sidebarStorageKey = 'simtaman-admin-sidebar-collapsed';
+                var expandBtn = document.getElementById('admin-sidebar-toggle');
+
+                function setSidebarCollapsed(collapsed) {
+                    document.body.classList.toggle('admin-sidebar-collapsed', collapsed);
+                    try {
+                        localStorage.setItem(sidebarStorageKey, collapsed ? '1' : '0');
+                    } catch (e) {}
+                    if (expandBtn) {
+                        expandBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                        expandBtn.setAttribute('aria-label', collapsed ? 'Tampilkan menu samping' : 'Sembunyikan menu samping');
+                    }
+                }
+
+                try {
+                    if (localStorage.getItem(sidebarStorageKey) === '1') {
+                        setSidebarCollapsed(true);
+                    }
+                } catch (e) {}
+
+                expandBtn?.addEventListener('click', function () {
+                    setSidebarCollapsed(! document.body.classList.contains('admin-sidebar-collapsed'));
+                });
+
                 initMobileDrawer({
                     toggleId: 'admin-mobile-menu-toggle',
                     closeId: 'admin-mobile-menu-close',
@@ -214,7 +198,7 @@
                     backdropId: 'admin-mobile-backdrop',
                     bodyClass: 'admin-nav-open',
                     side: 'left',
-                    width: 280,
+                    width: 240,
                     background: '#111827',
                     color: '#ffffff',
                     shadow: '10px 0 40px rgba(0,0,0,0.25)',

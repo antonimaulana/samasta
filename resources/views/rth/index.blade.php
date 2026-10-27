@@ -10,7 +10,7 @@
 
 @section('content')
     {{-- Hero --}}
-    <section class="relative mb-10 overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-700 via-teal-700 to-green-800 px-6 py-10 text-white shadow-xl shadow-emerald-900/20 sm:px-10 sm:py-12">
+    <section class="relative mb-8 overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-700 via-teal-700 to-green-800 px-4 py-8 text-white shadow-xl shadow-emerald-900/20 sm:mb-10 sm:rounded-3xl sm:px-10 sm:py-12">
         <div class="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
         <div class="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-lime-300/20 blur-3xl"></div>
 
@@ -23,23 +23,18 @@
                 <span class="text-xs text-emerald-100/90">Disperakimtan Kota Batam · SIMTAMAN</span>
             </div>
 
-            <h1 class="mt-4 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">
+            <h1 class="mt-4 max-w-3xl text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
                 Statistik Ruang Terbuka Hijau Kota Batam
             </h1>
-            <p class="mt-4 max-w-2xl text-base leading-relaxed text-emerald-50/95 sm:text-lg">
-                Data terpadu luas, lokasi, capaian RTRW, dan distribusi RTH per kategori &amp; wilayah —
-                diselaraskan dengan Laporan Taman internal Dinas untuk keperluan publik dan eksternal.
-            </p>
-
-            <p class="mt-4 text-xs text-emerald-100/80">
-                Snapshot data: {{ PublicRthStatisticsBuilder::formatSnapshot($snapshotAt) }}
+            <p class="mt-3 text-xs text-emerald-100/85 sm:text-sm">
+                Diperbarui {{ PublicRthStatisticsBuilder::formatSnapshot($snapshotAt) }} · selaras Laporan Taman SIMTAMAN
             </p>
 
             @if ($hasData)
-                <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 xl:grid-cols-4">
                     <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-sm">
                         <p class="text-xs font-semibold uppercase tracking-wide text-emerald-100">Total Luas Dikelola</p>
-                        <p class="mt-2 text-3xl font-black">{{ PublicRthStatisticsBuilder::formatArea($totalLuasan) }}</p>
+                        <p class="mt-2 text-2xl font-black sm:text-3xl">{{ PublicRthStatisticsBuilder::formatArea($totalLuasan) }}</p>
                         <p class="mt-1 text-xs text-emerald-100/80">meter persegi (m²)</p>
                     </div>
                     <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-sm">
@@ -86,11 +81,7 @@
         {{-- Capaian RTRW highlight --}}
         <section id="capaian-rtrw" class="mb-10 scroll-mt-24">
             <div class="mb-5">
-                <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Ringkasan Capaian</p>
-                <h2 class="mt-1 text-2xl font-bold text-emerald-950">Posisi RTH Dikelola Dinas vs RTRW</h2>
-                <p class="mt-2 max-w-3xl text-sm text-gray-600">
-                    Indikator utama tahun {{ $latestYear }} — sama dengan perhitungan pada menu Admin → Laporan Taman.
-                </p>
+                <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">Capaian RTRW {{ $latestYear }}</h2>
             </div>
 
             <div class="grid gap-4 lg:grid-cols-3">
@@ -168,12 +159,8 @@
 
         {{-- Per kategori --}}
         <section id="per-kategori" class="mb-10 scroll-mt-24">
-            <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Distribusi</p>
-                    <h2 class="mt-1 text-2xl font-bold text-emerald-950">RTH per Kategori</h2>
-                    <p class="mt-2 text-sm text-gray-600">Rekap jumlah lokasi dan luasan — selaras dengan tabel kategori di Laporan Taman.</p>
-                </div>
+            <div class="mb-5">
+                <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">RTH per Kategori</h2>
             </div>
 
             <div class="grid gap-6 lg:grid-cols-5">
@@ -226,11 +213,8 @@
         {{-- Per wilayah --}}
         <section id="per-wilayah" class="mb-10 scroll-mt-24">
             <div class="mb-5">
-                <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Wilayah Administratif</p>
-                <h2 class="mt-1 text-2xl font-bold text-emerald-950">RTH per Kecamatan &amp; Kelurahan</h2>
-                <p class="mt-2 text-sm text-gray-600">
-                    Agregasi {{ number_format($totalTaman) }} lokasi terdaftar, termasuk entri yang belum memiliki kelurahan (ditampilkan sebagai "Belum diset").
-                </p>
+                <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">RTH per Kecamatan &amp; Kelurahan</h2>
+                <p class="mt-1 text-sm text-gray-600">{{ number_format($totalTaman) }} lokasi terdaftar</p>
             </div>
 
             <div class="overflow-hidden rounded-2xl border border-teal-200 bg-white shadow-sm">
@@ -304,24 +288,11 @@
         {{-- Capaian per tahun --}}
         <section id="capaian-tahun" class="mb-10 scroll-mt-24">
             <div class="mb-5">
-                <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Tabel Capaian</p>
-                <h2 class="mt-1 text-2xl font-bold text-emerald-950">Capaian RTH per Tahun (A–G)</h2>
-                <p class="mt-2 text-sm text-gray-600">Format indikator sama dengan Laporan Taman admin — siap dijadikan acuan eksternal.</p>
+                <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">Capaian RTH per Tahun (A–G)</h2>
             </div>
 
             @include('rth.partials.yearly-summary-public')
         </section>
-
-        {{-- Footer note --}}
-        <aside class="rounded-2xl border border-gray-200 bg-gray-50 px-6 py-5 text-sm text-gray-600">
-            <p class="font-semibold text-gray-800">Tentang data ini</p>
-            <ul class="mt-2 list-inside list-disc space-y-1 leading-relaxed">
-                <li>Sumber: SIMTAMAN — basis data RTH Disperakimtan Kota Batam.</li>
-                <li>Angka diselaraskan dengan menu Admin → Laporan Taman (tanpa filter).</li>
-                <li>Data diperbarui otomatis dari registrasi taman; snapshot ditampilkan di bagian atas halaman.</li>
-                <li>Untuk pertanyaan data, hubungi Disperakimtan Kota Batam.</li>
-            </ul>
-        </aside>
     @endif
 @endsection
 

@@ -9,20 +9,7 @@
         $greeting = \App\Support\LapanganUi::greetingName(auth()->user(), $guestMode);
     @endphp
 
-    <div class="lapangan-card mb-5 overflow-hidden p-0">
-        <div class="bg-gradient-to-br from-green-600 to-emerald-700 px-5 py-6 text-white">
-            <p class="text-sm text-green-100">Selamat {{ now()->hour < 12 ? 'pagi' : (now()->hour < 15 ? 'siang' : (now()->hour < 18 ? 'sore' : 'malam')) }},</p>
-            <h2 class="mt-1 text-2xl font-black tracking-tight">{{ $greeting }} 👋</h2>
-            <p class="mt-2 text-sm leading-relaxed text-green-50/95">
-                Pilih menu di bawah untuk mencatat pekerjaan lapangan hari ini. Cukup ikuti langkah-langkahnya, form akan memandu Anda.
-            </p>
-        </div>
-    </div>
-
-    <div class="mb-3 flex items-center justify-between">
-        <p class="lapangan-section-title text-sm font-bold text-gray-800">Menu Pekerjaan</p>
-        <span class="text-xs text-gray-500">{{ count($menuItems) }} menu tersedia</span>
-    </div>
+    <p class="mb-4 text-sm text-gray-600">Halo, <span class="font-semibold text-gray-900">{{ $greeting }}</span> — pilih pekerjaan di bawah.</p>
 
     <div class="grid gap-3 sm:grid-cols-2">
         @foreach ($menuItems as $item)

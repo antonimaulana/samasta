@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AduanMasyarakatController as AdminAduanMasyarakatController;
-use App\Http\Controllers\Admin\AlatSaranaOperasionalController;
+use App\Http\Controllers\Admin\ArmadaController;
 use App\Http\Controllers\Admin\BibitController;
 use App\Http\Controllers\Admin\BibitKeluarController;
 use App\Http\Controllers\Admin\BibitLaporanController;
@@ -166,7 +166,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::get('pemeliharaan-tamans/{pemeliharaan_taman}/export/pdf', [PemeliharaanTamanController::class, 'exportPdfOperasional'])
         ->name('pemeliharaan-tamans.export-pdf-operasional');
     Route::resource('pemeliharaan-tamans', PemeliharaanTamanController::class)->except(['show']);
-    Route::resource('alat-sarana-operasionals', AlatSaranaOperasionalController::class);
+    Route::redirect('alat-sarana-operasionals', '/admin/armadas');
+    Route::get('alat-sarana-operasionals/{legacy}', fn (string $legacy) => redirect("/admin/armadas/{$legacy}", 301))
+        ->where('legacy', '[0-9]+');
+    Route::resource('armadas', ArmadaController::class);
     Route::resource('aduan-masyarakats', AdminAduanMasyarakatController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::patch('aduan-masyarakats/{aduan_masyarakat}/status', [AdminAduanMasyarakatController::class, 'updateStatus'])
         ->name('aduan-masyarakats.update-status');

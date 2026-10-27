@@ -5,22 +5,35 @@
 
 @section('content')
     @php
-        $statusConfig = match ($executive_status['tone'] ?? 'success') {
-            'danger' => [
-                'label' => $executive_status['label'] ?? 'Perlu Tindakan',
-                'badge' => 'bg-red-500/20 text-red-100 ring-red-300/40',
-                'dot' => 'bg-red-400',
-            ],
-            'warning' => [
-                'label' => $executive_status['label'] ?? 'Waspada',
-                'badge' => 'bg-amber-500/20 text-amber-100 ring-amber-300/40',
-                'dot' => 'bg-amber-400',
-            ],
-            default => [
-                'label' => $executive_status['label'] ?? 'Operasional Baik',
+        $needsAttention = in_array($executive_status['tone'] ?? 'success', ['danger', 'warning'], true);
+        $statusConfig = $needsAttention
+            ? [
+                'label' => 'Operasional Perlu Perhatian',
+                'badge' => 'bg-amber-500/25 text-amber-50 ring-amber-200/40',
+                'dot' => 'bg-amber-300',
+            ]
+            : [
+                'label' => 'Operasional Baik',
                 'badge' => 'bg-white/15 text-white ring-white/25',
                 'dot' => 'bg-emerald-300',
-            ],
+            ];
+
+        $jadwalTiles = [
+            ['key' => 'hari_ini', 'label' => 'Hari Ini', 'desc' => 'Pelaksanaan aktif hari ini', 'danger' => false],
+            ['key' => 'besok', 'label' => 'Besok (H-1)', 'desc' => 'Persiapan besok', 'danger' => false],
+            ['key' => 'diproses', 'label' => 'Sedang Diproses', 'desc' => 'Dikerjakan di lapangan', 'danger' => false],
+            ['key' => 'terlambat', 'label' => 'Terlambat', 'desc' => 'Lewat jadwal / belum selesai', 'danger' => true],
+        ];
+
+        $formatLuasan = function (int $luasan): string {
+            if ($luasan >= 1_000_000) {
+                return number_format($luasan / 1_000_000, 1, ',', '.').' jt m²';
+            }
+            if ($luasan >= 10_000) {
+                return number_format($luasan / 1_000, 1, ',', '.').' rb m²';
+            }
+
+            return number_format($luasan, 0, ',', '.').' m²';
         };
 
         $surveyLabel = match (true) {
@@ -30,269 +43,223 @@
             $survey_summary['average'] >= 3.0 => 'Cukup',
             default => 'Perlu Perhatian',
         };
+
+        $surveyValue = $survey_summary['total'] > 0
+            ? number_format($survey_summary['average'], 1).' /5'
+            : '—';
+
+        $aduanTone = $aduan_baru > 0 ? 'rose' : 'sky';
     @endphp
 
-    {{-- Hero ringkasan eksekutif --}}
+    {{-- Hero --}}
     <section class="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-green-700 via-emerald-600 to-teal-600 p-6 text-white shadow-lg shadow-emerald-200/50 sm:p-8">
         <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"></div>
         <div class="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-teal-300/20 blur-2xl"></div>
 
         <div class="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div class="max-w-2xl">
-                <div class="flex flex-wrap items-center gap-3">
-                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-green-100">
-                        {{ $is_viewer ? 'Ringkasan Pimpinan' : 'Dashboard Operasional' }}
+            <div class="max-w-3xl">
+                @if ($is_viewer)
+                    <p class="dash-kicker text-green-100">Ringkasan Pimpinan</p>
+                @else
+                    <p class="text-[10px] font-bold uppercase leading-snug tracking-wide text-green-100 sm:text-[11px]">
+                        Dinas Perumahan, Kawasan Permukiman dan Pertamanan
+                        <span class="mx-1.5 font-normal text-green-200/70">·</span>
+                        Bidang Pertamanan dan Pemakaman
                     </p>
-                    <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 {{ $statusConfig['badge'] }}">
-                        <span class="h-2 w-2 rounded-full {{ $statusConfig['dot'] }}"></span>
-                        {{ $statusConfig['label'] }}
-                    </span>
-                </div>
+                @endif
                 <h2 class="mt-3 text-2xl font-black sm:text-3xl">
-                    @if ($is_viewer)
-                        Snapshot Operasional Pertamanan Batam
-                    @else
-                        Ringkasan Operasional Dinas
-                    @endif
+                    {{ $is_viewer ? 'Snapshot Operasional Pertamanan Batam' : 'Dashboard Operasional' }}
                 </h2>
-                <p class="mt-2 text-sm leading-relaxed text-green-50/90">
+                <span class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 {{ $statusConfig['badge'] }}">
+                    <span class="h-2 w-2 rounded-full {{ $statusConfig['dot'] }}"></span>
+                    {{ $statusConfig['label'] }}
+                </span>
+                <p class="mt-3 text-sm leading-relaxed text-green-50/90">
                     {{ now()->translatedFormat('l, d F Y') }} · {{ now()->translatedFormat('H:i') }} WIB
-                    — {{ $executive_status['description'] ?? 'Ringkasan operasional pertamanan Kota Batam.' }}
                 </p>
             </div>
 
-            <div class="flex flex-col gap-4 lg:items-end">
-                <a href="{{ route('admin.dashboard.export-pdf') }}"
-                   class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/25">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Unduh Ringkasan PDF
+            <div class="flex shrink-0 flex-col gap-4 lg:items-end">
+                <a href="{{ route('admin.dashboard.export-pdf') }}" class="dash-btn-hero">
+                    <x-admin.nav-icon name="download" class="h-4 w-4" />
+                    Unduh Ringkasan
                 </a>
-                <div class="grid grid-cols-3 gap-3 sm:gap-4">
-                <div class="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-center backdrop-blur-sm">
-                    <p class="text-2xl font-black">{{ number_format($total_taman) }}</p>
-                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-wide text-green-100">Taman</p>
-                </div>
-                <div class="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-center backdrop-blur-sm">
-                    <p class="text-2xl font-black">{{ $layanan_selesai_persen }}%</p>
-                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-wide text-green-100">Operasional Selesai</p>
-                </div>
-                <div class="rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-center backdrop-blur-sm">
-                    <p class="text-2xl font-black">{{ $survey_summary['total'] > 0 ? number_format($survey_summary['average'], 1) : '—' }}</p>
-                    <p class="mt-1 text-[10px] font-semibold uppercase tracking-wide text-green-100">Kepuasan</p>
-                </div>
-                </div>
             </div>
         </div>
     </section>
 
-    @include('admin.partials.operator_inbox')
+    {{-- Ringkasan data induk --}}
+    <div class="mb-8 grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <x-admin.dash-stat-card
+            :href="route('admin.tamans.index')"
+            tone="emerald"
+            label="Data Taman"
+            :value="number_format($total_taman)"
+            subtitle="Total lokasi"
+            footer="Kelola taman →"
+            animate="0">
+            <x-slot:meta>
+                <span class="dash-chip dash-chip--emerald">{{ $formatLuasan($total_luasan_taman) }} luasan</span>
+            </x-slot:meta>
+            <x-slot:icon>
+                <x-admin.nav-icon name="taman" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
 
-    {{-- Indikator prioritas pimpinan --}}
-    <div class="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <a href="{{ route('admin.survey-kepuasan.index') }}"
-           class="group overflow-hidden rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-fuchsia-50 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wide text-violet-600">Kepuasan Masyarakat</p>
-                    <p class="mt-2 text-3xl font-black text-violet-900">
-                        {{ $survey_summary['total'] > 0 ? number_format($survey_summary['average'], 1) : '—' }}
-                        <span class="text-lg text-violet-400">/5</span>
-                    </p>
-                    <p class="mt-1 text-sm font-medium text-violet-700">{{ $surveyLabel }}</p>
+        <x-admin.dash-stat-card
+            :href="route('admin.bibits.index')"
+            tone="teal"
+            label="Data Bibit"
+            :value="number_format($total_stok_bibit)"
+            subtitle="Total stok"
+            footer="Kelola bibit →"
+            animate="1">
+            <x-slot:meta>
+                <div class="flex flex-wrap gap-2">
+                    <span class="dash-chip dash-chip--teal">{{ number_format($total_varietas_bibit) }} varietas</span>
+                    <span class="dash-chip dash-chip--cyan">{{ $bibit_siap_persen }}% siap tanam</span>
                 </div>
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
-                    <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                </span>
-            </div>
-            <p class="mt-3 text-xs text-violet-600/80">{{ number_format($survey_summary['total']) }} respons · {{ now()->translatedFormat('F Y') }}</p>
-        </a>
+            </x-slot:meta>
+            <x-slot:icon>
+                <x-admin.nav-icon name="bibit" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
 
-        <a href="{{ route('admin.operasional-pertamanan-laporan.index') }}"
-           class="group overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-            <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                    <p class="text-xs font-bold uppercase tracking-wide text-emerald-600">Penyelesaian Operasional</p>
-                    <p class="mt-2 text-3xl font-black text-emerald-900">{{ $layanan_selesai_persen }}%</p>
-                    <p class="mt-1 text-sm text-emerald-700">{{ number_format($layanan_selesai) }} dari {{ number_format($total_layanan) }} selesai</p>
-                </div>
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </span>
-            </div>
-            <div class="mt-3 h-2 overflow-hidden rounded-full bg-emerald-100">
-                <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500" style="width: {{ $layanan_selesai_persen }}%"></div>
-            </div>
-        </a>
+        <x-admin.dash-stat-card
+            :href="route('admin.armadas.index')"
+            tone="green"
+            label="Data Armada"
+            :value="number_format($total_armada)"
+            subtitle="Unit"
+            footer="Lihat armada →"
+            animate="2">
+            <x-slot:extra>
+                @if ($armada_recent_usage->isNotEmpty())
+                    <ul class="mt-3 space-y-1.5 border-t border-green-100 pt-3 text-xs text-gray-600">
+                        @foreach ($armada_recent_usage->take(3) as $entry)
+                            <li class="flex items-center justify-between gap-2">
+                                <span class="truncate font-medium text-gray-800">{{ Str::limit($entry['armada'], 22) }}</span>
+                                <span class="shrink-0 text-gray-400">{{ $entry['tanggal']?->format('d/m') ?? '—' }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="mt-3 text-xs text-gray-500">Belum ada riwayat penggunaan tercatat.</p>
+                @endif
+            </x-slot:extra>
+            <x-slot:icon>
+                <x-admin.nav-icon name="armada" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
 
-        <a href="{{ route('admin.aduan-masyarakats.index') }}"
-           class="group overflow-hidden rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md {{ $aduan_baru > 0 ? 'border-red-200 bg-gradient-to-br from-red-50 to-orange-50' : 'border-sky-100 bg-gradient-to-br from-sky-50 to-blue-50' }}">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wide {{ $aduan_baru > 0 ? 'text-red-600' : 'text-sky-600' }}">Aduan Masyarakat</p>
-                    <p class="mt-2 text-3xl font-black {{ $aduan_baru > 0 ? 'text-red-800' : 'text-sky-900' }}">{{ number_format($aduan_baru) }}</p>
-                    <p class="mt-1 text-sm {{ $aduan_baru > 0 ? 'text-red-700' : 'text-sky-700' }}">Baru · {{ number_format($aduan_aktif) }} aktif</p>
-                </div>
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl {{ $aduan_baru > 0 ? 'bg-red-100 text-red-600' : 'bg-sky-100 text-sky-600' }}">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
-                </span>
-            </div>
-        </a>
-
-        <a href="{{ route('admin.pemangkasans.index', ['view' => 'terlambat']) }}"
-           class="group overflow-hidden rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md {{ ($jadwal_counts['terlambat'] ?? 0) > 0 ? 'border-red-200 bg-gradient-to-br from-rose-50 to-red-50' : 'border-gray-200 bg-white' }}">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-wide {{ ($jadwal_counts['terlambat'] ?? 0) > 0 ? 'text-red-600' : 'text-gray-500' }}">Jadwal Terlambat</p>
-                    <p class="mt-2 text-3xl font-black {{ ($jadwal_counts['terlambat'] ?? 0) > 0 ? 'text-red-800' : 'text-gray-900' }}">{{ $jadwal_counts['terlambat'] ?? 0 }}</p>
-                    <p class="mt-1 text-sm {{ ($jadwal_counts['terlambat'] ?? 0) > 0 ? 'text-red-700' : 'text-gray-500' }}">
-                        {{ ($jadwal_counts['terlambat'] ?? 0) > 0 ? 'Perlu tindak lanjut segera' : 'Tidak ada keterlambatan' }}
-                    </p>
-                </div>
-                <span class="flex h-11 w-11 items-center justify-center rounded-xl {{ ($jadwal_counts['terlambat'] ?? 0) > 0 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500' }}">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </span>
-            </div>
-        </a>
+        <x-admin.dash-stat-card
+            :href="route('admin.tim-pelaksanas.index')"
+            tone="cyan"
+            label="Data Petugas"
+            :value="number_format($total_petugas)"
+            subtitle="Petugas"
+            footer="Kelola tim kerja →"
+            animate="3">
+            <x-slot:meta>
+                <span class="dash-chip dash-chip--cyan">{{ number_format($total_tim_kerja) }} tim kerja</span>
+            </x-slot:meta>
+            <x-slot:icon>
+                <x-admin.nav-icon name="users" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
     </div>
 
-    {{-- Jadwal operasional --}}
-    <section class="mb-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-gray-50/80 px-5 py-4">
-            <div>
-                <h3 class="font-bold text-gray-900">Jadwal Operasional Lapangan</h3>
-                <p class="text-xs text-gray-500">Monitoring pelaksanaan harian tim pertamanan</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('admin.pemangkasans.index', ['view' => 'hari_ini']) }}"
-                   class="rounded-lg bg-green-600 px-4 py-2 text-xs font-bold text-white hover:bg-green-700">
-                    Buka Antrian
-                </a>
-                <x-admin.can-write>
-                    <a href="{{ route('admin.pemangkasans.create') }}"
-                       class="rounded-lg border border-green-200 bg-white px-4 py-2 text-xs font-bold text-green-700 hover:bg-green-50">
-                        + Permohonan Baru
-                    </a>
-                </x-admin.can-write>
-            </div>
-        </div>
-        <div class="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach ([
-                ['key' => 'hari_ini', 'label' => 'Hari Ini', 'desc' => 'Pelaksanaan hari ini', 'accent' => 'emerald'],
-                ['key' => 'besok', 'label' => 'Besok (H-1)', 'desc' => 'Persiapan besok', 'accent' => 'blue'],
-                ['key' => 'diproses', 'label' => 'Sedang Diproses', 'desc' => 'Dikerjakan di lapangan', 'accent' => 'amber'],
-                ['key' => 'terlambat', 'label' => 'Terlambat', 'desc' => 'Lewat jadwal', 'accent' => 'red', 'danger' => true],
-            ] as $item)
-                @php
-                    $count = $jadwal_counts[$item['key']] ?? 0;
-                    $isDanger = ($item['danger'] ?? false) && $count > 0;
-                @endphp
-                <a href="{{ route('admin.pemangkasans.index', ['view' => $item['key']]) }}"
-                   class="rounded-xl border p-4 transition hover:shadow-md {{ $isDanger ? 'border-red-200 bg-red-50/80' : 'border-gray-100 bg-white hover:border-green-200' }}">
-                    <p class="text-3xl font-black {{ $isDanger ? 'text-red-700' : 'text-gray-900' }}">{{ $count }}</p>
-                    <p class="mt-1 text-sm font-semibold text-gray-900">{{ $item['label'] }}</p>
-                    <p class="mt-0.5 text-xs text-gray-500">{{ $item['desc'] }}</p>
-                </a>
-            @endforeach
-        </div>
-    </section>
+    <div class="mb-8 grid gap-4 sm:grid-cols-2">
+        <x-admin.dash-stat-card
+            :href="route('admin.survey-kepuasan.index')"
+            tone="violet"
+            label="Kepuasan Masyarakat"
+            :value="$surveyValue"
+            :subtitle="$surveyLabel">
+            <x-slot:meta>
+                <p class="text-xs text-gray-500">{{ number_format($survey_summary['total']) }} respons · {{ now()->translatedFormat('F Y') }}</p>
+            </x-slot:meta>
+            <x-slot:icon>
+                <x-admin.nav-icon name="star" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
 
-    {{-- Aset hijau --}}
-    <div class="mb-8 grid gap-4 lg:grid-cols-2">
-        <a href="{{ route('admin.tamans.index') }}"
-           class="flex items-center gap-5 rounded-2xl border border-green-100 bg-gradient-to-r from-green-50 to-emerald-50 p-5 shadow-sm transition hover:shadow-md">
-            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-green-600 text-2xl text-white">🌳</span>
-            <div>
-                <p class="text-xs font-bold uppercase tracking-wide text-green-700">Data Taman</p>
-                <p class="text-2xl font-black text-gray-900">{{ number_format($total_taman) }} <span class="text-base font-semibold text-gray-500">taman terdaftar</span></p>
-                <p class="text-xs text-gray-600">Data taman publik {{ config('app.name') }}</p>
-            </div>
-        </a>
-        <a href="{{ route('admin.bibits.index') }}"
-           class="flex items-center gap-5 rounded-2xl border border-teal-100 bg-gradient-to-r from-teal-50 to-cyan-50 p-5 shadow-sm transition hover:shadow-md">
-            <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-teal-600 text-2xl text-white">🌱</span>
-            <div>
-                <p class="text-xs font-bold uppercase tracking-wide text-teal-700">Pembibitan</p>
-                <p class="text-2xl font-black text-gray-900">{{ number_format($total_stok_bibit) }} <span class="text-base font-semibold text-gray-500">unit stok</span></p>
-                <p class="text-xs text-gray-600">{{ number_format($total_varietas_bibit) }} varietas · {{ $bibit_siap_persen }}% siap tanam</p>
-            </div>
-        </a>
+        <x-admin.dash-stat-card
+            :href="route('admin.aduan-masyarakats.index')"
+            :tone="$aduanTone"
+            label="Masukan Masyarakat"
+            :value="number_format($aduan_baru)"
+            :subtitle="'Baru · '.number_format($aduan_aktif).' aktif'">
+            <x-slot:icon>
+                <x-admin.nav-icon name="chat" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
     </div>
+
+    {{-- Operasional pertamanan --}}
+    <x-admin.dash-section title="Operasional Pertamanan">
+        <x-slot:icon>
+            <x-admin.nav-icon name="operasional" class="h-5 w-5" />
+        </x-slot:icon>
+
+        <div class="space-y-8">
+            <div>
+                <div class="dash-block-heading">
+                    <p class="dash-kicker dash-kicker--emerald">Pemeliharaan Rutin</p>
+                    <p class="dash-section__desc">Pelaksanaan hari ini per tim</p>
+                </div>
+
+                @if (count($pemeliharaan_tim_hari_ini) > 0)
+                    <div class="dash-metric-grid-6 dash-metric-grid--pemeliharaan">
+                        @foreach ($pemeliharaan_tim_hari_ini as $index => $timRow)
+                            @php
+                                $theme = ($index % 6) + 1;
+                                $isIdle = ($timRow['count'] ?? 0) === 0;
+                            @endphp
+                            <a href="{{ $timRow['url'] }}"
+                               title="{{ $timRow['tim'] }}"
+                               class="dash-metric-tile dash-metric-tile--{{ $theme }} {{ $isIdle ? 'dash-metric-tile--idle' : '' }}">
+                                <p class="dash-metric-tile__value">{{ $timRow['count'] }}</p>
+                                <p class="dash-metric-tile__label">{{ Str::replaceFirst('Tim ', '', $timRow['tim']) }}</p>
+                                <p class="dash-metric-tile__meta">Hari ini</p>
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm text-gray-500">Belum ada kegiatan pemeliharaan rutin tercatat untuk hari ini.</p>
+                @endif
+            </div>
+
+            <div class="border-t border-gray-100 pt-6">
+                <div class="dash-block-heading">
+                    <p class="dash-kicker dash-kicker--emerald">Operasional Permohonan</p>
+                    <p class="dash-section__desc">Jadwal pelaksanaan layanan permohonan masyarakat / instansi</p>
+                </div>
+
+                <div class="dash-metric-grid-4 dash-metric-grid--permohonan">
+                    @foreach ($jadwalTiles as $index => $tile)
+                        @php
+                            $count = $jadwal_counts[$tile['key']] ?? 0;
+                            $theme = ($index % 4) + 1;
+                            $isIdle = $count === 0;
+                        @endphp
+                        <a href="{{ route('admin.pemangkasans.index', ['view' => $tile['key']]) }}"
+                           class="dash-metric-tile dash-metric-tile--{{ $theme }} {{ $isIdle ? 'dash-metric-tile--idle' : '' }}">
+                            <p class="dash-metric-tile__value">{{ $count }}</p>
+                            <p class="dash-metric-tile__label">{{ $tile['label'] }}</p>
+                            <p class="dash-metric-tile__meta">{{ $tile['desc'] }}</p>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </x-admin.dash-section>
 
     @include('admin.partials.operational_alerts')
 
-    {{-- Statistik detail — untuk drill-down --}}
-    <details class="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 marker:content-none hover:bg-gray-50">
-            <div>
-                <h3 class="font-bold text-gray-900">Analisis Detail</h3>
-                <p class="text-xs text-gray-500">Breakdown status operasional, pembibitan, dan per jenis operasional</p>
-            </div>
-            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 group-open:hidden">Buka</span>
-            <span class="hidden rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 group-open:inline">Tutup</span>
-        </summary>
-
-        <div class="border-t border-gray-100 p-5">
-            <div class="mb-6 grid gap-4 sm:grid-cols-3">
-                @foreach ([
-                    ['key' => 'rencana', 'label' => 'Rencana', 'color' => 'text-blue-700', 'bg' => 'bg-blue-50 border-blue-100'],
-                    ['key' => 'diproses', 'label' => 'Diproses', 'color' => 'text-amber-700', 'bg' => 'bg-amber-50 border-amber-100'],
-                    ['key' => 'selesai', 'label' => 'Selesai', 'color' => 'text-green-700', 'bg' => 'bg-green-50 border-green-100'],
-                ] as $item)
-                    <div class="rounded-xl border p-4 text-center {{ $item['bg'] }}">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $item['label'] }}</p>
-                        <p class="mt-1 text-3xl font-black {{ $item['color'] }}">{{ number_format($status_global[$item['key']]) }}</p>
-                    </div>
-                @endforeach
-            </div>
-
-            <x-admin.data-table class="border-gray-100">
-                <x-slot:header>
-                    <div class="border-b border-gray-100 bg-gray-50 px-4 py-3">
-                        <h4 class="font-semibold text-gray-900">Operasional per Jenis</h4>
-                    </div>
-                </x-slot:header>
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis Operasional</th>
-                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Rencana</th>
-                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Diproses</th>
-                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Selesai</th>
-                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Progress</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700"></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @foreach ($layanan_per_jenis as $row)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm">
-                                <span class="mr-2">{{ $row['icon'] }}</span>
-                                <span class="font-medium text-gray-900">{{ $row['jenis'] }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-center text-sm">{{ $row['rencana'] }}</td>
-                            <td class="px-4 py-3 text-center text-sm">{{ $row['diproses'] }}</td>
-                            <td class="px-4 py-3 text-center text-sm">{{ $row['selesai'] }}</td>
-                            <td class="px-4 py-3 text-sm">
-                                <div class="flex items-center gap-2">
-                                    <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
-                                        <div class="h-full rounded-full bg-green-500" style="width: {{ $row['progress'] }}%"></div>
-                                    </div>
-                                    <span class="w-8 text-xs font-semibold text-gray-600">{{ $row['progress'] }}%</span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3 text-right text-sm">
-                                <a href="{{ route('admin.pemangkasans.index', ['jenis' => $row['jenis']]) }}"
-                                   class="text-xs font-semibold text-green-700 hover:underline">Detail</a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </x-admin.data-table>
-        </div>
-    </details>
-
     @unless ($canWrite ?? auth()->user()?->canWrite())
         <p class="mt-8 text-center text-xs text-gray-400">
-            Klik kartu di atas untuk melihat detail. Gunakan tombol <strong>Kembali ke Dashboard</strong> untuk kembali ke ringkasan.
+            Klik kartu untuk melihat detail modul terkait.
         </p>
     @endunless
 @endsection

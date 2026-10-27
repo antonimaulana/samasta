@@ -104,17 +104,8 @@
         color: #9ca3af;
     }
 
-    #admin-mobile-drawer nav a {
-        display: block;
-        padding: 0.5rem 0.75rem;
+    #admin-mobile-drawer .admin-nav-link,
+    #admin-mobile-drawer .admin-nav-sublink {
         color: #d1d5db;
-        text-decoration: none;
-        font-size: 0.875rem;
-        border-radius: 0.5rem;
-    }
-
-    #admin-mobile-drawer nav a:hover {
-        background: #1f2937;
-        color: #ffffff;
     }
 </style>

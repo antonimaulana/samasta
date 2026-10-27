@@ -5,11 +5,11 @@
     $armadaRequired = $armadaRequired ?? true;
     $sopirOptions = \App\Support\ArmadaSopirOptions::names();
     $armadaRows = $armadaRows ?? old('armada', $kinerja?->armadas?->map(fn ($row) => [
-        'alat_sarana_operasional_id' => $row->alat_sarana_operasional_id ?? '',
+        'armada_id' => $row->armada_id ?? '',
         'sopir' => $row->sopir ?? '',
-    ])->all() ?? [['alat_sarana_operasional_id' => '', 'sopir' => '']]);
+    ])->all() ?? [['armada_id' => '', 'sopir' => '']]);
     if ($armadaRows === []) {
-        $armadaRows = [['alat_sarana_operasional_id' => '', 'sopir' => '']];
+        $armadaRows = [['armada_id' => '', 'sopir' => '']];
     }
 @endphp
 
@@ -19,7 +19,7 @@
             <h3 class="text-sm font-bold text-green-800">Data Armada</h3>
             @unless($isLapanganArmada)
                 <p class="mt-1 text-xs text-gray-500">
-                    Pilih armada dari inventaris Alat/Sarana Operasional (Tim Armada) dan tentukan sopir{{ $armadaRequired ? '.' : ' — opsional.' }}
+                    Pilih armada dari inventaris Armada dan tentukan sopir{{ $armadaRequired ? '.' : ' — opsional.' }}
                 </p>
             @endunless
         </div>
@@ -36,7 +36,7 @@
     @if ($armadaInventory->isEmpty())
         <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             Belum ada data armada di
-            <a href="{{ route('admin.alat-sarana-operasionals.index') }}" class="font-semibold underline">Alat/Sarana Operasional</a>.
+            <a href="{{ route('admin.armadas.index') }}" class="font-semibold underline">Armada</a>.
             Tambahkan inventaris armada untuk Tim Armada terlebih dahulu.
         </div>
     @endif
@@ -44,7 +44,7 @@
     <div id="armada-rows" class="space-y-4">
         @foreach ($armadaRows as $index => $armada)
             @php
-                $selectedId = (string) ($armada['alat_sarana_operasional_id'] ?? '');
+                $selectedId = (string) ($armada['armada_id'] ?? '');
                 $selectedSopir = (string) ($armada['sopir'] ?? '');
             @endphp
             <div class="armada-row rounded-xl border border-gray-200 bg-gray-50 p-4" data-index="{{ $index }}">
@@ -58,7 +58,7 @@
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
                         <label class="mb-1 block text-sm font-medium text-gray-700">Nama Armada{{ $armadaRequired ? ' *' : '' }}</label>
-                        <select name="armada[{{ $index }}][alat_sarana_operasional_id]"
+                        <select name="armada[{{ $index }}][armada_id]"
                                 class="armada-select w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                                 @disabled($armadaInventory->isEmpty())>
                             <option value="">Pilih armada</option>
@@ -68,7 +68,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        @error('armada.'.$index.'.alat_sarana_operasional_id')
+                        @error('armada.'.$index.'.armada_id')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -101,7 +101,7 @@
         <div class="grid gap-4 md:grid-cols-2">
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700">Nama Armada{{ $armadaRequired ? ' *' : '' }}</label>
-                <select name="armada[__INDEX__][alat_sarana_operasional_id]"
+                <select name="armada[__INDEX__][armada_id]"
                         class="armada-select w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
                     <option value="">Pilih armada</option>
                     @foreach ($armadaInventory as $option)

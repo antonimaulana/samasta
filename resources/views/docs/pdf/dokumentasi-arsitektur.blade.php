@@ -241,7 +241,7 @@
 <table class="data">
     <tr><th>Domain</th><th>Model</th></tr>
     <tr><td>Parks</td><td>Taman, TamanImage, Kecamatan, Kelurahan, RthKategori</td></tr>
-    <tr><td>Operations</td><td>PemeliharaanTaman, PemeliharaanTamanArmada, Pemangkasan, AlatSaranaOperasional, TimPelaksana</td></tr>
+    <tr><td>Operations</td><td>PemeliharaanTaman, PemeliharaanTamanArmada, Pemangkasan, Armada, TimPelaksana</td></tr>
     <tr><td>Bibit</td><td>Bibit, BibitMasuk, BibitKeluar</td></tr>
     <tr><td>Engagement</td><td>AduanMasyarakat, SurveyKepuasan</td></tr>
     <tr><td>Content</td><td>EnsiklopediaKategori, EnsiklopediaArtikel, Pejabat, KotaProfile</td></tr>
