@@ -6,6 +6,16 @@ use App\Models\Taman;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Capaian RTH per tahun (Laporan Taman), baris a–g:
+ * a = jumlah luas RTH dikelola (kumulatif tahun verifikasi ≤ kolom tahun)
+ * b = jumlah lokasi (unit), idem
+ * c = luas RTH publik RTRW (tetap)
+ * d = a ÷ c (%)
+ * e = a − penyesuaian tidak terpelihara (min 0)
+ * f = b
+ * g = e ÷ a (%)
+ */
 class TamanRthYearlySummary
 {
     /**
@@ -35,7 +45,7 @@ class TamanRthYearlySummary
         $baseQuery = $scope->scopeTamans(Taman::query(), $user);
 
         $rtrwLuasan = (int) config('simtaman.rth_laporan.luasan_rth_publik_rtrw_m2', 52_990_000);
-        $penyesuaianTidakTerpelihara = (int) config('simtaman.rth_laporan.luasan_penyesuaian_tidak_terpelihara_m2', 300_000);
+        $penyesuaianTidakTerpelihara = (int) config('simtaman.rth_laporan.luasan_penyesuaian_tidak_terpelihara_m2', 556_600);
 
         $years = $this->years();
         $metrics = [];
@@ -54,8 +64,12 @@ class TamanRthYearlySummary
                 'luasan' => $luasan,
                 'lokasi' => $lokasi,
                 'luasan_terpelihara' => $luasanTerpelihara,
-                'persen_rtrw' => $rtrwLuasan > 0 ? ($luasan / $rtrwLuasan) * 100 : 0.0,
-                'persen_terpelihara' => $luasan > 0 ? ($luasanTerpelihara / $luasan) * 100 : 0.0,
+                'persen_rtrw' => $rtrwLuasan > 0
+                    ? round(($luasan / $rtrwLuasan) * 100, 2)
+                    : 0.0,
+                'persen_terpelihara' => $luasan > 0
+                    ? round(($luasanTerpelihara / $luasan) * 100, 2)
+                    : 0.0,
             ];
         }
 

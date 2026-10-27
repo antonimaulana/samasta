@@ -1,25 +1,31 @@
-<section>
-    <div class="mb-8 text-center sm:mb-10">
-        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold tracking-wide text-emerald-700 sm:px-4 sm:text-xs">
-            <span>🌱</span> Disperkimtan Kota Batam
+<section class="penjaga-hijau" id="penjaga-hijau" aria-labelledby="penjaga-hijau-title">
+    <div class="penjaga-hijau__header">
+        <span class="penjaga-hijau__badge">
+            <span aria-hidden="true">🌱</span> Disperkimtan Kota Batam
         </span>
-        <h2 class="mt-2 text-xl font-black text-gray-900 sm:mt-3 sm:text-2xl lg:text-3xl">Penjaga Hijau Kota</h2>
-        <p class="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-gray-600 sm:mt-3 sm:text-base">
-            Wajah di balik keindahan taman Batam — tim lapangan yang setiap hari merawat, menanam,
-            dan menjaga ruang hijau agar nyaman bagi seluruh warga.
+        <h2 id="penjaga-hijau-title" class="penjaga-hijau__title">Penjaga Hijau Kota</h2>
+        <p class="penjaga-hijau__lead">
+            Tim lapangan yang setiap hari merawat, menanam, dan menjaga ruang hijau agar Kota Batam semakin indah
+            dan nyaman bagi seluruh warga.
         </p>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 lg:gap-6">
+    <ul class="penjaga-hijau__grid" role="list">
         @foreach ($penjagaHijauGallery as $foto)
-            <figure class="group overflow-hidden rounded-2xl bg-green-900 shadow-lg shadow-green-200/50 ring-1 ring-green-100 sm:rounded-3xl sm:shadow-xl">
-                <div class="h-40 overflow-hidden sm:h-auto sm:aspect-[3/4]">
-                    <img src="{{ asset($foto['image']) }}"
-                         alt="{{ $foto['title'] }} — Penjaga Hijau Kota Batam"
-                         loading="lazy"
-                         class="h-full w-full object-cover object-center transition duration-700 group-hover:scale-105">
-                </div>
-            </figure>
+            <li>
+                <article class="penjaga-hijau__card">
+                    <div class="penjaga-hijau__media">
+                        <img src="{{ asset($foto['image']) }}"
+                             alt="Petugas pertamanan lapangan — Penjaga Hijau Kota Batam"
+                             width="600"
+                             height="800"
+                             loading="lazy"
+                             decoding="async"
+                             class="penjaga-hijau__photo {{ $foto['photo_modifier'] ?? '' }}"
+                             style="object-position: {{ $foto['focus'] ?? 'center 22%' }}">
+                    </div>
+                </article>
+            </li>
         @endforeach
-    </div>
+    </ul>
 </section>

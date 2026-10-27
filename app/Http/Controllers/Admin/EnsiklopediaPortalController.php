@@ -7,27 +7,12 @@ use App\Models\EnsiklopediaPortalSetting;
 use App\Support\EnsiklopediaPortalConfig;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class EnsiklopediaPortalController extends Controller
 {
     public function __construct()
     {
         $this->middleware('admin.manage');
-    }
-
-    public function edit(): View
-    {
-        $setting = EnsiklopediaPortalSetting::query()->firstOrCreate([]);
-        $interaktif = array_replace_recursive(
-            EnsiklopediaPortalConfig::interaktifDefaults(),
-            $setting->interaktif_config ?? []
-        );
-
-        return view('admin.ensiklopedia_portal.edit', [
-            'setting' => $setting,
-            'interaktif' => $interaktif,
-        ]);
     }
 
     public function update(Request $request): RedirectResponse
@@ -113,7 +98,7 @@ class EnsiklopediaPortalController extends Controller
         EnsiklopediaPortalConfig::forgetCache();
 
         return redirect()
-            ->route('admin.ensiklopedia-portal.edit')
+            ->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'portal'])
             ->with('success', 'Pengaturan portal ensiklopedia berhasil disimpan.');
     }
 }

@@ -62,13 +62,13 @@ class AdminAccessTest extends TestCase
             ->assertRedirect(route('aduan.create'));
     }
 
-    public function test_operator_can_access_ensiklopedia_but_not_sistem_or_dpa(): void
+    public function test_operator_cannot_access_ensiklopedia_pengaturan_or_sistem_or_dpa(): void
     {
         $operator = User::factory()->operatorTeams([], allWilayah: true)->create();
 
         $this->actingAs($operator)
-            ->get(route('admin.ensiklopedia-kategoris.index'))
-            ->assertOk();
+            ->get(route('admin.ensiklopedia-pengaturan.index'))
+            ->assertForbidden();
 
         $this->actingAs($operator)
             ->get(route('admin.users.index'))
@@ -96,14 +96,13 @@ class AdminAccessTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_operator_admin_nav_shows_ensiklopedia_not_sistem(): void
+    public function test_operator_admin_nav_does_not_show_sistem_menu(): void
     {
         $operator = User::factory()->operatorTeams([], allWilayah: true)->create();
 
         $this->actingAs($operator)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Ensiklopedia')
             ->assertDontSee('Kelola Pengguna')
             ->assertDontSee('Monitoring DPA');
     }

@@ -14,27 +14,21 @@ use Illuminate\View\View;
 
 class EnsiklopediaArtikelController extends Controller
 {
-    public function index(Request $request): View
+    public function __construct()
     {
-        $artikels = EnsiklopediaArtikel::with('kategori')
-            ->when($request->filled('kategori'), function ($query) use ($request) {
-                $query->where('ensiklopedia_kategori_id', $request->integer('kategori'));
-            })
-            ->tap(fn ($q) => TableSearch::apply($q, $request, [
-                'judul',
-                'slug',
-                'ringkas',
-                'konten',
-                'kategori.nama',
-            ]))
-            ->orderBy('urutan')
-            ->orderBy('judul')
-            ->paginate(15)
-            ->withQueryString();
+        $this->middleware('admin.manage');
+    }
 
-        $kategoris = EnsiklopediaKategori::orderBy('nama')->get();
+    public function index(Request $request): RedirectResponse
+    {
+        $query = $request->query();
+        if (isset($query['search'])) {
+            $query['artikel_search'] = $query['search'];
+            unset($query['search']);
+        }
+        $query['tab'] = 'artikel';
 
-        return view('admin.ensiklopedia_artikels.index', compact('artikels', 'kategoris'));
+        return redirect()->route('admin.ensiklopedia-pengaturan.index', $query);
     }
 
     public function create(): View
@@ -49,7 +43,7 @@ class EnsiklopediaArtikelController extends Controller
         EnsiklopediaArtikel::create($this->validateArtikel($request));
 
         return redirect()
-            ->route('admin.ensiklopedia-artikels.index')
+            ->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'artikel'])
             ->with('success', 'Artikel ensiklopedia berhasil ditambahkan.');
     }
 
@@ -68,7 +62,7 @@ class EnsiklopediaArtikelController extends Controller
         $ensiklopediaArtikel->update($this->validateArtikel($request, $ensiklopediaArtikel));
 
         return redirect()
-            ->route('admin.ensiklopedia-artikels.index')
+            ->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'artikel'])
             ->with('success', 'Artikel ensiklopedia berhasil diperbarui.');
     }
 
@@ -77,7 +71,7 @@ class EnsiklopediaArtikelController extends Controller
         $ensiklopediaArtikel->delete();
 
         return redirect()
-            ->route('admin.ensiklopedia-artikels.index')
+            ->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'artikel'])
             ->with('success', 'Artikel ensiklopedia berhasil dihapus.');
     }
 

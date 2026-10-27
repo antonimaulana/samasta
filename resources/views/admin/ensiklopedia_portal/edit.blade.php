@@ -1,28 +1,19 @@
 @extends('layouts.admin')
 
-@section('title', 'Pengaturan Ensiklopedia')
-@section('header', 'Konten Portal Ensiklopedia')
+@section('title', 'Portal Ensiklopedia')
+@section('header', 'Portal & Interaktif')
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p class="max-w-2xl text-sm text-gray-600">
-            Atur teks hero, tips interaktif, fakta edukasi, dan bank soal kuis — tanpa mengubah artikel/kategori (kelola di menu Ensiklopedia).
-        </p>
-        <a href="{{ route('ensiklopedia.index') }}" target="_blank" rel="noopener"
-           class="rounded-lg border border-green-300 bg-green-50 px-4 py-2 text-sm font-semibold text-green-800 hover:bg-green-100">
-            Lihat portal ↗
-        </a>
+    <div class="mb-4">
+        <a href="{{ route('admin.ensiklopedia.dashboard') }}" class="text-sm font-semibold text-green-700 hover:underline">← Ringkasan ensiklopedia</a>
     </div>
 
-    @if (session('success'))
-        <div class="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">{{ session('success') }}</div>
-    @endif
-
-    @if ($errors->any())
-        <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            Periksa kembali isian form.
-        </div>
-    @endif
+    <div class="mb-6 flex flex-wrap items-center justify-end gap-3">
+        <a href="{{ route('ensiklopedia.index') }}" target="_blank" rel="noopener"
+           class="text-sm font-semibold text-green-700 hover:underline">
+            Pratinjau portal ↗
+        </a>
+    </div>
 
     <form action="{{ route('admin.ensiklopedia-portal.update') }}" method="POST" id="ensiklopedia-portal-form">
         @csrf

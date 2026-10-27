@@ -3,9 +3,18 @@
     $bibitActive = request()->routeIs('admin.bibits.*', 'admin.bibit-masuks.*', 'admin.bibit-keluars.*', 'admin.bibit-laporan.*');
     $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.alat-sarana-operasionals.*');
     $masyarakatActive = request()->routeIs('admin.aduan-masyarakats.*', 'admin.survey-kepuasan.*');
-    $ensiklopediaActive = request()->routeIs('admin.ensiklopedia-kategoris.*', 'admin.ensiklopedia-artikels.*');
     $evaluasiActive = request()->routeIs('admin.evaluasi.*');
-    $sistemActive = request()->routeIs('admin.tim-pelaksanas.*', 'admin.users.*', 'admin.activity-logs.*', 'admin.beranda-slides.*', 'admin.faq.*', 'admin.ensiklopedia-portal.*');
+    $sistemActive = request()->routeIs(
+        'admin.tim-pelaksanas.*',
+        'admin.users.*',
+        'admin.activity-logs.*',
+        'admin.beranda-slides.*',
+        'admin.faq.*',
+        'admin.ensiklopedia-pengaturan.*',
+        'admin.ensiklopedia-kategoris.*',
+        'admin.ensiklopedia-artikels.*',
+        'admin.ensiklopedia-portal.*',
+    );
 @endphp
 
 <nav class="space-y-1 px-4 py-4">
@@ -134,27 +143,6 @@
         </div>
     </div>
 
-    @if ($canWrite ?? false)
-        <div class="sidebar-menu-group {{ $ensiklopediaActive ? 'is-open' : '' }}">
-            <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $ensiklopediaActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
-                <span>Ensiklopedia</span>
-                <svg class="sidebar-chevron h-4 w-4 flex-shrink-0 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-            <div class="sidebar-submenu">
-                <a href="{{ route('admin.ensiklopedia-kategoris.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.ensiklopedia-kategoris.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                    Kategori
-                </a>
-                <a href="{{ route('admin.ensiklopedia-artikels.index') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.ensiklopedia-artikels.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                    Artikel
-                </a>
-            </div>
-        </div>
-    @endif
-
     @if ($canManageUsers ?? false)
         <div class="sidebar-menu-group {{ $sistemActive ? 'is-open' : '' }}">
             <button type="button" class="sidebar-menu-trigger flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm {{ $sistemActive ? 'bg-green-600 text-white' : 'text-gray-300 hover:bg-gray-800' }}">
@@ -184,9 +172,9 @@
                    class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.faq.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
                     FAQ Beranda
                 </a>
-                <a href="{{ route('admin.ensiklopedia-portal.edit') }}"
-                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.ensiklopedia-portal.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
-                    Konten Ensiklopedia
+                <a href="{{ route('admin.ensiklopedia-pengaturan.index') }}"
+                   class="block rounded-lg py-2 pl-8 pr-3 text-sm {{ request()->routeIs('admin.ensiklopedia-pengaturan.*', 'admin.ensiklopedia-kategoris.*', 'admin.ensiklopedia-artikels.*', 'admin.ensiklopedia-portal.*') ? 'bg-green-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' }}">
+                    Ensiklopedia
                 </a>
             </div>
         </div>

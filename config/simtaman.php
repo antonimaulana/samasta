@@ -39,7 +39,7 @@ return [
         'luasan_penyesuaian_tidak_terpelihara_m2' => (int) env('SIMTAMAN_RTH_PENYESUAIAN_TIDAK_TERPELIHARA_M2', env('SIMAPAN_RTH_PENYESUAIAN_TIDAK_TERPELIHARA_M2', 556_600)),
 
         /** Kolom tahun pada tabel rekap (perhitungan kumulatif tahun pemutakhiran ke bawah). */
-        'tahun' => [2025, 2026],
+        'tahun' => [2025, 2026, 2027],
     ],
 
     /*

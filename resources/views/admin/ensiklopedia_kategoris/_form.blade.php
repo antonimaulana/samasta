@@ -48,7 +48,7 @@
             class="rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white hover:bg-green-700">
         Simpan
     </button>
-    <a href="{{ route('admin.ensiklopedia-kategoris.index') }}"
+    <a href="{{ route('admin.ensiklopedia-pengaturan.index', ['tab' => 'kategori']) }}"
        class="rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
         Batal
     </a>

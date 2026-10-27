@@ -13,15 +13,21 @@ use Illuminate\View\View;
 
 class EnsiklopediaKategoriController extends Controller
 {
-    public function index(Request $request): View
+    public function __construct()
     {
-        $kategoris = TableSearch::apply(
-            EnsiklopediaKategori::withCount('artikels')->orderBy('urutan')->orderBy('nama'),
-            $request,
-            ['nama', 'slug', 'deskripsi']
-        )->paginate(15)->withQueryString();
+        $this->middleware('admin.manage');
+    }
 
-        return view('admin.ensiklopedia_kategoris.index', compact('kategoris'));
+    public function index(Request $request): RedirectResponse
+    {
+        $query = $request->query();
+        if (isset($query['search'])) {
+            $query['kategori_search'] = $query['search'];
+            unset($query['search']);
+        }
+        $query['tab'] = 'kategori';
+
+        return redirect()->route('admin.ensiklopedia-pengaturan.index', $query);
     }
 
     public function create(): View
@@ -34,7 +40,7 @@ class EnsiklopediaKategoriController extends Controller
         EnsiklopediaKategori::create($this->validateKategori($request));
 
         return redirect()
-            ->route('admin.ensiklopedia-kategoris.index')
+            ->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'kategori'])
             ->with('success', 'Kategori ensiklopedia berhasil ditambahkan.');
     }
 
@@ -50,7 +56,7 @@ class EnsiklopediaKategoriController extends Controller
         $ensiklopediaKategori->update($this->validateKategori($request, $ensiklopediaKategori));
 
         return redirect()
-            ->route('admin.ensiklopedia-kategoris.index')
+            ->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'kategori'])
             ->with('success', 'Kategori ensiklopedia berhasil diperbarui.');
     }
 
@@ -59,7 +65,7 @@ class EnsiklopediaKategoriController extends Controller
         $ensiklopediaKategori->delete();
 
         return redirect()
-            ->route('admin.ensiklopedia-kategoris.index')
+            ->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'kategori'])
             ->with('success', 'Kategori ensiklopedia berhasil dihapus.');
     }
 

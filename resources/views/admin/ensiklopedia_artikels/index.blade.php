@@ -4,12 +4,15 @@
 @section('header', 'Artikel Ensiklopedia')
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-sm text-gray-600">Kelola artikel konten ensiklopedia di situs publik.</p>
+    <div class="mb-4">
+        <a href="{{ route('admin.ensiklopedia.dashboard') }}" class="text-sm font-semibold text-green-700 hover:underline">← Ringkasan ensiklopedia</a>
+    </div>
+
+    <div class="mb-6 flex flex-wrap items-center justify-end gap-3">
         <div class="flex gap-2">
             <a href="{{ route('admin.ensiklopedia-kategoris.index') }}"
                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Kelola Kategori
+                Kategori
             </a>
             <x-admin.can-write>
             <a href="{{ route('admin.ensiklopedia-artikels.create') }}"

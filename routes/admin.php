@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\BerandaSlideController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\EnsiklopediaArtikelController;
 use App\Http\Controllers\Admin\EnsiklopediaKategoriController;
+use App\Http\Controllers\Admin\EnsiklopediaPengaturanController;
 use App\Http\Controllers\Admin\EnsiklopediaPortalController;
 use App\Http\Controllers\Admin\EvaluasiArmadaController;
 use App\Http\Controllers\Admin\EvaluasiDashboardController;
@@ -174,8 +175,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
 
     Route::get('tim-pelaksanas/suggest', [TimPelaksanaController::class, 'suggest'])->name('tim-pelaksanas.suggest');
     Route::get('tim-pelaksanas/roster', [TimPelaksanaController::class, 'roster'])->name('tim-pelaksanas.roster');
-    Route::resource('ensiklopedia-kategoris', EnsiklopediaKategoriController::class)->except(['show']);
-    Route::resource('ensiklopedia-artikels', EnsiklopediaArtikelController::class)->except(['show']);
+    Route::middleware('admin.manage')->group(function () {
+        Route::get('ensiklopedia-pengaturan', [EnsiklopediaPengaturanController::class, 'index'])->name('ensiklopedia-pengaturan.index');
+        Route::get('ensiklopedia', fn () => redirect()->route('admin.ensiklopedia-pengaturan.index'));
+        Route::get('ensiklopedia-portal', fn () => redirect()->route('admin.ensiklopedia-pengaturan.index', ['tab' => 'portal']))
+            ->name('ensiklopedia-portal.edit');
+        Route::put('ensiklopedia-portal', [EnsiklopediaPortalController::class, 'update'])->name('ensiklopedia-portal.update');
+        Route::resource('ensiklopedia-kategoris', EnsiklopediaKategoriController::class)->except(['show']);
+        Route::resource('ensiklopedia-artikels', EnsiklopediaArtikelController::class)->except(['show']);
+    });
 
     Route::middleware('admin.manage')->group(function () {
         Route::get('tim-pelaksanas/create', [TimPelaksanaController::class, 'create'])->name('tim-pelaksanas.create');
@@ -203,8 +211,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         Route::delete('faq/{faq}', [FaqController::class, 'destroy'])->name('faq.destroy');
         Route::patch('faq/{faq}/toggle', [FaqController::class, 'toggle'])->name('faq.toggle');
         Route::post('faq/reorder', [FaqController::class, 'reorder'])->name('faq.reorder');
-        Route::get('ensiklopedia-portal', [EnsiklopediaPortalController::class, 'edit'])->name('ensiklopedia-portal.edit');
-        Route::put('ensiklopedia-portal', [EnsiklopediaPortalController::class, 'update'])->name('ensiklopedia-portal.update');
         Route::resource('users', UserController::class)->except(['show']);
 
         Route::middleware('admin.feature:dpa_monitoring')->prefix('dpa')->name('dpa.')->group(function () {
