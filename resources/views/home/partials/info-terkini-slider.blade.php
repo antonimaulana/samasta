@@ -1,7 +1,13 @@
-﻿<section class="relative" id="info-terkini-slider">
-    <div class="relative mb-6 sm:mb-8">
-        <h2 class="text-center text-2xl font-black text-gray-900 sm:text-3xl">Informasi Terkini</h2>
-        <div class="absolute right-0 top-1/2 hidden -translate-y-1/2 items-center gap-2 sm:flex">
+﻿<section class="relative" id="info-terkini-slider" aria-labelledby="info-terkini-heading">
+    <div class="relative">
+        <x-home-section-heading
+            tag="Berita"
+            title="Informasi Terkini"
+            lead="Informasi seputar pertamanan Kota Batam."
+            heading-id="info-terkini-heading"
+            class="sm:px-16 lg:px-20"
+        />
+        <div class="absolute right-0 top-8 hidden items-center gap-2 sm:flex lg:top-10">
             <button type="button" id="info-slider-prev"
                     class="flex h-9 w-9 items-center justify-center rounded-full border border-green-200 bg-white text-green-600 shadow-sm transition hover:bg-lime-50"
                     aria-label="Slide sebelumnya">

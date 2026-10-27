@@ -1,14 +1,10 @@
 <section class="penjaga-hijau" id="penjaga-hijau" aria-labelledby="penjaga-hijau-title">
-    <div class="penjaga-hijau__header">
-        <span class="penjaga-hijau__badge">
-            <span aria-hidden="true">🌱</span> Disperkimtan Kota Batam
-        </span>
-        <h2 id="penjaga-hijau-title" class="penjaga-hijau__title">Penjaga Hijau Kota</h2>
-        <p class="penjaga-hijau__lead">
-            Tim lapangan yang setiap hari merawat, menanam, dan menjaga ruang hijau agar Kota Batam semakin indah
-            dan nyaman bagi seluruh warga.
-        </p>
-    </div>
+    <x-home-section-heading
+        tag="Disperkimtan"
+        title="Penjaga Hijau Kota"
+        lead="Tim lapangan yang setiap hari merawat, menanam, dan menjaga ruang hijau agar Kota Batam semakin indah dan nyaman bagi seluruh warga."
+        heading-id="penjaga-hijau-title"
+    />
 
     <ul class="penjaga-hijau__grid" role="list">
         @foreach ($penjagaHijauGallery as $foto)

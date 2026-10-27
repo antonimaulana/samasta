@@ -37,10 +37,10 @@ class RthWilayahStatisticsTest extends TestCase
 
         $this->get(route('rth.index'))
             ->assertOk()
-            ->assertSee('Pedoman Data Resmi')
-            ->assertSee('Statistik Ruang Terbuka Hijau Kota Batam')
-            ->assertSee('RTH per Kategori')
-            ->assertSee('Capaian RTH per Tahun')
+            ->assertSee('Statistik RTH Kota Batam')
+            ->assertSee('Per kategori')
+            ->assertSee('Capaian per tahun')
+            ->assertDontSee('Tentang data ini')
             ->assertSee('Batam Kota')
             ->assertSee('Belian')
             ->assertSee('5.000');

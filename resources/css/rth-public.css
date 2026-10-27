@@ -1,0 +1,113 @@
+.rth-page {
+    --rth-accent: #059669;
+    --rth-accent-soft: #ecfdf5;
+}
+
+.rth-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    border: 1px solid rgb(167 243 208 / 0.6);
+    background: linear-gradient(135deg, #047857 0%, #0d9488 45%, #065f46 100%);
+    color: #fff;
+    box-shadow: 0 20px 40px -12px rgb(6 78 59 / 0.35);
+}
+
+.rth-kpi {
+    border-radius: 1rem;
+    background: rgb(255 255 255 / 0.12);
+    padding: 1rem 1.125rem;
+    border: 1px solid rgb(255 255 255 / 0.18);
+    backdrop-filter: blur(6px);
+    transition: transform 0.25s ease, background 0.25s ease;
+}
+.rth-kpi:hover {
+    transform: translateY(-2px);
+    background: rgb(255 255 255 / 0.16);
+}
+
+.rth-nav {
+    position: sticky;
+    top: 4.25rem;
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.65rem;
+    border-radius: 9999px;
+    border: 1px solid #d1fae5;
+    background: rgb(255 255 255 / 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgb(16 185 129 / 0.08);
+}
+.rth-nav__link {
+    border-radius: 9999px;
+    padding: 0.45rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #065f46;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.rth-nav__link:hover,
+.rth-nav__link.is-active {
+    background: #059669;
+    color: #fff;
+}
+
+.rth-progress {
+    height: 0.625rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: #f3f4f6;
+}
+.rth-progress__fill {
+    height: 100%;
+    border-radius: 9999px;
+    width: 0;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.rth-progress.is-animated .rth-progress__fill {
+    width: var(--rth-progress, 0%);
+}
+
+.rth-kategori-card {
+    border-radius: 1rem;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    overflow: hidden;
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.rth-kategori-card:hover,
+.rth-kategori-card.is-active {
+    border-color: #6ee7b7;
+    box-shadow: 0 8px 24px rgb(16 185 129 / 0.12);
+}
+
+.rth-year-tab {
+    border-radius: 9999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #047857;
+    background: #ecfdf5;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+.rth-year-tab.is-active {
+    background: #059669;
+    color: #fff;
+    border-color: #047857;
+}
+
+.rth-year-panel {
+    display: none;
+}
+.rth-year-panel.is-active {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .rth-year-mobile-only {
+        display: none;
+    }
+}
