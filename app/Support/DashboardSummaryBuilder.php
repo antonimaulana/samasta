@@ -31,8 +31,12 @@ class DashboardSummaryBuilder
         $totalStokBibit = (int) Bibit::sum('stok_tersedia');
         $bibitSiapTanam = (int) BibitMasuk::where('status_siap_tanam', true)->sum('sisa_stok');
 
-        $totalArmada = Armada::query()->armadaInventory()->count();
-        $armadaRecentUsage = app(ArmadaUsageHistory::class)->recent(4);
+        $totalArmada = ArmadaSchema::isReady()
+            ? Armada::query()->armadaInventory()->count()
+            : 0;
+        $armadaRecentUsage = ArmadaSchema::isReady()
+            ? app(ArmadaUsageHistory::class)->recent(4)
+            : collect();
 
         $totalPetugas = Petugas::query()->where('aktif', true)->count();
         $totalTimKerja = TimPelaksana::query()->where('aktif', true)->count();
