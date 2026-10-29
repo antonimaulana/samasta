@@ -114,7 +114,7 @@
                     <td><x-admin.bibit-nama :bibit="$keluar->bibit" pdf /></td>
                     <td class="num">-{{ number_format($keluar->jumlah) }}</td>
                     <td>{{ $keluar->peruntukan ?: '—' }}</td>
-                    <td>{{ $keluar->taman?->nama_taman ?: '—' }}</td>
+                    <td>{{ $keluar->lokasiLabel() }}</td>
                     <td>{{ $keluar->foto ? 'Ada' : '—' }}</td>
                 </tr>
             @empty

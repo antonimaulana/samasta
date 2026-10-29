@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bibit;
 use App\Models\BibitKeluar;
 use App\Models\BibitMasuk;
+use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,7 @@ class BibitKeluarController extends Controller
         $bibitKeluars = TableSearch::apply(
             BibitKeluar::with(['bibit', 'taman'])->latest('tanggal_keluar')->latest(),
             $request,
-            ['peruntukan', 'bibit.nama_tanaman', 'bibit.nama_ilmiah', 'taman.nama_taman']
+            ['peruntukan', 'lokasi', 'bibit.nama_tanaman', 'bibit.nama_ilmiah', 'taman.nama_taman']
         )->paginate(10)->withQueryString();
 
         return view('admin.bibit_keluars.index', compact('bibitKeluars'));
@@ -44,20 +45,22 @@ class BibitKeluarController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'bibit_id' => ['required', 'exists:bibits,id'],
             'jumlah' => ['required', 'integer', 'min:1'],
             'tanggal_keluar' => ['required', 'date'],
             'peruntukan' => ['required', Rule::in(BibitKeluar::PERUNTUKAN)],
-            'taman_id' => ['required', 'exists:tamans,id'],
             'foto' => ['required', 'image', 'max:4096'],
-        ], [], [
+        ], $this->lokasiValidationRules($request)), [], [
             'bibit_id' => 'bibit',
             'tanggal_keluar' => 'tanggal keluar',
             'peruntukan' => 'peruntukan',
             'taman_id' => 'lokasi',
+            'lokasi' => 'lokasi',
             'foto' => 'foto',
         ]);
+
+        $validated = $this->normalizeLokasiFields($request, $validated);
 
         $validated['foto'] = $request->file('foto')->store('bibit-keluar', 'public');
 
@@ -104,18 +107,20 @@ class BibitKeluarController extends Controller
 
     public function update(Request $request, BibitKeluar $bibitKeluar): RedirectResponse
     {
-        $validated = $request->validate([
+        $validated = $request->validate(array_merge([
             'jumlah' => ['required', 'integer', 'min:1'],
             'tanggal_keluar' => ['required', 'date'],
             'peruntukan' => ['required', Rule::in(BibitKeluar::PERUNTUKAN)],
-            'taman_id' => ['required', 'exists:tamans,id'],
             'foto' => ['nullable', 'image', 'max:4096'],
-        ], [], [
+        ], $this->lokasiValidationRules($request)), [], [
             'tanggal_keluar' => 'tanggal keluar',
             'peruntukan' => 'peruntukan',
             'taman_id' => 'lokasi',
+            'lokasi' => 'lokasi',
             'foto' => 'foto',
         ]);
+
+        $validated = $this->normalizeLokasiFields($request, $validated);
 
         if ($request->hasFile('foto')) {
             if ($bibitKeluar->foto) {
@@ -169,6 +174,45 @@ class BibitKeluarController extends Controller
         return redirect()
             ->back(fallback: route('admin.bibit-keluars.index'))
             ->with('success', 'Data stok keluar berhasil dihapus dan stok bibit telah dikembalikan.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function lokasiValidationRules(Request $request): array
+    {
+        $isLokasiLuar = $request->boolean('lokasi_luar');
+
+        $rules = [
+            'lokasi_luar' => ['nullable', 'boolean'],
+        ];
+
+        if ($isLokasiLuar) {
+            $rules['lokasi'] = ['required', 'string', 'max:255'];
+        } else {
+            $rules['taman_id'] = ['required', 'exists:tamans,id'];
+        }
+
+        return $rules;
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @return array<string, mixed>
+     */
+    private function normalizeLokasiFields(Request $request, array $validated): array
+    {
+        if ($request->boolean('lokasi_luar')) {
+            $validated['taman_id'] = null;
+            $validated['lokasi'] = trim((string) ($validated['lokasi'] ?? ''));
+        } else {
+            $taman = Taman::query()->findOrFail($validated['taman_id']);
+            $validated['lokasi'] = PemeliharaanTaman::lokasiLabelFromTaman($taman);
+        }
+
+        unset($validated['lokasi_luar']);
+
+        return $validated;
     }
 
     private function kurangiStokMasuk(Bibit $bibit, int $jumlah): void

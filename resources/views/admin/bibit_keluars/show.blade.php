@@ -35,10 +35,7 @@
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">Lokasi</dt>
-                        <dd class="mt-1 font-medium text-gray-900">{{ $keluar->taman?->nama_taman ?? '—' }}</dd>
-                        @if ($keluar->taman?->alamat)
-                            <dd class="text-sm text-gray-600">{{ $keluar->taman->alamat }}</dd>
-                        @endif
+                        <dd class="mt-1 font-medium text-gray-900">{{ $keluar->lokasiLabel() }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">Dicatat</dt>

@@ -128,7 +128,7 @@ class BibitLaporanController extends Controller
 
         $riwayatKeluarQuery = BibitKeluar::with(['bibit', 'taman'])
             ->whereBetween('tanggal_keluar', [$awal, $akhir]);
-        TableSearch::apply($riwayatKeluarQuery, $request, ['peruntukan', 'bibit.nama_tanaman', 'bibit.nama_ilmiah', 'taman.nama_taman']);
+        TableSearch::apply($riwayatKeluarQuery, $request, ['peruntukan', 'lokasi', 'bibit.nama_tanaman', 'bibit.nama_ilmiah', 'taman.nama_taman']);
         $riwayatKeluar = $riwayatKeluarQuery
             ->latest('tanggal_keluar')
             ->when(! $forPdf, fn ($q) => $q->limit(10))

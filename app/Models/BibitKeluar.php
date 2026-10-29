@@ -8,7 +8,12 @@ use Illuminate\Support\Facades\Storage;
 
 class BibitKeluar extends Model
 {
-    public const PERUNTUKAN = ['Penanaman Awal', 'Pergantian', 'Perbanyakan'];
+    public const PERUNTUKAN = [
+        'Penanaman Awal',
+        'Pergantian',
+        'Perbanyakan',
+        'Permintaan Masyarakat/Instansi',
+    ];
 
     protected $table = 'bibit_keluars';
 
@@ -18,6 +23,7 @@ class BibitKeluar extends Model
         'tanggal_keluar',
         'peruntukan',
         'taman_id',
+        'lokasi',
         'foto',
     ];
 
@@ -37,6 +43,25 @@ class BibitKeluar extends Model
     public function taman(): BelongsTo
     {
         return $this->belongsTo(Taman::class);
+    }
+
+    public function lokasiLabel(): string
+    {
+        if (filled($this->lokasi)) {
+            return (string) $this->lokasi;
+        }
+
+        if ($this->taman_id) {
+            $taman = $this->relationLoaded('taman')
+                ? $this->taman
+                : $this->taman()->first(['id', 'nama_taman', 'alamat']);
+
+            if ($taman) {
+                return PemeliharaanTaman::lokasiLabelFromTaman($taman);
+            }
+        }
+
+        return '—';
     }
 
     public function hasFotoPath(): bool

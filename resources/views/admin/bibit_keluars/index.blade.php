@@ -48,7 +48,7 @@
                         <span class="font-semibold text-red-700">-{{ $keluar->jumlah }}</span>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $keluar->peruntukan }}</td>
-                    <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">{{ $keluar->taman?->nama_taman ?? '—' }}</td>
+                    <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">{{ $keluar->lokasiLabel() }}</td>
                     <td class="px-4 py-3 text-right text-sm">
                         <div class="flex justify-end gap-2">
                             <a href="{{ route('admin.bibit-keluars.show', $keluar) }}"
