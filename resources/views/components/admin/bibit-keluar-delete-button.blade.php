@@ -1,4 +1,4 @@
-@props(['keluar', 'size' => 'default'])
+@props(['batch', 'size' => 'default'])
 
 @php
     $buttonClass = $size === 'xs'
@@ -7,8 +7,8 @@
 @endphp
 
 <x-admin.can-write>
-    <form action="{{ route('admin.bibit-keluars.destroy', $keluar) }}" method="POST"
-          onsubmit="return confirm('Yakin ingin menghapus data stok keluar ini? Stok bibit akan dikembalikan.')">
+    <form action="{{ route('admin.bibit-keluars.destroy', $batch) }}" method="POST"
+          onsubmit="return confirm('Yakin ingin menghapus transaksi stok keluar ini? Semua jenis bibit dalam transaksi akan dikembalikan ke stok.')">
         @csrf
         @method('DELETE')
         <button type="submit" class="{{ $buttonClass }}">

@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Bibit;
-use App\Models\BibitKeluar;
+use App\Models\BibitKeluarBatch;
 use App\Models\BibitMasuk;
 use App\Models\Kelurahan;
 use App\Models\Taman;
@@ -78,17 +78,20 @@ class BibitStokFotoShowTest extends TestCase
             'status_siap_tanam' => true,
         ]);
 
-        $keluar = BibitKeluar::create([
-            'bibit_id' => $bibit->id,
-            'jumlah' => 5,
+        $batch = BibitKeluarBatch::create([
             'tanggal_keluar' => now()->toDateString(),
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
+            'lokasi' => $taman->nama_taman,
             'foto' => 'bibit-keluar/bukti.jpg',
+        ]);
+        $batch->items()->create([
+            'bibit_id' => $bibit->id,
+            'jumlah' => 5,
         ]);
 
         $this->actingAs($admin)
-            ->get(route('admin.bibit-keluars.show', $keluar))
+            ->get(route('admin.bibit-keluars.show', $batch))
             ->assertOk()
             ->assertSee('Foto bukti', false)
             ->assertSee('bibit-keluar/bukti.jpg', false);

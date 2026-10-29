@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Bibit;
 use App\Models\BibitKeluar;
+use App\Models\BibitKeluarBatch;
 use App\Models\BibitMasuk;
 use App\Models\Taman;
 use App\Models\User;
@@ -38,16 +39,22 @@ class BibitTransaksiDeleteTest extends TestCase
         ]);
     }
 
-    private function createKeluar(Bibit $bibit, Taman $taman, int $jumlah): BibitKeluar
+    private function createKeluar(Bibit $bibit, Taman $taman, int $jumlah): BibitKeluarBatch
     {
-        return BibitKeluar::create([
-            'bibit_id' => $bibit->id,
-            'jumlah' => $jumlah,
+        $batch = BibitKeluarBatch::create([
             'tanggal_keluar' => now()->toDateString(),
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
+            'lokasi' => $taman->nama_taman,
             'foto' => 'bibit-keluar/test.jpg',
         ]);
+
+        $batch->items()->create([
+            'bibit_id' => $bibit->id,
+            'jumlah' => $jumlah,
+        ]);
+
+        return $batch;
     }
 
     public function test_operator_can_delete_unused_bibit_masuk_and_restore_stock(): void
@@ -94,15 +101,16 @@ class BibitTransaksiDeleteTest extends TestCase
             'alamat' => 'Alamat test bibit keluar',
             'deskripsi' => 'Deskripsi taman untuk test hapus stok keluar.',
         ]);
-        $keluar = $this->createKeluar($bibit, $taman, 30);
+        $batch = $this->createKeluar($bibit, $taman, 30);
 
         $this->actingAs($operator)
             ->from(route('admin.bibit-keluars.index'))
-            ->delete(route('admin.bibit-keluars.destroy', $keluar))
+            ->delete(route('admin.bibit-keluars.destroy', $batch))
             ->assertRedirect(route('admin.bibit-keluars.index'))
             ->assertSessionHas('success');
 
-        $this->assertDatabaseMissing('bibit_keluars', ['id' => $keluar->id]);
+        $this->assertDatabaseMissing('bibit_keluar_batches', ['id' => $batch->id]);
+        $this->assertDatabaseCount('bibit_keluars', 0);
         $this->assertSame(60, $bibit->fresh()->stok_tersedia);
         $this->assertSame(100, $masuk->fresh()->sisa_stok);
     }

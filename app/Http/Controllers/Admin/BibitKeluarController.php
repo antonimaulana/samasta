@@ -5,34 +5,50 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bibit;
 use App\Models\BibitKeluar;
-use App\Models\BibitMasuk;
+use App\Models\BibitKeluarBatch;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
+use App\Support\BibitKeluarStock;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class BibitKeluarController extends Controller
 {
-    public function __construct()
-    {
-        $this->authorizeResource(BibitKeluar::class, 'bibit_keluar');
+    public function __construct(
+        private BibitKeluarStock $stock
+    ) {
+        $this->authorizeResource(BibitKeluarBatch::class, 'bibit_keluar');
     }
 
     public function index(Request $request): View
     {
-        $bibitKeluars = TableSearch::apply(
-            BibitKeluar::with(['bibit', 'taman'])->latest('tanggal_keluar')->latest(),
-            $request,
-            ['peruntukan', 'lokasi', 'bibit.nama_tanaman', 'bibit.nama_ilmiah', 'taman.nama_taman']
-        )->paginate(10)->withQueryString();
+        $query = BibitKeluarBatch::query()
+            ->with(['taman'])
+            ->withCount('items')
+            ->withSum('items', 'jumlah')
+            ->latest('tanggal_keluar')
+            ->latest('id');
 
-        return view('admin.bibit_keluars.index', compact('bibitKeluars'));
+        $search = trim((string) $request->input('search', ''));
+        if ($search !== '') {
+            $like = '%'.$search.'%';
+            $query->where(function ($q) use ($request, $like) {
+                TableSearch::apply($q, $request, ['peruntukan', 'lokasi', 'taman.nama_taman']);
+                $q->orWhereHas('items', fn ($items) => $items->whereHas('bibit', fn ($bibit) => $bibit
+                    ->where('nama_tanaman', 'like', $like)
+                    ->orWhere('nama_ilmiah', 'like', $like)
+                    ->orWhere('jenis', 'like', $like)));
+            });
+        }
+
+        $batches = $query->paginate(10)->withQueryString();
+
+        return view('admin.bibit_keluars.index', compact('batches'));
     }
 
     public function create(): View
@@ -45,39 +61,28 @@ class BibitKeluarController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate(array_merge([
-            'bibit_id' => ['required', 'exists:bibits,id'],
-            'jumlah' => ['required', 'integer', 'min:1'],
-            'tanggal_keluar' => ['required', 'date'],
-            'peruntukan' => ['required', Rule::in(BibitKeluar::PERUNTUKAN)],
-            'foto' => ['required', 'image', 'max:4096'],
-        ], $this->lokasiValidationRules($request)), [], [
-            'bibit_id' => 'bibit',
-            'tanggal_keluar' => 'tanggal keluar',
-            'peruntukan' => 'peruntukan',
-            'taman_id' => 'lokasi',
-            'lokasi' => 'lokasi',
-            'foto' => 'foto',
-        ]);
+        $validated = $this->validateBatchRequest($request, requireFoto: true);
+        $items = $this->normalizeItems($validated['items']);
+        $header = $this->normalizeLokasiFields($request, $validated);
+        unset($header['items'], $header['lokasi_luar']);
 
-        $validated = $this->normalizeLokasiFields($request, $validated);
+        $header['foto'] = $request->file('foto')->store('bibit-keluar', 'public');
 
-        $validated['foto'] = $request->file('foto')->store('bibit-keluar', 'public');
+        DB::transaction(function () use ($header, $items) {
+            $this->stock->assertStokCukup($items);
 
-        DB::transaction(function () use ($validated) {
-            $bibit = Bibit::lockForUpdate()->findOrFail($validated['bibit_id']);
+            $batch = BibitKeluarBatch::create($header);
 
-            if ($validated['jumlah'] > $bibit->stok_tersedia) {
-                throw ValidationException::withMessages([
-                    'jumlah' => "Jumlah keluar ({$validated['jumlah']}) melebihi stok tersedia ({$bibit->stok_tersedia}) untuk {$bibit->nama_tanaman}.",
+            foreach ($items as $item) {
+                $bibit = Bibit::lockForUpdate()->findOrFail($item['bibit_id']);
+                $this->stock->kurangiStokMasuk($bibit, $item['jumlah']);
+                $bibit->decrement('stok_tersedia', $item['jumlah']);
+
+                $batch->items()->create([
+                    'bibit_id' => $item['bibit_id'],
+                    'jumlah' => $item['jumlah'],
                 ]);
             }
-
-            $this->kurangiStokMasuk($bibit, $validated['jumlah']);
-
-            BibitKeluar::create($validated);
-
-            $bibit->decrement('stok_tersedia', $validated['jumlah']);
         });
 
         return redirect()
@@ -85,84 +90,96 @@ class BibitKeluarController extends Controller
             ->with('success', 'Stok keluar berhasil dicatat dan stok bibit telah diperbarui.');
     }
 
-    public function show(BibitKeluar $bibitKeluar): View
+    public function show(BibitKeluarBatch $bibitKeluar): View
     {
-        $bibitKeluar->load(['bibit', 'taman']);
+        $bibitKeluar->load(['items.bibit', 'taman']);
 
         return view('admin.bibit_keluars.show', [
-            'keluar' => $bibitKeluar,
+            'batch' => $bibitKeluar,
         ]);
     }
 
-    public function edit(BibitKeluar $bibitKeluar): View
+    public function edit(BibitKeluarBatch $bibitKeluar): View
     {
-        $bibitKeluar->load('bibit');
+        $bibitKeluar->load(['items.bibit']);
+        $bibits = Bibit::query()
+            ->where(function ($q) use ($bibitKeluar) {
+                $q->where('stok_tersedia', '>', 0)
+                    ->orWhereIn('id', $bibitKeluar->items->pluck('bibit_id'));
+            })
+            ->orderBy('nama_tanaman')
+            ->get();
         $tamans = Taman::orderBy('nama_taman')->get();
 
         return view('admin.bibit_keluars.edit', [
-            'keluar' => $bibitKeluar,
+            'batch' => $bibitKeluar,
+            'bibits' => $bibits,
             'tamans' => $tamans,
         ]);
     }
 
-    public function update(Request $request, BibitKeluar $bibitKeluar): RedirectResponse
+    public function update(Request $request, BibitKeluarBatch $bibitKeluar): RedirectResponse
     {
-        $validated = $request->validate(array_merge([
-            'jumlah' => ['required', 'integer', 'min:1'],
-            'tanggal_keluar' => ['required', 'date'],
-            'peruntukan' => ['required', Rule::in(BibitKeluar::PERUNTUKAN)],
-            'foto' => ['nullable', 'image', 'max:4096'],
-        ], $this->lokasiValidationRules($request)), [], [
-            'tanggal_keluar' => 'tanggal keluar',
-            'peruntukan' => 'peruntukan',
-            'taman_id' => 'lokasi',
-            'lokasi' => 'lokasi',
-            'foto' => 'foto',
-        ]);
-
-        $validated = $this->normalizeLokasiFields($request, $validated);
+        $validated = $this->validateBatchRequest($request, requireFoto: false);
+        $items = $this->normalizeItems($validated['items']);
+        $header = $this->normalizeLokasiFields($request, $validated);
+        unset($header['items'], $header['lokasi_luar']);
 
         if ($request->hasFile('foto')) {
             if ($bibitKeluar->foto) {
                 Storage::disk('public')->delete($bibitKeluar->foto);
             }
 
-            $validated['foto'] = $request->file('foto')->store('bibit-keluar', 'public');
+            $header['foto'] = $request->file('foto')->store('bibit-keluar', 'public');
         }
 
-        DB::transaction(function () use ($bibitKeluar, $validated) {
-            $bibit = Bibit::lockForUpdate()->findOrFail($bibitKeluar->bibit_id);
-            $diff = $validated['jumlah'] - $bibitKeluar->jumlah;
+        DB::transaction(function () use ($bibitKeluar, $header, $items) {
+            $bibitKeluar->load('items');
 
-            if ($diff > 0) {
-                if ($diff > $bibit->stok_tersedia) {
-                    throw ValidationException::withMessages([
-                        'jumlah' => "Penambahan jumlah ({$diff}) melebihi stok tersedia ({$bibit->stok_tersedia}).",
-                    ]);
-                }
-
-                $this->kurangiStokMasuk($bibit, $diff);
-                $bibit->decrement('stok_tersedia', $diff);
-            } elseif ($diff < 0) {
-                $this->kembalikanStokMasuk($bibit, abs($diff));
-                $bibit->increment('stok_tersedia', abs($diff));
+            $bonus = [];
+            foreach ($bibitKeluar->items as $line) {
+                $bonus[$line->bibit_id] = ($bonus[$line->bibit_id] ?? 0) + $line->jumlah;
             }
 
-            $bibitKeluar->update($validated);
+            $this->stock->assertStokCukup($items, $bonus);
+
+            foreach ($bibitKeluar->items as $line) {
+                $bibit = Bibit::lockForUpdate()->findOrFail($line->bibit_id);
+                $this->stock->kembalikanStokMasuk($bibit, $line->jumlah);
+                $bibit->increment('stok_tersedia', $line->jumlah);
+            }
+
+            $bibitKeluar->items()->delete();
+
+            foreach ($items as $item) {
+                $bibit = Bibit::lockForUpdate()->findOrFail($item['bibit_id']);
+                $this->stock->kurangiStokMasuk($bibit, $item['jumlah']);
+                $bibit->decrement('stok_tersedia', $item['jumlah']);
+
+                $bibitKeluar->items()->create([
+                    'bibit_id' => $item['bibit_id'],
+                    'jumlah' => $item['jumlah'],
+                ]);
+            }
+
+            $bibitKeluar->update($header);
         });
 
         return redirect()
-            ->route('admin.bibit-keluars.index')
+            ->route('admin.bibit-keluars.show', $bibitKeluar)
             ->with('success', 'Data stok keluar berhasil diperbarui.');
     }
 
-    public function destroy(BibitKeluar $bibitKeluar): RedirectResponse
+    public function destroy(BibitKeluarBatch $bibitKeluar): RedirectResponse
     {
         DB::transaction(function () use ($bibitKeluar) {
-            $bibit = Bibit::lockForUpdate()->findOrFail($bibitKeluar->bibit_id);
+            $bibitKeluar->load('items');
 
-            $this->kembalikanStokMasuk($bibit, $bibitKeluar->jumlah);
-            $bibit->increment('stok_tersedia', $bibitKeluar->jumlah);
+            foreach ($bibitKeluar->items as $line) {
+                $bibit = Bibit::lockForUpdate()->findOrFail($line->bibit_id);
+                $this->stock->kembalikanStokMasuk($bibit, $line->jumlah);
+                $bibit->increment('stok_tersedia', $line->jumlah);
+            }
 
             if ($bibitKeluar->foto) {
                 Storage::disk('public')->delete($bibitKeluar->foto);
@@ -174,6 +191,60 @@ class BibitKeluarController extends Controller
         return redirect()
             ->back(fallback: route('admin.bibit-keluars.index'))
             ->with('success', 'Data stok keluar berhasil dihapus dan stok bibit telah dikembalikan.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateBatchRequest(Request $request, bool $requireFoto): array
+    {
+        $rules = array_merge([
+            'tanggal_keluar' => ['required', 'date'],
+            'peruntukan' => ['required', Rule::in(BibitKeluarBatch::PERUNTUKAN)],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.bibit_id' => ['required', 'distinct', 'exists:bibits,id'],
+            'items.*.jumlah' => ['required', 'integer', 'min:1'],
+            'foto' => [$requireFoto ? 'required' : 'nullable', 'image', 'max:4096'],
+        ], $this->lokasiValidationRules($request));
+
+        return $request->validate($rules, [], [
+            'tanggal_keluar' => 'tanggal keluar',
+            'peruntukan' => 'peruntukan',
+            'taman_id' => 'lokasi',
+            'lokasi' => 'lokasi',
+            'foto' => 'foto',
+            'items' => 'daftar bibit',
+            'items.*.bibit_id' => 'bibit',
+            'items.*.jumlah' => 'jumlah keluar',
+        ]);
+    }
+
+    /**
+     * @param  array<int, array{bibit_id?: mixed, jumlah?: mixed}>  $items
+     * @return list<array{bibit_id: int, jumlah: int}>
+     */
+    private function normalizeItems(array $items): array
+    {
+        $normalized = [];
+
+        foreach ($items as $item) {
+            if (! filled($item['bibit_id'] ?? null)) {
+                continue;
+            }
+
+            $normalized[] = [
+                'bibit_id' => (int) $item['bibit_id'],
+                'jumlah' => (int) $item['jumlah'],
+            ];
+        }
+
+        if ($normalized === []) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'items' => 'Tambahkan minimal satu jenis bibit dengan jumlah keluar.',
+            ]);
+        }
+
+        return $normalized;
     }
 
     /**
@@ -210,72 +281,6 @@ class BibitKeluarController extends Controller
             $validated['lokasi'] = PemeliharaanTaman::lokasiLabelFromTaman($taman);
         }
 
-        unset($validated['lokasi_luar']);
-
         return $validated;
-    }
-
-    private function kurangiStokMasuk(Bibit $bibit, int $jumlah): void
-    {
-        $sisa = $jumlah;
-
-        $masuks = BibitMasuk::where('bibit_id', $bibit->id)
-            ->where('sisa_stok', '>', 0)
-            ->orderBy('tanggal_masuk')
-            ->orderBy('id')
-            ->lockForUpdate()
-            ->get();
-
-        foreach ($masuks as $masuk) {
-            if ($sisa <= 0) {
-                break;
-            }
-
-            $potong = min($sisa, $masuk->sisa_stok);
-            $masuk->decrement('sisa_stok', $potong);
-            $sisa -= $potong;
-        }
-
-        if ($sisa > 0) {
-            throw ValidationException::withMessages([
-                'jumlah' => 'Stok batch tidak mencukupi untuk pengeluaran ini.',
-            ]);
-        }
-    }
-
-    private function kembalikanStokMasuk(Bibit $bibit, int $jumlah): void
-    {
-        $sisa = $jumlah;
-
-        $masuks = BibitMasuk::where('bibit_id', $bibit->id)
-            ->whereColumn('sisa_stok', '<', 'jumlah')
-            ->orderByDesc('tanggal_masuk')
-            ->orderByDesc('id')
-            ->lockForUpdate()
-            ->get();
-
-        foreach ($masuks as $masuk) {
-            if ($sisa <= 0) {
-                break;
-            }
-
-            $kapasitas = $masuk->jumlah - $masuk->sisa_stok;
-            $tambah = min($sisa, $kapasitas);
-            $masuk->increment('sisa_stok', $tambah);
-            $sisa -= $tambah;
-        }
-
-        if ($sisa > 0) {
-            $masuk = BibitMasuk::where('bibit_id', $bibit->id)
-                ->orderByDesc('tanggal_masuk')
-                ->orderByDesc('id')
-                ->lockForUpdate()
-                ->first();
-
-            if ($masuk) {
-                $masuk->increment('sisa_stok', $sisa);
-                $masuk->increment('jumlah', $sisa);
-            }
-        }
     }
 }

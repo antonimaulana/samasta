@@ -2,37 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class BibitKeluar extends Model
 {
-    public const PERUNTUKAN = [
-        'Penanaman Awal',
-        'Pergantian',
-        'Perbanyakan',
-        'Permintaan Masyarakat/Instansi',
-    ];
-
     protected $table = 'bibit_keluars';
 
     protected $fillable = [
+        'bibit_keluar_batch_id',
         'bibit_id',
         'jumlah',
-        'tanggal_keluar',
-        'peruntukan',
-        'taman_id',
-        'lokasi',
-        'foto',
     ];
 
     protected function casts(): array
     {
         return [
             'jumlah' => 'integer',
-            'tanggal_keluar' => 'date',
         ];
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(BibitKeluarBatch::class, 'bibit_keluar_batch_id');
     }
 
     public function bibit(): BelongsTo
@@ -40,47 +33,19 @@ class BibitKeluar extends Model
         return $this->belongsTo(Bibit::class);
     }
 
-    public function taman(): BelongsTo
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeWhereBatchTanggalBetween(Builder $query, $awal, $akhir): Builder
     {
-        return $this->belongsTo(Taman::class);
+        return $query->whereHas('batch', fn (Builder $batch) => $batch->whereBetween('tanggal_keluar', [$awal, $akhir]));
     }
 
-    public function lokasiLabel(): string
+    /**
+     * @param  Builder<self>  $query
+     */
+    public function scopeWhereBatchDate(Builder $query, $date): Builder
     {
-        if (filled($this->lokasi)) {
-            return (string) $this->lokasi;
-        }
-
-        if ($this->taman_id) {
-            $taman = $this->relationLoaded('taman')
-                ? $this->taman
-                : $this->taman()->first(['id', 'nama_taman', 'alamat']);
-
-            if ($taman) {
-                return PemeliharaanTaman::lokasiLabelFromTaman($taman);
-            }
-        }
-
-        return '—';
-    }
-
-    public function hasFotoPath(): bool
-    {
-        return filled($this->foto);
-    }
-
-    public function getFotoUrlAttribute(): ?string
-    {
-        if (! filled($this->foto)) {
-            return null;
-        }
-
-        $path = str_replace('\\', '/', (string) $this->foto);
-
-        if (! Storage::disk('public')->exists($path)) {
-            return null;
-        }
-
-        return Storage::disk('public')->url($path);
+        return $query->whereHas('batch', fn (Builder $batch) => $batch->whereDate('tanggal_keluar', $date));
     }
 }

@@ -179,7 +179,7 @@
                     <li class="flex items-center justify-between px-4 py-3 text-sm">
                         <div>
                             <x-admin.bibit-nama :bibit="$keluar->bibit" />
-                            <p class="text-xs text-gray-500">{{ $keluar->tanggal_keluar->format('d M Y') }} · {{ $keluar->peruntukan }} · {{ $keluar->lokasiLabel() }}</p>
+                            <p class="text-xs text-gray-500">{{ $keluar->batch->tanggal_keluar->format('d M Y') }} · {{ $keluar->batch->peruntukan }} · {{ $keluar->batch->lokasiLabel() }}</p>
                         </div>
                         <span class="font-semibold text-red-700">-{{ $keluar->jumlah }}</span>
                     </li>

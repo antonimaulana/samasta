@@ -110,12 +110,12 @@
             @forelse ($riwayatKeluar as $index => $keluar)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $keluar->tanggal_keluar->format('d/m/Y') }}</td>
+                    <td>{{ $keluar->batch->tanggal_keluar->format('d/m/Y') }}</td>
                     <td><x-admin.bibit-nama :bibit="$keluar->bibit" pdf /></td>
                     <td class="num">-{{ number_format($keluar->jumlah) }}</td>
-                    <td>{{ $keluar->peruntukan ?: '—' }}</td>
-                    <td>{{ $keluar->lokasiLabel() }}</td>
-                    <td>{{ $keluar->foto ? 'Ada' : '—' }}</td>
+                    <td>{{ $keluar->batch->peruntukan ?: '—' }}</td>
+                    <td>{{ $keluar->batch->lokasiLabel() }}</td>
+                    <td>{{ $keluar->batch->foto ? 'Ada' : '—' }}</td>
                 </tr>
             @empty
                 <tr>

@@ -199,28 +199,29 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Bibit</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
                         <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
                     </tr>
                 </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse ($recentKeluars as $keluar)
+                        @forelse ($recentKeluarBatches as $batch)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-gray-600">{{ $keluar->tanggal_keluar->format('d M Y') }}</td>
-                                <td class="px-4 py-2">
-                                    <x-admin.bibit-nama :bibit="$keluar->bibit" />
+                                <td class="px-4 py-2 text-gray-600">{{ $batch->tanggal_keluar->format('d M Y') }}</td>
+                                <td class="px-4 py-2 text-gray-700">
+                                    {{ $batch->peruntukan }}
+                                    <span class="block text-xs text-gray-500">{{ $batch->items_count }} jenis bibit</span>
                                 </td>
-                                <td class="px-4 py-2 font-semibold text-red-700">-{{ number_format($keluar->jumlah) }}</td>
-                                <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $keluar->lokasiLabel() }}</td>
+                                <td class="px-4 py-2 font-semibold text-red-700">-{{ number_format((int) ($batch->items_sum_jumlah ?? 0)) }}</td>
+                                <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $batch->lokasiLabel() }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.bibit-keluars.show', $keluar) }}"
+                                        <a href="{{ route('admin.bibit-keluars.show', $batch) }}"
                                            class="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50">
                                             Lihat
                                         </a>
-                                        <x-admin.bibit-keluar-delete-button :keluar="$keluar" size="xs" />
+                                        <x-admin.bibit-keluar-delete-button :batch="$batch" size="xs" />
                                     </div>
                                 </td>
                             </tr>

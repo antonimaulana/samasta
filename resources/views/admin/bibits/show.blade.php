@@ -139,17 +139,16 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($bibit->keluars as $keluar)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-gray-600">{{ $keluar->tanggal_keluar->format('d M Y') }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $keluar->batch->tanggal_keluar->format('d M Y') }}</td>
                                 <td class="px-4 py-2 font-semibold text-red-700">-{{ $keluar->jumlah }}</td>
-                                <td class="px-4 py-2 text-gray-600">{{ $keluar->peruntukan }}</td>
-                                <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $keluar->lokasiLabel() }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $keluar->batch->peruntukan }}</td>
+                                <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $keluar->batch->lokasiLabel() }}</td>
                                 <td class="px-4 py-2 text-right">
                                     <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.bibit-keluars.show', $keluar) }}"
+                                        <a href="{{ route('admin.bibit-keluars.show', $keluar->batch) }}"
                                            class="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50">
                                             Lihat
                                         </a>
-                                        <x-admin.bibit-keluar-delete-button :keluar="$keluar" size="xs" />
                                     </div>
                                 </td>
                             </tr>

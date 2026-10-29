@@ -24,58 +24,52 @@
         <thead class="bg-gray-50">
             <tr>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama Tanaman</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Rincian bibit</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Total</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
                 <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-            @forelse ($bibitKeluars as $keluar)
+            @forelse ($batches as $batch)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $keluar->tanggal_keluar->format('d M Y') }}</td>
-                    <td class="px-4 py-3 text-sm">
-                        <x-admin.bibit-nama :bibit="$keluar->bibit" />
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $batch->tanggal_keluar->format('d M Y') }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ $batch->peruntukan }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        {{ $batch->items_count }} jenis bibit
                     </td>
                     <td class="px-4 py-3 text-sm">
-                        <span class="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                            {{ $keluar->bibit->jenis }}
-                        </span>
+                        <span class="font-semibold text-red-700">-{{ (int) ($batch->items_sum_jumlah ?? 0) }}</span>
                     </td>
-                    <td class="px-4 py-3 text-sm">
-                        <span class="font-semibold text-red-700">-{{ $keluar->jumlah }}</span>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $keluar->peruntukan }}</td>
-                    <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">{{ $keluar->lokasiLabel() }}</td>
+                    <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">{{ $batch->lokasiLabel() }}</td>
                     <td class="px-4 py-3 text-right text-sm">
                         <div class="flex justify-end gap-2">
-                            <a href="{{ route('admin.bibit-keluars.show', $keluar) }}"
+                            <a href="{{ route('admin.bibit-keluars.show', $batch) }}"
                                class="rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-50">
                                 Lihat
                             </a>
                             <x-admin.can-write>
-                            <a href="{{ route('admin.bibit-keluars.edit', $keluar) }}"
+                            <a href="{{ route('admin.bibit-keluars.edit', $batch) }}"
                                class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
                                 Edit
                             </a>
-                            <x-admin.bibit-keluar-delete-button :keluar="$keluar" />
+                            <x-admin.bibit-keluar-delete-button :batch="$batch" />
                             </x-admin.can-write>
                         </div>
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                         Belum ada riwayat stok keluar.@if ($canWrite ?? auth()->user()?->canWrite()) <a href="{{ route('admin.bibit-keluars.create') }}" class="text-green-700 underline">Catat sekarang</a>@endif
                     </td>
                 </tr>
             @endforelse
         </tbody>
-        @if ($bibitKeluars->hasPages())
+        @if ($batches->hasPages())
             <x-slot:footer>
-                {{ $bibitKeluars->links() }}
+                {{ $batches->links() }}
             </x-slot:footer>
         @endif
     </x-admin.data-table>

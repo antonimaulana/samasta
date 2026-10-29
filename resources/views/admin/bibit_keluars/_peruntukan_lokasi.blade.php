@@ -1,6 +1,6 @@
 @php
-    $isLokasiLuar = filter_var(old('lokasi_luar', ($keluar && ! $keluar->taman_id) ? '1' : '0'), FILTER_VALIDATE_BOOLEAN);
-    $manualLokasiValue = old('lokasi', $isLokasiLuar ? ($keluar?->lokasi ?? '') : '');
+    $isLokasiLuar = filter_var(old('lokasi_luar', ($batch && ! $batch->taman_id) ? '1' : '0'), FILTER_VALIDATE_BOOLEAN);
+    $manualLokasiValue = old('lokasi', $isLokasiLuar ? ($batch?->lokasi ?? '') : '');
 @endphp
 
 <div>
@@ -8,8 +8,8 @@
     <select name="peruntukan" id="peruntukan" required
             class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
         <option value="">-- Pilih peruntukan --</option>
-        @foreach (\App\Models\BibitKeluar::PERUNTUKAN as $peruntukan)
-            <option value="{{ $peruntukan }}" @selected(old('peruntukan', $keluar?->peruntukan) === $peruntukan)>
+        @foreach (\App\Models\BibitKeluarBatch::PERUNTUKAN as $peruntukan)
+            <option value="{{ $peruntukan }}" @selected(old('peruntukan', $batch?->peruntukan) === $peruntukan)>
                 {{ $peruntukan }}
             </option>
         @endforeach
@@ -28,7 +28,7 @@
     <div id="bibit-keluar-lokasi-taman-section" class="{{ $isLokasiLuar ? 'hidden' : '' }}">
         <x-admin.taman-select
             :tamans="$tamans ?? collect()"
-            :selected="old('taman_id', $keluar?->taman_id)"
+            :selected="old('taman_id', $batch?->taman_id)"
             :required="true"
         />
         @error('taman_id')

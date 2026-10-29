@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bibit;
-use App\Models\BibitKeluar;
+use App\Models\BibitKeluarBatch;
 use App\Models\BibitMasuk;
 use App\Support\BibitCsvImporter;
 use App\Support\TableSearch;
@@ -42,14 +42,15 @@ class BibitController extends Controller
             ->limit(5)
             ->get();
 
-        $recentKeluars = BibitKeluar::query()
-            ->with(['bibit', 'taman'])
+        $recentKeluarBatches = BibitKeluarBatch::query()
+            ->withCount('items')
+            ->withSum('items', 'jumlah')
             ->latest('tanggal_keluar')
-            ->latest()
+            ->latest('id')
             ->limit(5)
             ->get();
 
-        return view('admin.bibits.index', compact('bibits', 'recentMasuks', 'recentKeluars'));
+        return view('admin.bibits.index', compact('bibits', 'recentMasuks', 'recentKeluarBatches'));
     }
 
     public function importForm(): View
@@ -136,7 +137,12 @@ class BibitController extends Controller
     {
         $bibit->load([
             'masuks' => fn ($query) => $query->latest('tanggal_masuk')->latest(),
-            'keluars' => fn ($query) => $query->with('taman')->latest('tanggal_keluar')->latest(),
+            'keluars' => fn ($query) => $query
+                ->with('batch')
+                ->join('bibit_keluar_batches', 'bibit_keluars.bibit_keluar_batch_id', '=', 'bibit_keluar_batches.id')
+                ->orderByDesc('bibit_keluar_batches.tanggal_keluar')
+                ->orderByDesc('bibit_keluars.id')
+                ->select('bibit_keluars.*'),
         ]);
 
         $totalMasuk = (int) $bibit->masuks->sum('jumlah');

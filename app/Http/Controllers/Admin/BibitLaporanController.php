@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bibit;
 use App\Models\BibitKeluar;
+use App\Models\BibitKeluarBatch;
 use App\Models\BibitMasuk;
 use App\Support\PdfExport;
 use App\Support\TableSearch;
@@ -56,17 +57,18 @@ class BibitLaporanController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         $totalMasuk = (int) BibitMasuk::whereBetween('tanggal_masuk', [$awal, $akhir])->sum('jumlah');
-        $totalKeluar = (int) BibitKeluar::whereBetween('tanggal_keluar', [$awal, $akhir])->sum('jumlah');
+        $totalKeluar = (int) BibitKeluar::query()->whereBatchTanggalBetween($awal, $akhir)->sum('jumlah');
         $mutasiBersih = $totalMasuk - $totalKeluar;
         $jumlahTransaksi = BibitMasuk::whereBetween('tanggal_masuk', [$awal, $akhir])->count()
-            + BibitKeluar::whereBetween('tanggal_keluar', [$awal, $akhir])->count();
+            + BibitKeluarBatch::whereBetween('tanggal_keluar', [$awal, $akhir])->count();
 
         $masukPerBibit = BibitMasuk::whereBetween('tanggal_masuk', [$awal, $akhir])
             ->selectRaw('bibit_id, SUM(jumlah) as total')
             ->groupBy('bibit_id')
             ->pluck('total', 'bibit_id');
 
-        $keluarPerBibit = BibitKeluar::whereBetween('tanggal_keluar', [$awal, $akhir])
+        $keluarPerBibit = BibitKeluar::query()
+            ->whereBatchTanggalBetween($awal, $akhir)
             ->selectRaw('bibit_id, SUM(jumlah) as total')
             ->groupBy('bibit_id')
             ->pluck('total', 'bibit_id');
@@ -106,14 +108,14 @@ class BibitLaporanController extends Controller
                 $date = Carbon::create($tahun, $bulan, $day);
                 $chartLabels[] = (string) $day;
                 $chartMasuk[] = (int) BibitMasuk::whereDate('tanggal_masuk', $date)->sum('jumlah');
-                $chartKeluar[] = (int) BibitKeluar::whereDate('tanggal_keluar', $date)->sum('jumlah');
+                $chartKeluar[] = (int) BibitKeluar::query()->whereBatchDate($date)->sum('jumlah');
             }
         } else {
             $cursor = $awal->copy();
             while ($cursor->lte($akhir)) {
                 $chartLabels[] = $cursor->format('d/m');
                 $chartMasuk[] = (int) BibitMasuk::whereDate('tanggal_masuk', $cursor)->sum('jumlah');
-                $chartKeluar[] = (int) BibitKeluar::whereDate('tanggal_keluar', $cursor)->sum('jumlah');
+                $chartKeluar[] = (int) BibitKeluar::query()->whereBatchDate($cursor)->sum('jumlah');
                 $cursor->addDay();
             }
         }
@@ -126,11 +128,15 @@ class BibitLaporanController extends Controller
             ->when(! $forPdf, fn ($q) => $q->limit(10))
             ->get();
 
-        $riwayatKeluarQuery = BibitKeluar::with(['bibit', 'taman'])
-            ->whereBetween('tanggal_keluar', [$awal, $akhir]);
-        TableSearch::apply($riwayatKeluarQuery, $request, ['peruntukan', 'lokasi', 'bibit.nama_tanaman', 'bibit.nama_ilmiah', 'taman.nama_taman']);
+        $riwayatKeluarQuery = BibitKeluar::query()
+            ->with(['bibit', 'batch.taman'])
+            ->whereBatchTanggalBetween($awal, $akhir)
+            ->join('bibit_keluar_batches', 'bibit_keluars.bibit_keluar_batch_id', '=', 'bibit_keluar_batches.id')
+            ->select('bibit_keluars.*')
+            ->orderByDesc('bibit_keluar_batches.tanggal_keluar')
+            ->orderByDesc('bibit_keluars.id');
+        TableSearch::apply($riwayatKeluarQuery, $request, ['bibit.nama_tanaman', 'bibit.nama_ilmiah', 'batch.peruntukan', 'batch.lokasi']);
         $riwayatKeluar = $riwayatKeluarQuery
-            ->latest('tanggal_keluar')
             ->when(! $forPdf, fn ($q) => $q->limit(10))
             ->get();
 
