@@ -36,14 +36,17 @@ class DashboardTest extends TestCase
             ->assertDontSee('Antrian Kerja Hari Ini');
     }
 
-    public function test_viewer_dashboard_shows_pimpinan_mode(): void
+    public function test_viewer_dashboard_matches_admin_layout(): void
     {
         $viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);
 
         $this->actingAs($viewer)
             ->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Snapshot Operasional Pertamanan Batam')
-            ->assertDontSee('sidebar-menu-group');
+            ->assertSee('Dashboard Operasional')
+            ->assertSee('Dinas Perumahan, Kawasan Permukiman dan Pertamanan')
+            ->assertSee('Data Taman')
+            ->assertSee('Operasional Pertamanan')
+            ->assertSee('sidebar-menu-group', false);
     }
 }

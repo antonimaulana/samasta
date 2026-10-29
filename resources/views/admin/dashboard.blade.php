@@ -58,17 +58,13 @@
 
         <div class="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div class="max-w-3xl">
-                @if ($is_viewer)
-                    <p class="dash-kicker text-green-100">Ringkasan Pimpinan</p>
-                @else
-                    <p class="text-[10px] font-bold uppercase leading-snug tracking-wide text-green-100 sm:text-[11px]">
-                        Dinas Perumahan, Kawasan Permukiman dan Pertamanan
-                        <span class="mx-1.5 font-normal text-green-200/70">·</span>
-                        Bidang Pertamanan dan Pemakaman
-                    </p>
-                @endif
+                <p class="text-[10px] font-bold uppercase leading-snug tracking-wide text-green-100 sm:text-[11px]">
+                    Dinas Perumahan, Kawasan Permukiman dan Pertamanan
+                    <span class="mx-1.5 font-normal text-green-200/70">·</span>
+                    Bidang Pertamanan dan Pemakaman
+                </p>
                 <h2 class="mt-3 text-2xl font-black sm:text-3xl">
-                    {{ $is_viewer ? 'Snapshot Operasional Pertamanan Batam' : 'Dashboard Operasional' }}
+                    Dashboard Operasional
                 </h2>
                 <span class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 {{ $statusConfig['badge'] }}">
                     <span class="h-2 w-2 rounded-full {{ $statusConfig['dot'] }}"></span>

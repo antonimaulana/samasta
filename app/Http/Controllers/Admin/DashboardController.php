@@ -27,10 +27,7 @@ class DashboardController extends Controller
             );
         }
 
-        return view('admin.dashboard', [
-            ...$summaryBuilder->build(auth()->user()),
-            'is_viewer' => auth()->user()?->isViewer() ?? false,
-        ]);
+        return view('admin.dashboard', $summaryBuilder->build(auth()->user()));
     }
 
     public function exportPdf(DashboardSummaryBuilder $summaryBuilder): Response

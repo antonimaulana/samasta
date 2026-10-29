@@ -24,9 +24,7 @@
 @endphp
 
 <nav class="admin-nav space-y-0.5 px-2 py-3">
-    @if ($canWrite ?? false)
-        <p class="admin-nav-section-label">Menu</p>
-    @endif
+    <p class="admin-nav-section-label">Menu</p>
 
     <a href="{{ route('admin.dashboard') }}" class="{{ $navTop(request()->routeIs('admin.dashboard')) }}">
         <x-admin.nav-icon name="dashboard" />

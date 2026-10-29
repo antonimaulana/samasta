@@ -51,6 +51,8 @@ class ViewerRouteAllowlist
             'admin.pemeliharaan-tamans.export-pdf',
             'admin.pemeliharaan-tamans.export-pdf-operasional',
             'admin.armadas.index',
+            'admin.armadas.show',
+            'admin.tim-pelaksanas.index',
         ];
     }
 

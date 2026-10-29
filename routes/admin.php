@@ -178,6 +178,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
 
     Route::get('tim-pelaksanas/suggest', [TimPelaksanaController::class, 'suggest'])->name('tim-pelaksanas.suggest');
     Route::get('tim-pelaksanas/roster', [TimPelaksanaController::class, 'roster'])->name('tim-pelaksanas.roster');
+    Route::get('tim-pelaksanas', [TimPelaksanaController::class, 'index'])->name('tim-pelaksanas.index');
     Route::middleware('admin.manage')->group(function () {
         Route::get('ensiklopedia-pengaturan', [EnsiklopediaPengaturanController::class, 'index'])->name('ensiklopedia-pengaturan.index');
         Route::get('ensiklopedia', fn () => redirect()->route('admin.ensiklopedia-pengaturan.index'));
@@ -191,7 +192,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::middleware('admin.manage')->group(function () {
         Route::get('tim-pelaksanas/create', [TimPelaksanaController::class, 'create'])->name('tim-pelaksanas.create');
         Route::post('tim-pelaksanas', [TimPelaksanaController::class, 'store'])->name('tim-pelaksanas.store');
-        Route::get('tim-pelaksanas', [TimPelaksanaController::class, 'index'])->name('tim-pelaksanas.index');
         Route::get('tim-pelaksanas/{tim_pelaksana}/edit', [TimPelaksanaController::class, 'edit'])->name('tim-pelaksanas.edit');
         Route::put('tim-pelaksanas/{tim_pelaksana}', [TimPelaksanaController::class, 'update'])->name('tim-pelaksanas.update');
         Route::delete('tim-pelaksanas/{tim_pelaksana}', [TimPelaksanaController::class, 'destroy'])->name('tim-pelaksanas.destroy');
