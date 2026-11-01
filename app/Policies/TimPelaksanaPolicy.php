@@ -12,6 +12,11 @@ class TimPelaksanaPolicy
         return $user->canWrite() || $user->isViewer();
     }
 
+    public function view(User $user, TimPelaksana $timPelaksana): bool
+    {
+        return $user->canWrite() || $user->isViewer();
+    }
+
     public function manageWilayah(User $user, TimPelaksana $timPelaksana): bool
     {
         return $user->canManageUsers() && $timPelaksana->memiliki_wilayah_kerja;

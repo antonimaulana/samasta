@@ -1,4 +1,4 @@
-﻿@php
+@php
     $pemangkasan = $pemangkasan ?? null;
     $currentStatus = old('status', $pemangkasan?->status ?? 'Rencana');
     $currentJenis = old('jenis_layanan', $pemangkasan?->jenis_layanan ?? request('jenis', ''));
@@ -116,7 +116,7 @@
             </div>
 
             <div id="lokasi-pohon-section" class="md:col-span-2 {{ $isMiniGarden ? 'hidden' : '' }}">
-                <label class="mb-1 block text-sm font-medium text-gray-700">Lokasi *</label>
+                <x-lapangan.field-label required>Lokasi pelaksanaan</x-lapangan.field-label>
                 <label class="mb-3 flex cursor-pointer items-center gap-2">
                     <input type="checkbox" name="lokasi_luar" id="lokasi_luar" value="1"
                            @checked($isLokasiLuar)
@@ -136,6 +136,7 @@
                             :tamans="$tamans"
                             :selected="old('taman_id', $pemangkasan?->taman_id)"
                             :required="true"
+                            :show-hint="false"
                         />
                     @endif
                     @error('taman_id')

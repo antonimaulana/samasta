@@ -7,8 +7,19 @@
     @apply bg-gray-50 text-left text-sm font-medium text-gray-700;
 }
 
+/* Semua tabel back-office: isi kolom rata kiri & vertikal tengah */
+.admin-panel table thead th,
+.admin-panel table tbody td {
+    text-align: left !important;
+    vertical-align: middle;
+}
+
+.admin-panel table thead th a.inline-flex {
+    justify-content: flex-start !important;
+}
+
 .admin-table-col-actions {
-    @apply w-[1%] whitespace-nowrap px-2 py-3 text-right align-middle;
+    @apply w-[1%] whitespace-nowrap px-2 py-3 text-left align-middle;
 }
 
 .admin-table-cell-truncate {
@@ -20,7 +31,7 @@
 }
 
 .admin-table-actions {
-    @apply inline-flex flex-shrink-0 flex-nowrap items-center justify-end gap-1;
+    @apply inline-flex flex-shrink-0 flex-nowrap items-center justify-start gap-1;
 }
 
 .admin-table-action {

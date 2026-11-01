@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Laporan Operasional Pemeliharaan Taman</title>
+    <title>Laporan Pemeliharaan Rutin</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #1f2937; margin: 24px; }
@@ -35,7 +35,7 @@
         $periodeSatuHari = $tanggalMulai->isSameDay($tanggalSelesai);
     @endphp
 
-    <h1>Laporan Operasional Pemeliharaan Taman</h1>
+    <h1>Laporan Pemeliharaan Rutin</h1>
     <p class="meta">
         Dinas Perumahan, Kawasan Permukiman dan Pertamanan Kota Batam<br>
         @if ($periodeSatuHari)
@@ -52,7 +52,7 @@
     </p>
 
     @forelse ($kinerjasPerTim as $tim => $items)
-        <h2>{{ $items->first()?->namaPengawas() ?? $tim }} ({{ $items->count() }} operasional)</h2>
+        <h2>{{ $tim }} ({{ $items->count() }} operasional)</h2>
         <table>
             <thead>
                 <tr>
@@ -93,16 +93,16 @@
                         </td>
                         @foreach ($fotoGroups as $groupLabel => $fields)
                             <td>
-                                @php $hasFoto = collect($fields)->contains(fn ($field) => $item->fotoBase64($field)); @endphp
+                                @php $hasFoto = collect($fields)->contains(fn ($field) => $item->fotoDompdfSrc($field)); @endphp
                                 @if ($hasFoto)
                                     <div class="foto-group">
                                         <div class="foto-group-label">{{ $groupLabel }}</div>
                                         @foreach ($fields as $field)
-                                            @if ($item->fotoBase64($field))
+                                            @if ($item->fotoDompdfSrc($field))
                                                 @php $size = $item->fotoPdfSize($field, 115, 68); @endphp
                                                 <div class="foto-wrap">
                                                     @if ($size)
-                                                        <img src="{{ $item->fotoBase64($field) }}"
+                                                        <img src="{{ $item->fotoDompdfSrc($field) }}"
                                                              alt="{{ $groupLabel }}"
                                                              width="{{ $size['width'] }}"
                                                              height="{{ $size['height'] }}">
@@ -121,7 +121,7 @@
             </tbody>
         </table>
     @empty
-        <p class="empty">Tidak ada data operasional pemeliharaan taman pada periode ini.</p>
+        <p class="empty">Tidak ada data pemeliharaan rutin pada periode ini.</p>
     @endforelse
 
     <div class="footer">

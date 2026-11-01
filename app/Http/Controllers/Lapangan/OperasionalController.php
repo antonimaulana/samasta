@@ -32,6 +32,10 @@ class OperasionalController extends Controller
             return redirect()->route('lapangan.index');
         }
 
+        if (config('simtaman.lapangan.require_login', true)) {
+            return redirect()->route('login');
+        }
+
         if (LapanganGuestAccess::isUnlocked($request)) {
             return redirect()->route('lapangan.index');
         }
@@ -49,7 +53,7 @@ class OperasionalController extends Controller
             return redirect()->route('lapangan.index');
         }
 
-        if (! LapanganGuestAccess::enabled()) {
+        if (config('simtaman.lapangan.require_login', true) || ! LapanganGuestAccess::enabled()) {
             return redirect()->route('login');
         }
 
@@ -72,6 +76,10 @@ class OperasionalController extends Controller
 
         if ($request->user()?->canInputLapangan()) {
             return redirect()->route('lapangan.index');
+        }
+
+        if (config('simtaman.lapangan.require_login', true)) {
+            return redirect()->route('login');
         }
 
         return redirect()
@@ -103,8 +111,6 @@ class OperasionalController extends Controller
         $tim = $menuItem['tim'];
         $recorder = app(PemeliharaanTamanRecorder::class);
 
-        $history = app(LapanganPemeliharaanHistory::class);
-
         return view('lapangan.pemeliharaan.create', [
             'menuItem' => $menuItem,
             'tim' => $tim,
@@ -113,7 +119,6 @@ class OperasionalController extends Controller
             'timWilayahKelurahan' => app(TimPelaksanaResolver::class)->kelurahanIdsByTeamName(),
             'armadaInventory' => ArmadaAssignment::inventory(),
             'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
-            'recentInputs' => $history->recentForAccount($request, $tim),
         ]);
     }
 
@@ -266,6 +271,10 @@ class OperasionalController extends Controller
             return;
         }
 
+        if (config('simtaman.lapangan.require_login', true)) {
+            abort(403);
+        }
+
         if (! LapanganGuestAccess::isUnlocked($request)) {
             abort(403);
         }
@@ -287,9 +296,24 @@ class OperasionalController extends Controller
             return;
         }
 
+        if (config('simtaman.lapangan.require_login', true)) {
+            abort(403);
+        }
+
         if (! LapanganGuestAccess::isUnlocked($request)) {
             abort(403);
         }
+    }
+
+    public function refreshSessionToken(Request $request): JsonResponse
+    {
+        if (! $request->user()?->canInputLapangan()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'token' => csrf_token(),
+        ]);
     }
 
     public function petugasRoster(Request $request, PetugasRosterBuilder $rosterBuilder): JsonResponse

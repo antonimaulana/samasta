@@ -1,7 +1,7 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
-@section('title', $taman ? 'Riwayat Pemeliharaan — '.$taman->nama_taman : 'Pemeliharaan Taman')
-@section('header', $taman ? 'Riwayat Pemeliharaan: '.$taman->nama_taman : 'Pemeliharaan Taman')
+@section('title', $taman ? 'Riwayat Pemeliharaan — '.$taman->nama_taman : 'Pemeliharaan Rutin')
+@section('header', $taman ? 'Riwayat Pemeliharaan: '.$taman->nama_taman : 'Pemeliharaan Rutin')
 @section('content')
     @if ($taman)
         <div class="mb-4">
@@ -36,7 +36,7 @@
                     <p class="mt-1 text-xs text-gray-500">{{ $taman->alamat }}</p>
                 @endif
             @else
-                <p class="text-sm text-gray-600">Input operasional pemeliharaan taman harian per tim pelaksana.</p>
+                <p class="text-sm text-gray-600">Input pemeliharaan rutin harian per tim pelaksana.</p>
                 <p class="mt-1 text-xs text-gray-500">6 Tim: Wilayah 1–4, Nursery, dan Armada</p>
             @endif
         </div>

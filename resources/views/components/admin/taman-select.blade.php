@@ -6,7 +6,7 @@
     'required' => false,
     'placeholder' => 'Ketik nama taman, kategori, atau alamat...',
     'hint' => 'Ketik untuk memfilter, lalu pilih taman dari daftar.',
-    'showHint' => true,
+    'showHint' => false,
     'inputClass' => 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500',
     'createUrl' => null,
     'emptyMessage' => null,

@@ -14,6 +14,7 @@ Route::prefix('lapangan')
 
         Route::middleware('lapangan.access')->group(function () {
             Route::get('/', [OperasionalController::class, 'index'])->name('index');
+            Route::get('session/csrf', [OperasionalController::class, 'refreshSessionToken'])->name('session.csrf');
             Route::get('tim-pelaksanas/roster', [OperasionalController::class, 'petugasRoster'])->name('tim-pelaksanas.roster');
             Route::get('pemeliharaan/{slug}', [OperasionalController::class, 'createPemeliharaan'])->name('pemeliharaan.create');
             Route::post('pemeliharaan/{slug}/cek-lokasi-duplikat', [OperasionalController::class, 'checkPemeliharaanLokasiDuplikat'])

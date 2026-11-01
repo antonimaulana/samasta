@@ -1,7 +1,5 @@
 @props([
     'records',
-    'guestMode' => false,
-    'scopedTim' => null,
 ])
 
 @if ($records->isNotEmpty())
@@ -15,36 +13,32 @@
                     {{ $records->count() }} terakhir
                 </span>
             </div>
-            <p class="mt-1 text-xs text-gray-500">
-                @if ($guestMode)
-                    Riwayat sesi PIN ini (maks. 5).
-                @else
-                    {{ $scopedTim ? 'Tim '.$scopedTim.' · ' : '' }}Maks. 5 catatan dari akun Anda.
-                @endif
-            </p>
         </summary>
         <ul class="divide-y divide-gray-100 border-t border-gray-100">
             @foreach ($records as $row)
                 <li class="px-4 py-3.5 sm:px-5">
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div class="min-w-0 flex-1">
-                            <p class="text-sm font-bold text-gray-900">
-                                {{ $row->lokasi_pelaksanaan ?: ($row->taman?->nama_taman ?? '—') }}
-                            </p>
-                            <p class="mt-0.5 text-xs text-gray-600">
-                                {{ \App\Support\OperasionalPelaksanaanTime::display($row->tanggal) }}
-                                · {{ $row->tim }}
-                            </p>
-                            @if ($row->uraian_pekerjaan)
-                                <p class="mt-1 line-clamp-2 text-xs text-gray-500">{{ $row->uraian_pekerjaan }}</p>
-                            @endif
+                    <dl class="space-y-1.5 text-sm">
+                        <div>
+                            <dt class="text-[10px] font-bold uppercase tracking-wide text-gray-500">Lokasi</dt>
+                            <dd class="font-semibold text-gray-900">{{ $row->lokasi_pelaksanaan ?: ($row->taman?->nama_taman ?? '—') }}</dd>
                         </div>
-                        @if ($row->persentase_progres !== null)
-                            <span class="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800">
-                                {{ $row->persentase_progres }}%
-                            </span>
-                        @endif
-                    </div>
+                        <div>
+                            <dt class="text-[10px] font-bold uppercase tracking-wide text-gray-500">Kategori RTH</dt>
+                            <dd class="text-gray-800">{{ $row->lokasiKategoriLabel() }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-[10px] font-bold uppercase tracking-wide text-gray-500">Tanggal &amp; waktu</dt>
+                            <dd class="text-gray-800">{{ \App\Support\OperasionalPelaksanaanTime::display($row->tanggal) }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-[10px] font-bold uppercase tracking-wide text-gray-500">Uraian pekerjaan</dt>
+                            <dd class="text-gray-700">{{ $row->uraian_pekerjaan ?: '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-[10px] font-bold uppercase tracking-wide text-gray-500">Progres</dt>
+                            <dd class="font-semibold text-emerald-800">{{ $row->lapanganRiwayatProgresLabel() ?? '—' }}</dd>
+                        </div>
+                    </dl>
                 </li>
             @endforeach
         </ul>

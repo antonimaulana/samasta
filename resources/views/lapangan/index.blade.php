@@ -13,7 +13,6 @@
 
     @include('lapangan.partials.recent-inputs', [
         'records' => $recentInputs ?? collect(),
-        'guestMode' => $guestMode,
     ])
 
     <div class="grid gap-3 sm:grid-cols-2">

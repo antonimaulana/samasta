@@ -87,7 +87,7 @@
         @if ($isLapanganForm)
             <x-lapangan.field-label required>Lokasi pelaksanaan</x-lapangan.field-label>
         @else
-            <label class="{{ $labelClass }}">Lokasi Pelaksanaan *</label>
+            <x-lapangan.field-label required>Lokasi pelaksanaan</x-lapangan.field-label>
         @endif
         <label @class([
             'mb-3 flex cursor-pointer items-center gap-2' => ! $isLapanganForm,
@@ -104,8 +104,7 @@
                 :tamans="$tamans ?? collect()"
                 :selected="old('taman_id', $kinerja?->taman_id ?? ($prefillTamanId ?? ''))"
                 :required="true"
-                :hint="$isLapanganForm ? null : (filled($timWilayahKelurahan ?? null) ? 'Daftar lokasi difilter sesuai wilayah kerja tim pelaksana yang dipilih.' : 'Ketik untuk memfilter, lalu pilih taman dari daftar.')"
-                :show-hint="! $isLapanganForm"
+                :show-hint="false"
                 :input-class="$tamanInputClass"
                 :placeholder="$isLapanganForm ? 'Ketik nama taman, lalu pilih dari daftar' : 'Ketik nama taman, kategori, atau alamat...'"
             />
@@ -132,7 +131,7 @@
         @if ($isLapanganForm)
             <x-lapangan.field-label required>Petugas</x-lapangan.field-label>
         @else
-            <label class="mb-2 block text-sm font-medium text-gray-700">Petugas Pelaksana *</label>
+            <x-lapangan.field-label required>Petugas</x-lapangan.field-label>
         @endif
         <x-petugas-picker
             :team-name="$selectedTim"
@@ -143,9 +142,6 @@
             roster-scope="operasional-wilayah"
             :variant="request()->routeIs('lapangan.*') ? 'lapangan' : 'admin'"
         />
-        @unless($isLapanganForm)
-            <p class="mt-1.5 text-xs text-gray-500">Daftar mencakup petugas aktif dari semua tim wilayah (Tim Wilayah 1–4).</p>
-        @endunless
     </div>
 
     <div @class(['lapangan-form-section' => $isLapanganForm])>

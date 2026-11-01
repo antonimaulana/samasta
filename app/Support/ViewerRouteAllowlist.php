@@ -17,6 +17,7 @@ class ViewerRouteAllowlist
             'admin.jadwal-layanan.index',
             'admin.pemangkasans.index',
             'admin.pemangkasans.show',
+            'admin.pemangkasans.export-pdf-progres',
             'admin.aduan-masyarakats.index',
             'admin.aduan-masyarakats.show',
             'admin.survey-kepuasan.index',
@@ -53,6 +54,7 @@ class ViewerRouteAllowlist
             'admin.armadas.index',
             'admin.armadas.show',
             'admin.tim-pelaksanas.index',
+            'admin.tim-pelaksanas.show',
         ];
     }
 

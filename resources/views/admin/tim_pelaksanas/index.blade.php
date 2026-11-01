@@ -5,10 +5,12 @@
 
 @section('content')
     <div class="mb-6 flex flex-wrap items-center justify-end gap-3">
-        <a href="{{ route('admin.tim-pelaksanas.create') }}"
-           class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700">
-            + Tambah Tim Kerja
-        </a>
+        <x-admin.can-manage-users>
+            <a href="{{ route('admin.tim-pelaksanas.create') }}"
+               class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700">
+                + Tambah Tim Kerja
+            </a>
+        </x-admin.can-manage-users>
     </div>
 
     @if (session('success'))
@@ -52,7 +54,10 @@
                     <td class="px-4 py-3 text-center text-sm text-gray-700">{{ number_format($team->petugas_count ?? 0) }}</td>
                     <td class="admin-table-col-actions">
                         <x-admin.table-actions>
-                            <x-admin.table-action-link variant="edit" :href="route('admin.tim-pelaksanas.edit', $team)" label="Ubah" />
+                            <x-admin.table-action-link :href="route('admin.tim-pelaksanas.show', $team)" label="Petugas" />
+                            <x-admin.can-manage-users>
+                                <x-admin.table-action-link variant="edit" :href="route('admin.tim-pelaksanas.edit', $team)" label="Ubah" />
+                            </x-admin.can-manage-users>
                         </x-admin.table-actions>
                     </td>
                 </tr>

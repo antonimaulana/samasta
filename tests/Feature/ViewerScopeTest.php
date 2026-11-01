@@ -46,6 +46,21 @@ class ViewerScopeTest extends TestCase
             ->assertRedirect(route('admin.dashboard'));
     }
 
+    public function test_viewer_can_open_tim_kerja_petugas_detail(): void
+    {
+        $this->seed(\Database\Seeders\TimPelaksanaSeeder::class);
+
+        $viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);
+        $team = \App\Models\TimPelaksana::query()->first();
+
+        $this->assertNotNull($team);
+
+        $this->actingAs($viewer)
+            ->get(route('admin.tim-pelaksanas.show', $team))
+            ->assertOk()
+            ->assertSee('Daftar Petugas', false);
+    }
+
     public function test_viewer_cannot_post_to_admin_routes(): void
     {
         $viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);

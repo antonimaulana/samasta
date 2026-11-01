@@ -21,6 +21,10 @@ class EnsureLapanganAccess
             abort(403, 'Halaman input lapangan hanya untuk Admin, Pengawas, atau Administrator.');
         }
 
+        if (config('simtaman.lapangan.require_login', true)) {
+            return redirect()->guest(route('login'));
+        }
+
         if (! LapanganGuestAccess::enabled()) {
             return redirect()->guest(route('login'));
         }

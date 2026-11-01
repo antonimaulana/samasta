@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#166534">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Input Lapangan') — {{ config('app.name') }}</title>
     @include('layouts.partials.favicon')
     @vite(['resources/css/app.css', 'resources/css/lapangan.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-<body class="lapangan-body min-h-screen text-gray-900 antialiased">
+<body class="lapangan-body min-h-screen text-gray-900 antialiased"
+      @if (auth()->check() && auth()->user()->canInputLapangan())
+          data-lapangan-csrf-url="{{ route('lapangan.session.csrf') }}"
+      @endif>
     <header class="lapangan-header sticky top-0 z-20">
         <div class="mx-auto max-w-3xl px-4 py-3.5">
             <div class="flex items-center justify-between gap-3">
@@ -38,7 +42,7 @@
                                 Keluar
                             </button>
                         </form>
-                    @elseif (\App\Support\LapanganGuestAccess::isUnlocked(request()))
+                    @elseif (! config('simtaman.lapangan.require_login', true) && \App\Support\LapanganGuestAccess::isUnlocked(request()))
                         <form action="{{ route('lapangan.lock') }}" method="POST">
                             @csrf
                             <button type="submit"
@@ -87,6 +91,9 @@
     </footer>
 
     <script src="{{ asset('js/searchable-select.js') }}?v=2"></script>
+    @if (auth()->check() && auth()->user()->canInputLapangan())
+        <script src="{{ asset('js/lapangan-session.js') }}?v=1"></script>
+    @endif
     @stack('scripts')
 </body>
 </html>

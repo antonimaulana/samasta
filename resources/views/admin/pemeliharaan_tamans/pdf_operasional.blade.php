@@ -153,7 +153,7 @@
         @endif
         <div class="header-org">PEMERINTAH KOTA BATAM</div>
         <div class="header-dept">DINAS PERUMAHAN, KAWASAN PERMUKIMAN DAN PERTAMANAN</div>
-        <div class="header-title">Laporan Operasional Pemeliharaan Taman</div>
+        <div class="header-title">Laporan Pemeliharaan Rutin</div>
         <div class="header-meta">
             <span class="badge">{{ $kinerja->tim }}</span>
         </div>
@@ -217,7 +217,7 @@
                 <tr>
                     @foreach ($fields as $field)
                         @php
-                            $base64 = $kinerja->fotoBase64($field);
+                            $base64 = $kinerja->fotoDompdfSrc($field);
                             $size = $kinerja->fotoPdfSize($field, $photoMaxWidth, $photoMaxHeight);
                         @endphp
                         <td>

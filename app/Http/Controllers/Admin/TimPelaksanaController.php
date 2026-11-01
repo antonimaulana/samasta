@@ -33,6 +33,20 @@ class TimPelaksanaController extends Controller
         return view('admin.tim_pelaksanas.index', compact('teams'));
     }
 
+    public function show(TimPelaksana $timPelaksana): View
+    {
+        $this->authorize('view', $timPelaksana);
+
+        $timPelaksana->load([
+            'kelurahans.kecamatan',
+            'petugas' => fn ($query) => $query->orderByDesc('aktif')->orderBy('urutan')->orderBy('nama'),
+        ]);
+
+        return view('admin.tim_pelaksanas.show', [
+            'timPelaksana' => $timPelaksana,
+        ]);
+    }
+
     public function create(): View
     {
         $this->authorize('create', TimPelaksana::class);

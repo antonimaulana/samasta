@@ -1,7 +1,7 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
-@section('title', 'Edit Operasional Pemeliharaan')
-@section('header', 'Edit Operasional Pemeliharaan')
+@section('title', 'Edit Pemeliharaan Rutin')
+@section('header', 'Edit Pemeliharaan Rutin')
 
 @section('content')
     <div class="max-w-4xl rounded-xl border border-gray-200 bg-white p-6 shadow-sm">

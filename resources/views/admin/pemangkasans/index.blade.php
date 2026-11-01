@@ -1,7 +1,7 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 
-@section('title', 'Operasional Pertamanan')
-@section('header', 'Operasional Pertamanan')
+@section('title', 'Permohonan')
+@section('header', 'Permohonan')
 
 @section('content')
     @php
@@ -26,7 +26,7 @@
     @endphp
 
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-sm text-gray-600">Kelola dan pantau antrian jadwal operasional pertamanan di Batam.</p>
+        <p class="text-sm text-gray-600">Kelola dan pantau antrian permohonan layanan pertamanan di Batam.</p>
         <x-admin.can-write>
             <a href="{{ route('admin.pemangkasans.create') }}"
                class="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">

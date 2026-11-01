@@ -170,6 +170,14 @@
         }
     }
 
+    function refreshCsrfIfAvailable() {
+        if (typeof window.lapanganRefreshCsrf === 'function') {
+            return window.lapanganRefreshCsrf();
+        }
+
+        return Promise.resolve(null);
+    }
+
     function ensureConfirmLokasiDuplikat(form) {
         const url = form.dataset.duplicateCheckUrl;
 
@@ -177,8 +185,9 @@
             return Promise.resolve(true);
         }
 
-        const body = new FormData();
-        body.append('_token', form.querySelector('[name="_token"]')?.value ?? '');
+        return refreshCsrfIfAvailable().then(function () {
+            const body = new FormData();
+            body.append('_token', form.querySelector('[name="_token"]')?.value ?? '');
         body.append('tanggal', form.querySelector('#tanggal')?.value ?? '');
         body.append('lokasi_luar', form.querySelector('#lokasi_luar')?.checked ? '1' : '0');
 
@@ -188,52 +197,66 @@
             body.append('taman_id', form.querySelector('#taman_id')?.value ?? '');
         }
 
-        return fetch(url, {
-            method: 'POST',
-            body: body,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                Accept: 'application/json',
-            },
-            credentials: 'same-origin',
-        })
-            .then(function (response) {
-                if (!response.ok) {
-                    return { duplicate: false };
-                }
-
-                return response.json();
+            return fetch(url, {
+                method: 'POST',
+                body: body,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
+                },
+                credentials: 'same-origin',
             })
-            .then(function (data) {
-                if (!data.duplicate) {
+                .then(function (response) {
+                    if (response.status === 419) {
+                        window.alert(
+                            'Sesi habis. Halaman akan dimuat ulang — login jika perlu, lalu isi form lagi.',
+                        );
+                        window.location.reload();
+
+                        return { duplicate: false, abort: true };
+                    }
+
+                    if (!response.ok) {
+                        return { duplicate: false };
+                    }
+
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data?.abort) {
+                        return false;
+                    }
+
+                    if (!data.duplicate) {
+                        return true;
+                    }
+
+                    const ok = window.confirm(
+                        data.message || 'Lokasi ini sudah dicatat pada hari yang sama. Lanjutkan menyimpan?',
+                    );
+
+                    if (!ok) {
+                        return false;
+                    }
+
+                    let hidden = form.querySelector('[name="confirm_lokasi_duplikat"]');
+
+                    if (!hidden) {
+                        hidden = document.createElement('input');
+                        hidden.type = 'hidden';
+                        hidden.name = 'confirm_lokasi_duplikat';
+                        form.appendChild(hidden);
+                    }
+
+                    hidden.value = '1';
+                    form.dataset.lapanganDuplicateConfirmed = '1';
+
                     return true;
-                }
-
-                const ok = window.confirm(
-                    data.message || 'Lokasi ini sudah dicatat pada hari yang sama. Lanjutkan menyimpan?',
-                );
-
-                if (!ok) {
-                    return false;
-                }
-
-                let hidden = form.querySelector('[name="confirm_lokasi_duplikat"]');
-
-                if (!hidden) {
-                    hidden = document.createElement('input');
-                    hidden.type = 'hidden';
-                    hidden.name = 'confirm_lokasi_duplikat';
-                    form.appendChild(hidden);
-                }
-
-                hidden.value = '1';
-                form.dataset.lapanganDuplicateConfirmed = '1';
-
-                return true;
-            })
-            .catch(function () {
-                return true;
-            });
+                })
+                .catch(function () {
+                    return true;
+                });
+        });
     }
 
     function submitFormNative(form, submitButton) {
@@ -243,15 +266,19 @@
     }
 
     function finishValidatedSubmit(form, submitButton) {
-        return ensureConfirmLokasiDuplikat(form).then(function (allowed) {
-            if (!allowed) {
-                resetSubmitButton(submitButton);
+        return refreshCsrfIfAvailable()
+            .then(function () {
+                return ensureConfirmLokasiDuplikat(form);
+            })
+            .then(function (allowed) {
+                if (!allowed) {
+                    resetSubmitButton(submitButton);
 
-                return;
-            }
+                    return;
+                }
 
-            submitFormNative(form, submitButton);
-        });
+                submitFormNative(form, submitButton);
+            });
     }
 
     function bindForm(form) {

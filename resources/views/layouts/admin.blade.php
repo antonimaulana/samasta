@@ -73,7 +73,7 @@
                 </div>
             </header>
 
-            <main class="min-w-0 flex-1 p-4 sm:p-6">
+            <main class="admin-panel min-w-0 flex-1 p-4 sm:p-6">
                 @if (session('viewer_redirect'))
                     <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                         Halaman tersebut tidak tersedia dalam mode ringkasan pimpinan. Anda diarahkan kembali ke dashboard.

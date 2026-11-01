@@ -115,6 +115,25 @@ class PemeliharaanTaman extends Model
         return $this->hari_ke.' / '.$this->total_hari.' hari';
     }
 
+    public function lapanganRiwayatProgresLabel(): ?string
+    {
+        if ($this->hari_ke !== null && $this->total_hari !== null) {
+            $label = $this->hari_ke.'/'.$this->total_hari.' hari';
+
+            if ($this->persentase_progres !== null) {
+                return $label.' - '.$this->persentase_progres.'%';
+            }
+
+            return $label;
+        }
+
+        if ($this->persentase_progres !== null) {
+            return $this->persentase_progres.'%';
+        }
+
+        return null;
+    }
+
     public function progressSummaryLabel(): ?string
     {
         $hari = $this->hariProgressLabel();
@@ -236,9 +255,57 @@ class PemeliharaanTaman extends Model
             return null;
         }
 
-        $mime = Storage::disk('public')->mimeType($path) ?: 'image/jpeg';
+        try {
+            $mime = Storage::disk('public')->mimeType($path) ?: 'image/jpeg';
+        } catch (\Throwable) {
+            $mime = 'image/jpeg';
+        }
 
         return 'data:'.$mime.';base64,'.base64_encode(Storage::disk('public')->get($path));
+    }
+
+    /**
+     * Data URI aman untuk Dompdf (JPEG/PNG/GIF; format lain dikonversi ke JPEG bila GD tersedia).
+     */
+    public function fotoDompdfSrc(string $field): ?string
+    {
+        $path = $this->{$field};
+
+        if (! $path || ! Storage::disk('public')->exists($path)) {
+            return null;
+        }
+
+        try {
+            $mime = Storage::disk('public')->mimeType($path);
+        } catch (\Throwable) {
+            $mime = null;
+        }
+
+        if (in_array($mime, ['image/jpeg', 'image/png', 'image/gif'], true)) {
+            return $this->fotoBase64($field);
+        }
+
+        if (! extension_loaded('gd')) {
+            return null;
+        }
+
+        $binary = Storage::disk('public')->get($path);
+        $image = @imagecreatefromstring($binary);
+
+        if ($image === false) {
+            return null;
+        }
+
+        ob_start();
+        imagejpeg($image, null, 85);
+        imagedestroy($image);
+        $jpeg = ob_get_clean();
+
+        if ($jpeg === false || $jpeg === '') {
+            return null;
+        }
+
+        return 'data:image/jpeg;base64,'.base64_encode($jpeg);
     }
 
     /**

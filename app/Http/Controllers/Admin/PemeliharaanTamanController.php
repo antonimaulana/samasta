@@ -179,6 +179,8 @@ class PemeliharaanTamanController extends Controller
 
     public function exportPdf(Request $request): Response
     {
+        $this->authorize('viewAny', PemeliharaanTaman::class);
+
         $this->ensureGdLoaded();
 
         $validated = $request->validate([
@@ -222,7 +224,7 @@ class PemeliharaanTamanController extends Controller
             'totalOperasional' => $kinerjas->flatten()->count(),
         ])->render();
 
-        $filename = 'operasional-pemeliharaan-taman-'.$tanggalMulai->format('Y-m-d');
+        $filename = 'pemeliharaan-rutin-'.$tanggalMulai->format('Y-m-d');
         if (! $tanggalMulai->isSameDay($tanggalSelesai)) {
             $filename .= '-'.$tanggalSelesai->format('Y-m-d');
         }
@@ -259,6 +261,9 @@ class PemeliharaanTamanController extends Controller
 
     private function downloadPdf(string $html, string $filename): Response
     {
+        @ini_set('memory_limit', '512M');
+        @set_time_limit(120);
+
         $options = new Options;
         $options->set('isRemoteEnabled', true);
         $options->set('defaultFont', 'DejaVu Sans');

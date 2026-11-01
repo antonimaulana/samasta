@@ -14,7 +14,7 @@
     </div>
 
     <div class="md:col-span-2">
-        <label class="mb-2 block text-sm font-medium text-gray-700">Petugas Pelaksana *</label>
+        <x-lapangan.field-label required>Petugas</x-lapangan.field-label>
         <x-petugas-picker
             :team-names="$pemangkasan->pelaksana ?? []"
             :selected-ids="old('petugas_ids', $progres->petugas?->pluck('id')?->all() ?? [])"

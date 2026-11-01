@@ -22,7 +22,7 @@
             <span class="text-sm text-amber-600">Belum diset</span>
         @endif
     </td>
-    <td class="whitespace-nowrap px-4 py-3 text-right align-top text-sm tabular-nums text-gray-900">
+    <td class="whitespace-nowrap px-4 py-3 text-sm tabular-nums text-gray-900">
         {{ number_format($taman->luasan, 0, ',', '.') }}
     </td>
     <td class="whitespace-nowrap px-4 py-3 align-top text-sm text-gray-900">

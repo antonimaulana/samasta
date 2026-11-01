@@ -98,9 +98,9 @@
                             <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['lokasi'] }}</td>
                             <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['sopir'] ?: '—' }}</td>
                             <td class="admin-table-col-actions">
-                                @if ($entry['url'])
+                                @if ($entry['pdf_url'])
                                     <x-admin.table-actions>
-                                        <x-admin.table-action-link :href="$entry['url']" />
+                                        <x-admin.table-action-link variant="pdf" :href="$entry['pdf_url']" />
                                     </x-admin.table-actions>
                                 @else
                                     <span class="text-sm text-gray-400">—</span>

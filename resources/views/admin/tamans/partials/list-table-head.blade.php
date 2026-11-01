@@ -11,7 +11,7 @@
             <x-admin.table-sort-header column="kategori" label="Kategori" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
         @endif
         <x-admin.table-sort-header column="wilayah" label="Wilayah" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
-        <x-admin.table-sort-header column="luasan" label="Luasan (M²)" align="right" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
+        <x-admin.table-sort-header column="luasan" label="Luasan (M²)" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
         <x-admin.table-sort-header column="tahun" label="Tahun" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
         <x-admin.table-sort-header column="status_data" label="Status Data" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
         @if ($showActions)

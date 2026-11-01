@@ -1,7 +1,7 @@
 @extends('layouts.lapangan')
 
 @section('title', 'Daftar Permohonan')
-@section('header', 'Permohonan Operasional')
+@section('header', 'Permohonan')
 
 @section('content')
     <x-lapangan.back-link :href="route('lapangan.index')" label="Kembali ke menu utama" />

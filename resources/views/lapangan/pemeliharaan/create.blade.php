@@ -6,16 +6,6 @@
 @section('content')
     <x-lapangan.back-link :href="route('lapangan.index')" label="Kembali ke menu utama" />
 
-    <x-lapangan.step-guide
-        title="Urutan pengisian"
-        :steps="[
-            ['step' => '1', 'label' => 'Waktu & lokasi', 'hint' => 'Tanggal pelaksanaan dan taman/alamat'],
-            ['step' => '2', 'label' => 'Petugas', 'hint' => 'Ketik nama, pilih dari daftar'],
-            ['step' => '3', 'label' => 'Foto & uraian', 'hint' => 'Dokumentasi sebelum, saat, sesudah'],
-            ['step' => '4', 'label' => 'Simpan', 'hint' => 'Periksa ringkasan lalu kirim'],
-        ]"
-    />
-
     <div class="lapangan-card p-5 sm:p-6">
         <div class="mb-5 flex items-center gap-3 rounded-2xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-4">
             <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-600 text-2xl text-white shadow-lg">{{ $menuItem['icon'] }}</span>
@@ -28,12 +18,6 @@
             <p class="font-bold">Belum bisa disimpan — lengkapi dulu:</p>
             <ul class="mt-2 list-inside list-disc space-y-1" data-error-list></ul>
         </div>
-
-        @include('lapangan.partials.recent-inputs', [
-            'records' => $recentInputs ?? collect(),
-            'guestMode' => ! auth()->check(),
-            'scopedTim' => $tim,
-        ])
 
         <form id="lapangan-pemeliharaan-form"
               data-foto-fields="{{ json_encode(array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS)) }}"
@@ -69,5 +53,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/lapangan-foto-compress.js') }}?v=1"></script>
-    <script src="{{ asset('js/lapangan-pemeliharaan-form.js') }}?v=5"></script>
+    <script src="{{ asset('js/lapangan-pemeliharaan-form.js') }}?v=6"></script>
 @endpush

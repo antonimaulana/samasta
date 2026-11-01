@@ -35,7 +35,20 @@ class LapanganOperasionalTest extends TestCase
 
             'simtaman.lapangan.session_ttl_minutes' => 480,
 
+            'simtaman.lapangan.require_login' => false,
+
         ]);
+
+    }
+
+    public function test_guest_is_redirected_to_login_when_require_login_enabled(): void
+    {
+
+        config(['simtaman.lapangan.require_login' => true]);
+
+        $this->get(route('lapangan.index'))
+
+            ->assertRedirect(route('login'));
 
     }
 

@@ -53,6 +53,11 @@ return [
     */
 
     'lapangan' => [
+        /** true = hanya user login (Admin/Operator/Pengawas); PIN tamu nonaktif. */
+        'require_login' => filter_var(
+            env('SIMTAMAN_LAPANGAN_REQUIRE_LOGIN', true),
+            FILTER_VALIDATE_BOOL
+        ),
         'pin' => env('SIMTAMAN_LAPANGAN_PIN', env('SIMAPAN_LAPANGAN_PIN')),
         'session_key' => 'lapangan_guest_unlocked_at',
         'session_ttl_minutes' => (int) env('SIMTAMAN_LAPANGAN_SESSION_TTL', env('SIMAPAN_LAPANGAN_SESSION_TTL', 480)),

@@ -3,7 +3,10 @@
 namespace App\Support;
 
 use App\Models\Armada;
+use App\Models\Pemangkasan;
+use App\Models\PemangkasanProgres;
 use App\Models\PemangkasanProgresArmada;
+use App\Models\PemeliharaanTaman;
 use App\Models\PemeliharaanTamanArmada;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -17,7 +20,7 @@ class ArmadaUsageHistory
      *     pekerjaan: string,
      *     lokasi: string,
      *     sopir: string,
-     *     url: ?string,
+     *     pdf_url: ?string,
      * }>
      */
     public function forArmada(Armada $armada): Collection
@@ -37,9 +40,7 @@ class ArmadaUsageHistory
                         : 'Pemeliharaan rutin '.$pemeliharaan?->tim,
                     'lokasi' => $pemeliharaan?->lokasiLabel() ?? '—',
                     'sopir' => $row->sopir,
-                    'url' => $pemeliharaan
-                        ? route('admin.pemeliharaan-tamans.edit', $pemeliharaan)
-                        : null,
+                    'pdf_url' => $this->pdfUrlForPemeliharaan($pemeliharaan),
                 ];
             });
 
@@ -57,12 +58,7 @@ class ArmadaUsageHistory
                     'pekerjaan' => $permohonan?->jenis_layanan ?? 'Permohonan operasional',
                     'lokasi' => $permohonan?->lokasiLabel() ?? '—',
                     'sopir' => $row->sopir,
-                    'url' => ($permohonan && $progres)
-                        ? route('admin.pemangkasans.progres.edit', [
-                            'pemangkasan' => $permohonan,
-                            'pemangkasanProgres' => $progres,
-                        ])
-                        : null,
+                    'pdf_url' => $this->pdfUrlForPermohonanProgres($permohonan, $progres),
                 ];
             });
 
@@ -81,7 +77,7 @@ class ArmadaUsageHistory
      *     pekerjaan: string,
      *     lokasi: string,
      *     sopir: string,
-     *     url: ?string,
+     *     pdf_url: ?string,
      * }>
      */
     public function recent(int $limit = 20): Collection
@@ -106,9 +102,7 @@ class ArmadaUsageHistory
                         : 'Pemeliharaan rutin '.$pemeliharaan?->tim,
                     'lokasi' => $pemeliharaan?->lokasiLabel() ?? '—',
                     'sopir' => $row->sopir,
-                    'url' => $pemeliharaan
-                        ? route('admin.pemeliharaan-tamans.edit', $pemeliharaan)
-                        : null,
+                    'pdf_url' => $this->pdfUrlForPemeliharaan($pemeliharaan),
                 ];
             });
 
@@ -131,12 +125,7 @@ class ArmadaUsageHistory
                     'pekerjaan' => $permohonan?->jenis_layanan ?? 'Permohonan operasional',
                     'lokasi' => $permohonan?->lokasiLabel() ?? '—',
                     'sopir' => $row->sopir,
-                    'url' => ($permohonan && $progres)
-                        ? route('admin.pemangkasans.progres.edit', [
-                            'pemangkasan' => $permohonan,
-                            'pemangkasanProgres' => $progres,
-                        ])
-                        : null,
+                    'pdf_url' => $this->pdfUrlForPermohonanProgres($permohonan, $progres),
                 ];
             });
 
@@ -145,5 +134,26 @@ class ArmadaUsageHistory
             ->sortByDesc(fn (array $entry) => $entry['tanggal']?->timestamp ?? 0)
             ->take($limit)
             ->values();
+    }
+
+    private function pdfUrlForPemeliharaan(?PemeliharaanTaman $pemeliharaan): ?string
+    {
+        if (! $pemeliharaan) {
+            return null;
+        }
+
+        return route('admin.pemeliharaan-tamans.export-pdf-operasional', $pemeliharaan);
+    }
+
+    private function pdfUrlForPermohonanProgres(?Pemangkasan $permohonan, ?PemangkasanProgres $progres): ?string
+    {
+        if (! $permohonan || ! $progres) {
+            return null;
+        }
+
+        return route('admin.pemangkasans.export-pdf-progres', [
+            'pemangkasan' => $permohonan,
+            'pemangkasanProgres' => $progres,
+        ]);
     }
 }
