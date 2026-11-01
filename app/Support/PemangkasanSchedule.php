@@ -86,12 +86,17 @@ class PemangkasanSchedule
     {
         $mulai = $permohonan->tanggal_eksekusi->format('d/m/Y');
         $akhir = ($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->format('d/m/Y');
+        $totalHari = (int) ($permohonan->total_hari ?: self::totalHari(
+            $permohonan->tanggal_eksekusi,
+            $permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi,
+        ));
+        $hariLabel = $totalHari.' hari';
 
         if ($mulai === $akhir) {
-            return $mulai;
+            return $mulai.' · '.$hariLabel;
         }
 
-        return $mulai.' – '.$akhir;
+        return $mulai.' – '.$akhir.' · '.$hariLabel;
     }
 
     public static function progressSummary(Pemangkasan $permohonan): string

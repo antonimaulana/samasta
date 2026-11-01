@@ -6,6 +6,7 @@ use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
 use App\Models\PemeliharaanTaman;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -31,6 +32,20 @@ class PermohonanProgressRecorder
                 : null,
         ]);
 
+        if ($request->boolean('confirm_extend_schedule')) {
+            $datePart = OperasionalPelaksanaanTime::datePart($validated['tanggal_progres']);
+            $scheduleEnd = Carbon::parse(
+                $permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi,
+            )->startOfDay();
+
+            if (Carbon::parse($datePart)->startOfDay()->gt($scheduleEnd)) {
+                $permohonan->forceFill([
+                    'tanggal_akhir_jadwal' => $datePart,
+                    'total_hari' => PemangkasanSchedule::totalHari($permohonan->tanggal_eksekusi, $datePart),
+                ])->save();
+            }
+        }
+
         PemangkasanSchedule::recalculate($permohonan);
 
         return $permohonan->fresh(['taman', 'progres.armadas']);
@@ -47,15 +62,29 @@ class PermohonanProgressRecorder
         array $armadaRows,
     ): PemangkasanProgres {
         $tanggal = $validated['tanggal_progres'];
+        $datePart = OperasionalPelaksanaanTime::datePart($tanggal);
+        $date = Carbon::parse($datePart)->startOfDay();
+        $mulai = Carbon::parse($permohonan->tanggal_eksekusi)->startOfDay();
+        $akhir = Carbon::parse($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->startOfDay();
+        $totalHari = (int) ($permohonan->total_hari ?? 1);
+        $hariKe = PemangkasanSchedule::hariKe($permohonan->tanggal_eksekusi, $datePart);
+        $confirmedEarly = $request->boolean('confirm_early_start');
+        $confirmedExtend = $request->boolean('confirm_extend_schedule');
 
-        if (! PemangkasanSchedule::tanggalWithinSchedule($permohonan, $tanggal)) {
+        if ($date->lt($mulai) && ! $confirmedEarly) {
             throw ValidationException::withMessages([
-                'tanggal_progres' => 'Tanggal progres harus berada dalam rentang jadwal pelaksanaan.',
+                'tanggal_progres' => 'Pelaksanaan sebelum jadwal memerlukan konfirmasi.',
+            ]);
+        }
+
+        if (($date->gt($akhir) || $hariKe > $totalHari) && ! $confirmedExtend) {
+            throw ValidationException::withMessages([
+                'tanggal_progres' => 'Pelaksanaan melebihi estimasi jadwal memerlukan konfirmasi perpanjangan.',
             ]);
         }
 
         $entry = $permohonan->progres()
-            ->whereDate('tanggal', $tanggal)
+            ->whereDate('tanggal', $datePart)
             ->first();
 
         if (! $entry) {
@@ -100,6 +129,8 @@ class PermohonanProgressRecorder
         $rules = [
             'status' => ['required', Rule::in($permohonan->lapanganStatusOptions())],
             'tanggal_progres' => ['required', 'date'],
+            'confirm_early_start' => ['nullable', 'boolean'],
+            'confirm_extend_schedule' => ['nullable', 'boolean'],
             'jumlah_personil' => [$rosterExists ? 'nullable' : 'required', 'integer', 'min:1', 'max:9999'],
             'catatan' => ['nullable', 'string'],
             'tanggal_penyelesaian' => [

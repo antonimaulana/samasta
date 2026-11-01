@@ -136,20 +136,16 @@ class BibitController extends Controller
 
     public function show(Bibit $bibit): View
     {
-        $bibit->load([
-            'masuks' => fn ($query) => $query
-                ->with('batch')
-                ->join('bibit_masuk_batches', 'bibit_masuk_batches.id', '=', 'bibit_masuks.bibit_masuk_batch_id')
-                ->orderByDesc('bibit_masuk_batches.tanggal_masuk')
-                ->orderByDesc('bibit_masuks.id')
-                ->select('bibit_masuks.*'),
-            'keluars' => fn ($query) => $query
-                ->with('batch')
-                ->join('bibit_keluar_batches', 'bibit_keluars.bibit_keluar_batch_id', '=', 'bibit_keluar_batches.id')
-                ->orderByDesc('bibit_keluar_batches.tanggal_keluar')
-                ->orderByDesc('bibit_keluars.id')
-                ->select('bibit_keluars.*'),
-        ]);
+        $bibit->load(['masuks.batch', 'keluars.batch']);
+
+        $bibit->setRelation(
+            'masuks',
+            $bibit->masuks->sortByDesc(fn ($masuk) => $masuk->batch?->tanggal_masuk?->timestamp ?? 0)->values(),
+        );
+        $bibit->setRelation(
+            'keluars',
+            $bibit->keluars->sortByDesc(fn ($keluar) => $keluar->batch?->tanggal_keluar?->timestamp ?? 0)->values(),
+        );
 
         $totalMasuk = (int) $bibit->masuks->sum('jumlah');
         $totalKeluar = (int) $bibit->keluars->sum('jumlah');

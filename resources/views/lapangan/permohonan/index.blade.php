@@ -6,25 +6,6 @@
 @section('content')
     <x-lapangan.back-link :href="route('lapangan.index')" label="Kembali ke menu utama" />
 
-    <div class="lapangan-card mb-5 border-blue-200 bg-gradient-to-br from-blue-50 to-white p-5">
-        <div class="flex items-start gap-3">
-            <span class="text-3xl" aria-hidden="true">📋</span>
-            <div>
-                <p class="text-sm font-black text-blue-900">Apa yang perlu dilakukan?</p>
-                <p class="mt-1 text-sm leading-relaxed text-blue-800">
-                    Admin sudah membuat daftar permohonan dengan status awal <strong>Rencana</strong>.
-                    Anda <strong>mulai pekerjaan</strong> (→ Diproses), isi <strong>progres per hari</strong>,
-                    lalu <strong>konfirmasi selesai</strong> di bagian bawah form.
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <x-lapangan.step-guide
-        title="Alur permohonan (3 langkah)"
-        :steps="\App\Support\LapanganUi::permohonanSteps()"
-    />
-
     @php
         $tabs = [
             'Rencana' => ['label' => 'Menunggu', 'emoji' => '📅', 'active' => 'bg-blue-600 text-white ring-2 ring-blue-300', 'idle' => 'bg-white text-blue-800 ring-1 ring-blue-200 hover:bg-blue-50'],

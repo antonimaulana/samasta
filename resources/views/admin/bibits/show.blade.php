@@ -99,14 +99,16 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($bibit->masuks as $masuk)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-gray-600">{{ \App\Support\OperasionalPelaksanaanTime::display($masuk->batch->tanggal_masuk) }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $masuk->batch ? \App\Support\OperasionalPelaksanaanTime::display($masuk->batch->tanggal_masuk) : '—' }}</td>
                                 <td class="px-4 py-2 font-semibold text-teal-700">+{{ $masuk->jumlah }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $masuk->sumber }}</td>
                                 <td class="px-4 py-2 text-gray-700">{{ $masuk->sisa_stok }} / {{ $masuk->jumlah }}</td>
                                 <td class="admin-table-col-actions">
                                     <x-admin.table-actions>
-                                        <x-admin.table-action-link size="sm" :href="route('admin.bibit-masuks.show', $masuk)" />
-                                        <x-admin.bibit-masuk-delete-button :masuk="$masuk" size="xs" />
+                                        @if ($masuk->batch)
+                                            <x-admin.table-action-link size="sm" :href="route('admin.bibit-masuks.show', $masuk->batch)" />
+                                            <x-admin.bibit-masuk-delete-button :batch="$masuk->batch" size="xs" />
+                                        @endif
                                     </x-admin.table-actions>
                                 </td>
                             </tr>
@@ -136,13 +138,15 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($bibit->keluars as $keluar)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-gray-600">{{ $keluar->batch->tanggal_keluar->format('d M Y') }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $keluar->batch ? \App\Support\OperasionalPelaksanaanTime::display($keluar->batch->tanggal_keluar) : '—' }}</td>
                                 <td class="px-4 py-2 font-semibold text-red-700">-{{ $keluar->jumlah }}</td>
-                                <td class="px-4 py-2 text-gray-600">{{ $keluar->batch->peruntukan }}</td>
-                                <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $keluar->batch->lokasiLabel() }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ $keluar->batch?->peruntukan ?? '—' }}</td>
+                                <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $keluar->batch?->lokasiLabel() ?? '—' }}</td>
                                 <td class="admin-table-col-actions">
                                     <x-admin.table-actions>
+                                        @if ($keluar->batch)
                                         <x-admin.table-action-link size="sm" :href="route('admin.bibit-keluars.show', $keluar->batch)" />
+                                        @endif
                                     </x-admin.table-actions>
                                 </td>
                             </tr>

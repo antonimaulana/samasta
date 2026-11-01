@@ -227,6 +227,45 @@ class LapanganOperasionalTest extends TestCase
             ->assertSee('Admin', false);
     }
 
+    public function test_pengawas_does_not_see_admin_back_link_on_lapangan(): void
+    {
+        $pengawas = User::factory()->create(['role' => User::ROLE_PENGAWAS]);
+
+        $this->actingAs($pengawas)
+            ->get(route('lapangan.index'))
+            ->assertOk()
+            ->assertDontSee('>Admin<', false);
+    }
+
+    public function test_nursery_only_operator_does_not_see_wilayah_menus(): void
+    {
+        $nursery = TimPelaksana::where('nama', 'Tim Nursery')->firstOrFail();
+        $operator = User::factory()->operatorTeams([$nursery->id])->create();
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.index'))
+            ->assertOk()
+            ->assertSee('Nursery')
+            ->assertDontSee('Wilayah 1')
+            ->assertDontSee('Wilayah 2')
+            ->assertSee('Permohonan')
+            ->assertDontSee('>Armada<', false);
+    }
+
+    public function test_armada_only_operator_does_not_see_wilayah_menus(): void
+    {
+        $armada = TimPelaksana::where('nama', PemeliharaanTaman::TIM_ARMADA)->firstOrFail();
+        $operator = User::factory()->operatorTeams([$armada->id])->create();
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.index'))
+            ->assertOk()
+            ->assertSee('Armada')
+            ->assertDontSee('Wilayah 1')
+            ->assertDontSee('Nursery')
+            ->assertSee('Permohonan');
+    }
+
     public function test_operator_menu_is_limited_to_assigned_team(): void
     {
 

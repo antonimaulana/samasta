@@ -38,7 +38,7 @@
 
     <div class="mb-6">
 
-        <p class="lapangan-section-title mb-3 text-sm font-bold text-gray-800">Riwayat hari sebelumnya</p>
+        <p class="lapangan-section-title mb-3 text-sm font-bold text-gray-800">Riwayat pelaksanaan</p>
 
         <div class="space-y-2">
 
@@ -98,13 +98,13 @@
 
                     name="tanggal_progres"
 
-                    :min="$permohonan->tanggal_eksekusi->format('Y-m-d').'T00:00'"
-
-                    :max="$jadwalAkhir->format('Y-m-d').'T23:59'"
-
                     variant="lapangan"
 
                 />
+
+                <input type="hidden" name="confirm_early_start" id="confirm_early_start" value="{{ old('confirm_early_start') }}">
+
+                <input type="hidden" name="confirm_extend_schedule" id="confirm_extend_schedule" value="{{ old('confirm_extend_schedule') }}">
 
                 <p class="mt-2 inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">
 
@@ -306,6 +306,10 @@
             const fotoDokumentasiSection = document.getElementById('foto-dokumentasi-section');
 
             const mulai = @json($permohonan->tanggal_eksekusi->format('Y-m-d'));
+
+            const akhir = @json($jadwalAkhir->format('Y-m-d'));
+
+            const totalHari = @json($totalHari);
 
             const isStartingWork = @json($permohonanStatus === 'Rencana');
 

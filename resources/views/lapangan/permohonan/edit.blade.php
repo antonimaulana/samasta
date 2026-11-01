@@ -111,14 +111,70 @@
                 return;
             }
 
+            const mulai = @json($permohonan->tanggal_eksekusi->format('Y-m-d'));
+            const akhir = @json(($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->format('Y-m-d'));
+            const totalHari = @json((int) ($permohonan->total_hari ?? 1));
+            const confirmEarlyInput = document.getElementById('confirm_early_start');
+            const confirmExtendInput = document.getElementById('confirm_extend_schedule');
+
             form.addEventListener('submit', function (event) {
-                if (form.checkValidity()) {
+                if (! form.checkValidity()) {
+                    event.preventDefault();
+                    form.reportValidity();
+                    form.querySelector(':invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
                     return;
                 }
 
-                event.preventDefault();
-                form.reportValidity();
-                form.querySelector(':invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const tanggalInput = document.getElementById('tanggal_progres');
+                const datePart = (tanggalInput?.value || '').split('T')[0];
+
+                if (! datePart) {
+                    return;
+                }
+
+                const start = new Date(mulai + 'T00:00:00');
+                const end = new Date(akhir + 'T00:00:00');
+                const current = new Date(datePart + 'T00:00:00');
+                const hariKe = Math.max(0, Math.round((current - start) / 86400000)) + 1;
+
+                if (current < start && confirmEarlyInput?.value !== '1') {
+                    event.preventDefault();
+                    const lanjut = window.confirm(
+                        'Pelaksanaan dijadwalkan mulai '+mulai+', tetapi tanggal yang dipilih lebih awal. Lanjutkan mulai pekerjaan?',
+                    );
+
+                    if (! lanjut) {
+                        return;
+                    }
+
+                    if (confirmEarlyInput) {
+                        confirmEarlyInput.value = '1';
+                    }
+
+                    form.requestSubmit();
+
+                    return;
+                }
+
+                if ((current > end || hariKe > totalHari) && confirmExtendInput?.value !== '1') {
+                    event.preventDefault();
+                    const lanjut = window.confirm(
+                        'Tanggal pelaksanaan melebihi estimasi jadwal ('+totalHari+' hari). Pekerjaan perlu waktu lebih lanjut?',
+                    );
+
+                    if (! lanjut) {
+                        return;
+                    }
+
+                    if (confirmExtendInput) {
+                        confirmExtendInput.value = '1';
+                    }
+
+                    form.requestSubmit();
+
+                    return;
+                }
             });
         });
     </script>

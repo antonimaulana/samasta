@@ -72,15 +72,51 @@ class LapanganMenu
 
         $scope = app(OperatorWilayahScope::class);
 
+        if ($user && ! $user->requiresWilayahScope()) {
+            return $items;
+        }
+
+        if ($user && $user->akses_semua_wilayah) {
+            return $items;
+        }
+
+        $assignedTeams = $user ? $scope->assignedTeams($user) : collect();
+
+        if ($user && $user->requiresWilayahScope() && $assignedTeams->isNotEmpty()) {
+            $allowedTeams = $scope->teamNames($user);
+            $canSeeWilayahMenus = collect($allowedTeams)->contains(
+                fn (string $tim) => str_starts_with($tim, 'Tim Wilayah'),
+            );
+
+            return array_values(array_filter($items, function (array $item) use ($allowedTeams, $canSeeWilayahMenus) {
+                if ($item['type'] === 'permohonan') {
+                    return true;
+                }
+
+                if (str_starts_with($item['slug'], 'wilayah-') && ! $canSeeWilayahMenus) {
+                    return false;
+                }
+
+                return in_array($item['tim'] ?? '', $allowedTeams, true);
+            }));
+        }
+
         if (! $scope->restrictsWilayah($user)) {
             return $items;
         }
 
         $allowedTeams = $scope->teamNames($user);
+        $canSeeWilayahMenus = collect($allowedTeams)->contains(
+            fn (string $tim) => str_starts_with($tim, 'Tim Wilayah'),
+        );
 
-        return array_values(array_filter($items, function (array $item) use ($allowedTeams) {
+        return array_values(array_filter($items, function (array $item) use ($allowedTeams, $canSeeWilayahMenus) {
             if ($item['type'] === 'permohonan') {
                 return true;
+            }
+
+            if (str_starts_with($item['slug'], 'wilayah-') && ! $canSeeWilayahMenus) {
+                return false;
             }
 
             return in_array($item['tim'] ?? '', $allowedTeams, true);

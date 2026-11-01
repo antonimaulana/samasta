@@ -26,6 +26,26 @@ class BibitStokFotoShowTest extends TestCase
         $this->seed(WilayahBatamSeeder::class);
     }
 
+    public function test_bibit_show_page_lists_masuk_and_keluar_without_error(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $bibit = Bibit::create([
+            'nama_tanaman' => 'Flamboyan',
+            'jenis' => 'Pohon Rindang',
+            'stok_tersedia' => 5,
+            'sumber_bibit' => 'Produksi',
+            'status_siap_tanam' => true,
+        ]);
+
+        $this->createBibitMasukLine($bibit, 5);
+
+        $this->actingAs($admin)
+            ->get(route('admin.bibits.show', $bibit))
+            ->assertOk()
+            ->assertSee('Flamboyan')
+            ->assertSee('Riwayat Stok Masuk');
+    }
+
     public function test_stok_masuk_show_displays_foto_bukti_when_file_exists(): void
     {
         Storage::fake('public');
