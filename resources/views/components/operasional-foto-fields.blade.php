@@ -24,8 +24,8 @@
         ])>{{ $groupLabel }}</h3>
         @if ($isLapangan && $loop->first)
             <p class="mb-3 text-xs leading-relaxed text-emerald-800/90">
-                Unggah 6 foto dokumentasi. Maks. <strong>4 MB per foto</strong> (total ±24 MB).
-                Jika gagal simpan, kompres di galeri HP atau gunakan resolusi “Sedang” saat ambil foto.
+                Unggah 6 foto dokumentasi. Sistem akan <strong>mengompres otomatis</strong> saat simpan (target maks. 4 MB per foto).
+                Foto sangat besar dari kamera tetap bisa gagal — gunakan resolusi “Sedang” jika perlu.
             </p>
         @endif
         <div class="grid gap-4 sm:grid-cols-2 md:gap-6">

@@ -563,6 +563,7 @@ class LapanganOperasionalTest extends TestCase
             ->assertSee('Lokasi di luar wilayah pemeliharaan')
             ->assertSee($tamanWilayah1->nama_taman)
             ->assertSee('js/searchable-select.js', false)
+            ->assertSee('js/lapangan-foto-compress.js', false)
             ->assertSee('js/lapangan-pemeliharaan-form.js', false)
             ->assertSee('data-searchable-select', false)
             ->assertDontSee('Taman Lapangan W2');

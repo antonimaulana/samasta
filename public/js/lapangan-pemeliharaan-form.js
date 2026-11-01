@@ -1,5 +1,7 @@
 (function () {
     const FORM_ID = 'lapangan-pemeliharaan-form';
+    const MAX_PER_FILE_BYTES = 4 * 1024 * 1024;
+    const MAX_TOTAL_BYTES = 24 * 1024 * 1024;
 
     function getForm() {
         return document.getElementById(FORM_ID);
@@ -24,7 +26,8 @@
         }
     }
 
-    function validate(form) {
+    function validate(form, options) {
+        const checkSizes = options?.checkSizes !== false;
         const errors = [];
         const fotoFields = fotoFieldNames(form);
 
@@ -56,8 +59,6 @@
             errors.push('Isi jumlah personil.');
         }
 
-        const maxPerFileBytes = 4 * 1024 * 1024;
-        const maxTotalBytes = 24 * 1024 * 1024;
         let totalBytes = 0;
 
         fotoFields.forEach(function (field) {
@@ -73,18 +74,22 @@
                 return;
             }
 
+            if (!checkSizes) {
+                return;
+            }
+
             const file = input.files[0];
             totalBytes += file.size;
 
-            if (file.size > maxPerFileBytes) {
+            if (file.size > MAX_PER_FILE_BYTES) {
                 const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-                errors.push(label + ' terlalu besar (' + sizeMb + ' MB). Maks. 4 MB per foto — kompres atau ambil ulang resolusi lebih kecil.');
+                errors.push(label + ' masih terlalu besar (' + sizeMb + ' MB) setelah kompresi. Ambil ulang dengan resolusi lebih kecil.');
             }
         });
 
-        if (totalBytes > maxTotalBytes) {
+        if (checkSizes && totalBytes > MAX_TOTAL_BYTES) {
             const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
-            errors.push('Total semua foto ' + totalMb + ' MB (maks. 24 MB untuk 6 foto). Kompres beberapa foto lalu coba lagi.');
+            errors.push('Total semua foto ' + totalMb + ' MB (maks. 24 MB). Coba kurangi resolusi kamera.');
         }
 
         return errors;
@@ -142,6 +147,29 @@
         }
     }
 
+    function getSubmitButton(form) {
+        return form.querySelector('button[type="submit"]');
+    }
+
+    function setSubmitBusy(button, label) {
+        if (!button || button.disabled) {
+            return;
+        }
+        button.disabled = true;
+        button.dataset.originalLabel = button.dataset.originalLabel || button.textContent;
+        button.textContent = label;
+    }
+
+    function resetSubmitButton(button) {
+        if (!button) {
+            return;
+        }
+        button.disabled = false;
+        if (button.dataset.originalLabel) {
+            button.textContent = button.dataset.originalLabel;
+        }
+    }
+
     function bindForm(form) {
         if (form.dataset.lapanganPemeliharaanBound === '1') {
             return;
@@ -151,29 +179,72 @@
         form.setAttribute('novalidate', 'novalidate');
 
         form.addEventListener('submit', function (event) {
-            delete form.dataset.lapanganSubmitOk;
-
-            commitPetugasPickers(form);
-
-            const errors = validate(form);
-            showErrors(form, errors);
-
-            if (errors.length > 0) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                focusFirstIssue(form, errors, fotoFieldNames(form));
+            if (form.dataset.lapanganNativeSubmit === '1') {
+                delete form.dataset.lapanganNativeSubmit;
 
                 return;
             }
 
-            form.dataset.lapanganSubmitOk = '1';
+            event.preventDefault();
+            event.stopImmediatePropagation();
 
-            const submitButton = form.querySelector('button[type="submit"]');
-            if (submitButton && !submitButton.disabled) {
-                submitButton.disabled = true;
-                submitButton.dataset.originalLabel = submitButton.dataset.originalLabel || submitButton.textContent;
-                submitButton.textContent = 'Menyimpan…';
+            delete form.dataset.lapanganSubmitOk;
+
+            commitPetugasPickers(form);
+
+            const fotoFields = fotoFieldNames(form);
+            let errors = validate(form, { checkSizes: false });
+            showErrors(form, errors);
+
+            if (errors.length > 0) {
+                focusFirstIssue(form, errors, fotoFields);
+
+                return;
             }
+
+            const submitButton = getSubmitButton(form);
+            const compressApi = window.LapanganFotoCompress;
+
+            if (!compressApi?.compressFormFotoInputs) {
+                errors = validate(form, { checkSizes: true });
+                showErrors(form, errors);
+                if (errors.length > 0) {
+                    focusFirstIssue(form, errors, fotoFields);
+
+                    return;
+                }
+                form.dataset.lapanganNativeSubmit = '1';
+                setSubmitBusy(submitButton, 'Menyimpan…');
+                form.submit();
+
+                return;
+            }
+
+            setSubmitBusy(submitButton, 'Mengompres foto…');
+
+            compressApi.compressFormFotoInputs(form, fotoFields)
+                .then(function () {
+                    errors = validate(form, { checkSizes: true });
+                    showErrors(form, errors);
+
+                    if (errors.length > 0) {
+                        resetSubmitButton(submitButton);
+                        focusFirstIssue(form, errors, fotoFields);
+
+                        return;
+                    }
+
+                    form.dataset.lapanganSubmitOk = '1';
+                    form.dataset.lapanganNativeSubmit = '1';
+                    setSubmitBusy(submitButton, 'Menyimpan…');
+                    form.submit();
+                })
+                .catch(function () {
+                    resetSubmitButton(submitButton);
+                    showErrors(form, [
+                        'Foto tidak dapat diproses di perangkat ini. Coba format JPG/PNG, atau kompres manual di galeri HP.',
+                    ]);
+                });
         }, true);
     }
 
