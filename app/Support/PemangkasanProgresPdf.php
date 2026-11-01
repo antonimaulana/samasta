@@ -42,12 +42,6 @@ class PemangkasanProgresPdf
 
     public static function filename(PemangkasanProgres $progres, Pemangkasan $permohonan): string
     {
-        $slug = str($permohonan->lokasi_pohon)->slug('-')->limit(30, '');
-
-        return 'operasional-'
-            .$progres->tanggal->format('Y-m-d')
-            .'-hari-'.$progres->hari_ke
-            .'-'.$slug
-            .'.pdf';
+        return OperasionalKegiatanPdfFilename::permohonanProgres($permohonan, $progres);
     }
 }

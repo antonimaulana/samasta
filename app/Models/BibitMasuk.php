@@ -4,20 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
-
 class BibitMasuk extends Model
 {
     protected $table = 'bibit_masuks';
 
     protected $fillable = [
+        'bibit_masuk_batch_id',
         'bibit_id',
         'jumlah',
         'sisa_stok',
-        'tanggal_masuk',
         'sumber',
         'status_siap_tanam',
-        'foto',
     ];
 
     protected function casts(): array
@@ -25,9 +22,13 @@ class BibitMasuk extends Model
         return [
             'jumlah' => 'integer',
             'sisa_stok' => 'integer',
-            'tanggal_masuk' => 'date',
             'status_siap_tanam' => 'boolean',
         ];
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(BibitMasukBatch::class, 'bibit_masuk_batch_id');
     }
 
     public function bibit(): BelongsTo
@@ -35,23 +36,19 @@ class BibitMasuk extends Model
         return $this->belongsTo(Bibit::class);
     }
 
-    public function hasFotoPath(): bool
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<self>  $query
+     */
+    public function scopeWhereBatchTanggalBetween($query, $awal, $akhir)
     {
-        return filled($this->foto);
+        return $query->whereHas('batch', fn ($batch) => $batch->whereBetween('tanggal_masuk', [$awal, $akhir]));
     }
 
-    public function getFotoUrlAttribute(): ?string
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<self>  $query
+     */
+    public function scopeWhereBatchDate($query, $date)
     {
-        if (! filled($this->foto)) {
-            return null;
-        }
-
-        $path = str_replace('\\', '/', (string) $this->foto);
-
-        if (! Storage::disk('public')->exists($path)) {
-            return null;
-        }
-
-        return Storage::disk('public')->url($path);
+        return $query->whereHas('batch', fn ($batch) => $batch->whereDate('tanggal_masuk', $date));
     }
 }

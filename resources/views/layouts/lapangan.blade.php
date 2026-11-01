@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 <div class="flex shrink-0 items-center gap-2">
-                    @if (auth()->user()?->isAdmin())
+                    @if (auth()->user()?->canAccessAdminBackpanel())
                         <a href="{{ route('admin.dashboard') }}"
                            class="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur hover:bg-white/25">
                             Admin

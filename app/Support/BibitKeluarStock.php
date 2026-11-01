@@ -8,14 +8,25 @@ use Illuminate\Validation\ValidationException;
 
 class BibitKeluarStock
 {
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder<BibitMasuk>
+     */
+    private function masukQueryForBibit(int $bibitId)
+    {
+        return BibitMasuk::query()
+            ->where('bibit_masuks.bibit_id', $bibitId)
+            ->join('bibit_masuk_batches', 'bibit_masuk_batches.id', '=', 'bibit_masuks.bibit_masuk_batch_id')
+            ->select('bibit_masuks.*');
+    }
+
     public function kurangiStokMasuk(Bibit $bibit, int $jumlah): void
     {
         $sisa = $jumlah;
 
-        $masuks = BibitMasuk::where('bibit_id', $bibit->id)
-            ->where('sisa_stok', '>', 0)
-            ->orderBy('tanggal_masuk')
-            ->orderBy('id')
+        $masuks = $this->masukQueryForBibit($bibit->id)
+            ->where('bibit_masuks.sisa_stok', '>', 0)
+            ->orderBy('bibit_masuk_batches.tanggal_masuk')
+            ->orderBy('bibit_masuks.id')
             ->lockForUpdate()
             ->get();
 
@@ -40,10 +51,10 @@ class BibitKeluarStock
     {
         $sisa = $jumlah;
 
-        $masuks = BibitMasuk::where('bibit_id', $bibit->id)
-            ->whereColumn('sisa_stok', '<', 'jumlah')
-            ->orderByDesc('tanggal_masuk')
-            ->orderByDesc('id')
+        $masuks = $this->masukQueryForBibit($bibit->id)
+            ->whereColumn('bibit_masuks.sisa_stok', '<', 'bibit_masuks.jumlah')
+            ->orderByDesc('bibit_masuk_batches.tanggal_masuk')
+            ->orderByDesc('bibit_masuks.id')
             ->lockForUpdate()
             ->get();
 
@@ -59,9 +70,12 @@ class BibitKeluarStock
         }
 
         if ($sisa > 0) {
-            $masuk = BibitMasuk::where('bibit_id', $bibit->id)
-                ->orderByDesc('tanggal_masuk')
-                ->orderByDesc('id')
+            $masuk = BibitMasuk::query()
+                ->where('bibit_masuks.bibit_id', $bibit->id)
+                ->join('bibit_masuk_batches', 'bibit_masuk_batches.id', '=', 'bibit_masuks.bibit_masuk_batch_id')
+                ->orderByDesc('bibit_masuk_batches.tanggal_masuk')
+                ->orderByDesc('bibit_masuks.id')
+                ->select('bibit_masuks.*')
                 ->lockForUpdate()
                 ->first();
 

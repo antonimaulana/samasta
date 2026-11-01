@@ -5,16 +5,18 @@ namespace Tests\Feature;
 use App\Models\Bibit;
 use App\Models\BibitKeluar;
 use App\Models\BibitKeluarBatch;
-use App\Models\BibitMasuk;
 use App\Models\Taman;
 use App\Models\User;
+use App\Support\OperasionalPelaksanaanTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\CreatesBibitStokFixtures;
 use Tests\TestCase;
 
 class BibitKeluarLokasiTest extends TestCase
 {
+    use CreatesBibitStokFixtures;
     use RefreshDatabase;
 
     public function test_store_stok_keluar_with_manual_lokasi_and_permintaan_masyarakat(): void
@@ -29,25 +31,18 @@ class BibitKeluarLokasiTest extends TestCase
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,
         ]);
-        BibitMasuk::create([
-            'bibit_id' => $bibit->id,
-            'jumlah' => 10,
-            'sisa_stok' => 10,
-            'tanggal_masuk' => now()->toDateString(),
-            'sumber' => 'Produksi',
-            'status_siap_tanam' => true,
-            'foto' => 'bibit-masuk/test.jpg',
-        ]);
+        $this->createBibitMasukLine($bibit, 10);
 
         $response = $this->actingAs($operator)->post(route('admin.bibit-keluars.store'), [
-            'tanggal_keluar' => now()->toDateString(),
+            'tanggal_keluar' => OperasionalPelaksanaanTime::inputValue(now()),
             'peruntukan' => 'Permintaan Masyarakat/Instansi',
             'lokasi_luar' => '1',
             'lokasi' => 'Kantor Kelurahan Sei Jodoh',
             'items' => [
                 ['bibit_id' => $bibit->id, 'jumlah' => 3],
             ],
-            'foto' => UploadedFile::fake()->image('bukti.jpg'),
+            'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
+            'dokumen_pendukung' => UploadedFile::fake()->create('surat.pdf', 100, 'application/pdf'),
         ]);
 
         $response->assertRedirect(route('admin.bibit-keluars.index'));
@@ -60,6 +55,8 @@ class BibitKeluarLokasiTest extends TestCase
         $this->assertSame('Kantor Kelurahan Sei Jodoh', $batch->lokasi);
         $this->assertSame(1, $batch->items()->count());
         $this->assertSame(7, $bibit->fresh()->stok_tersedia);
+        $this->assertTrue($batch->hasFotoBukti());
+        $this->assertNotNull($batch->dokumen_pendukung);
     }
 
     public function test_store_stok_keluar_with_taman_sets_lokasi_label(): void
@@ -74,15 +71,7 @@ class BibitKeluarLokasiTest extends TestCase
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,
         ]);
-        BibitMasuk::create([
-            'bibit_id' => $bibit->id,
-            'jumlah' => 5,
-            'sisa_stok' => 5,
-            'tanggal_masuk' => now()->toDateString(),
-            'sumber' => 'Produksi',
-            'status_siap_tanam' => true,
-            'foto' => 'bibit-masuk/test.jpg',
-        ]);
+        $this->createBibitMasukLine($bibit, 5);
         $taman = Taman::create([
             'nama_taman' => 'Taman Keluar Bibit',
             'kategori' => 'Taman Kota',
@@ -92,13 +81,13 @@ class BibitKeluarLokasiTest extends TestCase
         ]);
 
         $this->actingAs($operator)->post(route('admin.bibit-keluars.store'), [
-            'tanggal_keluar' => now()->toDateString(),
+            'tanggal_keluar' => OperasionalPelaksanaanTime::inputValue(now()),
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
             'items' => [
                 ['bibit_id' => $bibit->id, 'jumlah' => 2],
             ],
-            'foto' => UploadedFile::fake()->image('bukti.jpg'),
+            'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
         ])->assertRedirect(route('admin.bibit-keluars.index'));
 
         $batch = BibitKeluarBatch::query()->first();
@@ -125,17 +114,8 @@ class BibitKeluarLokasiTest extends TestCase
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,
         ]);
-        foreach ([$bibitA, $bibitB] as $bibit) {
-            BibitMasuk::create([
-                'bibit_id' => $bibit->id,
-                'jumlah' => $bibit->stok_tersedia,
-                'sisa_stok' => $bibit->stok_tersedia,
-                'tanggal_masuk' => now()->toDateString(),
-                'sumber' => 'Produksi',
-                'status_siap_tanam' => true,
-                'foto' => 'bibit-masuk/test.jpg',
-            ]);
-        }
+        $this->createBibitMasukLine($bibitA, 4);
+        $this->createBibitMasukLine($bibitB, 6);
         $taman = Taman::create([
             'nama_taman' => 'Taman Multi Bibit',
             'kategori' => 'Taman Kota',
@@ -145,14 +125,14 @@ class BibitKeluarLokasiTest extends TestCase
         ]);
 
         $this->actingAs($operator)->post(route('admin.bibit-keluars.store'), [
-            'tanggal_keluar' => now()->toDateString(),
+            'tanggal_keluar' => OperasionalPelaksanaanTime::inputValue(now()),
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
             'items' => [
                 ['bibit_id' => $bibitA->id, 'jumlah' => 2],
                 ['bibit_id' => $bibitB->id, 'jumlah' => 3],
             ],
-            'foto' => UploadedFile::fake()->image('bukti.jpg'),
+            'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
         ])->assertRedirect(route('admin.bibit-keluars.index'));
 
         $this->assertSame(1, BibitKeluarBatch::count());

@@ -12,13 +12,10 @@
         <form action="{{ route('admin.bibit-keluars.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
-            <div>
-                <label for="tanggal_keluar" class="mb-1 block text-sm font-medium text-gray-700">Tanggal Keluar *</label>
-                <input type="date" name="tanggal_keluar" id="tanggal_keluar"
-                       value="{{ old('tanggal_keluar', now()->format('Y-m-d')) }}"
-                       required
-                       class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-            </div>
+            <x-operasional-pelaksanaan-datetime
+                name="tanggal_keluar"
+                label="Tanggal & Waktu Keluar"
+            />
 
             <div class="space-y-6">
                 @include('admin.bibit_keluars._peruntukan_lokasi', ['batch' => null])
@@ -26,12 +23,7 @@
 
             @include('admin.bibit_keluars._baris_bibit', ['batch' => null])
 
-            <div>
-                <label for="foto" class="mb-1 block text-sm font-medium text-gray-700">Foto Bukti *</label>
-                <input type="file" name="foto" id="foto" accept="image/*" required
-                       class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-green-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-green-700 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-                <p class="mt-1 text-xs text-gray-500">Format JPG/PNG, maks. 4 MB.</p>
-            </div>
+            @include('admin.partials.bibit-stok-foto-input')
 
             <div class="flex gap-3">
                 <button type="submit"

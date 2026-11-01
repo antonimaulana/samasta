@@ -63,7 +63,7 @@
                 <select name="jenis_layanan" id="jenis_layanan"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500">
                     <option value="" @selected($jenisLayanan === '')>Semua Jenis</option>
-                    @foreach (\App\Models\Pemangkasan::JENIS_LAYANAN as $jenis)
+                    @foreach (\App\Models\Pemangkasan::jenisLayananForSelect() as $jenis)
                         <option value="{{ $jenis }}" @selected($jenisLayanan === $jenis)>{{ $jenis }}</option>
                     @endforeach
                 </select>

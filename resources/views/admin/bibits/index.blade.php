@@ -36,11 +36,11 @@
 
     <x-admin.data-table fixed>
         <colgroup>
-            <col style="width: 20%">
-            <col style="width: 10%">
-            <col style="width: 9%">
-            <col style="width: auto">
-            <col style="width: 14%">
+            <col style="width: 22%">
+            <col style="width: 11%">
+            <col style="width: 8%">
+            <col style="width: min(28rem, 32%)">
+            <col style="width: 12%">
             <col style="width: 7rem">
         </colgroup>
                 <thead class="bg-gray-50">
@@ -155,18 +155,15 @@
                     </tr>
                 </thead>
                     <tbody class="divide-y divide-gray-100">
-                        @forelse ($recentMasuks as $masuk)
+                        @forelse ($recentMasuks as $masukBatch)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-gray-600">{{ $masuk->tanggal_masuk->format('d M Y') }}</td>
-                                <td class="px-4 py-2">
-                                    <x-admin.bibit-nama :bibit="$masuk->bibit" />
-                                </td>
-                                <td class="px-4 py-2 font-semibold text-teal-700">+{{ number_format($masuk->jumlah) }}</td>
-                                <td class="px-4 py-2 text-gray-600">{{ $masuk->sumber }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ \App\Support\OperasionalPelaksanaanTime::display($masukBatch->tanggal_masuk) }}</td>
+                                <td class="px-4 py-2 text-gray-700">{{ $masukBatch->items_count }} jenis bibit</td>
+                                <td class="px-4 py-2 font-semibold text-teal-700">+{{ number_format((int) ($masukBatch->items_sum_jumlah ?? 0)) }}</td>
+                                <td class="px-4 py-2 text-gray-500">—</td>
                                 <td class="admin-table-col-actions">
                                     <x-admin.table-actions>
-                                        <x-admin.table-action-link size="sm" :href="route('admin.bibit-masuks.show', $masuk)" />
-                                        <x-admin.bibit-masuk-delete-button :masuk="$masuk" size="xs" />
+                                        <x-admin.table-action-link size="sm" :href="route('admin.bibit-masuks.show', $masukBatch)" />
                                     </x-admin.table-actions>
                                 </td>
                             </tr>
@@ -204,7 +201,7 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($recentKeluarBatches as $batch)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-gray-600">{{ $batch->tanggal_keluar->format('d M Y') }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ \App\Support\OperasionalPelaksanaanTime::display($batch->tanggal_keluar) }}</td>
                                 <td class="px-4 py-2 text-gray-700">
                                     {{ $batch->peruntukan }}
                                     <span class="block text-xs text-gray-500">{{ $batch->items_count }} jenis bibit</span>

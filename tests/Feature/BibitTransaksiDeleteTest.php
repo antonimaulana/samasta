@@ -3,16 +3,18 @@
 namespace Tests\Feature;
 
 use App\Models\Bibit;
-use App\Models\BibitKeluar;
 use App\Models\BibitKeluarBatch;
 use App\Models\BibitMasuk;
+use App\Models\BibitMasukBatch;
 use App\Models\Taman;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\CreatesBibitStokFixtures;
 use Tests\TestCase;
 
 class BibitTransaksiDeleteTest extends TestCase
 {
+    use CreatesBibitStokFixtures;
     use RefreshDatabase;
 
     private function createBibit(int $stok = 100): Bibit
@@ -26,27 +28,48 @@ class BibitTransaksiDeleteTest extends TestCase
         ]);
     }
 
-    private function createMasuk(Bibit $bibit, int $jumlah, ?int $sisaStok = null): BibitMasuk
+    public function test_operator_can_delete_unused_bibit_masuk_and_restore_stock(): void
     {
-        return BibitMasuk::create([
-            'bibit_id' => $bibit->id,
-            'jumlah' => $jumlah,
-            'sisa_stok' => $sisaStok ?? $jumlah,
-            'tanggal_masuk' => now()->toDateString(),
-            'sumber' => 'Produksi',
-            'status_siap_tanam' => true,
-            'foto' => 'bibit-masuk/test.jpg',
-        ]);
+        $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
+        $bibit = $this->createBibit(50);
+        $masuk = $this->createBibitMasukLine($bibit, 50);
+        $batch = $masuk->batch;
+
+        $this->actingAs($operator)
+            ->from(route('admin.bibit-masuks.index'))
+            ->delete(route('admin.bibit-masuks.destroy', $batch))
+            ->assertRedirect(route('admin.bibit-masuks.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('bibit_masuks', ['id' => $masuk->id]);
+        $this->assertDatabaseMissing('bibit_masuk_batches', ['id' => $batch->id]);
+        $this->assertSame(0, $bibit->fresh()->stok_tersedia);
+    }
+
+    public function test_operator_cannot_delete_bibit_masuk_when_batch_partially_used(): void
+    {
+        $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
+        $bibit = $this->createBibit(70);
+        $masuk = $this->createBibitMasukLine($bibit, 100, 70);
+        $batch = $masuk->batch;
+
+        $this->actingAs($operator)
+            ->from(route('admin.bibit-masuks.index'))
+            ->delete(route('admin.bibit-masuks.destroy', $batch))
+            ->assertRedirect(route('admin.bibit-masuks.index'))
+            ->assertSessionHasErrors('delete');
+
+        $this->assertDatabaseHas('bibit_masuks', ['id' => $masuk->id]);
+        $this->assertSame(70, $bibit->fresh()->stok_tersedia);
     }
 
     private function createKeluar(Bibit $bibit, Taman $taman, int $jumlah): BibitKeluarBatch
     {
         $batch = BibitKeluarBatch::create([
-            'tanggal_keluar' => now()->toDateString(),
+            'tanggal_keluar' => now()->format('Y-m-d H:i:s'),
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
             'lokasi' => $taman->nama_taman,
-            'foto' => 'bibit-keluar/test.jpg',
         ]);
 
         $batch->items()->create([
@@ -57,43 +80,11 @@ class BibitTransaksiDeleteTest extends TestCase
         return $batch;
     }
 
-    public function test_operator_can_delete_unused_bibit_masuk_and_restore_stock(): void
-    {
-        $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
-        $bibit = $this->createBibit(50);
-        $masuk = $this->createMasuk($bibit, 50);
-
-        $this->actingAs($operator)
-            ->from(route('admin.bibit-masuks.index'))
-            ->delete(route('admin.bibit-masuks.destroy', $masuk))
-            ->assertRedirect(route('admin.bibit-masuks.index'))
-            ->assertSessionHas('success');
-
-        $this->assertDatabaseMissing('bibit_masuks', ['id' => $masuk->id]);
-        $this->assertSame(0, $bibit->fresh()->stok_tersedia);
-    }
-
-    public function test_operator_cannot_delete_bibit_masuk_when_batch_partially_used(): void
-    {
-        $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
-        $bibit = $this->createBibit(70);
-        $masuk = $this->createMasuk($bibit, 100, 70);
-
-        $this->actingAs($operator)
-            ->from(route('admin.bibit-masuks.index'))
-            ->delete(route('admin.bibit-masuks.destroy', $masuk))
-            ->assertRedirect(route('admin.bibit-masuks.index'))
-            ->assertSessionHasErrors('delete');
-
-        $this->assertDatabaseHas('bibit_masuks', ['id' => $masuk->id]);
-        $this->assertSame(70, $bibit->fresh()->stok_tersedia);
-    }
-
     public function test_operator_can_delete_bibit_keluar_and_restore_stock(): void
     {
         $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
         $bibit = $this->createBibit(30);
-        $masuk = $this->createMasuk($bibit, 100, 70);
+        $masuk = $this->createBibitMasukLine($bibit, 100, 70);
         $taman = Taman::create([
             'nama_taman' => 'Taman Bibit Test',
             'kategori' => 'Taman Kota',
@@ -119,10 +110,10 @@ class BibitTransaksiDeleteTest extends TestCase
     {
         $viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);
         $bibit = $this->createBibit(20);
-        $masuk = $this->createMasuk($bibit, 20);
+        $masuk = $this->createBibitMasukLine($bibit, 20);
 
         $this->actingAs($viewer)
-            ->delete(route('admin.bibit-masuks.destroy', $masuk))
+            ->delete(route('admin.bibit-masuks.destroy', $masuk->batch))
             ->assertForbidden();
 
         $this->assertDatabaseHas('bibit_masuks', ['id' => $masuk->id]);

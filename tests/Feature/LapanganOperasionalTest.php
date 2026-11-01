@@ -217,6 +217,16 @@ class LapanganOperasionalTest extends TestCase
 
     }
 
+    public function test_operator_sees_admin_back_link_on_lapangan(): void
+    {
+        $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.index'))
+            ->assertOk()
+            ->assertSee('Admin', false);
+    }
+
     public function test_operator_menu_is_limited_to_assigned_team(): void
     {
 

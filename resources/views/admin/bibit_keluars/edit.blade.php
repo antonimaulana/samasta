@@ -13,13 +13,11 @@
             @csrf
             @method('PUT')
 
-            <div>
-                <label for="tanggal_keluar" class="mb-1 block text-sm font-medium text-gray-700">Tanggal Keluar *</label>
-                <input type="date" name="tanggal_keluar" id="tanggal_keluar"
-                       value="{{ old('tanggal_keluar', $batch->tanggal_keluar->format('Y-m-d')) }}"
-                       required
-                       class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-            </div>
+            <x-operasional-pelaksanaan-datetime
+                name="tanggal_keluar"
+                :value="$batch->tanggal_keluar"
+                label="Tanggal & Waktu Keluar"
+            />
 
             <div class="space-y-6">
                 @include('admin.bibit_keluars._peruntukan_lokasi')
@@ -27,17 +25,10 @@
 
             @include('admin.bibit_keluars._baris_bibit')
 
-            <div>
-                <label for="foto" class="mb-1 block text-sm font-medium text-gray-700">Foto Bukti</label>
-                @if ($batch->foto_url)
-                    <a href="{{ $batch->foto_url }}" target="_blank" rel="noopener" class="mb-2 block">
-                        <img src="{{ $batch->foto_url }}" alt="Foto saat ini" class="max-h-40 rounded-lg border object-cover">
-                    </a>
-                @endif
-                <input type="file" name="foto" id="foto" accept="image/*"
-                       class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-green-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-green-700 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
-                <p class="mt-1 text-xs text-gray-500">Kosongkan jika tidak ingin mengganti foto. Format JPG/PNG, maks. 4 MB.</p>
-            </div>
+            @include('admin.partials.bibit-stok-foto-input', [
+                'required' => false,
+                'existingCount' => $batch->buktiFotos->count(),
+            ])
 
             <div class="flex gap-3">
                 <button type="submit"

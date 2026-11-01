@@ -17,6 +17,18 @@ class Pemangkasan extends Model
 
     public const JENIS_LAYANAN = ['Pemangkasan Pohon', 'Gotong Royong', 'Penanganan Pohon Tumbang', 'Pemasangan Mini Garden'];
 
+    /** Urutan tampilan dropdown permohonan (Gotong Royong di paling bawah). */
+    public static function jenisLayananForSelect(): array
+    {
+        $ordered = array_values(array_filter(
+            self::JENIS_LAYANAN,
+            fn (string $jenis) => $jenis !== 'Gotong Royong',
+        ));
+        $ordered[] = 'Gotong Royong';
+
+        return $ordered;
+    }
+
     protected $fillable = [
         'jenis_layanan',
         'taman_id',

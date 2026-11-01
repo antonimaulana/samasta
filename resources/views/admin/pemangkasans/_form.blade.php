@@ -25,7 +25,7 @@
         <select name="jenis_layanan" id="jenis_layanan" required
                 class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
             <option value="" @selected($currentJenis === '') disabled>Pilih jenis operasional</option>
-            @foreach (\App\Models\Pemangkasan::JENIS_LAYANAN as $jenis)
+            @foreach (\App\Models\Pemangkasan::jenisLayananForSelect() as $jenis)
                 <option value="{{ $jenis }}" @selected($currentJenis === $jenis)>{{ $jenis }}</option>
             @endforeach
         </select>

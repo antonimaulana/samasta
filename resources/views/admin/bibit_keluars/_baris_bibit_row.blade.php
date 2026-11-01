@@ -3,7 +3,7 @@
     $jumlah = old("items.{$index}.jumlah", $row['jumlah'] ?? '');
 @endphp
 
-<div data-bibit-keluar-row class="grid gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 md:grid-cols-[1fr_140px_auto] md:items-end">
+<div data-bibit-keluar-row class="grid gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 md:grid-cols-[minmax(0,1fr)_7rem_auto] md:items-end">
     <div>
         <label class="mb-1 block text-xs font-medium text-gray-600">Bibit *</label>
         <select name="items[{{ $index }}][bibit_id]" data-bibit-select required

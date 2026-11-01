@@ -16,6 +16,26 @@
     </select>
 </div>
 
+<div id="bibit-keluar-dokumen-section" class="hidden">
+    <label for="dokumen_pendukung" class="mb-1 block text-sm font-medium text-gray-700">Dokumen Pendukung *</label>
+    @if ($batch?->dokumen_pendukung)
+        <p class="mb-2 text-xs text-gray-500">
+            Dokumen saat ini:
+            @if ($batch->dokumenPendukungUrl())
+                <a href="{{ $batch->dokumenPendukungUrl() }}" target="_blank" rel="noopener" class="font-medium text-green-700 hover:underline">Lihat file</a>
+            @else
+                <span class="text-amber-700">File tidak ditemukan di server</span>
+            @endif
+        </p>
+    @endif
+    <input type="file" name="dokumen_pendukung" id="dokumen_pendukung" accept=".pdf,image/*"
+           class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-green-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-green-700 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500">
+    <p class="mt-1 text-xs text-gray-500">PDF atau gambar, maks. 8 MB. Wajib untuk peruntukan permintaan masyarakat/instansi.</p>
+    @error('dokumen_pendukung')
+        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+    @enderror
+</div>
+
 <div>
     <label class="mb-1 block text-sm font-medium text-gray-700">Lokasi *</label>
     <label class="mb-3 flex cursor-pointer items-center gap-2">
@@ -57,6 +77,18 @@
                 const tamanHiddenInput = document.getElementById('taman_id');
                 const tamanSearchInput = document.getElementById('taman_id_search');
                 const lokasiManualInput = document.getElementById('bibit_keluar_lokasi_manual');
+                const peruntukanSelect = document.getElementById('peruntukan');
+                const dokumenSection = document.getElementById('bibit-keluar-dokumen-section');
+                const dokumenInput = document.getElementById('dokumen_pendukung');
+                const permintaanValue = @json(\App\Models\BibitKeluarBatch::PERUNTUKAN_PERMINTAAN);
+
+                function toggleDokumenPendukung() {
+                    const needsDoc = peruntukanSelect?.value === permintaanValue;
+                    dokumenSection?.classList.toggle('hidden', ! needsDoc);
+                    if (dokumenInput) {
+                        dokumenInput.required = needsDoc && ! @json((bool) ($batch?->dokumen_pendukung));
+                    }
+                }
 
                 function toggleLokasiMode() {
                     const isManual = lokasiLuarCheckbox?.checked ?? false;
@@ -92,7 +124,9 @@
                 }
 
                 lokasiLuarCheckbox?.addEventListener('change', toggleLokasiMode);
+                peruntukanSelect?.addEventListener('change', toggleDokumenPendukung);
                 toggleLokasiMode();
+                toggleDokumenPendukung();
             });
         </script>
     @endpush

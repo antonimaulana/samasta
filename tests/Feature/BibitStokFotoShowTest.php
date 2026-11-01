@@ -4,17 +4,19 @@ namespace Tests\Feature;
 
 use App\Models\Bibit;
 use App\Models\BibitKeluarBatch;
-use App\Models\BibitMasuk;
+use App\Models\BibitMasukBatch;
 use App\Models\Kelurahan;
 use App\Models\Taman;
 use App\Models\User;
 use Database\Seeders\WilayahBatamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\CreatesBibitStokFixtures;
 use Tests\TestCase;
 
 class BibitStokFotoShowTest extends TestCase
 {
+    use CreatesBibitStokFixtures;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -38,18 +40,15 @@ class BibitStokFotoShowTest extends TestCase
             'status_siap_tanam' => true,
         ]);
 
-        $masuk = BibitMasuk::create([
-            'bibit_id' => $bibit->id,
-            'jumlah' => 10,
-            'sisa_stok' => 10,
-            'tanggal_masuk' => now()->toDateString(),
-            'sumber' => 'Produksi',
-            'status_siap_tanam' => true,
-            'foto' => 'bibit-masuk/bukti.jpg',
+        $masuk = $this->createBibitMasukLine($bibit, 10);
+        $batch = $masuk->batch;
+        $batch->buktiFotos()->create([
+            'path' => 'bibit-masuk/bukti.jpg',
+            'urutan' => 1,
         ]);
 
         $this->actingAs($admin)
-            ->get(route('admin.bibit-masuks.show', $masuk))
+            ->get(route('admin.bibit-masuks.show', $batch))
             ->assertOk()
             ->assertSee('Foto bukti', false)
             ->assertSee('bibit-masuk/bukti.jpg', false);
@@ -79,15 +78,18 @@ class BibitStokFotoShowTest extends TestCase
         ]);
 
         $batch = BibitKeluarBatch::create([
-            'tanggal_keluar' => now()->toDateString(),
+            'tanggal_keluar' => now()->format('Y-m-d H:i:s'),
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
             'lokasi' => $taman->nama_taman,
-            'foto' => 'bibit-keluar/bukti.jpg',
         ]);
         $batch->items()->create([
             'bibit_id' => $bibit->id,
             'jumlah' => 5,
+        ]);
+        $batch->buktiFotos()->create([
+            'path' => 'bibit-keluar/bukti.jpg',
+            'urutan' => 1,
         ]);
 
         $this->actingAs($admin)

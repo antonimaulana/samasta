@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\ArmadaSopirOptions;
 use App\Support\JadwalPemeliharaanQuery;
 use App\Support\OperasionalFotoStorage;
+use App\Support\OperasionalKegiatanPdfFilename;
 use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
 use App\Support\PetugasAssignment;
@@ -246,8 +247,7 @@ class PemeliharaanTamanController extends Controller
             'kinerja' => $pemeliharaanTaman->load(['armadas.armada', 'taman', 'petugas']),
         ])->render();
 
-        $slug = str($pemeliharaanTaman->lokasi_pelaksanaan)->slug('-')->limit(30, '');
-        $filename = 'operasional-'.$pemeliharaanTaman->tanggal->format('Y-m-d').'-'.$slug.'.pdf';
+        $filename = OperasionalKegiatanPdfFilename::pemeliharaan($pemeliharaanTaman);
 
         return $this->downloadPdf($html, $filename);
     }

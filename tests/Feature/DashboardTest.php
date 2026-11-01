@@ -25,6 +25,7 @@ class DashboardTest extends TestCase
             ->assertSee('Data Taman')
             ->assertSee('Data Bibit')
             ->assertSee('Data Armada')
+            ->assertSee('Kelola armada')
             ->assertSee('Data Petugas')
             ->assertSee('Operasional Pertamanan')
             ->assertSee('Pemeliharaan Rutin')

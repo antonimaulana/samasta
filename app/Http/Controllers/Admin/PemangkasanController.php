@@ -73,7 +73,7 @@ class PemangkasanController extends Controller
             'viewOptions' => JadwalLayananQuery::viewOptions(),
             'counts' => $this->jadwalCountsForUser($request->user(), $pelaksana, $jenis),
             'timList' => PemeliharaanTaman::timNames(),
-            'jenisList' => Pemangkasan::JENIS_LAYANAN,
+            'jenisList' => Pemangkasan::jenisLayananForSelect(),
             'pelaksana' => $pelaksana,
             'jenis' => $jenis,
         ]);

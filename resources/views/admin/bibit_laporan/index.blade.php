@@ -160,7 +160,7 @@
                     <li class="flex items-center justify-between px-4 py-3 text-sm">
                         <div>
                             <x-admin.bibit-nama :bibit="$masuk->bibit" />
-                            <p class="text-xs text-gray-500">{{ $masuk->tanggal_masuk->format('d M Y') }} · {{ $masuk->sumber }}</p>
+                            <p class="text-xs text-gray-500">{{ \App\Support\OperasionalPelaksanaanTime::display($masuk->batch->tanggal_masuk) }} · {{ $masuk->sumber }}</p>
                         </div>
                         <span class="font-semibold text-teal-700">+{{ $masuk->jumlah }}</span>
                     </li>

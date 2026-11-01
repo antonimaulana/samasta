@@ -9,6 +9,8 @@ use App\Models\BibitKeluarBatch;
 use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Support\BibitKeluarStock;
+use App\Support\BibitStokBuktiFotoStorage;
+use App\Support\OperasionalPelaksanaanTime;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,7 +22,8 @@ use Illuminate\View\View;
 class BibitKeluarController extends Controller
 {
     public function __construct(
-        private BibitKeluarStock $stock
+        private BibitKeluarStock $stock,
+        private BibitStokBuktiFotoStorage $fotoStorage,
     ) {
         $this->authorizeResource(BibitKeluarBatch::class, 'bibit_keluar');
     }
@@ -61,17 +64,22 @@ class BibitKeluarController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validateBatchRequest($request, requireFoto: true);
+        $validated = $this->validateBatchRequest($request, requireFotos: true);
         $items = $this->normalizeItems($validated['items']);
         $header = $this->normalizeLokasiFields($request, $validated);
-        unset($header['items'], $header['lokasi_luar']);
+        unset($header['items'], $header['lokasi_luar'], $header['fotos'], $header['dokumen_pendukung']);
+        $header['tanggal_keluar'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_keluar']);
 
-        $header['foto'] = $request->file('foto')->store('bibit-keluar', 'public');
+        if ($request->hasFile('dokumen_pendukung')) {
+            $header['dokumen_pendukung'] = $request->file('dokumen_pendukung')->store('bibit-keluar-dokumen', 'public');
+        }
 
-        DB::transaction(function () use ($header, $items) {
+        DB::transaction(function () use ($request, $header, $items) {
             $this->stock->assertStokCukup($items);
 
             $batch = BibitKeluarBatch::create($header);
+
+            $this->fotoStorage->storeMany($batch, $request->file('fotos', []), 'bibit-keluar');
 
             foreach ($items as $item) {
                 $bibit = Bibit::lockForUpdate()->findOrFail($item['bibit_id']);
@@ -92,7 +100,7 @@ class BibitKeluarController extends Controller
 
     public function show(BibitKeluarBatch $bibitKeluar): View
     {
-        $bibitKeluar->load(['items.bibit', 'taman']);
+        $bibitKeluar->load(['items.bibit', 'taman', 'buktiFotos']);
 
         return view('admin.bibit_keluars.show', [
             'batch' => $bibitKeluar,
@@ -101,7 +109,7 @@ class BibitKeluarController extends Controller
 
     public function edit(BibitKeluarBatch $bibitKeluar): View
     {
-        $bibitKeluar->load(['items.bibit']);
+        $bibitKeluar->load(['items.bibit', 'buktiFotos']);
         $bibits = Bibit::query()
             ->where(function ($q) use ($bibitKeluar) {
                 $q->where('stok_tersedia', '>', 0)
@@ -120,20 +128,22 @@ class BibitKeluarController extends Controller
 
     public function update(Request $request, BibitKeluarBatch $bibitKeluar): RedirectResponse
     {
-        $validated = $this->validateBatchRequest($request, requireFoto: false);
+        $validated = $this->validateBatchRequest($request, requireFotos: false, existing: $bibitKeluar);
         $items = $this->normalizeItems($validated['items']);
         $header = $this->normalizeLokasiFields($request, $validated);
-        unset($header['items'], $header['lokasi_luar']);
+        unset($header['items'], $header['lokasi_luar'], $header['fotos'], $header['dokumen_pendukung']);
 
-        if ($request->hasFile('foto')) {
-            if ($bibitKeluar->foto) {
-                Storage::disk('public')->delete($bibitKeluar->foto);
+        if ($request->hasFile('dokumen_pendukung')) {
+            if ($bibitKeluar->dokumen_pendukung) {
+                Storage::disk('public')->delete($bibitKeluar->dokumen_pendukung);
             }
 
-            $header['foto'] = $request->file('foto')->store('bibit-keluar', 'public');
+            $header['dokumen_pendukung'] = $request->file('dokumen_pendukung')->store('bibit-keluar-dokumen', 'public');
         }
 
-        DB::transaction(function () use ($bibitKeluar, $header, $items) {
+        $header['tanggal_keluar'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_keluar']);
+
+        DB::transaction(function () use ($request, $bibitKeluar, $header, $items) {
             $bibitKeluar->load('items');
 
             $bonus = [];
@@ -163,6 +173,10 @@ class BibitKeluarController extends Controller
             }
 
             $bibitKeluar->update($header);
+
+            if ($request->hasFile('fotos')) {
+                $this->fotoStorage->storeMany($bibitKeluar, $request->file('fotos', []), 'bibit-keluar');
+            }
         });
 
         return redirect()
@@ -181,9 +195,11 @@ class BibitKeluarController extends Controller
                 $bibit->increment('stok_tersedia', $line->jumlah);
             }
 
-            if ($bibitKeluar->foto) {
-                Storage::disk('public')->delete($bibitKeluar->foto);
+            if ($bibitKeluar->dokumen_pendukung) {
+                Storage::disk('public')->delete($bibitKeluar->dokumen_pendukung);
             }
+
+            $this->fotoStorage->deleteAll($bibitKeluar);
 
             $bibitKeluar->delete();
         });
@@ -196,15 +212,27 @@ class BibitKeluarController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function validateBatchRequest(Request $request, bool $requireFoto): array
+    private function validateBatchRequest(Request $request, bool $requireFotos, ?BibitKeluarBatch $existing = null): array
     {
+        $fotoRules = ['required', 'array', 'min:1'];
+        if (! $requireFotos && $existing?->hasFotoBukti()) {
+            $fotoRules = ['nullable', 'array'];
+        }
+
+        $peruntukan = (string) $request->input('peruntukan');
+        $dokumenRules = $peruntukan === BibitKeluarBatch::PERUNTUKAN_PERMINTAAN
+            ? ($requireFotos || ! $existing?->dokumen_pendukung ? ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'] : ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'])
+            : ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:8192'];
+
         $rules = array_merge([
-            'tanggal_keluar' => ['required', 'date'],
+            'tanggal_keluar' => ['required', 'string'],
             'peruntukan' => ['required', Rule::in(BibitKeluarBatch::PERUNTUKAN)],
             'items' => ['required', 'array', 'min:1'],
             'items.*.bibit_id' => ['required', 'distinct', 'exists:bibits,id'],
             'items.*.jumlah' => ['required', 'integer', 'min:1'],
-            'foto' => [$requireFoto ? 'required' : 'nullable', 'image', 'max:4096'],
+            'fotos' => $fotoRules,
+            'fotos.*' => ['image', 'max:4096'],
+            'dokumen_pendukung' => $dokumenRules,
         ], $this->lokasiValidationRules($request));
 
         return $request->validate($rules, [], [
@@ -212,7 +240,8 @@ class BibitKeluarController extends Controller
             'peruntukan' => 'peruntukan',
             'taman_id' => 'lokasi',
             'lokasi' => 'lokasi',
-            'foto' => 'foto',
+            'fotos' => 'foto bukti',
+            'dokumen_pendukung' => 'dokumen pendukung',
             'items' => 'daftar bibit',
             'items.*.bibit_id' => 'bibit',
             'items.*.jumlah' => 'jumlah keluar',

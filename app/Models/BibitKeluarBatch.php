@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Casts\OperasionalDateTime;
+use App\Models\Concerns\HasBibitStokBuktiFotos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,11 +11,15 @@ use Illuminate\Support\Facades\Storage;
 
 class BibitKeluarBatch extends Model
 {
+    use HasBibitStokBuktiFotos;
+
+    public const PERUNTUKAN_PERMINTAAN = 'Permintaan Masyarakat/Instansi';
+
     public const PERUNTUKAN = [
         'Penanaman Awal',
         'Pergantian',
         'Perbanyakan',
-        'Permintaan Masyarakat/Instansi',
+        self::PERUNTUKAN_PERMINTAAN,
     ];
 
     protected $fillable = [
@@ -21,13 +27,13 @@ class BibitKeluarBatch extends Model
         'peruntukan',
         'taman_id',
         'lokasi',
-        'foto',
+        'dokumen_pendukung',
     ];
 
     protected function casts(): array
     {
         return [
-            'tanggal_keluar' => 'date',
+            'tanggal_keluar' => OperasionalDateTime::class,
         ];
     }
 
@@ -69,18 +75,18 @@ class BibitKeluarBatch extends Model
         return (int) $this->items()->sum('jumlah');
     }
 
-    public function hasFotoPath(): bool
+    public function requiresDokumenPendukung(): bool
     {
-        return filled($this->foto);
+        return $this->peruntukan === self::PERUNTUKAN_PERMINTAAN;
     }
 
-    public function getFotoUrlAttribute(): ?string
+    public function dokumenPendukungUrl(): ?string
     {
-        if (! filled($this->foto)) {
+        if (! filled($this->dokumen_pendukung)) {
             return null;
         }
 
-        $path = str_replace('\\', '/', (string) $this->foto);
+        $path = str_replace('\\', '/', (string) $this->dokumen_pendukung);
 
         if (! Storage::disk('public')->exists($path)) {
             return null;

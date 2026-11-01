@@ -198,14 +198,22 @@ class BibitCsvImporter
                 ]);
             }
 
+            $tanggal = $payload['tanggal_masuk'];
+            if ($tanggal && strlen((string) $tanggal) <= 10) {
+                $tanggal = $tanggal.' 08:00:00';
+            }
+
+            $batch = \App\Models\BibitMasukBatch::create([
+                'tanggal_masuk' => $tanggal ?? now()->format('Y-m-d H:i:s'),
+            ]);
+
             BibitMasuk::create([
+                'bibit_masuk_batch_id' => $batch->id,
                 'bibit_id' => $bibit->id,
                 'jumlah' => $payload['stok_awal'],
                 'sisa_stok' => $payload['stok_awal'],
-                'tanggal_masuk' => $payload['tanggal_masuk'],
                 'sumber' => $payload['sumber'],
                 'status_siap_tanam' => $payload['status_siap_tanam'],
-                'foto' => null,
             ]);
 
             $bibit->increment('stok_tersedia', $payload['stok_awal']);

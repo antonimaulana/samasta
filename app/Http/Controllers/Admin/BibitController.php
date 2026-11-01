@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bibit;
 use App\Models\BibitKeluarBatch;
-use App\Models\BibitMasuk;
+use App\Models\BibitMasukBatch;
 use App\Support\BibitCsvImporter;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
@@ -35,10 +35,11 @@ class BibitController extends Controller
             ))
             ->paginate(10)->withQueryString();
 
-        $recentMasuks = BibitMasuk::query()
-            ->with('bibit')
+        $recentMasuks = BibitMasukBatch::query()
+            ->withCount('items')
+            ->withSum('items', 'jumlah')
             ->latest('tanggal_masuk')
-            ->latest()
+            ->latest('id')
             ->limit(5)
             ->get();
 
@@ -136,7 +137,12 @@ class BibitController extends Controller
     public function show(Bibit $bibit): View
     {
         $bibit->load([
-            'masuks' => fn ($query) => $query->latest('tanggal_masuk')->latest(),
+            'masuks' => fn ($query) => $query
+                ->with('batch')
+                ->join('bibit_masuk_batches', 'bibit_masuk_batches.id', '=', 'bibit_masuks.bibit_masuk_batch_id')
+                ->orderByDesc('bibit_masuk_batches.tanggal_masuk')
+                ->orderByDesc('bibit_masuks.id')
+                ->select('bibit_masuks.*'),
             'keluars' => fn ($query) => $query
                 ->with('batch')
                 ->join('bibit_keluar_batches', 'bibit_keluars.bibit_keluar_batch_id', '=', 'bibit_keluar_batches.id')

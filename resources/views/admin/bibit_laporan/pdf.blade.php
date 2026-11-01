@@ -79,11 +79,11 @@
             @forelse ($riwayatMasuk as $index => $masuk)
                 <tr>
                     <td>{{ $index + 1 }}</td>
-                    <td>{{ $masuk->tanggal_masuk->format('d/m/Y') }}</td>
+                    <td>{{ \App\Support\OperasionalPelaksanaanTime::display($masuk->batch->tanggal_masuk) }}</td>
                     <td><x-admin.bibit-nama :bibit="$masuk->bibit" pdf /></td>
                     <td class="num">+{{ number_format($masuk->jumlah) }}</td>
                     <td>{{ $masuk->sumber ?: '—' }}</td>
-                    <td>{{ $masuk->foto ? 'Ada' : '—' }}</td>
+                    <td>{{ $masuk->batch?->hasFotoBukti() ? 'Ada' : '—' }}</td>
                 </tr>
             @empty
                 <tr>
@@ -115,7 +115,7 @@
                     <td class="num">-{{ number_format($keluar->jumlah) }}</td>
                     <td>{{ $keluar->batch->peruntukan ?: '—' }}</td>
                     <td>{{ $keluar->batch->lokasiLabel() }}</td>
-                    <td>{{ $keluar->batch->foto ? 'Ada' : '—' }}</td>
+                    <td>{{ $keluar->batch?->hasFotoBukti() ? 'Ada' : '—' }}</td>
                 </tr>
             @empty
                 <tr>

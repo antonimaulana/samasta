@@ -99,7 +99,7 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($bibit->masuks as $masuk)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-2 text-gray-600">{{ $masuk->tanggal_masuk->format('d M Y') }}</td>
+                                <td class="px-4 py-2 text-gray-600">{{ \App\Support\OperasionalPelaksanaanTime::display($masuk->batch->tanggal_masuk) }}</td>
                                 <td class="px-4 py-2 font-semibold text-teal-700">+{{ $masuk->jumlah }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $masuk->sumber }}</td>
                                 <td class="px-4 py-2 text-gray-700">{{ $masuk->sisa_stok }} / {{ $masuk->jumlah }}</td>

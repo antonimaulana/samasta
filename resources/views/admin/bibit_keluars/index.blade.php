@@ -42,7 +42,7 @@
         <tbody class="divide-y divide-gray-100">
             @forelse ($batches as $batch)
                 <tr class="hover:bg-gray-50">
-                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{{ $batch->tanggal_keluar->format('d M Y') }}</td>
+                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{{ \App\Support\OperasionalPelaksanaanTime::display($batch->tanggal_keluar) }}</td>
                     <td class="admin-table-cell-wrap px-4 py-3 text-sm text-gray-600">{{ $batch->peruntukan }}</td>
                     <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{{ $batch->items_count }} jenis bibit</td>
                     <td class="whitespace-nowrap px-4 py-3 text-sm">

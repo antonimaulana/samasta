@@ -13,6 +13,7 @@ use App\Models\SurveyKepuasan;
 use App\Models\Taman;
 use App\Models\TimPelaksana;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 class DashboardSummaryBuilder
 {
@@ -34,9 +35,11 @@ class DashboardSummaryBuilder
         $totalArmada = ArmadaSchema::isReady()
             ? Armada::query()->armadaInventory()->count()
             : 0;
-        $armadaRecentUsage = ArmadaSchema::isReady()
-            ? app(ArmadaUsageHistory::class)->recent(4)
-            : collect();
+        $armadaKondisiBaikPersen = 0;
+        if (ArmadaSchema::isReady() && $totalArmada > 0) {
+            $armadaBaik = Armada::query()->armadaInventory()->where('kondisi', 'Baik')->count();
+            $armadaKondisiBaikPersen = (int) round(($armadaBaik / $totalArmada) * 100);
+        }
 
         $totalPetugas = Petugas::query()->where('aktif', true)->count();
         $totalTimKerja = TimPelaksana::query()->where('aktif', true)->count();
@@ -101,7 +104,7 @@ class DashboardSummaryBuilder
             'bibit_siap_tanam' => $bibitSiapTanam,
             'bibit_siap_persen' => $totalStokBibit > 0 ? (int) round(($bibitSiapTanam / $totalStokBibit) * 100) : 0,
             'total_armada' => $totalArmada,
-            'armada_recent_usage' => $armadaRecentUsage,
+            'armada_kondisi_baik_persen' => $armadaKondisiBaikPersen,
             'total_petugas' => $totalPetugas,
             'total_tim_kerja' => $totalTimKerja,
             'layanan_per_jenis' => $layananPerJenis,
@@ -115,7 +118,7 @@ class DashboardSummaryBuilder
             'survey_summary' => $surveySummary,
             'jadwal_counts' => $jadwalCounts,
             'pemeliharaan_jadwal_counts' => $pemeliharaanJadwalCounts,
-            'pemeliharaan_tim_hari_ini' => $this->pemeliharaanTimHariIni($user),
+            'pemeliharaan_hari_ini' => $this->pemeliharaanHariIni($user),
             'aduan_baru' => $aduanBaru,
             'aduan_aktif' => $aduanAktif,
             'aduan_selesai_bulan' => $aduanSelesaiBulan,
@@ -180,50 +183,34 @@ class DashboardSummaryBuilder
     }
 
     /**
-     * @return list<array{tim: string, count: int, url: string}>
+     * Input pelaksanaan pemeliharaan rutin yang tercatat pada hari ini.
+     *
+     * @return list<array{id: int, tim: string, tim_short: string, lokasi: string, progres: ?string, waktu: string, url: string}>
      */
-    private function pemeliharaanTimHariIni(?User $user): array
+    private function pemeliharaanHariIni(?User $user): array
     {
         $scope = app(OperatorWilayahScope::class);
-        $allowedTeams = $scope->teamNames($user);
 
-        $teams = TimPelaksana::query()
-            ->where('aktif', true)
-            ->where(function ($query) {
-                $query->where('memiliki_wilayah_kerja', true)
-                    ->orWhereIn('nama', ['Tim Nursery', PemeliharaanTaman::TIM_ARMADA]);
-            })
-            ->orderBy('urutan')
-            ->orderBy('nama')
-            ->pluck('nama');
-
-        if ($teams->isEmpty()) {
-            $teams = collect(PemeliharaanTaman::timNames())
-                ->filter(fn (string $name) => str_starts_with($name, 'Tim Wilayah')
-                    || $name === 'Tim Nursery'
-                    || $name === PemeliharaanTaman::TIM_ARMADA);
-        }
-
-        return $teams
-            ->when($scope->restrictsWilayah($user), fn ($collection) => $collection->filter(
-                fn (string $tim) => in_array($tim, $allowedTeams, true),
-            ))
-            ->map(function (string $tim) use ($scope, $user) {
-                $count = $scope->scopePemeliharaan(
-                    JadwalPemeliharaanQuery::hariIni($tim),
-                    $user,
-                )->count();
-
+        return $scope->scopePemeliharaan(
+            PemeliharaanTaman::query()
+                ->with('taman')
+                ->whereDate('tanggal', today())
+                ->orderByDesc('tanggal'),
+            $user,
+        )
+            ->limit(15)
+            ->get()
+            ->map(function (PemeliharaanTaman $entry) {
                 return [
-                    'tim' => $tim,
-                    'count' => $count,
-                    'url' => route('admin.pemeliharaan-tamans.index', [
-                        'view' => 'hari_ini',
-                        'tim' => $tim,
-                    ]),
+                    'id' => $entry->id,
+                    'tim' => (string) $entry->tim,
+                    'tim_short' => Str::replaceFirst('Tim ', '', (string) $entry->tim),
+                    'lokasi' => Str::limit($entry->lokasiLabel(), 48),
+                    'progres' => $entry->lapanganRiwayatProgresLabel() ?? $entry->progressSummaryLabel(),
+                    'waktu' => OperasionalPelaksanaanTime::display($entry->tanggal),
+                    'url' => route('admin.pemeliharaan-tamans.export-pdf-operasional', $entry),
                 ];
             })
-            ->values()
             ->all();
     }
 

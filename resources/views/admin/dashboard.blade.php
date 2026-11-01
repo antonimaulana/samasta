@@ -25,15 +25,16 @@
             ['key' => 'terlambat', 'label' => 'Terlambat', 'desc' => 'Lewat jadwal / belum selesai', 'danger' => true],
         ];
 
-        $formatLuasan = function (int $luasan): string {
-            if ($luasan >= 1_000_000) {
-                return number_format($luasan / 1_000_000, 1, ',', '.').' jt m²';
+        $formatLuasan = function (int $luasanM2): string {
+            $hektar = $luasanM2 / 10_000;
+            if ($hektar >= 100) {
+                return number_format($hektar, 0, ',', '.').' ha';
             }
-            if ($luasan >= 10_000) {
-                return number_format($luasan / 1_000, 1, ',', '.').' rb m²';
+            if ($hektar >= 1) {
+                return number_format($hektar, 2, ',', '.').' ha';
             }
 
-            return number_format($luasan, 0, ',', '.').' m²';
+            return number_format($hektar, 3, ',', '.').' ha';
         };
 
         $surveyLabel = match (true) {
@@ -127,22 +128,15 @@
             label="Data Armada"
             :value="number_format($total_armada)"
             subtitle="Unit"
-            footer="Lihat armada →"
+            footer="Kelola armada →"
             animate="2">
-            <x-slot:extra>
-                @if ($armada_recent_usage->isNotEmpty())
-                    <ul class="mt-3 space-y-1.5 border-t border-green-100 pt-3 text-xs text-gray-600">
-                        @foreach ($armada_recent_usage->take(3) as $entry)
-                            <li class="flex items-center justify-between gap-2">
-                                <span class="truncate font-medium text-gray-800">{{ Str::limit($entry['armada'], 22) }}</span>
-                                <span class="shrink-0 text-gray-400">{{ $entry['tanggal']?->format('d/m') ?? '—' }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
+            <x-slot:meta>
+                @if ($total_armada > 0)
+                    <span class="dash-chip dash-chip--green">{{ $armada_kondisi_baik_persen }}% baik</span>
                 @else
-                    <p class="mt-3 text-xs text-gray-500">Belum ada riwayat penggunaan tercatat.</p>
+                    <span class="dash-chip dash-chip--green">Belum ada unit</span>
                 @endif
-            </x-slot:extra>
+            </x-slot:meta>
             <x-slot:icon>
                 <x-admin.nav-icon name="armada" class="h-5 w-5" />
             </x-slot:icon>
@@ -202,27 +196,35 @@
             <div>
                 <div class="dash-block-heading">
                     <p class="dash-kicker dash-kicker--emerald">Pemeliharaan Rutin</p>
-                    <p class="dash-section__desc">Pelaksanaan hari ini per tim</p>
+                    <p class="dash-section__desc">Input pelaksanaan yang tercatat hari ini</p>
                 </div>
 
-                @if (count($pemeliharaan_tim_hari_ini) > 0)
-                    <div class="dash-metric-grid-6 dash-metric-grid--pemeliharaan">
-                        @foreach ($pemeliharaan_tim_hari_ini as $index => $timRow)
-                            @php
-                                $theme = ($index % 6) + 1;
-                                $isIdle = ($timRow['count'] ?? 0) === 0;
-                            @endphp
-                            <a href="{{ $timRow['url'] }}"
-                               title="{{ $timRow['tim'] }}"
-                               class="dash-metric-tile dash-metric-tile--{{ $theme }} {{ $isIdle ? 'dash-metric-tile--idle' : '' }}">
-                                <p class="dash-metric-tile__value">{{ $timRow['count'] }}</p>
-                                <p class="dash-metric-tile__label">{{ Str::replaceFirst('Tim ', '', $timRow['tim']) }}</p>
-                                <p class="dash-metric-tile__meta">Hari ini</p>
-                            </a>
+                @if (count($pemeliharaan_hari_ini) > 0)
+                    <ul class="dash-day-input-list">
+                        @foreach ($pemeliharaan_hari_ini as $row)
+                            <li>
+                                <a href="{{ $row['url'] }}" class="dash-day-input-list__item" title="{{ $row['tim'] }} · {{ $row['lokasi'] }}">
+                                    <span class="dash-day-input-list__main">
+                                        <span class="dash-day-input-list__lokasi">{{ $row['lokasi'] }}</span>
+                                        <span class="dash-day-input-list__meta">
+                                            {{ $row['tim_short'] }}
+                                            @if ($row['progres'])
+                                                · {{ $row['progres'] }}
+                                            @endif
+                                        </span>
+                                    </span>
+                                    <span class="dash-day-input-list__waktu">{{ $row['waktu'] }}</span>
+                                </a>
+                            </li>
                         @endforeach
-                    </div>
+                    </ul>
+                    <p class="mt-3 text-right">
+                        <a href="{{ route('admin.pemeliharaan-tamans.index', ['view' => 'hari_ini']) }}" class="dash-link dash-link--emerald text-sm font-semibold">
+                            Semua jadwal hari ini →
+                        </a>
+                    </p>
                 @else
-                    <p class="text-sm text-gray-500">Belum ada kegiatan pemeliharaan rutin tercatat untuk hari ini.</p>
+                    <p class="text-sm text-gray-500">Belum ada input pelaksanaan pemeliharaan rutin untuk hari ini.</p>
                 @endif
             </div>
 

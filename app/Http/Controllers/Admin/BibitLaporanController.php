@@ -56,13 +56,13 @@ class BibitLaporanController extends Controller
 
         $search = trim((string) $request->input('search', ''));
 
-        $totalMasuk = (int) BibitMasuk::whereBetween('tanggal_masuk', [$awal, $akhir])->sum('jumlah');
+        $totalMasuk = (int) BibitMasuk::query()->whereBatchTanggalBetween($awal, $akhir)->sum('jumlah');
         $totalKeluar = (int) BibitKeluar::query()->whereBatchTanggalBetween($awal, $akhir)->sum('jumlah');
         $mutasiBersih = $totalMasuk - $totalKeluar;
-        $jumlahTransaksi = BibitMasuk::whereBetween('tanggal_masuk', [$awal, $akhir])->count()
+        $jumlahTransaksi = BibitMasuk::query()->whereBatchTanggalBetween($awal, $akhir)->count()
             + BibitKeluarBatch::whereBetween('tanggal_keluar', [$awal, $akhir])->count();
 
-        $masukPerBibit = BibitMasuk::whereBetween('tanggal_masuk', [$awal, $akhir])
+        $masukPerBibit = BibitMasuk::query()->whereBatchTanggalBetween($awal, $akhir)
             ->selectRaw('bibit_id, SUM(jumlah) as total')
             ->groupBy('bibit_id')
             ->pluck('total', 'bibit_id');
@@ -107,24 +107,27 @@ class BibitLaporanController extends Controller
             for ($day = 1; $day <= $daysInMonth; $day++) {
                 $date = Carbon::create($tahun, $bulan, $day);
                 $chartLabels[] = (string) $day;
-                $chartMasuk[] = (int) BibitMasuk::whereDate('tanggal_masuk', $date)->sum('jumlah');
+                $chartMasuk[] = (int) BibitMasuk::query()->whereBatchDate($date)->sum('jumlah');
                 $chartKeluar[] = (int) BibitKeluar::query()->whereBatchDate($date)->sum('jumlah');
             }
         } else {
             $cursor = $awal->copy();
             while ($cursor->lte($akhir)) {
                 $chartLabels[] = $cursor->format('d/m');
-                $chartMasuk[] = (int) BibitMasuk::whereDate('tanggal_masuk', $cursor)->sum('jumlah');
+                $chartMasuk[] = (int) BibitMasuk::query()->whereBatchDate($cursor)->sum('jumlah');
                 $chartKeluar[] = (int) BibitKeluar::query()->whereBatchDate($cursor)->sum('jumlah');
                 $cursor->addDay();
             }
         }
 
-        $riwayatMasukQuery = BibitMasuk::with('bibit')
-            ->whereBetween('tanggal_masuk', [$awal, $akhir]);
+        $riwayatMasukQuery = BibitMasuk::with(['bibit', 'batch'])
+            ->whereBatchTanggalBetween($awal, $akhir);
         TableSearch::apply($riwayatMasukQuery, $request, ['sumber', 'bibit.nama_tanaman', 'bibit.nama_ilmiah']);
         $riwayatMasuk = $riwayatMasukQuery
-            ->latest('tanggal_masuk')
+            ->join('bibit_masuk_batches', 'bibit_masuk_batches.id', '=', 'bibit_masuks.bibit_masuk_batch_id')
+            ->select('bibit_masuks.*')
+            ->orderByDesc('bibit_masuk_batches.tanggal_masuk')
+            ->orderByDesc('bibit_masuks.id')
             ->when(! $forPdf, fn ($q) => $q->limit(10))
             ->get();
 

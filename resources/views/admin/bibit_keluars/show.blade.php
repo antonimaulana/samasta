@@ -15,7 +15,7 @@
                     <div>
                         <p class="text-xs font-semibold uppercase text-red-600">Stok Keluar</p>
                         <h2 class="mt-1 text-xl font-bold text-gray-900">{{ $batch->peruntukan }}</h2>
-                        <p class="mt-1 text-sm text-gray-500">{{ $batch->tanggal_keluar->translatedFormat('d F Y') }}</p>
+                        <p class="mt-1 text-sm text-gray-500">{{ \App\Support\OperasionalPelaksanaanTime::display($batch->tanggal_keluar) }}</p>
                     </div>
                     <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-800">
                         -{{ $batch->totalJumlah() }} bibit · {{ $batch->items->count() }} jenis
@@ -59,20 +59,21 @@
                     </div>
                 </div>
 
-                @if ($batch->hasFotoPath())
+                @if ($batch->requiresDokumenPendukung())
                     <div class="mt-6">
-                        <h3 class="text-sm font-semibold text-gray-700">Foto bukti</h3>
-                        @if ($batch->foto_url)
-                            <a href="{{ $batch->foto_url }}" target="_blank" rel="noopener" class="mt-2 inline-block">
-                                <img src="{{ $batch->foto_url }}" alt="Foto stok keluar" class="max-h-96 rounded-lg border border-gray-200 object-cover shadow-sm">
+                        <h3 class="text-sm font-semibold text-gray-700">Dokumen pendukung</h3>
+                        @if ($batch->dokumenPendukungUrl())
+                            <a href="{{ $batch->dokumenPendukungUrl() }}" target="_blank" rel="noopener"
+                               class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-green-700 hover:underline">
+                                Unduh / lihat dokumen
                             </a>
                         @else
-                            <div class="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                                File foto tercatat di database tetapi tidak ditemukan di server.
-                            </div>
+                            <p class="mt-2 text-sm text-gray-500">Belum ada dokumen pendukung tercatat.</p>
                         @endif
                     </div>
                 @endif
+
+                @include('admin.partials.bibit-stok-foto-gallery', ['batch' => $batch])
 
                 <div class="mt-6 flex flex-wrap gap-2 border-t border-gray-100 pt-6">
                     <x-admin.can-write>

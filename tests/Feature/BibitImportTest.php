@@ -8,10 +8,12 @@ use App\Models\User;
 use App\Support\BibitCsvImporter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Tests\Support\CreatesBibitStokFixtures;
 use Tests\TestCase;
 
 class BibitImportTest extends TestCase
 {
+    use CreatesBibitStokFixtures;
     use RefreshDatabase;
 
     public function test_template_download_uses_semicolon_delimiter_for_excel(): void
@@ -67,11 +69,7 @@ class BibitImportTest extends TestCase
             'status_siap_tanam' => false,
         ]);
 
-        BibitMasuk::create([
-            'bibit_id' => $bibit->id,
-            'jumlah' => 20,
-            'sisa_stok' => 20,
-            'tanggal_masuk' => now()->toDateString(),
+        $this->createBibitMasukLine($bibit, 20, 20, [
             'sumber' => 'Produksi',
             'status_siap_tanam' => false,
         ]);
