@@ -14,29 +14,25 @@
     'min-h-screen bg-gray-100 text-gray-900',
     'admin-pimpinan-mode' => $isViewer ?? auth()->user()?->isViewer(),
 ])>
+    @php
+        $isPimpinanLayout = $isViewer ?? auth()->user()?->isViewer();
+    @endphp
+
     <div class="flex min-h-screen">
-        <aside id="admin-desktop-sidebar" class="hidden w-60 shrink-0 border-r border-gray-800 bg-gray-900 text-white md:block">
-            <div class="border-b border-gray-800 px-3 py-3.5">
-                @include('layouts.partials.admin-sidebar-brand')
-            </div>
-            @include('layouts.partials.admin-nav')
-        </aside>
+        @unless ($isPimpinanLayout)
+            <aside id="admin-desktop-sidebar" class="hidden w-60 shrink-0 border-r border-gray-800 bg-gray-900 text-white md:block">
+                <div class="border-b border-gray-800 px-3 py-3.5">
+                    @include('layouts.partials.admin-sidebar-brand')
+                </div>
+                @include('layouts.partials.admin-nav')
+            </aside>
+        @endunless
 
         <div class="flex min-w-0 flex-1 flex-col">
             <header class="border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
                 <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-3">
                     <div class="flex min-w-0 items-center gap-3">
-                        @if ($isViewer ?? auth()->user()?->isViewer())
-                            <button type="button"
-                                    id="admin-mobile-menu-toggle"
-                                    class="relative z-[51] inline-flex h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 md:hidden"
-                                    aria-label="Buka menu"
-                                    aria-expanded="false"
-                                    aria-controls="admin-mobile-drawer">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                                </svg>
-                            </button>
+                        @if ($isPimpinanLayout)
                             <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 items-center gap-2.5">
                                 @include('layouts.partials.app-logo', ['size' => 'sm'])
                                 <div class="min-w-0 leading-tight">
@@ -44,6 +40,24 @@
                                     <span class="hidden truncate text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:block">{{ config('app.full_name') }}</span>
                                 </div>
                             </a>
+                            <nav class="flex flex-wrap items-center gap-1" aria-label="Navigasi ringkasan pimpinan">
+                                <a href="{{ route('admin.dashboard') }}"
+                                   @class([
+                                       'rounded-lg px-3 py-1.5 text-sm font-semibold transition',
+                                       'bg-green-100 text-green-800' => request()->routeIs('admin.dashboard'),
+                                       'text-gray-600 hover:bg-gray-100 hover:text-gray-900' => ! request()->routeIs('admin.dashboard'),
+                                   ])>
+                                    Ringkasan
+                                </a>
+                                <a href="{{ route('admin.evaluasi.index') }}"
+                                   @class([
+                                       'rounded-lg px-3 py-1.5 text-sm font-semibold transition',
+                                       'bg-amber-100 text-amber-900' => request()->routeIs('admin.evaluasi.*'),
+                                       'text-gray-600 hover:bg-gray-100 hover:text-gray-900' => ! request()->routeIs('admin.evaluasi.*'),
+                                   ])>
+                                    Evaluasi Kinerja
+                                </a>
+                            </nav>
                         @else
                             <button type="button"
                                     id="admin-mobile-menu-toggle"
@@ -124,21 +138,23 @@
         </div>
     </div>
 
-    {{-- Admin mobile drawer --}}
-    <div id="admin-mobile-backdrop" style="display:none" aria-hidden="true"></div>
-    <aside id="admin-mobile-drawer" style="display:none" aria-hidden="true">
-        <div class="flex items-center justify-between gap-2 border-b border-gray-800 px-4 py-3.5">
-            <div class="min-w-0 flex-1">
-                @include('layouts.partials.admin-sidebar-brand')
+    @unless ($isPimpinanLayout)
+        {{-- Admin mobile drawer --}}
+        <div id="admin-mobile-backdrop" style="display:none" aria-hidden="true"></div>
+        <aside id="admin-mobile-drawer" style="display:none" aria-hidden="true">
+            <div class="flex items-center justify-between gap-2 border-b border-gray-800 px-4 py-3.5">
+                <div class="min-w-0 flex-1">
+                    @include('layouts.partials.admin-sidebar-brand')
+                </div>
+                <button type="button" id="admin-mobile-menu-close" class="shrink-0 rounded-lg p-2 text-gray-400 hover:bg-gray-800" aria-label="Tutup menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
-            <button type="button" id="admin-mobile-menu-close" class="shrink-0 rounded-lg p-2 text-gray-400 hover:bg-gray-800" aria-label="Tutup menu">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-        @include('layouts.partials.admin-nav')
-    </aside>
+            @include('layouts.partials.admin-nav')
+        </aside>
+    @endunless
 
     @include('layouts.partials.mobile-nav-script')
     @include('layouts.partials.sidebar-accordion-script')
@@ -154,11 +170,7 @@
         window.onPageReady(function () {
             var isPimpinanMode = document.body.classList.contains('admin-pimpinan-mode');
 
-            if (isPimpinanMode) {
-                document.querySelectorAll('.sidebar-menu-group').forEach(function (group) {
-                    group.classList.add('is-open');
-                });
-            } else {
+            if (! isPimpinanMode) {
                 initSidebarAccordion(document);
 
                 var sidebarStorageKey = 'simtaman-admin-sidebar-collapsed';
@@ -186,18 +198,20 @@
                 });
             }
 
-            initMobileDrawer({
-                toggleId: 'admin-mobile-menu-toggle',
-                closeId: 'admin-mobile-menu-close',
-                drawerId: 'admin-mobile-drawer',
-                backdropId: 'admin-mobile-backdrop',
-                bodyClass: 'admin-nav-open',
-                side: 'left',
-                width: 240,
-                background: '#111827',
-                color: '#ffffff',
-                shadow: '10px 0 40px rgba(0,0,0,0.25)',
-            });
+            if (document.getElementById('admin-mobile-menu-toggle')) {
+                initMobileDrawer({
+                    toggleId: 'admin-mobile-menu-toggle',
+                    closeId: 'admin-mobile-menu-close',
+                    drawerId: 'admin-mobile-drawer',
+                    backdropId: 'admin-mobile-backdrop',
+                    bodyClass: 'admin-nav-open',
+                    side: 'left',
+                    width: 240,
+                    background: '#111827',
+                    color: '#ffffff',
+                    shadow: '10px 0 40px rgba(0,0,0,0.25)',
+                });
+            }
         });
     </script>
 

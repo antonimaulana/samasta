@@ -51,7 +51,10 @@ class DashboardTest extends TestCase
             ->assertSee('Unduh Ringkasan')
             ->assertSee('Evaluasi Kinerja')
             ->assertSee(config('app.name'))
-            ->assertDontSee('id="admin-sidebar-toggle"', false);
+            ->assertSee('Ringkasan')
+            ->assertDontSee('id="admin-sidebar-toggle"', false)
+            ->assertDontSee('id="admin-desktop-sidebar"', false)
+            ->assertDontSee('id="admin-mobile-menu-toggle"', false);
 
         $this->actingAs($viewer)
             ->get(route('admin.evaluasi.index'))
