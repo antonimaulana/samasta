@@ -136,4 +136,62 @@ class PemangkasanSchedule
 
         return self::tanggalWithinSchedule($permohonan, today());
     }
+
+    public static function plannedScheduleEnd(Pemangkasan $permohonan): Carbon
+    {
+        return Carbon::parse(
+            $permohonan->tanggal_akhir_jadwal_rencana
+                ?? $permohonan->tanggal_akhir_jadwal
+                ?? $permohonan->tanggal_eksekusi,
+        )->startOfDay();
+    }
+
+    public static function startedEarly(Pemangkasan $permohonan): bool
+    {
+        $mulai = Carbon::parse($permohonan->tanggal_eksekusi)->startOfDay();
+
+        $entries = $permohonan->relationLoaded('progres')
+            ? $permohonan->progres
+            : $permohonan->progres()->get(['tanggal']);
+
+        if ($entries->isEmpty()) {
+            return false;
+        }
+
+        $earliest = $entries->min(fn (PemangkasanProgres $entry) => Carbon::parse($entry->tanggal)->startOfDay());
+
+        return $earliest->lt($mulai);
+    }
+
+    public static function needsExtraTime(Pemangkasan $permohonan): bool
+    {
+        $rencana = self::plannedScheduleEnd($permohonan);
+        $aktual = Carbon::parse($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->startOfDay();
+
+        return $aktual->gt($rencana);
+    }
+
+    /**
+     * @return list<array{label: string, class: string}>
+     */
+    public static function jadwalAdjustmentLabels(Pemangkasan $permohonan): array
+    {
+        $labels = [];
+
+        if (self::startedEarly($permohonan)) {
+            $labels[] = [
+                'label' => 'Mulai lebih awal',
+                'class' => 'text-amber-700',
+            ];
+        }
+
+        if (self::needsExtraTime($permohonan)) {
+            $labels[] = [
+                'label' => 'Perlu waktu tambahan',
+                'class' => 'text-violet-700',
+            ];
+        }
+
+        return $labels;
+    }
 }

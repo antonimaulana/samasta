@@ -33,6 +33,48 @@ class PemangkasanScheduleTest extends TestCase
         $this->assertSame(3, PemangkasanSchedule::hariKe('2026-08-28', '2026-08-30'));
     }
 
+    public function test_jadwal_adjustment_labels_detect_early_start_and_extra_time(): void
+    {
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Label Jadwal',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => Kelurahan::query()->value('id'),
+            'luasan' => 500,
+            'alamat' => 'Alamat label',
+            'deskripsi' => 'Deskripsi label jadwal.',
+        ]);
+
+        $permohonan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemangkasan Pohon',
+            'taman_id' => $taman->id,
+            'lokasi_pohon' => $taman->nama_taman,
+            'asal' => 'Warga',
+            'penanggungjawab' => 'Budi',
+            'kontak_permohonan' => '081234567890',
+            'tanggal_permohonan' => '2026-08-28',
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => '2026-08-30',
+            'tanggal_akhir_jadwal' => '2026-09-02',
+            'tanggal_akhir_jadwal_rencana' => '2026-08-31',
+            'total_hari' => 4,
+            'pelaksana' => ['Tim Wilayah 1'],
+            'status' => 'Diproses',
+        ]);
+
+        PemangkasanProgres::create([
+            'pemangkasan_id' => $permohonan->id,
+            'tanggal' => '2026-08-29 08:00:00',
+            'hari_ke' => 1,
+            'jumlah_personil' => 2,
+        ]);
+
+        $labels = PemangkasanSchedule::jadwalAdjustmentLabels($permohonan->fresh('progres'));
+
+        $this->assertContains('Mulai lebih awal', array_column($labels, 'label'));
+        $this->assertContains('Perlu waktu tambahan', array_column($labels, 'label'));
+    }
+
     public function test_recalculate_updates_progress_percentage_from_daily_entries(): void
     {
         $taman = Taman::create([

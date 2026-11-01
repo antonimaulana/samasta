@@ -14,6 +14,7 @@ class ViewerRouteAllowlist
         return [
             'admin.dashboard',
             'admin.dashboard.export-pdf',
+            'admin.evaluasi.index',
             'admin.jadwal-layanan.index',
             'admin.pemangkasans.index',
             'admin.pemangkasans.show',

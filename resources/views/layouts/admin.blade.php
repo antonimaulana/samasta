@@ -10,7 +10,10 @@
     @include('layouts.partials.mobile-nav-styles')
     @include('layouts.partials.admin-sidebar-styles')
 </head>
-<body class="min-h-screen bg-gray-100 text-gray-900">
+<body @class([
+    'min-h-screen bg-gray-100 text-gray-900',
+    'admin-pimpinan-mode' => $isViewer ?? auth()->user()?->isViewer(),
+])>
     <div class="flex min-h-screen">
         <aside id="admin-desktop-sidebar" class="hidden w-60 shrink-0 border-r border-gray-800 bg-gray-900 text-white md:block">
             <div class="border-b border-gray-800 px-3 py-3.5">
@@ -23,27 +26,47 @@
             <header class="border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
                 <div class="mx-auto flex max-w-[1400px] items-center justify-between gap-3">
                     <div class="flex min-w-0 items-center gap-3">
-                        <button type="button"
-                                id="admin-mobile-menu-toggle"
-                                class="relative z-[51] inline-flex h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 md:hidden"
-                                aria-label="Buka menu admin"
-                                aria-expanded="false"
-                                aria-controls="admin-mobile-drawer">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
-                        </button>
-                        <button type="button"
-                                id="admin-sidebar-toggle"
-                                class="hidden h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                                aria-label="Tampilkan menu samping"
-                                aria-expanded="true"
-                                aria-controls="admin-desktop-sidebar">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
-                        </button>
-                        <h1 class="truncate text-base font-semibold sm:text-lg md:text-xl">@yield('header', 'Dashboard')</h1>
+                        @if ($isViewer ?? auth()->user()?->isViewer())
+                            <button type="button"
+                                    id="admin-mobile-menu-toggle"
+                                    class="relative z-[51] inline-flex h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 md:hidden"
+                                    aria-label="Buka menu"
+                                    aria-expanded="false"
+                                    aria-controls="admin-mobile-drawer">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                            <a href="{{ route('admin.dashboard') }}" class="flex min-w-0 items-center gap-2.5">
+                                @include('layouts.partials.app-logo', ['size' => 'sm'])
+                                <div class="min-w-0 leading-tight">
+                                    <span class="block truncate text-base font-bold text-green-800">{{ config('app.name') }}</span>
+                                    <span class="hidden truncate text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:block">{{ config('app.full_name') }}</span>
+                                </div>
+                            </a>
+                        @else
+                            <button type="button"
+                                    id="admin-mobile-menu-toggle"
+                                    class="relative z-[51] inline-flex h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 md:hidden"
+                                    aria-label="Buka menu admin"
+                                    aria-expanded="false"
+                                    aria-controls="admin-mobile-drawer">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                            <button type="button"
+                                    id="admin-sidebar-toggle"
+                                    class="hidden h-10 w-10 flex-shrink-0 touch-manipulation items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                                    aria-label="Tampilkan menu samping"
+                                    aria-expanded="true"
+                                    aria-controls="admin-desktop-sidebar">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                            <h1 class="truncate text-base font-semibold sm:text-lg md:text-xl">@yield('header', 'Dashboard')</h1>
+                        @endif
                     </div>
 
                     <div class="flex flex-shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
@@ -129,31 +152,39 @@
         };
 
         window.onPageReady(function () {
-            initSidebarAccordion(document);
+            var isPimpinanMode = document.body.classList.contains('admin-pimpinan-mode');
 
-            var sidebarStorageKey = 'simtaman-admin-sidebar-collapsed';
-            var expandBtn = document.getElementById('admin-sidebar-toggle');
+            if (isPimpinanMode) {
+                document.querySelectorAll('.sidebar-menu-group').forEach(function (group) {
+                    group.classList.add('is-open');
+                });
+            } else {
+                initSidebarAccordion(document);
 
-            function setSidebarCollapsed(collapsed) {
-                document.body.classList.toggle('admin-sidebar-collapsed', collapsed);
+                var sidebarStorageKey = 'simtaman-admin-sidebar-collapsed';
+                var expandBtn = document.getElementById('admin-sidebar-toggle');
+
+                function setSidebarCollapsed(collapsed) {
+                    document.body.classList.toggle('admin-sidebar-collapsed', collapsed);
+                    try {
+                        localStorage.setItem(sidebarStorageKey, collapsed ? '1' : '0');
+                    } catch (e) {}
+                    if (expandBtn) {
+                        expandBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                        expandBtn.setAttribute('aria-label', collapsed ? 'Tampilkan menu samping' : 'Sembunyikan menu samping');
+                    }
+                }
+
                 try {
-                    localStorage.setItem(sidebarStorageKey, collapsed ? '1' : '0');
+                    if (localStorage.getItem(sidebarStorageKey) === '1') {
+                        setSidebarCollapsed(true);
+                    }
                 } catch (e) {}
-                if (expandBtn) {
-                    expandBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-                    expandBtn.setAttribute('aria-label', collapsed ? 'Tampilkan menu samping' : 'Sembunyikan menu samping');
-                }
+
+                expandBtn?.addEventListener('click', function () {
+                    setSidebarCollapsed(! document.body.classList.contains('admin-sidebar-collapsed'));
+                });
             }
-
-            try {
-                if (localStorage.getItem(sidebarStorageKey) === '1') {
-                    setSidebarCollapsed(true);
-                }
-            } catch (e) {}
-
-            expandBtn?.addEventListener('click', function () {
-                setSidebarCollapsed(! document.body.classList.contains('admin-sidebar-collapsed'));
-            });
 
             initMobileDrawer({
                 toggleId: 'admin-mobile-menu-toggle',

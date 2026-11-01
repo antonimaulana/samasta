@@ -48,6 +48,13 @@ class DashboardTest extends TestCase
             ->assertSee('Dinas Perumahan, Kawasan Permukiman dan Pertamanan')
             ->assertSee('Data Taman')
             ->assertSee('Operasional Pertamanan')
-            ->assertSee('sidebar-menu-group', false);
+            ->assertSee('Unduh Ringkasan')
+            ->assertSee('Evaluasi Kinerja')
+            ->assertSee(config('app.name'))
+            ->assertDontSee('id="admin-sidebar-toggle"', false);
+
+        $this->actingAs($viewer)
+            ->get(route('admin.evaluasi.index'))
+            ->assertOk();
     }
 }

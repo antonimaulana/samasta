@@ -157,4 +157,28 @@
     .admin-main-table-wrap {
         -webkit-overflow-scrolling: touch;
     }
+
+    body.admin-pimpinan-mode .sidebar-menu-group .sidebar-submenu {
+        max-height: min(75vh, 40rem);
+        opacity: 1;
+        pointer-events: auto;
+        margin-top: 0.125rem;
+        margin-bottom: 0.25rem;
+        margin-left: 0.75rem;
+        padding-left: 0.5rem;
+        border-left: 2px solid rgb(55 65 81);
+    }
+
+    body.admin-pimpinan-mode .sidebar-chevron {
+        display: none;
+    }
+
+    body.admin-pimpinan-mode .sidebar-menu-trigger {
+        pointer-events: none;
+        cursor: default;
+    }
+
+    body.admin-pimpinan-mode #admin-sidebar-toggle {
+        display: none !important;
+    }
 </style>

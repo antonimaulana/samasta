@@ -94,6 +94,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('pemangkasans.progres.edit');
     Route::put('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}', [PemangkasanController::class, 'updateProgres'])
         ->name('pemangkasans.progres.update');
+    Route::delete('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}', [PemangkasanController::class, 'destroyProgres'])
+        ->name('pemangkasans.progres.destroy');
     Route::patch('pemangkasans/{pemangkasan}/status', [PemangkasanController::class, 'updateStatus'])
         ->name('pemangkasans.update-status');
     Route::resource('pemangkasans', PemangkasanController::class);

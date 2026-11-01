@@ -79,6 +79,11 @@
                             <span class="block text-sm font-normal text-gray-600">
                                 {{ (int) ($pemangkasan->total_hari ?? 1) }} hari rencana · {{ \App\Support\PemangkasanSchedule::progressSummary($pemangkasan) }}
                             </span>
+                            @foreach (\App\Support\PemangkasanSchedule::jadwalAdjustmentLabels($pemangkasan) as $adjustment)
+                                <span class="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold {{ $adjustment['class'] }}">
+                                    {{ $adjustment['label'] }}
+                                </span>
+                            @endforeach
                         </dd>
                     </div>
                     @if ($pemangkasan->status === 'Selesai' && $pemangkasan->tanggal_penyelesaian)
@@ -125,6 +130,11 @@
                                         <x-admin.table-action-link size="sm" variant="pdf"
                                             :href="route('admin.pemangkasans.export-pdf-progres', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry])"
                                             target="_blank" rel="noopener" />
+                                        <x-admin.pemangkasan-progres-delete-button
+                                            :pemangkasan="$pemangkasan"
+                                            :progres="$entry"
+                                            size="xs"
+                                        />
                                     </x-admin.table-actions>
                                 </div>
                                 @if ($entry->catatan)

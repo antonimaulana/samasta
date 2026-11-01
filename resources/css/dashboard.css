@@ -245,4 +245,8 @@
     .dash-btn-hero {
         @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/25;
     }
+
+    .dash-btn-hero--evaluasi {
+        @apply border-amber-300/80 bg-amber-400 text-amber-950 shadow-sm hover:bg-amber-300;
+    }
 }

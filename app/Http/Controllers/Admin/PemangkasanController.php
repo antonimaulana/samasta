@@ -12,6 +12,7 @@ use App\Support\ArmadaAssignment;
 use App\Support\JadwalLayananQuery;
 use App\Support\OperatorWilayahScope;
 use App\Support\PelaksanaScheduleConflictChecker;
+use App\Support\PemangkasanProgresDeleter;
 use App\Support\PemangkasanProgresPdf;
 use App\Support\PemangkasanSchedule;
 use App\Support\PermohonanProgresEntryRecorder;
@@ -65,7 +66,10 @@ class PemangkasanController extends Controller
                 'dampak',
             ]));
 
-        $pemangkasans = $query->paginate(15)->withQueryString();
+        $pemangkasans = $query
+            ->with(['progres' => fn ($progresQuery) => $progresQuery->select('id', 'pemangkasan_id', 'tanggal')])
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.pemangkasans.index', [
             'pemangkasans' => $pemangkasans,
@@ -231,6 +235,19 @@ class PemangkasanController extends Controller
             ->with('success', 'Progres permohonan berhasil diperbarui.');
     }
 
+    public function destroyProgres(Pemangkasan $pemangkasan, PemangkasanProgres $pemangkasanProgres): RedirectResponse
+    {
+        $this->authorize('view', $pemangkasan);
+        abort_unless(auth()->user()?->canDelete(), 403);
+        $this->ensureProgresBelongsToPermohonan($pemangkasan, $pemangkasanProgres);
+
+        app(PemangkasanProgresDeleter::class)->delete($pemangkasan, $pemangkasanProgres);
+
+        return redirect()
+            ->route('admin.pemangkasans.show', $pemangkasan)
+            ->with('success', 'Progres harian berhasil dihapus.');
+    }
+
     public function destroy(Pemangkasan $pemangkasan): RedirectResponse
     {
         if ($pemangkasan->foto_sebelum) {
@@ -331,6 +348,8 @@ class PemangkasanController extends Controller
                 $validated['tanggal_akhir_jadwal'],
             ),
         );
+
+        $validated['tanggal_akhir_jadwal_rencana'] = $validated['tanggal_akhir_jadwal'];
 
         if ($validated['status'] !== 'Selesai') {
             $validated['tanggal_penyelesaian'] = null;

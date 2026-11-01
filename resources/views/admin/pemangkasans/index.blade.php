@@ -144,15 +144,7 @@
                         @endphp
                         <tr class="hover:bg-gray-50 {{ $isLate ? 'bg-red-50/40' : '' }}">
                             <td class="px-4 py-3">
-                                <p class="font-medium text-gray-900">{{ \App\Support\PemangkasanSchedule::labelRentang($pemangkasan) }}</p>
-                                <p class="text-xs text-gray-500">{{ \App\Support\PemangkasanSchedule::progressSummary($pemangkasan) }}</p>
-                                @if ($isLate)
-                                    <p class="text-xs font-medium text-red-600">Terlambat</p>
-                                @elseif ($isActiveToday)
-                                    <p class="text-xs font-medium text-emerald-700">Hari ini</p>
-                                @elseif (\App\Support\PemangkasanSchedule::tanggalWithinSchedule($pemangkasan, today()->addDay()))
-                                    <p class="text-xs font-medium text-blue-700">Besok</p>
-                                @endif
+                                @include('admin.pemangkasans.partials.jadwal-cell', ['pemangkasan' => $pemangkasan])
                             </td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $jenisClass }}">
