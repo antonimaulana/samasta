@@ -17,6 +17,8 @@
                 label="Tanggal & Waktu Masuk"
             />
 
+            @include('admin.bibit_masuks._batch_fields', ['batch' => null])
+
             @include('admin.bibit_masuks._baris_bibit', ['batch' => null])
 
             @include('admin.partials.bibit-stok-foto-input')

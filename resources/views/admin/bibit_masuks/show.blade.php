@@ -22,6 +22,17 @@
                     </span>
                 </div>
 
+                <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-xs font-semibold uppercase text-gray-500">Sumber</dt>
+                        <dd class="mt-1 font-medium text-gray-900">{{ $batch->sumber ?? $batch->items->first()?->sumber ?? '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase text-gray-500">Siap tanam</dt>
+                        <dd class="mt-1 text-gray-900">{{ ($batch->status_siap_tanam ?? $batch->items->first()?->status_siap_tanam) ? 'Ya' : 'Belum' }}</dd>
+                    </div>
+                </dl>
+
                 <div class="mt-6">
                     <h3 class="text-sm font-semibold text-gray-700">Rincian bibit</h3>
                     <div class="mt-3 overflow-hidden rounded-lg border border-gray-200">
@@ -29,8 +40,6 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-2 text-left font-medium text-gray-700">Nama tanaman</th>
-                                    <th class="px-4 py-2 text-left font-medium text-gray-700">Sumber</th>
-                                    <th class="px-4 py-2 text-left font-medium text-gray-700">Siap tanam</th>
                                     <th class="px-4 py-2 text-right font-medium text-gray-700">Jumlah</th>
                                 </tr>
                             </thead>
@@ -40,8 +49,6 @@
                                         <td class="px-4 py-2">
                                             <x-admin.bibit-nama :bibit="$item->bibit" />
                                         </td>
-                                        <td class="px-4 py-2 text-gray-600">{{ $item->sumber }}</td>
-                                        <td class="px-4 py-2 text-gray-600">{{ $item->status_siap_tanam ? 'Siap' : 'Belum' }}</td>
                                         <td class="px-4 py-2 text-right font-semibold text-teal-700">+{{ $item->jumlah }}</td>
                                     </tr>
                                 @endforeach

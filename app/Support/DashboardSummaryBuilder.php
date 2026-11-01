@@ -13,8 +13,6 @@ use App\Models\SurveyKepuasan;
 use App\Models\Taman;
 use App\Models\TimPelaksana;
 use App\Models\User;
-use Illuminate\Support\Str;
-
 class DashboardSummaryBuilder
 {
     /**
@@ -118,7 +116,7 @@ class DashboardSummaryBuilder
             'survey_summary' => $surveySummary,
             'jadwal_counts' => $jadwalCounts,
             'pemeliharaan_jadwal_counts' => $pemeliharaanJadwalCounts,
-            'pemeliharaan_hari_ini' => $this->pemeliharaanHariIni($user),
+            'pemeliharaan_tim_hari_ini' => $this->pemeliharaanTimHariIni($user),
             'aduan_baru' => $aduanBaru,
             'aduan_aktif' => $aduanAktif,
             'aduan_selesai_bulan' => $aduanSelesaiBulan,
@@ -183,34 +181,56 @@ class DashboardSummaryBuilder
     }
 
     /**
-     * Input pelaksanaan pemeliharaan rutin yang tercatat pada hari ini.
+     * Jumlah input pelaksanaan pemeliharaan rutin hari ini per tim.
      *
-     * @return list<array{id: int, tim: string, tim_short: string, lokasi: string, progres: ?string, waktu: string, url: string}>
+     * @return list<array{tim: string, count: int, url: string}>
      */
-    private function pemeliharaanHariIni(?User $user): array
+    private function pemeliharaanTimHariIni(?User $user): array
     {
         $scope = app(OperatorWilayahScope::class);
+        $allowedTeams = $scope->teamNames($user);
+        $today = today()->toDateString();
 
-        return $scope->scopePemeliharaan(
-            PemeliharaanTaman::query()
-                ->with('taman')
-                ->whereDate('tanggal', today())
-                ->orderByDesc('tanggal'),
-            $user,
-        )
-            ->limit(15)
-            ->get()
-            ->map(function (PemeliharaanTaman $entry) {
+        $teams = TimPelaksana::query()
+            ->where('aktif', true)
+            ->where(function ($query) {
+                $query->where('memiliki_wilayah_kerja', true)
+                    ->orWhereIn('nama', ['Tim Nursery', PemeliharaanTaman::TIM_ARMADA]);
+            })
+            ->orderBy('urutan')
+            ->orderBy('nama')
+            ->pluck('nama');
+
+        if ($teams->isEmpty()) {
+            $teams = collect(PemeliharaanTaman::timNames())
+                ->filter(fn (string $name) => str_starts_with($name, 'Tim Wilayah')
+                    || $name === 'Tim Nursery'
+                    || $name === PemeliharaanTaman::TIM_ARMADA);
+        }
+
+        return $teams
+            ->when($scope->restrictsWilayah($user), fn ($collection) => $collection->filter(
+                fn (string $tim) => in_array($tim, $allowedTeams, true),
+            ))
+            ->map(function (string $tim) use ($scope, $user, $today) {
+                $count = $scope->scopePemeliharaan(
+                    PemeliharaanTaman::query()
+                        ->where('tim', $tim)
+                        ->whereDate('tanggal', $today),
+                    $user,
+                )->count();
+
                 return [
-                    'id' => $entry->id,
-                    'tim' => (string) $entry->tim,
-                    'tim_short' => Str::replaceFirst('Tim ', '', (string) $entry->tim),
-                    'lokasi' => Str::limit($entry->lokasiLabel(), 48),
-                    'progres' => $entry->lapanganRiwayatProgresLabel() ?? $entry->progressSummaryLabel(),
-                    'waktu' => OperasionalPelaksanaanTime::display($entry->tanggal),
-                    'url' => route('admin.pemeliharaan-tamans.export-pdf-operasional', $entry),
+                    'tim' => $tim,
+                    'count' => $count,
+                    'url' => route('admin.pemeliharaan-tamans.index', [
+                        'tim' => $tim,
+                        'tanggal_mulai' => $today,
+                        'tanggal_selesai' => $today,
+                    ]),
                 ];
             })
+            ->values()
             ->all();
     }
 

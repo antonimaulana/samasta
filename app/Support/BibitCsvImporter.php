@@ -205,6 +205,8 @@ class BibitCsvImporter
 
             $batch = \App\Models\BibitMasukBatch::create([
                 'tanggal_masuk' => $tanggal ?? now()->format('Y-m-d H:i:s'),
+                'sumber' => $payload['sumber'],
+                'status_siap_tanam' => $payload['status_siap_tanam'],
             ]);
 
             BibitMasuk::create([

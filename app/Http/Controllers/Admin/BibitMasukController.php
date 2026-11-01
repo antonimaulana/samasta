@@ -61,9 +61,17 @@ class BibitMasukController extends Controller
     {
         $validated = $this->validateBatchRequest($request, requireFotos: true);
         $items = $this->normalizeItems($validated['items']);
-        $header = ['tanggal_masuk' => OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_masuk'])];
+        $header = [
+            'tanggal_masuk' => OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_masuk']),
+            'sumber' => $validated['sumber'],
+            'status_siap_tanam' => $request->boolean('status_siap_tanam'),
+        ];
+        $lineMeta = [
+            'sumber' => $validated['sumber'],
+            'status_siap_tanam' => $request->boolean('status_siap_tanam'),
+        ];
 
-        DB::transaction(function () use ($request, $header, $items) {
+        DB::transaction(function () use ($request, $header, $items, $lineMeta) {
             $batch = BibitMasukBatch::create($header);
 
             foreach ($items as $item) {
@@ -72,8 +80,8 @@ class BibitMasukController extends Controller
                     'bibit_id' => $item['bibit_id'],
                     'jumlah' => $item['jumlah'],
                     'sisa_stok' => $item['jumlah'],
-                    'sumber' => $item['sumber'],
-                    'status_siap_tanam' => $item['status_siap_tanam'],
+                    'sumber' => $lineMeta['sumber'],
+                    'status_siap_tanam' => $lineMeta['status_siap_tanam'],
                 ]);
 
                 Bibit::lockForUpdate()
@@ -123,9 +131,17 @@ class BibitMasukController extends Controller
     {
         $validated = $this->validateBatchRequest($request, requireFotos: false, existing: $bibitMasuk);
         $items = $this->normalizeItems($validated['items']);
-        $header = ['tanggal_masuk' => OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_masuk'])];
+        $header = [
+            'tanggal_masuk' => OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_masuk']),
+            'sumber' => $validated['sumber'],
+            'status_siap_tanam' => $request->boolean('status_siap_tanam'),
+        ];
+        $lineMeta = [
+            'sumber' => $validated['sumber'],
+            'status_siap_tanam' => $request->boolean('status_siap_tanam'),
+        ];
 
-        DB::transaction(function () use ($request, $bibitMasuk, $header, $items) {
+        DB::transaction(function () use ($request, $bibitMasuk, $header, $items, $lineMeta) {
             $bibitMasuk->load('items');
 
             foreach ($bibitMasuk->items as $line) {
@@ -148,8 +164,8 @@ class BibitMasukController extends Controller
                     'bibit_id' => $item['bibit_id'],
                     'jumlah' => $item['jumlah'],
                     'sisa_stok' => $item['jumlah'],
-                    'sumber' => $item['sumber'],
-                    'status_siap_tanam' => $item['status_siap_tanam'],
+                    'sumber' => $lineMeta['sumber'],
+                    'status_siap_tanam' => $lineMeta['status_siap_tanam'],
                 ]);
 
                 Bibit::lockForUpdate()
@@ -213,26 +229,26 @@ class BibitMasukController extends Controller
 
         return $request->validate([
             'tanggal_masuk' => ['required', 'string'],
+            'sumber' => ['required', Rule::in(Bibit::SUMBER)],
+            'status_siap_tanam' => ['nullable', 'boolean'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.bibit_id' => ['required', 'distinct', 'exists:bibits,id'],
             'items.*.jumlah' => ['required', 'integer', 'min:1'],
-            'items.*.sumber' => ['required', Rule::in(Bibit::SUMBER)],
-            'items.*.status_siap_tanam' => ['nullable', 'boolean'],
             'fotos' => $fotoRules,
             'fotos.*' => ['image', 'max:4096'],
         ], [], [
             'tanggal_masuk' => 'tanggal masuk',
+            'sumber' => 'sumber',
             'items' => 'daftar bibit',
             'items.*.bibit_id' => 'bibit',
             'items.*.jumlah' => 'jumlah masuk',
-            'items.*.sumber' => 'sumber',
             'fotos' => 'foto bukti',
         ]);
     }
 
     /**
      * @param  array<int, array<string, mixed>>  $items
-     * @return list<array{bibit_id: int, jumlah: int, sumber: string, status_siap_tanam: bool}>
+     * @return list<array{bibit_id: int, jumlah: int}>
      */
     private function normalizeItems(array $items): array
     {
@@ -246,8 +262,6 @@ class BibitMasukController extends Controller
             $normalized[] = [
                 'bibit_id' => (int) $item['bibit_id'],
                 'jumlah' => (int) $item['jumlah'],
-                'sumber' => (string) $item['sumber'],
-                'status_siap_tanam' => filter_var($item['status_siap_tanam'] ?? false, FILTER_VALIDATE_BOOLEAN),
             ];
         }
 

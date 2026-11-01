@@ -24,7 +24,7 @@
                 $isPermohonan = $item['type'] === 'permohonan';
             @endphp
             <a href="{{ $href }}"
-               class="lapangan-card lapangan-card-hover group block p-5 {{ $isPermohonan ? 'sm:col-span-2 border-blue-200 bg-gradient-to-br from-white to-blue-50/40' : '' }}">
+               class="lapangan-card lapangan-card-hover group block p-5 sm:col-span-2 {{ $isPermohonan ? 'border-blue-200 bg-gradient-to-br from-white to-blue-50/40' : '' }}">
                 <div class="flex items-start gap-4">
                     <div class="lapangan-menu-icon flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-green-100 to-emerald-200 text-xl font-black text-green-800 shadow-inner group-hover:from-green-200 group-hover:to-emerald-300">
                         {{ $item['icon'] }}

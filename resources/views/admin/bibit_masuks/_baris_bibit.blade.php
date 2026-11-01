@@ -7,14 +7,12 @@
             ? $batch->items->map(fn ($item) => [
                 'bibit_id' => $item->bibit_id,
                 'jumlah' => $item->jumlah,
-                'sumber' => $item->sumber,
-                'status_siap_tanam' => $item->status_siap_tanam,
             ])->all()
-            : [['bibit_id' => request('bibit_id'), 'jumlah' => '', 'sumber' => '', 'status_siap_tanam' => false]];
+            : [['bibit_id' => request('bibit_id'), 'jumlah' => '']];
     }
 
     if ($rows === []) {
-        $rows = [['bibit_id' => '', 'jumlah' => '', 'sumber' => '', 'status_siap_tanam' => false]];
+        $rows = [['bibit_id' => '', 'jumlah' => '']];
     }
 @endphp
 
@@ -47,7 +45,7 @@
 <template id="bibit-masuk-row-template">
     @include('admin.bibit_masuks._baris_bibit_row', [
         'index' => '__INDEX__',
-        'row' => ['bibit_id' => '', 'jumlah' => '', 'sumber' => '', 'status_siap_tanam' => false],
+        'row' => ['bibit_id' => '', 'jumlah' => ''],
         'bibits' => $bibits,
         'canRemove' => true,
     ])

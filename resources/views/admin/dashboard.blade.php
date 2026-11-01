@@ -196,35 +196,27 @@
             <div>
                 <div class="dash-block-heading">
                     <p class="dash-kicker dash-kicker--emerald">Pemeliharaan Rutin</p>
-                    <p class="dash-section__desc">Input pelaksanaan yang tercatat hari ini</p>
+                    <p class="dash-section__desc">Akumulasi input pelaksanaan tercatat hari ini per tim</p>
                 </div>
 
-                @if (count($pemeliharaan_hari_ini) > 0)
-                    <ul class="dash-day-input-list">
-                        @foreach ($pemeliharaan_hari_ini as $row)
-                            <li>
-                                <a href="{{ $row['url'] }}" class="dash-day-input-list__item" title="{{ $row['tim'] }} · {{ $row['lokasi'] }}">
-                                    <span class="dash-day-input-list__main">
-                                        <span class="dash-day-input-list__lokasi">{{ $row['lokasi'] }}</span>
-                                        <span class="dash-day-input-list__meta">
-                                            {{ $row['tim_short'] }}
-                                            @if ($row['progres'])
-                                                · {{ $row['progres'] }}
-                                            @endif
-                                        </span>
-                                    </span>
-                                    <span class="dash-day-input-list__waktu">{{ $row['waktu'] }}</span>
-                                </a>
-                            </li>
+                @if (count($pemeliharaan_tim_hari_ini) > 0)
+                    <div class="dash-metric-grid-6 dash-metric-grid--pemeliharaan">
+                        @foreach ($pemeliharaan_tim_hari_ini as $index => $timRow)
+                            @php
+                                $theme = ($index % 6) + 1;
+                                $isIdle = ($timRow['count'] ?? 0) === 0;
+                            @endphp
+                            <a href="{{ $timRow['url'] }}"
+                               title="{{ $timRow['tim'] }}"
+                               class="dash-metric-tile dash-metric-tile--{{ $theme }} {{ $isIdle ? 'dash-metric-tile--idle' : '' }}">
+                                <p class="dash-metric-tile__value">{{ $timRow['count'] }}</p>
+                                <p class="dash-metric-tile__label">{{ Str::replaceFirst('Tim ', '', $timRow['tim']) }}</p>
+                                <p class="dash-metric-tile__meta">Input hari ini</p>
+                            </a>
                         @endforeach
-                    </ul>
-                    <p class="mt-3 text-right">
-                        <a href="{{ route('admin.pemeliharaan-tamans.index', ['view' => 'hari_ini']) }}" class="dash-link dash-link--emerald text-sm font-semibold">
-                            Semua jadwal hari ini →
-                        </a>
-                    </p>
+                    </div>
                 @else
-                    <p class="text-sm text-gray-500">Belum ada input pelaksanaan pemeliharaan rutin untuk hari ini.</p>
+                    <p class="text-sm text-gray-500">Belum ada tim pemeliharaan aktif untuk ditampilkan.</p>
                 @endif
             </div>
 

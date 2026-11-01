@@ -13,12 +13,15 @@ class BibitMasukBatch extends Model
 
     protected $fillable = [
         'tanggal_masuk',
+        'sumber',
+        'status_siap_tanam',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal_masuk' => OperasionalDateTime::class,
+            'status_siap_tanam' => 'boolean',
         ];
     }
 
