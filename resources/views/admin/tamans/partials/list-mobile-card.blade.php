@@ -5,7 +5,6 @@
 ])
 
 @php
-    $actionLinkClass = 'px-2 py-0.5 text-[11px] leading-none';
     $metaParts = [];
     if ($showKategori && filled($taman->kategori)) {
         $metaParts[] = ['type' => 'kategori', 'text' => $taman->kategori];
@@ -53,20 +52,20 @@
             {{ $taman->tahun_pembangunan ?? '—' }}
         </p>
         @if ($showActions)
-            <div class="flex shrink-0 flex-wrap justify-end gap-1">
-                <x-admin.table-action-link :href="route('admin.tamans.show', $taman)" :class="$actionLinkClass">Lihat</x-admin.table-action-link>
+            <x-admin.table-actions>
+                <x-admin.table-action-link size="sm" :href="route('admin.tamans.show', $taman)" />
                 <x-admin.can-write>
-                    <x-admin.table-action-link variant="edit" :href="route('admin.tamans.edit', $taman)" :class="$actionLinkClass">Edit</x-admin.table-action-link>
+                    <x-admin.table-action-link size="sm" variant="edit" :href="route('admin.tamans.edit', $taman)" />
                 </x-admin.can-write>
                 <x-admin.can-delete>
                     <form action="{{ route('admin.tamans.destroy', $taman) }}" method="POST" class="inline"
                           onsubmit="return confirm('Yakin ingin menghapus taman ini?')">
                         @csrf
                         @method('DELETE')
-                        <x-admin.table-action-link tag="button" variant="delete" :class="$actionLinkClass">Hapus</x-admin.table-action-link>
+                        <x-admin.table-action-link size="sm" tag="button" variant="delete" />
                     </form>
                 </x-admin.can-delete>
-            </div>
+            </x-admin.table-actions>
         @endif
     </div>
 </div>

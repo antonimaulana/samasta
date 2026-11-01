@@ -55,6 +55,7 @@ class PemeliharaanTaman extends Model
     protected $fillable = [
         'tanggal',
         'tim',
+        'created_by_user_id',
         'taman_id',
         'lokasi_pelaksanaan',
         'jumlah_personil',
@@ -163,6 +164,11 @@ class PemeliharaanTaman extends Model
         return $this->armadas
             ->map(fn (PemeliharaanTamanArmada $armada) => $armada->pdfEntryHtml())
             ->implode(', ');
+    }
+
+    public function createdByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     public function taman(): BelongsTo

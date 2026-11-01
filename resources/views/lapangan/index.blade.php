@@ -11,6 +11,11 @@
 
     <p class="mb-4 text-sm text-gray-600">Halo, <span class="font-semibold text-gray-900">{{ $greeting }}</span> — pilih pekerjaan di bawah.</p>
 
+    @include('lapangan.partials.recent-inputs', [
+        'records' => $recentInputs ?? collect(),
+        'guestMode' => $guestMode,
+    ])
+
     <div class="grid gap-3 sm:grid-cols-2">
         @foreach ($menuItems as $item)
             @php

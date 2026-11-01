@@ -6,6 +6,7 @@
     'required' => false,
     'placeholder' => 'Ketik nama taman, kategori, atau alamat...',
     'hint' => 'Ketik untuk memfilter, lalu pilih taman dari daftar.',
+    'showHint' => true,
     'inputClass' => 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500',
     'createUrl' => null,
     'emptyMessage' => null,
@@ -43,7 +44,7 @@
         empty-text="Tidak ada taman yang cocok. Pilih tim pelaksana atau ketik kata kunci lain."
     />
 
-    @if ($hint)
+    @if ($showHint && filled($hint))
         <p class="mt-1 text-xs text-gray-500">{{ $hint }} Ketuk kolom pencarian untuk membuka daftar.</p>
     @endif
 @endif

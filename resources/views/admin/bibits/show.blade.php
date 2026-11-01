@@ -93,7 +93,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sumber</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sisa</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -103,14 +103,11 @@
                                 <td class="px-4 py-2 font-semibold text-teal-700">+{{ $masuk->jumlah }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $masuk->sumber }}</td>
                                 <td class="px-4 py-2 text-gray-700">{{ $masuk->sisa_stok }} / {{ $masuk->jumlah }}</td>
-                                <td class="px-4 py-2 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.bibit-masuks.show', $masuk) }}"
-                                           class="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50">
-                                            Lihat
-                                        </a>
+                                <td class="admin-table-col-actions">
+                                    <x-admin.table-actions>
+                                        <x-admin.table-action-link size="sm" :href="route('admin.bibit-masuks.show', $masuk)" />
                                         <x-admin.bibit-masuk-delete-button :masuk="$masuk" size="xs" />
-                                    </div>
+                                    </x-admin.table-actions>
                                 </td>
                             </tr>
                         @empty
@@ -133,7 +130,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -143,13 +140,10 @@
                                 <td class="px-4 py-2 font-semibold text-red-700">-{{ $keluar->jumlah }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $keluar->batch->peruntukan }}</td>
                                 <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $keluar->batch->lokasiLabel() }}</td>
-                                <td class="px-4 py-2 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.bibit-keluars.show', $keluar->batch) }}"
-                                           class="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50">
-                                            Lihat
-                                        </a>
-                                    </div>
+                                <td class="admin-table-col-actions">
+                                    <x-admin.table-actions>
+                                        <x-admin.table-action-link size="sm" :href="route('admin.bibit-keluars.show', $keluar->batch)" />
+                                    </x-admin.table-actions>
                                 </td>
                             </tr>
                         @empty

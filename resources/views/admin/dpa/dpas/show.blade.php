@@ -44,7 +44,7 @@
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pagu</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tahap</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Penyedia</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -64,9 +64,10 @@
                         </span>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $paket->penyedia?->nama ?: '—' }}</td>
-                    <td class="px-4 py-3 text-right text-sm">
-                        <a href="{{ route('admin.dpa.paket-pekerjaans.show', $paket) }}"
-                           class="text-green-700 hover:text-green-900">Monitoring</a>
+                    <td class="admin-table-col-actions">
+                        <x-admin.table-actions>
+                            <x-admin.table-action-link :href="route('admin.dpa.paket-pekerjaans.show', $paket)" label="Monitoring" />
+                        </x-admin.table-actions>
                     </td>
                 </tr>
             @empty

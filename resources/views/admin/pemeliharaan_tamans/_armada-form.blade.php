@@ -1,5 +1,9 @@
 @php
     $isLapanganArmada = request()->routeIs('lapangan.*');
+    $armadaLabelClass = $isLapanganArmada ? 'lapangan-field-label' : 'mb-1 block text-sm font-medium text-gray-700';
+    $armadaInputClass = $isLapanganArmada
+        ? 'lapangan-field-input focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-100'
+        : 'w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500';
     $armadaInventory = $armadaInventory ?? collect();
     $armadaVisibility = $armadaVisibility ?? 'tim-select';
     $armadaRequired = $armadaRequired ?? true;
@@ -13,10 +17,17 @@
     }
 @endphp
 
-<div id="armada-section" class="mt-8 border-t border-gray-100 pt-6 {{ ($isTimArmada ?? false) ? '' : 'hidden' }}">
+<div id="armada-section" @class([
+    'mt-8 border-t border-gray-100 pt-6' => ! $isLapanganArmada,
+    'lapangan-form-section mt-4' => $isLapanganArmada,
+    'hidden' => ! ($isTimArmada ?? false),
+])>
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-            <h3 class="text-sm font-bold text-green-800">Data Armada</h3>
+            <h3 @class([
+                'text-sm font-bold text-green-800' => ! $isLapanganArmada,
+                'lapangan-section-title text-sm font-black text-gray-900' => $isLapanganArmada,
+            ])>Data Armada</h3>
             @unless($isLapanganArmada)
                 <p class="mt-1 text-xs text-gray-500">
                     Pilih armada dari inventaris Armada dan tentukan sopir{{ $armadaRequired ? '.' : ' — opsional.' }}
@@ -57,9 +68,9 @@
                 </div>
                 <div class="grid gap-4 md:grid-cols-2">
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">Nama Armada{{ $armadaRequired ? ' *' : '' }}</label>
+                        <label class="{{ $armadaLabelClass }}">Nama Armada{{ $armadaRequired ? ' *' : '' }}</label>
                         <select name="armada[{{ $index }}][armada_id]"
-                                class="armada-select w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                class="armada-select {{ $armadaInputClass }}"
                                 @disabled($armadaInventory->isEmpty())>
                             <option value="">Pilih armada</option>
                             @foreach ($armadaInventory as $option)
@@ -73,11 +84,12 @@
                         @enderror
                     </div>
                     <div>
-                        <label class="mb-1 block text-sm font-medium text-gray-700">Sopir{{ $armadaRequired ? ' *' : '' }}</label>
+                        <label class="{{ $armadaLabelClass }}">Sopir{{ $armadaRequired ? ' *' : '' }}</label>
                         <x-admin.armada-sopir-select
                             name="armada[{{ $index }}][sopir]"
                             :selected="old('armada.'.$index.'.sopir', $selectedSopir)"
                             :required="$armadaRequired"
+                            :input-class="$armadaInputClass"
                         />
                         @error('armada.'.$index.'.sopir')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

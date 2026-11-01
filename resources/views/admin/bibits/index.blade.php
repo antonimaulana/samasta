@@ -34,15 +34,23 @@
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari nama tanaman, nama ilmiah, jenis...'])
 
-    <x-admin.data-table>
+    <x-admin.data-table fixed>
+        <colgroup>
+            <col style="width: 20%">
+            <col style="width: 10%">
+            <col style="width: 9%">
+            <col style="width: auto">
+            <col style="width: 14%">
+            <col style="width: 7rem">
+        </colgroup>
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama Tanaman</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
-                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Total Stok</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Stok per Sumber</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Kesiapan Tanam</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="px-4 py-3">Nama Tanaman</th>
+                        <th class="px-4 py-3">Jenis</th>
+                        <th class="px-4 py-3 text-center">Total Stok</th>
+                        <th class="px-4 py-3">Stok per Sumber</th>
+                        <th class="px-4 py-3">Kesiapan Tanam</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -95,30 +103,21 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.bibits.show', $bibit) }}"
-                                       class="rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-50">
-                                        Lihat
-                                    </a>
+                            <td class="admin-table-col-actions">
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link :href="route('admin.bibits.show', $bibit)" />
                                     <x-admin.can-write>
-                                    <a href="{{ route('admin.bibits.edit', $bibit) }}"
-                                       class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
-                                        Edit
-                                    </a>
+                                        <x-admin.table-action-link variant="edit" :href="route('admin.bibits.edit', $bibit)" />
                                     </x-admin.can-write>
                                     <x-admin.can-delete>
-                                    <form action="{{ route('admin.bibits.destroy', $bibit) }}" method="POST"
-                                          onsubmit="return confirm('Yakin ingin menghapus data bibit ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50">
-                                            Hapus
-                                        </button>
-                                    </form>
+                                        <form action="{{ route('admin.bibits.destroy', $bibit) }}" method="POST" class="inline"
+                                              onsubmit="return confirm('Yakin ingin menghapus data bibit ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <x-admin.table-action-link tag="button" variant="delete" />
+                                        </form>
                                     </x-admin.can-delete>
-                                </div>
+                                </x-admin.table-actions>
                             </td>
                         </tr>
                     @empty
@@ -152,7 +151,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Bibit</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sumber</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -164,14 +163,11 @@
                                 </td>
                                 <td class="px-4 py-2 font-semibold text-teal-700">+{{ number_format($masuk->jumlah) }}</td>
                                 <td class="px-4 py-2 text-gray-600">{{ $masuk->sumber }}</td>
-                                <td class="px-4 py-2 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.bibit-masuks.show', $masuk) }}"
-                                           class="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50">
-                                            Lihat
-                                        </a>
+                                <td class="admin-table-col-actions">
+                                    <x-admin.table-actions>
+                                        <x-admin.table-action-link size="sm" :href="route('admin.bibit-masuks.show', $masuk)" />
                                         <x-admin.bibit-masuk-delete-button :masuk="$masuk" size="xs" />
-                                    </div>
+                                    </x-admin.table-actions>
                                 </td>
                             </tr>
                         @empty
@@ -202,7 +198,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -215,14 +211,11 @@
                                 </td>
                                 <td class="px-4 py-2 font-semibold text-red-700">-{{ number_format((int) ($batch->items_sum_jumlah ?? 0)) }}</td>
                                 <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $batch->lokasiLabel() }}</td>
-                                <td class="px-4 py-2 text-right">
-                                    <div class="flex justify-end gap-1">
-                                        <a href="{{ route('admin.bibit-keluars.show', $batch) }}"
-                                           class="rounded border border-gray-300 px-2 py-0.5 text-xs text-gray-700 hover:bg-gray-50">
-                                            Lihat
-                                        </a>
+                                <td class="admin-table-col-actions">
+                                    <x-admin.table-actions>
+                                        <x-admin.table-action-link size="sm" :href="route('admin.bibit-keluars.show', $batch)" />
                                         <x-admin.bibit-keluar-delete-button :batch="$batch" size="xs" />
-                                    </div>
+                                    </x-admin.table-actions>
                                 </td>
                             </tr>
                         @empty

@@ -15,7 +15,7 @@
         <x-admin.table-sort-header column="tahun" label="Tahun" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
         <x-admin.table-sort-header column="status_data" label="Status Data" :sort="$sortState['sort']" :direction="$sortState['direction']" class="whitespace-nowrap px-4 py-3" />
         @if ($showActions)
-            <th class="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+            <th class="admin-table-col-actions">Aksi</th>
         @endif
     </tr>
 </thead>

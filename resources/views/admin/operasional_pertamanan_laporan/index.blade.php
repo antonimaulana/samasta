@@ -231,8 +231,7 @@
                         </p>
                     </div>
                     @if ($canWrite ?? auth()->user()?->canWrite())
-                    <a href="{{ route('admin.pemangkasans.edit', $layanan) }}"
-                       class="text-xs font-medium text-emerald-700 hover:underline">Detail</a>
+                    <x-admin.table-action-link size="sm" :href="route('admin.pemangkasans.edit', $layanan)" label="Detail" />
                     @endif
                 </li>
             @empty

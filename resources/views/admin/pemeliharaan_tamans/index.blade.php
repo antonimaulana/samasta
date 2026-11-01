@@ -127,13 +127,19 @@
     </div>
     @endif
 
-    <x-admin.data-table>
+    <x-admin.data-table fixed>
+        <colgroup>
+            <col style="width: 14%">
+            <col style="width: 16%">
+            <col style="width: auto">
+            <col style="width: 8rem">
+        </colgroup>
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tim</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="px-4 py-3">Tanggal</th>
+                <th class="px-4 py-3">Tim</th>
+                <th class="px-4 py-3">Lokasi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -143,7 +149,7 @@
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{{ $kinerja->tim }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="admin-table-cell-wrap px-4 py-3">
                                 <p class="font-medium">{{ $kinerja->lokasi_pelaksanaan }}</p>
                                 @if ($kinerja->uraian_pekerjaan)
                                     <p class="mt-0.5 text-xs text-gray-500">{{ Str::limit($kinerja->uraian_pekerjaan, 60) }}</p>
@@ -152,24 +158,21 @@
                                     <p class="mt-0.5 text-xs text-green-700">Progres {{ $kinerja->persentase_progres }}%</p>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex flex-wrap justify-end gap-2">
-                                    <a href="{{ route('admin.pemeliharaan-tamans.export-pdf-operasional', $kinerja) }}"
-                                       class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50"
-                                       title="Export PDF operasional ini">PDF</a>
+                            <td class="admin-table-col-actions">
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link variant="pdf" :href="route('admin.pemeliharaan-tamans.export-pdf-operasional', $kinerja)" label="PDF" />
                                     <x-admin.can-write>
-                                        <a href="{{ route('admin.pemeliharaan-tamans.edit', $kinerja) }}"
-                                           class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">Edit</a>
+                                        <x-admin.table-action-link variant="edit" :href="route('admin.pemeliharaan-tamans.edit', $kinerja)" />
                                     </x-admin.can-write>
                                     <x-admin.can-delete>
-                                        <form action="{{ route('admin.pemeliharaan-tamans.destroy', $kinerja) }}" method="POST"
+                                        <form action="{{ route('admin.pemeliharaan-tamans.destroy', $kinerja) }}" method="POST" class="inline"
                                               onsubmit="return confirm('Hapus data operasional ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50">Hapus</button>
+                                            <x-admin.table-action-link tag="button" variant="delete" />
                                         </form>
                                     </x-admin.can-delete>
-                                </div>
+                                </x-admin.table-actions>
                             </td>
                         </tr>
                     @empty

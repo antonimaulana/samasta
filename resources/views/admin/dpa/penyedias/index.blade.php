@@ -28,7 +28,7 @@
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">PIC</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">NPWP</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Paket</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -38,8 +38,10 @@
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $penyedia->pic ?: '—' }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $penyedia->npwp ?: '—' }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ number_format($penyedia->paket_pekerjaans_count) }}</td>
-                    <td class="px-4 py-3 text-right text-sm">
-                        <a href="{{ route('admin.dpa.penyedias.edit', $penyedia) }}" class="text-green-700 hover:text-green-900">Edit</a>
+                    <td class="admin-table-col-actions">
+                        <x-admin.table-actions>
+                            <x-admin.table-action-link variant="edit" :href="route('admin.dpa.penyedias.edit', $penyedia)" />
+                        </x-admin.table-actions>
                     </td>
                 </tr>
             @empty

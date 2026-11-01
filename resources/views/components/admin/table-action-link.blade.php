@@ -2,18 +2,40 @@
     'href' => null,
     'variant' => 'view',
     'tag' => 'a',
+    'label' => null,
+    'size' => 'md',
 ])
 
 @php
-    $classes = match ($variant) {
-        'edit' => 'rounded border border-blue-300 px-2.5 py-1 text-sm font-medium text-blue-700 hover:bg-blue-50',
-        'delete' => 'rounded border border-red-300 px-2.5 py-1 text-sm font-medium text-red-700 hover:bg-red-50',
-        default => 'rounded border border-gray-300 px-2.5 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50',
+    $labelText = trim($label ?? (string) $slot) ?: match ($variant) {
+        'edit' => 'Edit',
+        'delete' => 'Hapus',
+        'pdf' => 'PDF',
+        'history' => 'Riwayat',
+        'download' => 'Unduh',
+        default => 'Lihat',
     };
+
+    $iconName = match ($variant) {
+        'edit' => 'edit',
+        'delete' => 'delete',
+        'pdf' => 'pdf',
+        'history' => 'history',
+        'download' => 'download',
+        default => 'view',
+    };
+
+    $sizeClass = $size === 'sm' ? 'admin-table-action--sm' : '';
+
+    $classes = 'admin-table-action admin-table-action--'.$variant.' '.$sizeClass;
 @endphp
 
 @if ($tag === 'button')
-    <button type="submit" {{ $attributes->merge(['class' => $classes]) }}>{{ $slot }}</button>
+    <button type="submit" title="{{ $labelText }}" aria-label="{{ $labelText }}" {{ $attributes->merge(['class' => $classes]) }}>
+        <x-admin.table-icon :name="$iconName" />
+    </button>
 @else
-    <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>{{ $slot }}</a>
+    <a href="{{ $href }}" title="{{ $labelText }}" aria-label="{{ $labelText }}" {{ $attributes->merge(['class' => $classes]) }}>
+        <x-admin.table-icon :name="$iconName" />
+    </a>
 @endif

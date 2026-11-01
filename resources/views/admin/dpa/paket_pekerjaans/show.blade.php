@@ -81,7 +81,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Satuan</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Harga</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700"></th>
+                        <th class="admin-table-col-actions"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -92,10 +92,10 @@
                             <td class="px-4 py-3 text-sm">{{ $item->satuan }}</td>
                             <td class="px-4 py-3 text-sm">{{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
                             <td class="px-4 py-3 text-sm">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
-                            <td class="px-4 py-3 text-right text-sm">
-                                <form action="{{ route('admin.dpa.paket-pekerjaans.hps-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" onsubmit="return confirm('Hapus item?')">
+                            <td class="admin-table-col-actions">
+                                <form action="{{ route('admin.dpa.paket-pekerjaans.hps-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" class="inline" onsubmit="return confirm('Hapus item?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-600 hover:underline">Hapus</button>
+                                    <x-admin.table-action-link tag="button" variant="delete" size="sm" />
                                 </form>
                             </td>
                         </tr>
@@ -130,7 +130,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Satuan</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Harga</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700"></th>
+                        <th class="admin-table-col-actions"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -141,10 +141,10 @@
                             <td class="px-4 py-3 text-sm">{{ $item->satuan }}</td>
                             <td class="px-4 py-3 text-sm">{{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
                             <td class="px-4 py-3 text-sm">{{ number_format($item->jumlah, 0, ',', '.') }}</td>
-                            <td class="px-4 py-3 text-right text-sm">
-                                <form action="{{ route('admin.dpa.paket-pekerjaans.spk-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" onsubmit="return confirm('Hapus item?')">
+                            <td class="admin-table-col-actions">
+                                <form action="{{ route('admin.dpa.paket-pekerjaans.spk-items.destroy', [$paketPekerjaan, $item]) }}" method="POST" class="inline" onsubmit="return confirm('Hapus item?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-600 hover:underline">Hapus</button>
+                                    <x-admin.table-action-link tag="button" variant="delete" size="sm" />
                                 </form>
                             </td>
                         </tr>

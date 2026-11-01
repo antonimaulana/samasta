@@ -54,21 +54,22 @@
                         'bg-gray-100 text-gray-600' => ! $faq->is_active,
                     ])>{{ $faq->is_active ? 'Aktif' : 'Nonaktif' }}</span>
                 </div>
-                <div class="mt-3 flex flex-wrap gap-2">
-                    <a href="{{ route('admin.faq.edit', $faq) }}"
-                       class="rounded-lg bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-700">Edit</a>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <x-admin.table-actions>
+                        <x-admin.table-action-link variant="edit" :href="route('admin.faq.edit', $faq)" />
+                        <form action="{{ route('admin.faq.destroy', $faq) }}" method="POST" class="inline"
+                              onsubmit="return confirm('Hapus pertanyaan ini?');">
+                            @csrf
+                            @method('DELETE')
+                            <x-admin.table-action-link tag="button" variant="delete" />
+                        </form>
+                    </x-admin.table-actions>
                     <form action="{{ route('admin.faq.toggle', $faq) }}" method="POST">
                         @csrf
                         @method('PATCH')
                         <button type="submit" class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50">
                             {{ $faq->is_active ? 'Sembunyikan' : 'Tampilkan' }}
                         </button>
-                    </form>
-                    <form action="{{ route('admin.faq.destroy', $faq) }}" method="POST"
-                          onsubmit="return confirm('Hapus pertanyaan ini?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50">Hapus</button>
                     </form>
                 </div>
             </article>

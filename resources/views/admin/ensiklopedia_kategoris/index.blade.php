@@ -33,7 +33,7 @@
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Slug</th>
                 <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Urutan</th>
                 <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Artikel</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -53,30 +53,21 @@
                                     {{ $kategori->artikels_count }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex justify-end gap-2">
-                                    <a href="{{ route('ensiklopedia.index') }}#{{ $kategori->slug }}"
-                                       class="rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-50">
-                                        Lihat
-                                    </a>
+                            <td class="admin-table-col-actions">
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link :href="route('ensiklopedia.index').'#'.$kategori->slug" target="_blank" />
                                     <x-admin.can-write>
-                                    <a href="{{ route('admin.ensiklopedia-kategoris.edit', $kategori) }}"
-                                       class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
-                                        Edit
-                                    </a>
+                                        <x-admin.table-action-link variant="edit" :href="route('admin.ensiklopedia-kategoris.edit', $kategori)" />
                                     </x-admin.can-write>
                                     <x-admin.can-delete>
-                                    <form action="{{ route('admin.ensiklopedia-kategoris.destroy', $kategori) }}" method="POST"
-                                          onsubmit="return confirm('Hapus kategori ini? Semua artikel di dalamnya ikut terhapus.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50">
-                                            Hapus
-                                        </button>
-                                    </form>
+                                        <form action="{{ route('admin.ensiklopedia-kategoris.destroy', $kategori) }}" method="POST" class="inline"
+                                              onsubmit="return confirm('Hapus kategori ini? Semua artikel di dalamnya ikut terhapus.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <x-admin.table-action-link tag="button" variant="delete" />
+                                        </form>
                                     </x-admin.can-delete>
-                                </div>
+                                </x-admin.table-actions>
                             </td>
                         </tr>
                     @empty

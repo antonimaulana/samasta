@@ -55,9 +55,9 @@
     $awaitingTeam = $isDynamic && $teams->isEmpty() && ! $isOperasionalWilayah;
     $pickerId = 'petugas-picker-'.uniqid();
     $inputClass = $isLapangan
-        ? 'w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-base'
+        ? 'lapangan-field-input focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-100'
         : 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm';
-    $labelClass = $isLapangan ? 'text-sm font-bold text-gray-700' : 'text-sm font-medium text-gray-700';
+    $labelClass = $isLapangan ? 'lapangan-field-label' : 'mb-1 block text-sm font-medium text-gray-700';
 @endphp
 
 <div id="{{ $pickerId }}"
@@ -97,7 +97,10 @@
                     Hapus semua
                 </button>
                 <p class="text-xs text-gray-500">
-                    <span data-petugas-count>{{ count($selected) }}</span> petugas · jumlah personil mengikuti pilihan
+                    <span data-petugas-count>{{ count($selected) }}</span> petugas dipilih
+                    @unless($isLapangan)
+                        · jumlah personil mengikuti pilihan
+                    @endunless
                 </p>
             </div>
 

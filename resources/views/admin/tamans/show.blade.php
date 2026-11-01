@@ -122,7 +122,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tim</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Uraian Pekerjaan</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -135,11 +135,11 @@
                             <td class="max-w-xs px-4 py-3 text-sm text-gray-700">
                                 {{ $kinerja->uraian_pekerjaan ? Str::limit($kinerja->uraian_pekerjaan, 80) : '—' }}
                             </td>
-                            <td class="px-4 py-3 text-right text-sm">
-                                <a href="{{ route('admin.pemeliharaan-tamans.export-pdf-operasional', $kinerja) }}"
-                                   class="rounded-lg border border-red-200 bg-white px-3 py-1 text-sm font-medium text-red-700 hover:bg-red-50">
-                                    PDF
-                                </a>
+                            <td class="admin-table-col-actions">
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link variant="pdf"
+                                        :href="route('admin.pemeliharaan-tamans.export-pdf-operasional', $kinerja)" />
+                                </x-admin.table-actions>
                             </td>
                         </tr>
                     @empty

@@ -41,25 +41,21 @@
                     </div>
 
                     <div class="mt-4 flex flex-wrap items-center gap-2">
-                        <a href="{{ route('admin.beranda-slides.edit', $slide) }}"
-                           class="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700">
-                            Edit
-                        </a>
+                        <x-admin.table-actions>
+                            <x-admin.table-action-link variant="edit" :href="route('admin.beranda-slides.edit', $slide)" />
+                            <form action="{{ route('admin.beranda-slides.destroy', $slide) }}" method="POST" class="inline"
+                                  onsubmit="return confirm('Hapus slide «{{ addslashes($slide->title_attr) }}»?');">
+                                @csrf
+                                @method('DELETE')
+                                <x-admin.table-action-link tag="button" variant="delete" />
+                            </form>
+                        </x-admin.table-actions>
                         <form action="{{ route('admin.beranda-slides.toggle', $slide) }}" method="POST">
                             @csrf
                             @method('PATCH')
                             <button type="submit"
                                     class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
                                 {{ $slide->is_active ? 'Sembunyikan' : 'Tampilkan' }}
-                            </button>
-                        </form>
-                        <form action="{{ route('admin.beranda-slides.destroy', $slide) }}" method="POST"
-                              onsubmit="return confirm('Hapus slide «{{ addslashes($slide->title_attr) }}»?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50">
-                                Hapus
                             </button>
                         </form>
                     </div>

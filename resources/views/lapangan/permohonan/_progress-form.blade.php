@@ -115,11 +115,12 @@
             </div>
 
             <div class="sm:col-span-2">
+                <x-lapangan.field-label required>Petugas</x-lapangan.field-label>
                 <x-petugas-picker
                     :team-names="$permohonan->pelaksana ?? []"
                     :selected-ids="old('petugas_ids', [])"
                     :rosters-by-team="$rostersByTeam ?? []"
-                    :roster-url="route('admin.tim-pelaksanas.roster')"
+                    :roster-url="route('lapangan.tim-pelaksanas.roster')"
                     variant="lapangan"
                 />
             </div>
@@ -150,13 +151,13 @@
 
         <div class="mt-4">
 
-            <label for="catatan" class="mb-1 block text-sm font-bold text-gray-700">Catatan pekerjaan</label>
+            <x-lapangan.field-label for="catatan">Catatan pekerjaan</x-lapangan.field-label>
 
             <textarea name="catatan" id="catatan" rows="3"
 
                       placeholder="Contoh: Pemangkasan 15 pohon di area utara taman"
 
-                      class="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-100">{{ old('catatan') }}</textarea>
+                      class="lapangan-field-input min-h-[5rem] text-sm">{{ old('catatan') }}</textarea>
 
             @error('catatan')
 
@@ -174,13 +175,13 @@
 
         <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4">
 
-            <label for="dampak" class="mb-1 block text-sm font-bold text-gray-800">Dampak ke sekitar</label>
+            <x-lapangan.field-label for="dampak">Dampak ke sekitar</x-lapangan.field-label>
 
             <textarea name="dampak" id="dampak" rows="3"
 
                       placeholder="Contoh: Menutup badan jalan sementara"
 
-                      class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm">{{ old('dampak') }}</textarea>
+                      class="lapangan-field-input min-h-[5rem] text-sm">{{ old('dampak') }}</textarea>
 
             @error('dampak')
 
@@ -240,11 +241,11 @@
 
         @elseif ($permohonanStatus === 'Diproses')
 
-            <label for="status" class="mt-4 mb-2 block text-sm font-bold text-blue-900">Tindakan konfirmasi *</label>
+            <x-lapangan.field-label for="status" :required="true" class="mt-4">Tindakan konfirmasi</x-lapangan.field-label>
 
             <select name="status" id="status" required
 
-                    class="w-full rounded-xl border-2 border-blue-200 bg-white px-4 py-3.5 text-base font-semibold focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-100">
+                    class="lapangan-field-input border-blue-200 font-semibold">
 
                 <option value="Diproses" @selected($currentStatus === 'Diproses')>💾 Simpan progres hari ini (masih dikerjakan)</option>
 
@@ -264,13 +265,13 @@
 
         <div id="tanggal-penyelesaian-section" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 {{ $currentStatus === 'Selesai' ? '' : 'hidden' }}">
 
-            <label for="tanggal_penyelesaian" class="mb-1 block text-sm font-black text-emerald-900">Tanggal penyelesaian *</label>
+            <x-lapangan.field-label for="tanggal_penyelesaian" :required="true">Tanggal penyelesaian</x-lapangan.field-label>
 
             <input type="date" name="tanggal_penyelesaian" id="tanggal_penyelesaian"
 
                    value="{{ old('tanggal_penyelesaian', $permohonan->tanggal_penyelesaian?->format('Y-m-d') ?? now()->format('Y-m-d')) }}"
 
-                   class="w-full rounded-xl border-2 border-emerald-200 bg-white px-4 py-3 text-base">
+                   class="lapangan-field-input border-emerald-200">
 
             @error('tanggal_penyelesaian')
 

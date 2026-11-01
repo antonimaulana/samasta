@@ -1,0 +1,66 @@
+/* Admin data tables — aksi ikon & kolom responsif */
+.admin-data-table {
+    @apply min-w-full divide-y divide-gray-200 text-sm;
+}
+
+.admin-data-table thead th {
+    @apply bg-gray-50 text-left text-sm font-medium text-gray-700;
+}
+
+.admin-table-col-actions {
+    @apply w-[1%] whitespace-nowrap px-2 py-3 text-right align-middle;
+}
+
+.admin-table-cell-truncate {
+    @apply max-w-0 truncate align-middle;
+}
+
+.admin-table-cell-wrap {
+    @apply max-w-[14rem] align-middle break-words sm:max-w-xs md:max-w-md;
+}
+
+.admin-table-actions {
+    @apply inline-flex flex-shrink-0 flex-nowrap items-center justify-end gap-1;
+}
+
+.admin-table-action {
+    @apply inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border transition-colors;
+}
+
+.admin-table-action--sm {
+    @apply h-8 w-8;
+}
+
+.admin-table-action--view {
+    @apply border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
+}
+
+.admin-table-action--edit {
+    @apply border-blue-300 bg-white text-blue-700 hover:bg-blue-50;
+}
+
+.admin-table-action--delete {
+    @apply border-red-300 bg-white text-red-700 hover:bg-red-50;
+}
+
+.admin-table-action--pdf {
+    @apply border-rose-300 bg-white text-rose-700 hover:bg-rose-50;
+}
+
+.admin-table-action--history {
+    @apply border-green-300 bg-white text-green-700 hover:bg-green-50;
+}
+
+.admin-table-action--download {
+    @apply border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50;
+}
+
+@media (max-width: 767px) {
+    .admin-data-table--fixed {
+        @apply table-auto;
+    }
+
+    .admin-table-cell-truncate {
+        @apply max-w-[10rem];
+    }
+}

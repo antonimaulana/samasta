@@ -20,17 +20,27 @@
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari tanaman, sumber...'])
 
-    <x-admin.data-table>
+    <x-admin.data-table fixed>
+        <colgroup>
+            <col style="width: 10%">
+            <col style="width: 18%">
+            <col style="width: 10%">
+            <col style="width: 8%">
+            <col style="width: auto">
+            <col style="width: 9%">
+            <col style="width: 10%">
+            <col style="width: 7rem">
+        </colgroup>
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Nama Tanaman</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sumber</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Siap Tanam</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sisa Stok</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="px-4 py-3">Tanggal</th>
+                <th class="px-4 py-3">Nama Tanaman</th>
+                <th class="px-4 py-3">Jenis</th>
+                <th class="px-4 py-3">Jumlah</th>
+                <th class="px-4 py-3">Sumber</th>
+                <th class="px-4 py-3">Siap Tanam</th>
+                <th class="px-4 py-3">Sisa Stok</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -48,7 +58,7 @@
                     <td class="px-4 py-3 text-sm">
                         <span class="font-semibold text-teal-700">+{{ $masuk->jumlah }}</span>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $masuk->sumber }}</td>
+                    <td class="admin-table-cell-truncate px-4 py-3 text-sm text-gray-600" title="{{ $masuk->sumber }}">{{ $masuk->sumber }}</td>
                     <td class="px-4 py-3 text-sm">
                         @if ($masuk->status_siap_tanam)
                             <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">Siap</span>
@@ -57,20 +67,14 @@
                         @endif
                     </td>
                     <td class="px-4 py-3 text-sm font-medium text-gray-700">{{ $masuk->sisa_stok }} / {{ $masuk->jumlah }}</td>
-                    <td class="px-4 py-3 text-right text-sm">
-                        <div class="flex justify-end gap-2">
-                            <a href="{{ route('admin.bibit-masuks.show', $masuk) }}"
-                               class="rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-50">
-                                Lihat
-                            </a>
+                    <td class="admin-table-col-actions">
+                        <x-admin.table-actions>
+                            <x-admin.table-action-link :href="route('admin.bibit-masuks.show', $masuk)" />
                             <x-admin.can-write>
-                            <a href="{{ route('admin.bibit-masuks.edit', $masuk) }}"
-                               class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
-                                Edit
-                            </a>
-                            <x-admin.bibit-masuk-delete-button :masuk="$masuk" />
+                                <x-admin.table-action-link variant="edit" :href="route('admin.bibit-masuks.edit', $masuk)" />
+                                <x-admin.bibit-masuk-delete-button :masuk="$masuk" />
                             </x-admin.can-write>
-                        </div>
+                        </x-admin.table-actions>
                     </td>
                 </tr>
             @empty

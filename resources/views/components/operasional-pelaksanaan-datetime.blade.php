@@ -22,15 +22,16 @@
     }
     $isLapangan = $variant === 'lapangan';
     $inputClass = $isLapangan
-        ? 'w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-base focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-100'
+        ? 'lapangan-field-input'
         : 'w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500';
-    $labelClass = $isLapangan
-        ? 'mb-1 block text-sm font-bold text-gray-700'
-        : 'mb-1 block text-sm font-medium text-gray-700';
 @endphp
 
 <div>
-    <label for="{{ $name }}" class="{{ $labelClass }}">{{ $label }} @if ($required)<span class="text-red-600">*</span>@endif</label>
+    @if ($isLapangan)
+        <x-lapangan.field-label :for="$name" :required="$required">{{ $label }}</x-lapangan.field-label>
+    @else
+        <label for="{{ $name }}" class="mb-1 block text-sm font-medium text-gray-700">{{ $label }} @if ($required)<span class="text-red-600">*</span>@endif</label>
+    @endif
     <input type="datetime-local"
            name="{{ $name }}"
            id="{{ $name }}"

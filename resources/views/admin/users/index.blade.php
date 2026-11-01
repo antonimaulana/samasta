@@ -19,7 +19,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Email</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peran</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tim / Wilayah</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -35,19 +35,18 @@
                             <td class="px-4 py-3 text-gray-600">
                                 {{ $user->wilayahLabel() ?? '—' }}
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.users.edit', $user) }}"
-                                       class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">Edit</a>
+                            <td class="admin-table-col-actions">
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link variant="edit" :href="route('admin.users.edit', $user)" />
                                     @if ($user->id !== auth()->id())
-                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline"
                                               onsubmit="return confirm('Hapus pengguna ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50">Hapus</button>
+                                            <x-admin.table-action-link tag="button" variant="delete" />
                                         </form>
                                     @endif
-                                </div>
+                                </x-admin.table-actions>
                             </td>
                         </tr>
                     @empty

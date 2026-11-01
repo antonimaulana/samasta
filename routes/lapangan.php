@@ -16,6 +16,8 @@ Route::prefix('lapangan')
             Route::get('/', [OperasionalController::class, 'index'])->name('index');
             Route::get('tim-pelaksanas/roster', [OperasionalController::class, 'petugasRoster'])->name('tim-pelaksanas.roster');
             Route::get('pemeliharaan/{slug}', [OperasionalController::class, 'createPemeliharaan'])->name('pemeliharaan.create');
+            Route::post('pemeliharaan/{slug}/cek-lokasi-duplikat', [OperasionalController::class, 'checkPemeliharaanLokasiDuplikat'])
+                ->name('pemeliharaan.check-lokasi-duplikat');
             Route::post('pemeliharaan/{slug}', [OperasionalController::class, 'storePemeliharaan'])->name('pemeliharaan.store');
             Route::get('permohonan/baru', fn () => redirect()->route('lapangan.permohonan.index'))->name('permohonan.create');
             Route::get('permohonan', [OperasionalController::class, 'indexPermohonan'])->name('permohonan.index');

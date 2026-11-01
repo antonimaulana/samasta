@@ -58,7 +58,7 @@
                 <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Jumlah</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Kondisi</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Keterangan</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -87,23 +87,21 @@
                         <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $kondisiClass }}">{{ $item->kondisi }}</span>
                     </td>
                     <td class="max-w-xs px-4 py-3 text-gray-600">{{ $item->keterangan ? Str::limit($item->keterangan, 80) : '—' }}</td>
-                    <td class="px-4 py-3 text-right">
-                        <div class="flex justify-end gap-2">
-                            <a href="{{ route('admin.armadas.show', $item) }}"
-                               class="rounded border border-green-300 px-3 py-1 text-green-700 hover:bg-green-50">Riwayat</a>
+                    <td class="admin-table-col-actions">
+                        <x-admin.table-actions>
+                            <x-admin.table-action-link variant="history" :href="route('admin.armadas.show', $item)" label="Riwayat" />
                             <x-admin.can-write>
-                                <a href="{{ route('admin.armadas.edit', $item) }}"
-                                   class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">Edit</a>
+                                <x-admin.table-action-link variant="edit" :href="route('admin.armadas.edit', $item)" />
                             </x-admin.can-write>
                             <x-admin.can-delete>
-                                <form action="{{ route('admin.armadas.destroy', $item) }}" method="POST"
+                                <form action="{{ route('admin.armadas.destroy', $item) }}" method="POST" class="inline"
                                       onsubmit="return confirm('Hapus data armada ini?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50">Hapus</button>
+                                    <x-admin.table-action-link tag="button" variant="delete" />
                                 </form>
                             </x-admin.can-delete>
-                        </div>
+                        </x-admin.table-actions>
                     </td>
                 </tr>
             @empty
@@ -138,7 +136,7 @@
                     <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pekerjaan</th>
                     <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
                     <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sopir</th>
-                    <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                    <th class="admin-table-col-actions">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -166,9 +164,11 @@
                         <td class="px-4 py-3 text-sm text-gray-900">{{ Str::limit($entry['pekerjaan'], 60) }}</td>
                         <td class="px-4 py-3 text-sm text-gray-700">{{ Str::limit($entry['lokasi'], 40) }}</td>
                         <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['sopir'] ?: '—' }}</td>
-                        <td class="px-4 py-3 text-right">
+                        <td class="admin-table-col-actions">
                             @if ($entry['url'])
-                                <a href="{{ $entry['url'] }}" class="text-sm font-medium text-green-700 hover:text-green-800">Lihat</a>
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link :href="$entry['url']" />
+                                </x-admin.table-actions>
                             @else
                                 <span class="text-sm text-gray-400">—</span>
                             @endif

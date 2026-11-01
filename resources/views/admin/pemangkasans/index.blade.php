@@ -108,16 +108,25 @@
         @endif
     </form>
 
-    <x-admin.data-table>
+    <x-admin.data-table fixed>
+        <colgroup>
+            <col style="width: 12%">
+            <col style="width: 11%">
+            <col style="width: auto">
+            <col style="width: 10%">
+            <col style="width: 14%">
+            <col style="width: 10%">
+            <col style="width: 7rem">
+        </colgroup>
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jadwal</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jenis</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Asal</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pelaksana</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="px-4 py-3">Jadwal</th>
+                <th class="px-4 py-3">Jenis</th>
+                <th class="px-4 py-3">Lokasi</th>
+                <th class="px-4 py-3">Asal</th>
+                <th class="px-4 py-3">Pelaksana</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -150,7 +159,7 @@
                                     {{ $pemangkasan->jenis_layanan }}
                                 </span>
                             </td>
-                            <td class="max-w-xs px-4 py-3 font-medium">{{ $pemangkasan->lokasi_pohon }}</td>
+                            <td class="admin-table-cell-truncate px-4 py-3 font-medium" title="{{ $pemangkasan->lokasi_pohon }}">{{ $pemangkasan->lokasi_pohon }}</td>
                             <td class="max-w-[140px] truncate px-4 py-3 text-gray-600">{{ $pemangkasan->asal }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $pemangkasan->pelaksanaLabel() ?: '—' }}</td>
                             <td class="px-4 py-3">
@@ -172,30 +181,21 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.pemangkasans.show', array_merge(['pemangkasan' => $pemangkasan], $detailQuery)) }}"
-                                       class="rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-50">
-                                        Detail
-                                    </a>
+                            <td class="admin-table-col-actions">
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link :href="route('admin.pemangkasans.show', array_merge(['pemangkasan' => $pemangkasan], $detailQuery))" label="Detail" />
                                     <x-admin.can-write>
-                                        <a href="{{ route('admin.pemangkasans.edit', $pemangkasan) }}"
-                                           class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
-                                            Edit
-                                        </a>
+                                        <x-admin.table-action-link variant="edit" :href="route('admin.pemangkasans.edit', $pemangkasan)" />
                                     </x-admin.can-write>
                                     <x-admin.can-delete>
-                                        <form action="{{ route('admin.pemangkasans.destroy', $pemangkasan) }}" method="POST"
+                                        <form action="{{ route('admin.pemangkasans.destroy', $pemangkasan) }}" method="POST" class="inline"
                                               onsubmit="return confirm('Yakin ingin menghapus data operasional ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
-                                                    class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50">
-                                                Hapus
-                                            </button>
+                                            <x-admin.table-action-link tag="button" variant="delete" />
                                         </form>
                                     </x-admin.can-delete>
-                                </div>
+                                </x-admin.table-actions>
                             </td>
                         </tr>
                     @empty

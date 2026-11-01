@@ -31,7 +31,7 @@
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Wilayah</th>
                 <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Kelurahan</th>
                 <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Anggota</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -50,11 +50,10 @@
                         {{ $team->memiliki_wilayah_kerja ? number_format($team->kelurahans_count) : '—' }}
                     </td>
                     <td class="px-4 py-3 text-center text-sm text-gray-700">{{ number_format($team->petugas_count ?? 0) }}</td>
-                    <td class="px-4 py-3 text-right text-sm">
-                        <a href="{{ route('admin.tim-pelaksanas.edit', $team) }}"
-                           class="rounded border border-green-300 px-3 py-1 font-medium text-green-800 hover:bg-green-50">
-                            Ubah
-                        </a>
+                    <td class="admin-table-col-actions">
+                        <x-admin.table-actions>
+                            <x-admin.table-action-link variant="edit" :href="route('admin.tim-pelaksanas.edit', $team)" label="Ubah" />
+                        </x-admin.table-actions>
                     </td>
                 </tr>
             @empty

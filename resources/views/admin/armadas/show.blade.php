@@ -76,7 +76,7 @@
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Pekerjaan</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sopir</th>
-                        <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                        <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -97,12 +97,11 @@
                             <td class="px-4 py-3 text-sm text-gray-900">{{ $entry['pekerjaan'] }}</td>
                             <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['lokasi'] }}</td>
                             <td class="px-4 py-3 text-sm text-gray-700">{{ $entry['sopir'] ?: '—' }}</td>
-                            <td class="px-4 py-3 text-right">
+                            <td class="admin-table-col-actions">
                                 @if ($entry['url'])
-                                    <a href="{{ $entry['url'] }}"
-                                       class="text-sm font-medium text-green-700 hover:text-green-800">
-                                        Lihat
-                                    </a>
+                                    <x-admin.table-actions>
+                                        <x-admin.table-action-link :href="$entry['url']" />
+                                    </x-admin.table-actions>
                                 @else
                                     <span class="text-sm text-gray-400">—</span>
                                 @endif

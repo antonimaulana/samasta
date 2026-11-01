@@ -44,7 +44,7 @@
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Kategori</th>
             <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Urutan</th>
             <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Status</th>
-            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+            <th class="admin-table-col-actions">Aksi</th>
         </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
@@ -68,28 +68,19 @@
                         <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">Draft</span>
                     @endif
                 </td>
-                <td class="px-4 py-3 text-right">
-                    <div class="flex justify-end gap-2">
+                <td class="admin-table-col-actions">
+                    <x-admin.table-actions>
                         @if ($artikel->is_published)
-                            <a href="{{ route('ensiklopedia.show', $artikel) }}"
-                               class="rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-50">
-                                Lihat
-                            </a>
+                            <x-admin.table-action-link :href="route('ensiklopedia.show', $artikel)" target="_blank" />
                         @endif
-                        <a href="{{ route('admin.ensiklopedia-artikels.edit', $artikel) }}"
-                           class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
-                            Edit
-                        </a>
-                        <form action="{{ route('admin.ensiklopedia-artikels.destroy', $artikel) }}" method="POST"
+                        <x-admin.table-action-link variant="edit" :href="route('admin.ensiklopedia-artikels.edit', $artikel)" />
+                        <form action="{{ route('admin.ensiklopedia-artikels.destroy', $artikel) }}" method="POST" class="inline"
                               onsubmit="return confirm('Yakin ingin menghapus artikel ini?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit"
-                                    class="rounded border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50">
-                                Hapus
-                            </button>
+                            <x-admin.table-action-link tag="button" variant="delete" />
                         </form>
-                    </div>
+                    </x-admin.table-actions>
                 </td>
             </tr>
         @empty

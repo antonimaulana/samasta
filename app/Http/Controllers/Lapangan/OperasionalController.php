@@ -9,6 +9,8 @@ use App\Models\PemeliharaanTaman;
 use App\Support\ArmadaAssignment;
 use App\Support\LapanganGuestAccess;
 use App\Support\LapanganMenu;
+use App\Support\LapanganPemeliharaanHistory;
+use App\Support\LapanganPemeliharaanLokasiDuplicate;
 use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
 use App\Support\PemangkasanProgresPdf;
@@ -79,9 +81,12 @@ class OperasionalController extends Controller
 
     public function index(Request $request): View
     {
+        $history = app(LapanganPemeliharaanHistory::class);
+
         return view('lapangan.index', [
             'menuItems' => LapanganMenu::items($request->user()),
             'guestMode' => ! $request->user() && LapanganGuestAccess::isUnlocked($request),
+            'recentInputs' => $history->recentForAccount($request),
         ]);
     }
 
@@ -98,6 +103,8 @@ class OperasionalController extends Controller
         $tim = $menuItem['tim'];
         $recorder = app(PemeliharaanTamanRecorder::class);
 
+        $history = app(LapanganPemeliharaanHistory::class);
+
         return view('lapangan.pemeliharaan.create', [
             'menuItem' => $menuItem,
             'tim' => $tim,
@@ -106,6 +113,40 @@ class OperasionalController extends Controller
             'timWilayahKelurahan' => app(TimPelaksanaResolver::class)->kelurahanIdsByTeamName(),
             'armadaInventory' => ArmadaAssignment::inventory(),
             'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
+            'recentInputs' => $history->recentForAccount($request, $tim),
+        ]);
+    }
+
+    public function checkPemeliharaanLokasiDuplikat(Request $request, string $slug): JsonResponse
+    {
+        $this->ensureCanWriteOperasional($request, PemeliharaanTaman::class);
+
+        $menuItem = LapanganMenu::find($slug, $request->user());
+
+        if (! $menuItem || $menuItem['type'] !== 'pemeliharaan') {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
+            'lokasi_luar' => ['nullable', 'boolean'],
+            'taman_id' => ['nullable', 'integer', 'exists:tamans,id'],
+            'lokasi_pelaksanaan' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $lokasiLuar = $request->boolean('lokasi_luar');
+        $checker = app(LapanganPemeliharaanLokasiDuplicate::class);
+        $existing = $checker->findSameDay(
+            $validated['tanggal'],
+            $lokasiLuar,
+            $lokasiLuar ? null : (int) ($validated['taman_id'] ?? 0),
+            $lokasiLuar ? (string) ($validated['lokasi_pelaksanaan'] ?? '') : null,
+        );
+
+        return response()->json([
+            'duplicate' => $existing->isNotEmpty(),
+            'count' => $existing->count(),
+            'message' => $existing->isNotEmpty() ? $checker->confirmMessage($existing) : null,
         ]);
     }
 
@@ -126,6 +167,8 @@ class OperasionalController extends Controller
         } catch (\Illuminate\Validation\ValidationException $exception) {
             throw $exception->redirectTo(route('lapangan.pemeliharaan.create', $menuItem['slug']));
         }
+
+        app(LapanganPemeliharaanHistory::class)->rememberSubmission($request, $pemeliharaan);
 
         return redirect()
             ->route('lapangan.index')

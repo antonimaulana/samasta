@@ -20,43 +20,43 @@
 
     @include('admin.partials.table-search', ['placeholder' => 'Cari tanaman, peruntukan, lokasi...'])
 
-    <x-admin.data-table>
+    <x-admin.data-table fixed>
+        <colgroup>
+            <col style="width: 11%">
+            <col style="width: 22%">
+            <col style="width: 14%">
+            <col style="width: 9%">
+            <col style="width: auto">
+            <col style="width: 7rem">
+        </colgroup>
         <thead class="bg-gray-50">
             <tr>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Rincian bibit</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Total</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="px-4 py-3">Tanggal</th>
+                <th class="px-4 py-3">Peruntukan</th>
+                <th class="px-4 py-3">Rincian bibit</th>
+                <th class="px-4 py-3">Total</th>
+                <th class="px-4 py-3">Lokasi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
             @forelse ($batches as $batch)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $batch->tanggal_keluar->format('d M Y') }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">{{ $batch->peruntukan }}</td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
-                        {{ $batch->items_count }} jenis bibit
-                    </td>
-                    <td class="px-4 py-3 text-sm">
+                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{{ $batch->tanggal_keluar->format('d M Y') }}</td>
+                    <td class="admin-table-cell-wrap px-4 py-3 text-sm text-gray-600">{{ $batch->peruntukan }}</td>
+                    <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-600">{{ $batch->items_count }} jenis bibit</td>
+                    <td class="whitespace-nowrap px-4 py-3 text-sm">
                         <span class="font-semibold text-red-700">-{{ (int) ($batch->items_sum_jumlah ?? 0) }}</span>
                     </td>
-                    <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">{{ $batch->lokasiLabel() }}</td>
-                    <td class="px-4 py-3 text-right text-sm">
-                        <div class="flex justify-end gap-2">
-                            <a href="{{ route('admin.bibit-keluars.show', $batch) }}"
-                               class="rounded border border-gray-300 px-3 py-1 text-gray-700 hover:bg-gray-50">
-                                Lihat
-                            </a>
+                    <td class="admin-table-cell-truncate px-4 py-3 text-sm text-gray-600" title="{{ $batch->lokasiLabel() }}">{{ $batch->lokasiLabel() }}</td>
+                    <td class="admin-table-col-actions">
+                        <x-admin.table-actions>
+                            <x-admin.table-action-link :href="route('admin.bibit-keluars.show', $batch)" />
                             <x-admin.can-write>
-                            <a href="{{ route('admin.bibit-keluars.edit', $batch) }}"
-                               class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">
-                                Edit
-                            </a>
-                            <x-admin.bibit-keluar-delete-button :batch="$batch" />
+                                <x-admin.table-action-link variant="edit" :href="route('admin.bibit-keluars.edit', $batch)" />
+                                <x-admin.bibit-keluar-delete-button :batch="$batch" />
                             </x-admin.can-write>
-                        </div>
+                        </x-admin.table-actions>
                     </td>
                 </tr>
             @empty

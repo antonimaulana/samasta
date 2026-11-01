@@ -32,21 +32,21 @@
         <x-admin.taman-status-data-badge :status="$taman->status_data" size="table" />
     </td>
     @if ($showActions)
-        <td class="whitespace-nowrap px-3 py-3 text-right align-top">
-            <div class="inline-flex flex-wrap justify-end gap-1.5">
-                <x-admin.table-action-link :href="route('admin.tamans.show', $taman)">Lihat</x-admin.table-action-link>
+        <td class="admin-table-col-actions align-top">
+            <x-admin.table-actions>
+                <x-admin.table-action-link :href="route('admin.tamans.show', $taman)" />
                 <x-admin.can-write>
-                    <x-admin.table-action-link variant="edit" :href="route('admin.tamans.edit', $taman)">Edit</x-admin.table-action-link>
+                    <x-admin.table-action-link variant="edit" :href="route('admin.tamans.edit', $taman)" />
                 </x-admin.can-write>
                 <x-admin.can-delete>
                     <form action="{{ route('admin.tamans.destroy', $taman) }}" method="POST" class="inline"
                           onsubmit="return confirm('Yakin ingin menghapus taman ini?')">
                         @csrf
                         @method('DELETE')
-                        <x-admin.table-action-link tag="button" variant="delete">Hapus</x-admin.table-action-link>
+                        <x-admin.table-action-link tag="button" variant="delete" />
                     </form>
                 </x-admin.can-delete>
-            </div>
+            </x-admin.table-actions>
         </td>
     @endif
 </tr>

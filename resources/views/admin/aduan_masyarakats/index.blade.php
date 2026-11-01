@@ -56,7 +56,7 @@
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
                 <th class="hidden px-4 py-3 text-left text-sm font-medium text-gray-700 md:table-cell">Pelapor</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
+                <th class="admin-table-col-actions">Aksi</th>
             </tr>
         </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -92,9 +92,10 @@
                                     {{ $aduan->status }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <a href="{{ route('admin.aduan-masyarakats.show', $aduan) }}"
-                                   class="rounded border border-blue-300 px-3 py-1 text-blue-700 hover:bg-blue-50">Detail</a>
+                            <td class="admin-table-col-actions">
+                                <x-admin.table-actions>
+                                    <x-admin.table-action-link :href="route('admin.aduan-masyarakats.show', $aduan)" label="Detail" />
+                                </x-admin.table-actions>
                             </td>
                         </tr>
                     @empty

@@ -18,11 +18,16 @@ class PemeliharaanTamanRecorder
     {
         $validated = $this->validate($request, $user);
         $this->applyTamanLokasi($request, $validated);
+        $this->assertLapanganLokasiNotDuplicateUnlessConfirmed($request, $validated);
         $this->storeUploadedFotos($request, $validated, requireAll: true);
         $armadaRows = ArmadaAssignment::extractRows(
             $request,
             ArmadaAssignment::requiresArmadaForTim($validated['tim']),
         );
+
+        if ($user) {
+            $validated['created_by_user_id'] = $user->id;
+        }
 
         $pemeliharaan = PemeliharaanTaman::create($validated);
         ArmadaAssignment::sync($pemeliharaan, $armadaRows);
@@ -115,6 +120,34 @@ class PemeliharaanTamanRecorder
         PetugasAssignment::applyValidatedPersonilOperasionalWilayah($validated, $request);
 
         return $validated;
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function assertLapanganLokasiNotDuplicateUnlessConfirmed(Request $request, array $validated): void
+    {
+        if (! $request->routeIs('lapangan.pemeliharaan.store')) {
+            return;
+        }
+
+        if ($request->boolean('confirm_lokasi_duplikat')) {
+            return;
+        }
+
+        $lokasiLuar = $request->boolean('lokasi_luar');
+        $checker = app(LapanganPemeliharaanLokasiDuplicate::class);
+
+        if ($checker->hasSameDay(
+            $validated['tanggal'] ?? null,
+            $lokasiLuar,
+            $lokasiLuar ? null : (int) ($validated['taman_id'] ?? 0),
+            $lokasiLuar ? (string) ($validated['lokasi_pelaksanaan'] ?? $request->input('lokasi_pelaksanaan')) : null,
+        )) {
+            throw ValidationException::withMessages([
+                'lokasi_duplikat' => 'Lokasi ini sudah dicatat pada hari yang sama. Konfirmasi di form untuk melanjutkan.',
+            ]);
+        }
     }
 
     /**

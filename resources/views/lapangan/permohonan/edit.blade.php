@@ -89,7 +89,7 @@
                 'rostersByTeam' => $rostersByTeam ?? [],
             ])
 
-            <div class="mt-8 space-y-3 border-t border-gray-100 pt-6">
+            <div class="lapangan-form-actions mt-8 space-y-3 sm:border-t sm:border-gray-100 sm:pt-6">
                 <button type="submit"
                         class="lapangan-btn-primary w-full rounded-2xl px-6 py-4 text-base font-black text-white sm:w-auto">
                     ✅ Simpan Progres

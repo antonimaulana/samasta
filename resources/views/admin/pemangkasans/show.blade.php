@@ -117,19 +117,15 @@
                                         Hari ke-{{ $entry->hari_ke }} · {{ \App\Support\OperasionalPelaksanaanTime::display($entry->tanggal) }}
                                         · {{ $entry->jumlah_personil }} personil
                                     </p>
-                                    <div class="flex flex-wrap gap-2">
+                                    <x-admin.table-actions>
                                         <x-admin.can-write>
-                                            <a href="{{ route('admin.pemangkasans.progres.edit', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry]) }}"
-                                               class="rounded border border-blue-300 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50">
-                                                Edit
-                                            </a>
+                                            <x-admin.table-action-link size="sm" variant="edit"
+                                                :href="route('admin.pemangkasans.progres.edit', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry])" />
                                         </x-admin.can-write>
-                                        <a href="{{ route('admin.pemangkasans.export-pdf-progres', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry]) }}"
-                                           class="rounded border border-red-300 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50"
-                                           target="_blank" rel="noopener">
-                                            PDF
-                                        </a>
-                                    </div>
+                                        <x-admin.table-action-link size="sm" variant="pdf"
+                                            :href="route('admin.pemangkasans.export-pdf-progres', ['pemangkasan' => $pemangkasan, 'pemangkasanProgres' => $entry])"
+                                            target="_blank" rel="noopener" />
+                                    </x-admin.table-actions>
                                 </div>
                                 @if ($entry->catatan)
                                     <p class="mt-1 text-gray-600">{{ $entry->catatan }}</p>

@@ -6,6 +6,16 @@
 @section('content')
     <x-lapangan.back-link :href="route('lapangan.index')" label="Kembali ke menu utama" />
 
+    <x-lapangan.step-guide
+        title="Urutan pengisian"
+        :steps="[
+            ['step' => '1', 'label' => 'Waktu & lokasi', 'hint' => 'Tanggal pelaksanaan dan taman/alamat'],
+            ['step' => '2', 'label' => 'Petugas', 'hint' => 'Ketik nama, pilih dari daftar'],
+            ['step' => '3', 'label' => 'Foto & uraian', 'hint' => 'Dokumentasi sebelum, saat, sesudah'],
+            ['step' => '4', 'label' => 'Simpan', 'hint' => 'Periksa ringkasan lalu kirim'],
+        ]"
+    />
+
     <div class="lapangan-card p-5 sm:p-6">
         <div class="mb-5 flex items-center gap-3 rounded-2xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-4">
             <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-600 text-2xl text-white shadow-lg">{{ $menuItem['icon'] }}</span>
@@ -19,8 +29,15 @@
             <ul class="mt-2 list-inside list-disc space-y-1" data-error-list></ul>
         </div>
 
+        @include('lapangan.partials.recent-inputs', [
+            'records' => $recentInputs ?? collect(),
+            'guestMode' => ! auth()->check(),
+            'scopedTim' => $tim,
+        ])
+
         <form id="lapangan-pemeliharaan-form"
               data-foto-fields="{{ json_encode(array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS)) }}"
+              data-duplicate-check-url="{{ route('lapangan.pemeliharaan.check-lokasi-duplikat', $menuItem['slug']) }}"
               action="{{ route('lapangan.pemeliharaan.store', $menuItem['slug']) }}"
               method="POST"
               enctype="multipart/form-data">
@@ -36,7 +53,7 @@
                 'hideFormActions' => true,
             ])
 
-            <div class="mt-8 space-y-3 border-t border-gray-100 pt-6">
+            <div class="lapangan-form-actions mt-8 space-y-3 sm:border-t sm:border-gray-100 sm:pt-6">
                 <button type="submit"
                         class="lapangan-btn-primary w-full rounded-2xl px-6 py-4 text-base font-black text-white sm:w-auto">
                     ✅ Simpan Pekerjaan
@@ -52,5 +69,5 @@
 
 @push('scripts')
     <script src="{{ asset('js/lapangan-foto-compress.js') }}?v=1"></script>
-    <script src="{{ asset('js/lapangan-pemeliharaan-form.js') }}?v=4"></script>
+    <script src="{{ asset('js/lapangan-pemeliharaan-form.js') }}?v=5"></script>
 @endpush

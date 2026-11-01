@@ -70,9 +70,7 @@ class LapanganOperasionalTest extends TestCase
 
             ->assertSee('Wilayah 1')
 
-            ->assertSee('Permohonan')
-
-            ->assertSee('Mode tanpa login');
+            ->assertSee('Permohonan');
 
     }
 
@@ -284,6 +282,8 @@ class LapanganOperasionalTest extends TestCase
             'lokasi_pelaksanaan' => 'Jl. Input Lapangan Test',
 
             'uraian_pekerjaan' => 'Pembersihan rutin dari lapangan',
+
+            'created_by_user_id' => $operator->id,
 
         ]);
 
@@ -559,7 +559,7 @@ class LapanganOperasionalTest extends TestCase
 
         $this->get(route('lapangan.pemeliharaan.create', 'wilayah-1'))
             ->assertOk()
-            ->assertSee('Lokasi Pelaksanaan')
+            ->assertSee('Lokasi pelaksanaan')
             ->assertSee('Lokasi di luar wilayah pemeliharaan')
             ->assertSee($tamanWilayah1->nama_taman)
             ->assertSee('js/searchable-select.js', false)
@@ -603,6 +603,105 @@ class LapanganOperasionalTest extends TestCase
         }
 
         return array_merge($payload, $overrides);
+    }
+
+    public function test_operator_sees_recent_input_history_on_lapangan_index(): void
+    {
+        $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
+        $operator = User::factory()->operatorTeams([$team1->id])->create();
+
+        $payload = $this->pemeliharaanLapanganPayload('Jl. Riwayat Akun Test');
+
+        $this->actingAs($operator)
+            ->post(route('lapangan.pemeliharaan.store', 'wilayah-1'), $payload)
+            ->assertRedirect(route('lapangan.index'));
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.index'))
+            ->assertOk()
+            ->assertSee('Riwayat input Anda', false)
+            ->assertSee('Jl. Riwayat Akun Test', false);
+    }
+
+    public function test_guest_sees_recent_input_history_for_current_session(): void
+    {
+        $this->unlockLapangan();
+
+        $payload = $this->pemeliharaanLapanganPayload('Jl. Riwayat Sesi Guest');
+
+        $this->post(route('lapangan.pemeliharaan.store', 'wilayah-1'), $payload)
+            ->assertRedirect(route('lapangan.index'));
+
+        $this->get(route('lapangan.index'))
+            ->assertOk()
+            ->assertSee('Riwayat input Anda', false)
+            ->assertSee('Jl. Riwayat Sesi Guest', false);
+    }
+
+    public function test_check_lokasi_duplikat_detects_same_manual_lokasi_on_same_day(): void
+    {
+        $this->unlockLapangan();
+
+        PemeliharaanTaman::query()->create([
+            'tanggal' => now(),
+            'tim' => 'Tim Wilayah 1',
+            'lokasi_pelaksanaan' => 'Jl. Duplikat Test',
+            'jumlah_personil' => 2,
+        ]);
+
+        $this->post(route('lapangan.pemeliharaan.check-lokasi-duplikat', 'wilayah-1'), [
+            'tanggal' => now()->format('Y-m-d\TH:i'),
+            'lokasi_luar' => '1',
+            'lokasi_pelaksanaan' => 'Jl. Duplikat Test',
+        ])
+            ->assertOk()
+            ->assertJsonPath('duplicate', true);
+    }
+
+    public function test_same_lokasi_same_day_requires_confirm_on_store(): void
+    {
+        $this->unlockLapangan();
+
+        PemeliharaanTaman::query()->create([
+            'tanggal' => now(),
+            'tim' => 'Tim Wilayah 1',
+            'lokasi_pelaksanaan' => 'Jl. Konfirmasi Duplikat',
+            'jumlah_personil' => 2,
+        ]);
+
+        $payload = $this->pemeliharaanLapanganPayload('Jl. Konfirmasi Duplikat');
+
+        $this->post(route('lapangan.pemeliharaan.store', 'wilayah-1'), $payload)
+            ->assertSessionHasErrors('lokasi_duplikat');
+
+        $payload['confirm_lokasi_duplikat'] = '1';
+
+        $this->post(route('lapangan.pemeliharaan.store', 'wilayah-1'), $payload)
+            ->assertRedirect(route('lapangan.index'))
+            ->assertSessionHas('success');
+
+        $this->assertEquals(2, PemeliharaanTaman::query()
+            ->where('lokasi_pelaksanaan', 'Jl. Konfirmasi Duplikat')
+            ->count());
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function pemeliharaanLapanganPayload(string $lokasiManual): array
+    {
+        $payload = $this->withPetugasForTeam([
+            'tanggal' => now()->format('Y-m-d\TH:i'),
+            'lokasi_luar' => '1',
+            'lokasi_pelaksanaan' => $lokasiManual,
+            'uraian_pekerjaan' => 'Uji lapangan',
+        ], 'Tim Wilayah 1');
+
+        foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
+            $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
+        }
+
+        return $payload;
     }
 
     private function unlockLapangan(string $pin = '1234'): void

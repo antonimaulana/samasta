@@ -16,7 +16,7 @@
 @foreach ($fotoGroups as $groupLabel => $fields)
     <div @class([
         'mt-8 border-t border-gray-100 pt-6' => ! $isLapangan,
-        'mt-4' => $isLapangan,
+        'lapangan-form-section mt-4' => $isLapangan,
     ])>
         <h3 @class([
             'mb-4 text-sm font-bold text-green-800' => ! $isLapangan,
@@ -37,12 +37,13 @@
                 <div @class([
                     'rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/50 p-4' => $isLapangan,
                 ])>
-                    <label for="{{ $field }}" @class([
-                        'mb-1 block text-sm font-medium text-gray-700' => ! $isLapangan,
-                        'block text-sm font-black text-emerald-900' => $isLapangan,
-                    ])>
-                        {{ $label }} @if ($mustUpload)<span class="text-red-600">*</span>@endif
-                    </label>
+                    @if ($isLapangan)
+                        <x-lapangan.field-label :for="$field" :required="$mustUpload">{{ $label }}</x-lapangan.field-label>
+                    @else
+                        <label for="{{ $field }}" class="mb-1 block text-sm font-medium text-gray-700">
+                            {{ $label }} @if ($mustUpload)<span class="text-red-600">*</span>@endif
+                        </label>
+                    @endif
                     <input type="file" name="{{ $field }}" id="{{ $field }}" accept="image/*"
                            @if ($mustUpload) required @endif
                            @class([
