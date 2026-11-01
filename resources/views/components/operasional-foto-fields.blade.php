@@ -22,6 +22,12 @@
             'mb-4 text-sm font-bold text-green-800' => ! $isLapangan,
             'lapangan-section-title mb-3 text-sm font-black text-emerald-900' => $isLapangan,
         ])>{{ $groupLabel }}</h3>
+        @if ($isLapangan && $loop->first)
+            <p class="mb-3 text-xs leading-relaxed text-emerald-800/90">
+                Unggah 6 foto dokumentasi. Maks. <strong>4 MB per foto</strong> (total ±24 MB).
+                Jika gagal simpan, kompres di galeri HP atau gunakan resolusi “Sedang” saat ambil foto.
+            </p>
+        @endif
         <div class="grid gap-4 sm:grid-cols-2 md:gap-6">
             @foreach ($fields as $field)
                 @php

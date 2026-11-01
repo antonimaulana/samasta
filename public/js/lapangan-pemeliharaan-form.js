@@ -56,28 +56,35 @@
             errors.push('Isi jumlah personil.');
         }
 
+        const maxPerFileBytes = 4 * 1024 * 1024;
+        const maxTotalBytes = 24 * 1024 * 1024;
+        let totalBytes = 0;
+
         fotoFields.forEach(function (field) {
             const input = form.querySelector('#' + field);
             if (!input) {
                 return;
             }
 
+            const label = input.closest('div')?.querySelector('label')?.textContent?.trim() || field;
+
             if (!input.files || input.files.length === 0) {
-                const label = input.closest('div')?.querySelector('label')?.textContent?.trim() || field;
                 errors.push('Unggah foto: ' + label + '.');
+                return;
+            }
+
+            const file = input.files[0];
+            totalBytes += file.size;
+
+            if (file.size > maxPerFileBytes) {
+                const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+                errors.push(label + ' terlalu besar (' + sizeMb + ' MB). Maks. 4 MB per foto — kompres atau ambil ulang resolusi lebih kecil.');
             }
         });
 
-        let totalBytes = 0;
-        fotoFields.forEach(function (field) {
-            const file = form.querySelector('#' + field)?.files?.[0];
-            if (file) {
-                totalBytes += file.size;
-            }
-        });
-
-        if (totalBytes > 18 * 1024 * 1024) {
-            errors.push('Total ukuran foto terlalu besar (max ~18 MB). Kompres foto atau unggah resolusi lebih kecil.');
+        if (totalBytes > maxTotalBytes) {
+            const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
+            errors.push('Total semua foto ' + totalMb + ' MB (maks. 24 MB untuk 6 foto). Kompres beberapa foto lalu coba lagi.');
         }
 
         return errors;

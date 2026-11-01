@@ -51,5 +51,5 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/lapangan-pemeliharaan-form.js') }}?v=2"></script>
+    <script src="{{ asset('js/lapangan-pemeliharaan-form.js') }}?v=3"></script>
 @endpush
