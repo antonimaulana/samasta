@@ -102,7 +102,40 @@ class PetugasPelaksanaTest extends TestCase
             ->get(route('lapangan.pemeliharaan.create', 'armada'))
             ->assertOk()
             ->assertSee('data-roster-scope="team"', false)
+            ->assertSee('petugas-picker.js', false)
             ->assertSee('Hendra Sopir', false);
+    }
+
+    public function test_lapangan_pemeliharaan_nursery_form_uses_team_roster_with_picker(): void
+    {
+        $nursery = TimPelaksana::query()->where('nama', 'Tim Nursery')->firstOrFail();
+        $nursery->update(['memiliki_wilayah_kerja' => false]);
+        Petugas::query()->create([
+            'tim_pelaksana_id' => $nursery->id,
+            'nama' => 'Marsis Lapangan',
+            'aktif' => true,
+            'urutan' => 1,
+        ]);
+        $operator = User::factory()->operatorTeams([$nursery->id])->create();
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.pemeliharaan.create', 'nursery'))
+            ->assertOk()
+            ->assertSee('data-roster-scope="team"', false)
+            ->assertSee('Marsis Lapangan', false)
+            ->assertSee('petugas-picker.js', false);
+    }
+
+    public function test_admin_pemeliharaan_create_locks_tim_for_armada_only_operator(): void
+    {
+        $armada = TimPelaksana::query()->where('nama', 'Tim Armada')->firstOrFail();
+        $operator = User::factory()->operatorTeams([$armada->id])->create();
+
+        $this->actingAs($operator)
+            ->get(route('admin.pemeliharaan-tamans.create'))
+            ->assertOk()
+            ->assertSee('Tim Armada', false)
+            ->assertSee('data-roster-scope="team"', false);
     }
 
     public function test_pemeliharaan_store_accepts_petugas_from_nursery_team(): void

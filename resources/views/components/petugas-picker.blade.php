@@ -51,7 +51,8 @@
     $hasRoster = count($initialRoster) > 0;
     $isDynamic = filled($timSelectId);
     $isOperasionalWilayah = $rosterScope === 'operasional-wilayah';
-    $showPicker = $hasRoster || $isDynamic || $isOperasionalWilayah;
+    $hasFixedTeam = $teams->isNotEmpty() && blank($timSelectId);
+    $showPicker = $hasRoster || $isDynamic || $isOperasionalWilayah || $hasFixedTeam;
     $awaitingTeam = $isDynamic && $teams->isEmpty() && ! $isOperasionalWilayah;
     $pickerId = 'petugas-picker-'.uniqid();
     $inputClass = $isLapangan

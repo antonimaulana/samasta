@@ -96,15 +96,27 @@ class PetugasAssignment
             return true;
         }
 
+        if (self::isTimTanpaWilayahKerja($teamName)) {
+            return false;
+        }
+
         $memilikiWilayah = TimPelaksana::query()
             ->where('nama', $teamName)
             ->value('memiliki_wilayah_kerja');
 
-        if ($memilikiWilayah === null) {
+        return $memilikiWilayah === true || $memilikiWilayah === 1;
+    }
+
+    public static function isTimTanpaWilayahKerja(string $teamName): bool
+    {
+        if (in_array($teamName, [PemeliharaanTaman::TIM_ARMADA, 'Tim Nursery'], true)) {
             return true;
         }
 
-        return (bool) $memilikiWilayah;
+        return TimPelaksana::query()
+            ->where('nama', $teamName)
+            ->where('memiliki_wilayah_kerja', false)
+            ->exists();
     }
 
     public static function rosterExistsForTim(?string $teamName): bool

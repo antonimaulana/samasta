@@ -557,7 +557,18 @@ class PemeliharaanTamanController extends Controller
      */
     private function operatorTimViewData(?User $user): array
     {
-        $allowed = app(OperatorWilayahScope::class)->allowedTimNamesForForm($user);
+        $scope = app(OperatorWilayahScope::class);
+        $assigned = $scope->teamNames($user);
+
+        if ($user?->requiresWilayahScope() && count($assigned) === 1) {
+            return ['operatorTim' => $assigned[0], 'operatorTimOptions' => null];
+        }
+
+        if ($user?->requiresWilayahScope() && count($assigned) > 1 && $scope->hasUnrestrictedWilayahAccess($user)) {
+            return ['operatorTim' => null, 'operatorTimOptions' => $assigned];
+        }
+
+        $allowed = $scope->allowedTimNamesForForm($user);
 
         if (! is_array($allowed)) {
             return ['operatorTim' => null, 'operatorTimOptions' => null];

@@ -427,7 +427,7 @@
         togglePickerMode(roster.length > 0);
         syncInputs();
 
-        if (fixedTeams.length > 0 && roster.length === 0 && !awaitingTeam) {
+        if (!isOperasionalWilayah && fixedTeams.length > 0 && roster.length === 0 && !awaitingTeam) {
             loadRosterForTeams(fixedTeams);
         }
     }
