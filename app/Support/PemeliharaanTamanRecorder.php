@@ -31,7 +31,7 @@ class PemeliharaanTamanRecorder
 
         $pemeliharaan = PemeliharaanTaman::create($validated);
         ArmadaAssignment::sync($pemeliharaan, $armadaRows);
-        PetugasAssignment::syncFromRequestOperasionalWilayah($pemeliharaan, $request);
+        PetugasAssignment::syncFromRequestForTim($pemeliharaan, $request, $validated['tim']);
 
         return $pemeliharaan;
     }
@@ -109,7 +109,7 @@ class PemeliharaanTamanRecorder
         }
 
         $rules = array_merge($rules, PetugasAssignment::validationRules(
-            PetugasAssignment::rosterExistsForOperasionalWilayah(),
+            PetugasAssignment::rosterExistsForTim($tim),
         ));
 
         $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
@@ -117,7 +117,7 @@ class PemeliharaanTamanRecorder
         unset($validated['armada'], $validated['lokasi_luar'], $validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
-        PetugasAssignment::applyValidatedPersonilOperasionalWilayah($validated, $request);
+        PetugasAssignment::applyValidatedPersonilForTim($validated, $request, $tim);
 
         return $validated;
     }

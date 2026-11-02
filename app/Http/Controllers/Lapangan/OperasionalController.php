@@ -318,13 +318,30 @@ class OperasionalController extends Controller
 
     public function petugasRoster(Request $request, PetugasRosterBuilder $rosterBuilder): JsonResponse
     {
-        if ($request->query('scope') !== 'operasional-wilayah') {
-            abort(404);
+        if ($request->query('scope') === 'operasional-wilayah') {
+            return response()->json([
+                'petugas' => $rosterBuilder->forOperasionalWilayah(),
+            ]);
         }
 
-        return response()->json([
-            'petugas' => $rosterBuilder->forOperasionalWilayah(),
-        ]);
+        if ($request->filled('teams')) {
+            $teams = collect($request->input('teams'))
+                ->filter(fn ($team) => is_string($team) && $team !== '')
+                ->values()
+                ->all();
+
+            return response()->json([
+                'petugas' => $rosterBuilder->forTeamNames($teams),
+            ]);
+        }
+
+        if ($request->filled('tim')) {
+            return response()->json([
+                'petugas' => $rosterBuilder->forTeamName((string) $request->query('tim')),
+            ]);
+        }
+
+        abort(404);
     }
 
     private function ensureCanViewPermohonan(Request $request, Pemangkasan $pemangkasan): void

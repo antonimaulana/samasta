@@ -3,6 +3,9 @@
     $isLapanganForm = request()->routeIs('lapangan.*');
     $isLokasiLuar = filter_var(old('lokasi_luar', ($kinerja && ! $kinerja->taman_id) ? '1' : '0'), FILTER_VALIDATE_BOOLEAN);
     $selectedTim = old('tim', $kinerja?->tim ?? ($operatorTim ?? ''));
+    $petugasRosterScope = \App\Support\PetugasAssignment::usesOperasionalWilayahRoster($selectedTim)
+        ? 'operasional-wilayah'
+        : 'team';
     $isTimArmada = $selectedTim === \App\Models\PemeliharaanTaman::TIM_ARMADA;
     $labelClass = $isLapanganForm ? 'lapangan-field-label' : 'mb-1 block text-sm font-medium text-gray-700';
     $inputClass = $isLapanganForm
@@ -139,7 +142,7 @@
             :rosters-by-team="$rostersByTeam ?? []"
             :roster-url="request()->routeIs('lapangan.*') ? route('lapangan.tim-pelaksanas.roster') : route('admin.tim-pelaksanas.roster')"
             :tim-select-id="filled($operatorTim ?? null) ? null : 'tim'"
-            roster-scope="operasional-wilayah"
+            :roster-scope="$petugasRosterScope"
             :variant="request()->routeIs('lapangan.*') ? 'lapangan' : 'admin'"
         />
     </div>

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\PemangkasanProgres;
 use App\Models\PemeliharaanTaman;
+use App\Models\TimPelaksana;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -87,6 +88,57 @@ class PetugasAssignment
     public static function rosterExistsForOperasionalWilayah(): bool
     {
         return app(PetugasRosterBuilder::class)->forOperasionalWilayah() !== [];
+    }
+
+    public static function usesOperasionalWilayahRoster(?string $teamName): bool
+    {
+        if (blank($teamName)) {
+            return true;
+        }
+
+        $memilikiWilayah = TimPelaksana::query()
+            ->where('nama', $teamName)
+            ->value('memiliki_wilayah_kerja');
+
+        if ($memilikiWilayah === null) {
+            return true;
+        }
+
+        return (bool) $memilikiWilayah;
+    }
+
+    public static function rosterExistsForTim(?string $teamName): bool
+    {
+        if (self::usesOperasionalWilayahRoster($teamName)) {
+            return self::rosterExistsForOperasionalWilayah();
+        }
+
+        return self::rosterExistsForTeams(array_filter([$teamName]));
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    public static function applyValidatedPersonilForTim(array &$validated, Request $request, ?string $teamName): void
+    {
+        if (self::usesOperasionalWilayahRoster($teamName)) {
+            self::applyValidatedPersonilOperasionalWilayah($validated, $request);
+
+            return;
+        }
+
+        self::applyValidatedPersonil($validated, $request, array_filter([$teamName]));
+    }
+
+    public static function syncFromRequestForTim(Model $record, Request $request, ?string $teamName): void
+    {
+        if (self::usesOperasionalWilayahRoster($teamName)) {
+            self::syncFromRequestOperasionalWilayah($record, $request);
+
+            return;
+        }
+
+        self::syncFromRequest($record, $request, array_filter([$teamName]));
     }
 
     /**

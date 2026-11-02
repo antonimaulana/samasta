@@ -76,6 +76,66 @@ class PetugasPelaksanaTest extends TestCase
 
         $this->assertContains('Tim Wilayah 1', $teams);
         $this->assertContains('Tim Wilayah 2', $teams);
+        $this->assertNotContains('Tim Armada', $teams);
+    }
+
+    public function test_roster_endpoint_returns_armada_team_petugas(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $response = $this->actingAs($admin)
+            ->getJson(route('admin.tim-pelaksanas.roster', ['tim' => 'Tim Armada']));
+
+        $response->assertOk();
+        $names = collect($response->json('petugas'))->pluck('nama')->all();
+
+        $this->assertContains('Munasir', $names);
+        $this->assertContains('Hendra Sopir', $names);
+    }
+
+    public function test_lapangan_pemeliharaan_armada_form_includes_team_roster(): void
+    {
+        $armada = TimPelaksana::query()->where('nama', 'Tim Armada')->firstOrFail();
+        $operator = User::factory()->operatorTeams([$armada->id])->create();
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.pemeliharaan.create', 'armada'))
+            ->assertOk()
+            ->assertSee('data-roster-scope="team"', false)
+            ->assertSee('Hendra Sopir', false);
+    }
+
+    public function test_pemeliharaan_store_accepts_petugas_from_nursery_team(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $nurseryTeam = TimPelaksana::query()->where('nama', 'Tim Nursery')->firstOrFail();
+        $petugas = Petugas::query()->create([
+            'tim_pelaksana_id' => $nurseryTeam->id,
+            'nama' => 'Petugas Nursery Uji',
+            'aktif' => true,
+            'urutan' => 1,
+        ]);
+
+        $payload = [
+            'tanggal' => now()->format('Y-m-d\TH:i'),
+            'tim' => 'Tim Nursery',
+            'lokasi_luar' => '1',
+            'lokasi_pelaksanaan' => 'Pembibitan uji',
+            'petugas_ids' => [$petugas->id],
+            'uraian_pekerjaan' => 'Uji petugas tim nursery',
+        ];
+
+        foreach (PemeliharaanTaman::FOTO_FIELDS as $field => $label) {
+            $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
+        }
+
+        $this->actingAs($admin)
+            ->post(route('admin.pemeliharaan-tamans.store'), $payload)
+            ->assertRedirect();
+
+        $record = PemeliharaanTaman::query()->latest('id')->first();
+        $this->assertNotNull($record);
+        $this->assertTrue($record->petugas->contains('id', $petugas->id));
     }
 
     public function test_pemeliharaan_store_accepts_petugas_from_other_wilayah_team(): void

@@ -125,7 +125,7 @@ class PemeliharaanTamanController extends Controller
 
         $pemeliharaan = PemeliharaanTaman::create($validated);
         $this->syncArmadas($pemeliharaan, $armadaRows);
-        PetugasAssignment::syncFromRequestOperasionalWilayah($pemeliharaan, $request);
+        PetugasAssignment::syncFromRequestForTim($pemeliharaan, $request, $validated['tim']);
 
         return redirect()
             ->route('admin.pemeliharaan-tamans.index', [
@@ -158,7 +158,7 @@ class PemeliharaanTamanController extends Controller
 
         $pemeliharaanTaman->update($validated);
         $this->syncArmadas($pemeliharaanTaman, $armadaRows);
-        PetugasAssignment::syncFromRequestOperasionalWilayah($pemeliharaanTaman, $request);
+        PetugasAssignment::syncFromRequestForTim($pemeliharaanTaman, $request, $validated['tim']);
 
         return redirect()
             ->route('admin.pemeliharaan-tamans.index', [
@@ -367,8 +367,10 @@ class PemeliharaanTamanController extends Controller
             $attributes[$field] = strtolower($label);
         }
 
+        $tim = (string) $request->input('tim');
+
         $rules = array_merge($rules, PetugasAssignment::validationRules(
-            PetugasAssignment::rosterExistsForOperasionalWilayah(),
+            PetugasAssignment::rosterExistsForTim($tim),
         ));
 
         $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
@@ -376,7 +378,7 @@ class PemeliharaanTamanController extends Controller
         unset($validated['armada'], $validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
-        PetugasAssignment::applyValidatedPersonilOperasionalWilayah($validated, $request);
+        PetugasAssignment::applyValidatedPersonilForTim($validated, $request, $tim);
 
         return $validated;
     }
@@ -441,8 +443,10 @@ class PemeliharaanTamanController extends Controller
             $attributes[$field] = strtolower($label);
         }
 
+        $tim = (string) $request->input('tim');
+
         $rules = array_merge($rules, PetugasAssignment::validationRules(
-            PetugasAssignment::rosterExistsForOperasionalWilayah(),
+            PetugasAssignment::rosterExistsForTim($tim),
         ));
 
         $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
@@ -450,7 +454,7 @@ class PemeliharaanTamanController extends Controller
         unset($validated['armada'], $validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
-        PetugasAssignment::applyValidatedPersonilOperasionalWilayah($validated, $request);
+        PetugasAssignment::applyValidatedPersonilForTim($validated, $request, $tim);
 
         return $validated;
     }
