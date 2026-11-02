@@ -26,72 +26,77 @@
         </form>
     @endforeach
 
-    @if ($taman->images->count() > 1)
-        <div class="mx-auto mt-8 max-w-5xl">
-            <form action="{{ route('admin.tamans.images.reorder', $taman) }}" method="POST"
-                  class="rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm">
-                @csrf
-                <p class="text-sm font-semibold text-gray-900">Urutan tampilan galeri</p>
-                <p class="mt-1 text-sm text-gray-600">Seret baris untuk mengubah urutan. Foto di posisi #1 tampil pertama di beranda dan slider publik.</p>
-                <ol class="mt-4 space-y-2" id="taman-gallery-order-list">
-                    @foreach ($taman->images as $index => $image)
-                        <li class="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-2">
-                            <span class="cursor-grab select-none px-1 text-gray-400 active:cursor-grabbing" aria-hidden="true" title="Seret">⋮⋮</span>
-                            <input type="hidden" name="order[]" value="{{ $image->id }}">
-                            <img src="{{ $image->url }}" alt="" class="h-14 w-24 shrink-0 rounded-lg object-cover">
-                            <span class="min-w-0 flex-1 text-sm font-medium text-gray-800">
-                                Posisi #{{ $index + 1 }}
-                                @if ($index === 0)
-                                    <span class="ml-1 text-xs font-semibold text-emerald-700">(sampul)</span>
-                                @endif
-                            </span>
-                        </li>
-                    @endforeach
-                </ol>
-                <button type="submit"
-                        class="mt-4 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
-                    Simpan urutan foto
-                </button>
-            </form>
-        </div>
-    @endif
-
     @include('admin.tamans.partials.location-map-assets')
-
-    @if ($taman->images->count() > 1)
-        @push('scripts')
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const list = document.getElementById('taman-gallery-order-list');
-                    if (! list) return;
-
-                    let dragEl = null;
-                    list.querySelectorAll('li').forEach(function (item) {
-                        item.draggable = true;
-                        item.addEventListener('dragstart', function () {
-                            dragEl = item;
-                            item.classList.add('opacity-50');
-                        });
-                        item.addEventListener('dragend', function () {
-                            item.classList.remove('opacity-50');
-                            dragEl = null;
-                            list.querySelectorAll('li').forEach(function (row, index) {
-                                const label = row.querySelector('.flex-1');
-                                if (! label) return;
-                                const isCover = index === 0;
-                                label.innerHTML = 'Posisi #' + (index + 1) + (isCover ? ' <span class="ml-1 text-xs font-semibold text-emerald-700">(sampul)</span>' : '');
-                            });
-                        });
-                        item.addEventListener('dragover', function (event) {
-                            event.preventDefault();
-                            if (! dragEl || dragEl === item) return;
-                            const rect = item.getBoundingClientRect();
-                            const after = (event.clientY - rect.top) / rect.height > 0.5;
-                            list.insertBefore(dragEl, after ? item.nextSibling : item);
-                        });
-                    });
-                });
-            </script>
-        @endpush
-    @endif
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            const list = document.getElementById('taman-gallery-order-list');
+            if (! list || ! list.dataset.reorderUrl) return;
+
+            let dragEl = null;
+
+            function refreshGalleryOrderUi() {
+                list.querySelectorAll('.taman-gallery-order-item').forEach(function (item, index) {
+                    const badge = item.querySelector('.taman-gallery-order-badge');
+                    const caption = item.querySelector('.taman-gallery-order-caption');
+                    if (badge) badge.textContent = '#' + (index + 1);
+                    if (caption) caption.textContent = index === 0 ? 'Sampul slider' : 'Galeri';
+                });
+            }
+
+            list.querySelectorAll('.taman-gallery-order-item').forEach(function (item) {
+                item.draggable = true;
+                item.addEventListener('dragstart', function (event) {
+                    dragEl = item;
+                    item.classList.add('opacity-60', 'ring-2', 'ring-emerald-400');
+                    if (event.dataTransfer) {
+                        event.dataTransfer.effectAllowed = 'move';
+                    }
+                });
+                item.addEventListener('dragend', function () {
+                    item.classList.remove('opacity-60', 'ring-2', 'ring-emerald-400');
+                    dragEl = null;
+                    refreshGalleryOrderUi();
+                });
+                item.addEventListener('dragover', function (event) {
+                    event.preventDefault();
+                    if (! dragEl || dragEl === item) return;
+                    const rect = item.getBoundingClientRect();
+                    const midX = rect.left + rect.width / 2;
+                    const midY = rect.top + rect.height / 2;
+                    const preferHorizontal = Math.abs(event.clientX - midX) > Math.abs(event.clientY - midY);
+                    const after = preferHorizontal ? event.clientX > midX : event.clientY > midY;
+                    list.insertBefore(dragEl, after ? item.nextSibling : item);
+                });
+            });
+
+            const saveBtn = document.getElementById('taman-gallery-save-order');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function () {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = list.dataset.reorderUrl;
+
+                    const token = document.createElement('input');
+                    token.type = 'hidden';
+                    token.name = '_token';
+                    token.value = list.dataset.csrf;
+                    form.appendChild(token);
+
+                    list.querySelectorAll('.taman-gallery-order-item').forEach(function (item) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'order[]';
+                        input.value = item.dataset.imageId;
+                        form.appendChild(input);
+                    });
+
+                    document.body.appendChild(form);
+                    form.submit();
+                });
+            }
+        })();
+    </script>
+@endpush

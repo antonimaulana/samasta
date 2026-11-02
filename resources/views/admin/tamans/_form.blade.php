@@ -144,20 +144,49 @@
         </div>
 
         @if ($taman?->images?->isNotEmpty())
+            @php
+                $galleryCanReorder = $taman->images->count() > 1;
+            @endphp
             <div class="mt-5 border-t border-gray-100 pt-5">
-                <x-admin.form.label>Foto Galeri Saat Ini</x-admin.form.label>
-                <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <x-admin.form.label class="mb-0">Foto Galeri Saat Ini</x-admin.form.label>
+                    @if ($galleryCanReorder)
+                        <button type="button"
+                                id="taman-gallery-save-order"
+                                class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">
+                            Simpan urutan foto
+                        </button>
+                    @endif
+                </div>
+                @if ($galleryCanReorder)
+                    <p class="mt-1 text-sm text-gray-500">Seret kartu foto untuk mengubah urutan. Posisi #1 = sampul slider publik.</p>
+                @endif
+                <div id="taman-gallery-order-list"
+                     class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+                     @if ($galleryCanReorder)
+                         data-reorder-url="{{ route('admin.tamans.images.reorder', $taman) }}"
+                         data-csrf="{{ csrf_token() }}"
+                     @endif>
                     @foreach ($taman->images as $index => $image)
-                        <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
+                        <div @class([
+                            'overflow-hidden rounded-lg border bg-white transition-shadow',
+                            'border-gray-200' => ! $galleryCanReorder,
+                            'taman-gallery-order-item cursor-grab border-gray-200 active:cursor-grabbing hover:border-emerald-300 hover:shadow-md' => $galleryCanReorder,
+                        ])
+                             @if ($galleryCanReorder) data-image-id="{{ $image->id }}" @endif>
                             <div class="relative overflow-hidden">
-                                <span class="absolute left-2 top-2 z-10 rounded-md bg-black/60 px-2 py-0.5 text-xs font-bold text-white">
+                                <span class="taman-gallery-order-badge absolute left-2 top-2 z-10 rounded-md bg-black/60 px-2 py-0.5 text-xs font-bold text-white">
                                     #{{ $index + 1 }}
                                 </span>
-                                <img src="{{ $image->url }}" alt="Foto {{ $taman->nama_taman }}"
-                                     class="aspect-[16/9] w-full object-cover object-center">
+                                @if ($galleryCanReorder)
+                                    <span class="pointer-events-none absolute right-2 top-2 z-10 rounded-md bg-white/90 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 shadow-sm"
+                                          aria-hidden="true">⋮⋮</span>
+                                @endif
+                                <img src="{{ $image->url }}" alt="Foto {{ $taman->nama_taman }}" draggable="false"
+                                     class="pointer-events-none aspect-[16/9] w-full select-none object-cover object-center">
                             </div>
                             <div class="flex items-center justify-between gap-2 border-t border-gray-100 px-2 py-1.5">
-                                <span class="truncate text-xs text-gray-500">{{ $index === 0 ? 'Sampul slider' : 'Galeri' }}</span>
+                                <span class="taman-gallery-order-caption truncate text-xs text-gray-500">{{ $index === 0 ? 'Sampul slider' : 'Galeri' }}</span>
                                 <button type="button"
                                         onclick="if(confirm('Hapus foto ini?')) document.getElementById('delete-image-{{ $image->id }}').submit()"
                                         class="shrink-0 rounded-md bg-red-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-red-700">
