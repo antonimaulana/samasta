@@ -9,10 +9,6 @@
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div class="max-w-2xl">
                     <h2 class="text-lg font-semibold text-green-900">Ringkasan evaluasi</h2>
-                    <p class="mt-1 text-sm text-green-800/90">
-                        Satu layar untuk memantau pemeliharaan, permohonan, armada, data RTH, dan masukan warga.
-                        Pilih jangka waktu lalu telusuri aspek di bawah.
-                    </p>
                 </div>
                 @if ($indeksKinerja !== null)
                     <div class="rounded-2xl border border-green-200 bg-white px-5 py-3 text-center shadow-sm">
