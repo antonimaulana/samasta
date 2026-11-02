@@ -6,11 +6,11 @@
         <h3 class="text-base font-bold leading-snug text-violet-800 sm:text-lg">Visi dan Misi Kota Batam</h3>
     </div>
     <div class="mt-4 flex-1 space-y-4 text-sm leading-relaxed text-gray-600 lg:space-y-3">
-        <p>
+        <p class="text-justify">
             <span class="font-bold text-gray-800">Visi:</span>
             {{ $visiMisi['visi'] }}
         </p>
-        <p>
+        <p class="text-justify">
             <span class="font-bold text-gray-800">Misi:</span>
             {{ $visiMisi['misi'] }}
         </p>

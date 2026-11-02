@@ -27,7 +27,7 @@ class PenjagaHijauKota
             [
                 'image' => 'images/penjaga-hijau/penjaga-semak.jpg',
                 'title' => 'Pemangkasan Vegetasi',
-                'caption' => 'Tim lapangan membentuk vegetasi dengan alat pertamanan di ruang terbuka hijau.',
+                'caption' => 'Tim pertamanan membentuk vegetasi dengan alat pertamanan di ruang terbuka hijau.',
                 'tag' => 'Operasional',
                 'focus' => 'center 24%',
             ],

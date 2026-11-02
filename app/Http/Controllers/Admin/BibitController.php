@@ -36,6 +36,7 @@ class BibitController extends Controller
             ->paginate(10)->withQueryString();
 
         $recentMasuks = BibitMasukBatch::query()
+            ->with(['items:id,bibit_masuk_batch_id,jumlah,sisa_stok'])
             ->withCount('items')
             ->withSum('items', 'jumlah')
             ->latest('tanggal_masuk')

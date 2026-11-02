@@ -2,7 +2,7 @@
     <x-home-section-heading
         tag="Disperkimtan"
         title="Penjaga Hijau Kota"
-        lead="Tim lapangan yang setiap hari merawat, menanam, dan menjaga ruang hijau agar Kota Batam semakin indah dan nyaman bagi seluruh warga."
+        lead="Tim pertamanan yang setiap hari merawat, menanam, dan menjaga ruang hijau agar Kota Batam semakin indah dan nyaman bagi seluruh warga."
         heading-id="penjaga-hijau-title"
     />
 

@@ -148,9 +148,9 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Bibit</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sumber</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Siap tanam</th>
                         <th class="admin-table-col-actions">Aksi</th>
                     </tr>
                 </thead>
@@ -158,12 +158,22 @@
                         @forelse ($recentMasuks as $masukBatch)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-2 text-gray-600">{{ \App\Support\OperasionalPelaksanaanTime::display($masukBatch->tanggal_masuk) }}</td>
-                                <td class="px-4 py-2 text-gray-700">{{ $masukBatch->items_count }} jenis bibit</td>
+                                <td class="px-4 py-2 text-gray-700">
+                                    {{ $masukBatch->sumber ?: '—' }}
+                                    <span class="block text-xs text-gray-500">{{ $masukBatch->items_count }} jenis bibit</span>
+                                </td>
                                 <td class="px-4 py-2 font-semibold text-teal-700">+{{ number_format((int) ($masukBatch->items_sum_jumlah ?? 0)) }}</td>
-                                <td class="px-4 py-2 text-gray-500">—</td>
+                                <td class="px-4 py-2 text-gray-700">
+                                    @if ($masukBatch->status_siap_tanam)
+                                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">Ya</span>
+                                    @else
+                                        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">Tidak</span>
+                                    @endif
+                                </td>
                                 <td class="admin-table-col-actions">
                                     <x-admin.table-actions>
                                         <x-admin.table-action-link size="sm" :href="route('admin.bibit-masuks.show', $masukBatch)" />
+                                        <x-admin.bibit-masuk-delete-button :batch="$masukBatch" size="xs" />
                                     </x-admin.table-actions>
                                 </td>
                             </tr>
