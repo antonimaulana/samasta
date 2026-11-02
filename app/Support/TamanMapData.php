@@ -32,7 +32,7 @@ class TamanMapData
                     ])
                     ->whereNotNull('latitude')
                     ->whereNotNull('longitude')
-                    ->with(['images' => fn ($q) => $q->latest()->limit(1)])
+                    ->with(['images' => fn ($q) => $q->orderBy('urutan')->orderBy('id')->limit(1)])
                     ->get()
                     ->map(function (Taman $taman) {
                         $coords = $taman->normalizedMapCoordinates();

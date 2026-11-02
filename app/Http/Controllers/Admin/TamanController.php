@@ -305,6 +305,35 @@ class TamanController extends Controller
             ->with('success', 'Foto galeri berhasil dihapus.');
     }
 
+    public function reorderImages(Request $request, Taman $taman): RedirectResponse
+    {
+        $this->authorize('update', $taman);
+
+        $validated = $request->validate([
+            'order' => ['required', 'array', 'min:1'],
+            'order.*' => ['integer'],
+        ]);
+
+        $expectedIds = $taman->images()->orderBy('urutan')->orderBy('id')->pluck('id')->all();
+        $submitted = array_map('intval', $validated['order']);
+
+        if (count($submitted) !== count($expectedIds) || array_diff($expectedIds, $submitted) !== []) {
+            throw ValidationException::withMessages([
+                'order' => 'Daftar urutan foto tidak valid. Muat ulang halaman lalu coba lagi.',
+            ]);
+        }
+
+        DB::transaction(function () use ($submitted) {
+            foreach ($submitted as $index => $id) {
+                TamanImage::query()->whereKey($id)->update(['urutan' => ($index + 1) * 10]);
+            }
+        });
+
+        return redirect()
+            ->route('admin.tamans.edit', $taman)
+            ->with('success', 'Urutan foto galeri disimpan.');
+    }
+
     private function normalizeProfilePhoto(UploadedFile $file, string $field): string
     {
         try {
@@ -350,9 +379,12 @@ class TamanController extends Controller
                 $storedPaths[] = $normalizer->normalizeAndStore($file);
             }
 
-            foreach ($storedPaths as $path) {
+            $baseUrutan = (int) $taman->images()->max('urutan');
+
+            foreach ($storedPaths as $offset => $path) {
                 $taman->images()->create([
                     'path_foto' => $path,
+                    'urutan' => $baseUrutan + ($offset + 1) * 10,
                 ]);
             }
         } catch (\Throwable $e) {

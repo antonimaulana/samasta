@@ -6,6 +6,7 @@ use App\Models\Taman;
 use App\Models\TamanImage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class TamanGalleryPhotoDisplayTest extends TestCase
@@ -14,6 +15,9 @@ class TamanGalleryPhotoDisplayTest extends TestCase
 
     public function test_taman_list_shows_gallery_photo_without_legacy_foto_column(): void
     {
+        Storage::fake('public');
+        Storage::disk('public')->put('tamans/sample.jpg', 'x');
+
         $taman = Taman::create([
             'nama_taman' => 'Taman Galeri Test',
             'kategori' => 'Taman Kota',
@@ -34,6 +38,10 @@ class TamanGalleryPhotoDisplayTest extends TestCase
 
     public function test_public_and_admin_show_pages_use_shared_gallery_layout(): void
     {
+        Storage::fake('public');
+        Storage::disk('public')->put('tamans/photo-a.jpg', 'a');
+        Storage::disk('public')->put('tamans/photo-b.jpg', 'b');
+
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $taman = Taman::create([
             'nama_taman' => 'Taman Galeri Konsisten',
@@ -95,5 +103,46 @@ class TamanGalleryPhotoDisplayTest extends TestCase
             ->get(route('admin.tamans.show', $taman))
             ->assertOk()
             ->assertSee('Tidak ada foto', false);
+    }
+
+    public function test_admin_can_reorder_gallery_images_and_cover_follows_first_position(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('tamans/first.jpg', 'a');
+        Storage::disk('public')->put('tamans/second.jpg', 'b');
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Urutan Foto',
+            'kategori' => 'Taman Kota',
+            'luasan' => 1000,
+            'alamat' => 'Alamat urutan',
+            'deskripsi' => 'Deskripsi urutan galeri.',
+        ]);
+
+        $first = TamanImage::create([
+            'taman_id' => $taman->id,
+            'path_foto' => 'tamans/first.jpg',
+            'urutan' => 10,
+        ]);
+        $second = TamanImage::create([
+            'taman_id' => $taman->id,
+            'path_foto' => 'tamans/second.jpg',
+            'urutan' => 20,
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.tamans.images.reorder', $taman), [
+                'order' => [$second->id, $first->id],
+            ])
+            ->assertRedirect(route('admin.tamans.edit', $taman))
+            ->assertSessionHas('success');
+
+        $this->assertSame(10, $second->fresh()->urutan);
+        $this->assertSame(20, $first->fresh()->urutan);
+
+        $taman->load('images');
+        $this->assertSame('tamans/second.jpg', $taman->images->first()->path_foto);
+        $this->assertStringContainsString('storage/tamans/second.jpg', (string) $taman->foto_url);
     }
 }

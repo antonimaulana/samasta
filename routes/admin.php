@@ -74,6 +74,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('tamans.ar-qr');
     Route::delete('tamans/{taman}/images/{image}', [AdminTamanController::class, 'destroyImage'])
         ->name('tamans.images.destroy');
+    Route::post('tamans/{taman}/images/reorder', [AdminTamanController::class, 'reorderImages'])
+        ->name('tamans.images.reorder');
     Route::resource('tamans', AdminTamanController::class);
     Route::get('bibits/import/template', [BibitController::class, 'importTemplate'])
         ->name('bibits.import.template');

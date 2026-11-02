@@ -499,7 +499,7 @@ class Taman extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(TamanImage::class)->latest();
+        return $this->hasMany(TamanImage::class)->orderBy('urutan')->orderBy('id');
     }
 
     public function kelurahan(): BelongsTo
@@ -542,7 +542,7 @@ class Taman extends Model
         }
 
         if ($this->images()->exists()) {
-            $first = $this->images()->first();
+            $first = $this->images()->orderBy('urutan')->orderBy('id')->first();
             if ($first && filled($first->url)) {
                 return $first->url;
             }

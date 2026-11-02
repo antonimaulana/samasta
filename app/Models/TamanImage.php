@@ -11,7 +11,15 @@ class TamanImage extends Model
     protected $fillable = [
         'taman_id',
         'path_foto',
+        'urutan',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'urutan' => 'integer',
+        ];
+    }
 
     public function taman(): BelongsTo
     {

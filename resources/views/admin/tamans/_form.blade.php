@@ -122,7 +122,7 @@
 
     <x-admin.rth-section
         title="Galeri Foto Taman"
-        description="Unggah satu atau beberapa foto profil taman. Jika lebih dari satu foto, tampilan publik memakai slider.">
+        description="Unggah satu atau beberapa foto profil taman. Urutan foto menentukan tampilan slider publik (foto pertama = sampul).">
         <div>
             <x-admin.form.label for="fotos">Upload Foto Baru</x-admin.form.label>
             <input type="file" name="fotos[]" id="fotos" accept="image/jpeg,image/png,image/webp" multiple
@@ -147,14 +147,17 @@
             <div class="mt-5 border-t border-gray-100 pt-5">
                 <x-admin.form.label>Foto Galeri Saat Ini</x-admin.form.label>
                 <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                    @foreach ($taman->images as $image)
+                    @foreach ($taman->images as $index => $image)
                         <div class="overflow-hidden rounded-lg border border-gray-200 bg-white">
-                            <div class="overflow-hidden">
+                            <div class="relative overflow-hidden">
+                                <span class="absolute left-2 top-2 z-10 rounded-md bg-black/60 px-2 py-0.5 text-xs font-bold text-white">
+                                    #{{ $index + 1 }}
+                                </span>
                                 <img src="{{ $image->url }}" alt="Foto {{ $taman->nama_taman }}"
                                      class="aspect-[16/9] w-full object-cover object-center">
                             </div>
                             <div class="flex items-center justify-between gap-2 border-t border-gray-100 px-2 py-1.5">
-                                <span class="truncate text-xs text-gray-500">Foto galeri</span>
+                                <span class="truncate text-xs text-gray-500">{{ $index === 0 ? 'Sampul slider' : 'Galeri' }}</span>
                                 <button type="button"
                                         onclick="if(confirm('Hapus foto ini?')) document.getElementById('delete-image-{{ $image->id }}').submit()"
                                         class="shrink-0 rounded-md bg-red-600 px-2 py-0.5 text-xs font-medium text-white hover:bg-red-700">
