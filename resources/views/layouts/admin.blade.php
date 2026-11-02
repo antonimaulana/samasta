@@ -40,24 +40,6 @@
                                     <span class="hidden truncate text-[10px] font-semibold uppercase tracking-wide text-gray-500 sm:block">{{ config('app.full_name') }}</span>
                                 </div>
                             </a>
-                            <nav class="flex flex-wrap items-center gap-1" aria-label="Navigasi ringkasan pimpinan">
-                                <a href="{{ route('admin.dashboard') }}"
-                                   @class([
-                                       'rounded-lg px-3 py-1.5 text-sm font-semibold transition',
-                                       'bg-green-100 text-green-800' => request()->routeIs('admin.dashboard'),
-                                       'text-gray-600 hover:bg-gray-100 hover:text-gray-900' => ! request()->routeIs('admin.dashboard'),
-                                   ])>
-                                    Ringkasan
-                                </a>
-                                <a href="{{ route('admin.evaluasi.index') }}"
-                                   @class([
-                                       'rounded-lg px-3 py-1.5 text-sm font-semibold transition',
-                                       'bg-amber-100 text-amber-900' => request()->routeIs('admin.evaluasi.*'),
-                                       'text-gray-600 hover:bg-gray-100 hover:text-gray-900' => ! request()->routeIs('admin.evaluasi.*'),
-                                   ])>
-                                    Evaluasi Kinerja
-                                </a>
-                            </nav>
                         @else
                             <button type="button"
                                     id="admin-mobile-menu-toggle"
@@ -131,6 +113,13 @@
                             @endforeach
                         </ul>
                     </div>
+                @endif
+
+                @if ($isPimpinanLayout && ! request()->routeIs('admin.dashboard'))
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="mb-5 inline-flex items-center gap-1.5 text-sm font-semibold text-green-700 hover:text-green-900 hover:underline">
+                        ← Dashboard
+                    </a>
                 @endif
 
                 @yield('content')

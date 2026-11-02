@@ -49,15 +49,20 @@ class DashboardTest extends TestCase
             ->assertSee('Data Taman')
             ->assertSee('Operasional Pertamanan')
             ->assertSee('Unduh Ringkasan')
-            ->assertSee('Evaluasi Kinerja')
+            ->assertSee('Evaluasi Operasional')
             ->assertSee(config('app.name'))
-            ->assertSee('Ringkasan')
             ->assertDontSee('id="admin-sidebar-toggle"', false)
             ->assertDontSee('id="admin-desktop-sidebar"', false)
             ->assertDontSee('id="admin-mobile-menu-toggle"', false);
 
         $this->actingAs($viewer)
             ->get(route('admin.evaluasi.index'))
-            ->assertOk();
+            ->assertOk()
+            ->assertSee('← Dashboard', false);
+
+        $this->actingAs($viewer)
+            ->get(route('admin.tim-pelaksanas.index'))
+            ->assertOk()
+            ->assertSee('Daftar tim kerja Bidang Pertamanan dan Pemakaman.');
     }
 }

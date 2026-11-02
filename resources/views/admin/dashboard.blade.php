@@ -84,7 +84,7 @@
                 @if ($isViewer ?? auth()->user()?->isViewer())
                     <a href="{{ route('admin.evaluasi.index') }}" class="dash-btn-hero dash-btn-hero--evaluasi">
                         <x-admin.nav-icon name="chart" class="h-4 w-4" />
-                        Evaluasi Kinerja
+                        Evaluasi Operasional
                     </a>
                 @endif
             </div>

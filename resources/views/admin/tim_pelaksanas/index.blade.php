@@ -4,7 +4,8 @@
 @section('header', 'Tim Kerja')
 
 @section('content')
-    <div class="mb-6 flex flex-wrap items-center justify-end gap-3">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm text-gray-600">Daftar tim kerja Bidang Pertamanan dan Pemakaman.</p>
         <x-admin.can-manage-users>
             <a href="{{ route('admin.tim-pelaksanas.create') }}"
                class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700">
