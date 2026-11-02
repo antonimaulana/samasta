@@ -1,18 +1,10 @@
-@props([
-    'action',
-    'mode',
-    'bulan',
-    'tahun',
-    'dari',
-    'sampai',
-    'daftarBulan',
-    'daftarTahun',
-    'title' => 'Filter Periode',
-    'description' => 'Pilih rentang waktu evaluasi',
-    'accent' => 'green',
-])
-
 @php
+    $title = $title ?? 'Filter Periode';
+    $description = $description ?? 'Pilih rentang waktu evaluasi';
+    $accent = $accent ?? 'green';
+    $exportRoute = $exportRoute ?? null;
+    $filters = $filters ?? null;
+
     $accentClasses = match ($accent) {
         'violet' => ['border' => 'border-violet-100', 'header' => 'from-violet-50 to-purple-50', 'title' => 'text-violet-800', 'desc' => 'text-violet-700/80', 'radio' => 'text-violet-600 focus:ring-violet-500', 'btn' => 'bg-violet-600 hover:bg-violet-700', 'export' => 'border-violet-300 text-violet-800 hover:bg-violet-50'],
         'blue' => ['border' => 'border-blue-100', 'header' => 'from-blue-50 to-indigo-50', 'title' => 'text-blue-800', 'desc' => 'text-blue-700/80', 'radio' => 'text-blue-600 focus:ring-blue-500', 'btn' => 'bg-blue-600 hover:bg-blue-700', 'export' => 'border-blue-300 text-blue-800 hover:bg-blue-50'],
@@ -30,7 +22,9 @@
     </div>
 
     <form action="{{ $action }}" method="GET" class="space-y-4 p-6">
-        {{ $filters ?? '' }}
+        @if ($filters)
+            {!! $filters !!}
+        @endif
 
         <div class="flex flex-wrap gap-4">
             <label class="flex cursor-pointer items-center gap-2">
@@ -83,7 +77,7 @@
             <button type="submit" class="rounded-lg px-5 py-2 text-sm font-medium text-white {{ $accentClasses['btn'] }}">
                 Tampilkan Evaluasi
             </button>
-            @if ($exportRoute ?? false)
+            @if ($exportRoute)
                 <a href="{{ $exportRoute }}"
                    class="inline-flex items-center gap-2 rounded-lg border bg-white px-5 py-2 text-sm font-semibold {{ $accentClasses['export'] }}">
                     📄 Export PDF

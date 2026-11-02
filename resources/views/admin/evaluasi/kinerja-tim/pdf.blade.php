@@ -38,6 +38,34 @@
         </tr>
     </table>
 
+    <h2>Rekapitulasi Petugas Paling Aktif</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Petugas</th>
+                <th>Tim</th>
+                <th class="num">Pemeliharaan</th>
+                <th class="num">Permohonan</th>
+                <th class="num">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($rekapPetugasAktif as $index => $row)
+                <tr>
+                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $row['nama'] }}@if (filled($row['jabatan'])) ({{ $row['jabatan'] }}) @endif</td>
+                    <td>{{ $row['tim'] }}</td>
+                    <td class="num">{{ number_format($row['jumlah_pemeliharaan']) }}</td>
+                    <td class="num">{{ number_format($row['jumlah_permohonan']) }}</td>
+                    <td class="num">{{ number_format($row['total_kegiatan']) }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="6" class="empty">Belum ada petugas tercatat pada periode ini.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+
     <h2>Rekapitulasi Kinerja per Tim</h2>
     <table>
         <thead>

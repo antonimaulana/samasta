@@ -6,8 +6,10 @@ use App\Models\Kelurahan;
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
 use App\Models\PemeliharaanTaman;
+use App\Models\Petugas;
 use App\Models\SurveyKepuasan;
 use App\Models\Taman;
+use App\Models\TimPelaksana;
 use App\Models\User;
 use Database\Seeders\TimPelaksanaSeeder;
 use Database\Seeders\WilayahBatamSeeder;
@@ -41,7 +43,18 @@ class EvaluasiKinerjaTimTest extends TestCase
             'deskripsi' => 'Deskripsi evaluasi.',
         ]);
 
-        PemeliharaanTaman::create([
+        $timRecord = TimPelaksana::query()->where('nama', $timWilayah)->first();
+        $this->assertNotNull($timRecord);
+
+        $petugas = Petugas::create([
+            'tim_pelaksana_id' => $timRecord->id,
+            'nama' => 'Petugas Aktif Evaluasi',
+            'jabatan' => 'Tenaga Lapangan',
+            'aktif' => true,
+            'urutan' => 1,
+        ]);
+
+        $pemeliharaan = PemeliharaanTaman::create([
             'tanggal' => now()->format('Y-m-d').' 08:00:00',
             'tim' => $timWilayah,
             'taman_id' => $taman->id,
@@ -49,6 +62,7 @@ class EvaluasiKinerjaTimTest extends TestCase
             'jumlah_personil' => 6,
             'uraian_pekerjaan' => 'Pembersihan rutin',
         ]);
+        $pemeliharaan->petugas()->attach($petugas->id);
 
         $permohonan = Pemangkasan::create([
             'jenis_layanan' => 'Pemangkasan Pohon',
@@ -67,13 +81,14 @@ class EvaluasiKinerjaTimTest extends TestCase
             'tanggal_penyelesaian' => now()->toDateString(),
         ]);
 
-        PemangkasanProgres::create([
+        $progres = PemangkasanProgres::create([
             'pemangkasan_id' => $permohonan->id,
             'tanggal' => now()->format('Y-m-d').' 09:00:00',
             'hari_ke' => 1,
             'jumlah_personil' => 4,
             'catatan' => 'Progres evaluasi kinerja tim',
         ]);
+        $progres->petugas()->attach($petugas->id);
 
         SurveyKepuasan::create([
             'kategori' => 'Operasional Pertamanan',
@@ -88,6 +103,8 @@ class EvaluasiKinerjaTimTest extends TestCase
             ->assertOk()
             ->assertSee('Evaluasi Kinerja Tim')
             ->assertSee($timWilayah)
+            ->assertSee('Rekapitulasi Petugas Paling Aktif')
+            ->assertSee('Petugas Aktif Evaluasi')
             ->assertSee('Rekapitulasi Kinerja per Tim');
     }
 

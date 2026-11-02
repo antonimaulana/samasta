@@ -5,6 +5,7 @@ namespace App\Support\Evaluasi;
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
 use App\Models\PemeliharaanTaman;
+use App\Models\Petugas;
 use App\Models\SurveyKepuasan;
 use App\Models\TimPelaksana;
 use App\Models\User;
@@ -62,6 +63,11 @@ class KinerjaTimReportBuilder
 
         $chart = self::buildTeamChart($rekapPerTim);
         $totals = self::buildTotals($rekapPerTim);
+        $rekapPetugasAktif = self::buildRekapPetugasAktif(
+            $pemeliharaanEntries,
+            $progresEntries,
+            $timFilter,
+        );
 
         return [
             'mode' => $mode,
@@ -77,6 +83,7 @@ class KinerjaTimReportBuilder
             'totalPersonil' => $totals['personil'],
             'rataTepatWaktu' => $totals['rata_tepat_waktu'],
             'rekapPerTim' => $forPdf ? $rekapPerTim : $rekapPerTim,
+            'rekapPetugasAktif' => $forPdf ? $rekapPetugasAktif : $rekapPetugasAktif,
             'chartLabels' => $chart['labels'],
             'chartPemeliharaan' => $chart['pemeliharaan'],
             'chartPermohonan' => $chart['permohonan'],
@@ -309,6 +316,64 @@ class KinerjaTimReportBuilder
      * @param  Collection<int, array<string, mixed>>  $rekapPerTim
      * @return array{total_kegiatan: int, pemeliharaan: int, permohonan: int, personil: int, rata_tepat_waktu: int|null}
      */
+    /**
+     * @param  Collection<int, PemeliharaanTaman>  $pemeliharaanEntries
+     * @param  Collection<int, PemangkasanProgres>  $progresEntries
+     * @return Collection<int, array<string, mixed>>
+     */
+    private static function buildRekapPetugasAktif(
+        Collection $pemeliharaanEntries,
+        Collection $progresEntries,
+        string $timFilter,
+        int $limit = 15,
+    ): Collection {
+        $pemeliharaanEntries->loadMissing(['petugas.timPelaksana']);
+        $progresEntries->loadMissing(['petugas.timPelaksana']);
+
+        /** @var array<int, array<string, mixed>> $stats */
+        $stats = [];
+
+        $register = function (Petugas $petugas, string $type) use (&$stats, $timFilter): void {
+            $timNama = $petugas->timPelaksana?->nama;
+            if ($timFilter !== '' && $timNama !== $timFilter) {
+                return;
+            }
+
+            $id = $petugas->id;
+            if (! isset($stats[$id])) {
+                $stats[$id] = [
+                    'petugas_id' => $id,
+                    'nama' => $petugas->nama,
+                    'jabatan' => $petugas->jabatan,
+                    'tim' => $timNama ?? '—',
+                    'jumlah_pemeliharaan' => 0,
+                    'jumlah_permohonan' => 0,
+                    'total_kegiatan' => 0,
+                ];
+            }
+
+            $stats[$id]['jumlah_'.$type]++;
+            $stats[$id]['total_kegiatan']++;
+        };
+
+        foreach ($pemeliharaanEntries as $entry) {
+            foreach ($entry->petugas as $petugas) {
+                $register($petugas, 'pemeliharaan');
+            }
+        }
+
+        foreach ($progresEntries as $entry) {
+            foreach ($entry->petugas as $petugas) {
+                $register($petugas, 'permohonan');
+            }
+        }
+
+        return collect($stats)
+            ->sortByDesc('total_kegiatan')
+            ->take($limit)
+            ->values();
+    }
+
     private static function buildTotals(Collection $rekapPerTim): array
     {
         $tepatWaktu = (int) $rekapPerTim->sum('permohonan_tepat_waktu');

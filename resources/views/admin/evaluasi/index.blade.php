@@ -18,14 +18,6 @@
                     </div>
                 @endif
             </div>
-            <ul class="mt-4 space-y-1 text-sm text-green-900/90">
-                @foreach ($highlights as $line)
-                    <li class="flex gap-2">
-                        <span class="text-green-600" aria-hidden="true">•</span>
-                        <span>{{ $line }}</span>
-                    </li>
-                @endforeach
-            </ul>
         </div>
 
         <form action="{{ route('admin.evaluasi.index') }}" method="GET" class="space-y-4 p-6">

@@ -61,6 +61,48 @@
         </div>
     </div>
 
+    <x-admin.data-table class="mb-8">
+        <x-slot:header>
+            <div class="border-b border-gray-100 px-6 py-4">
+                <h3 class="text-base font-semibold text-gray-800">Rekapitulasi Petugas Paling Aktif</h3>
+                <p class="mt-1 text-xs text-gray-500">Berdasarkan penugasan tercatat di pemeliharaan rutin dan progres permohonan pada periode evaluasi</p>
+            </div>
+        </x-slot:header>
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-600">#</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-600">Petugas</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-600">Tim</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Pemeliharaan</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Permohonan</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Total</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            @forelse ($rekapPetugasAktif as $index => $row)
+                <tr>
+                    <td class="px-4 py-3 text-sm text-gray-500">{{ $index + 1 }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <p class="font-medium text-gray-900">{{ $row['nama'] }}</p>
+                        @if (filled($row['jabatan']))
+                            <p class="text-xs text-gray-500">{{ $row['jabatan'] }}</p>
+                        @endif
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-700">{{ $row['tim'] }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-green-700">{{ number_format($row['jumlah_pemeliharaan']) }}</td>
+                    <td class="px-4 py-3 text-right text-sm text-violet-700">{{ number_format($row['jumlah_permohonan']) }}</td>
+                    <td class="px-4 py-3 text-right text-sm font-semibold text-gray-900">{{ number_format($row['total_kegiatan']) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
+                        Belum ada petugas tercatat pada kegiatan periode ini. Pastikan petugas dipilih saat input pemeliharaan atau progres permohonan.
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </x-admin.data-table>
+
     <x-admin.data-table>
         <x-slot:header>
             <div class="border-b border-gray-100 px-6 py-4">
