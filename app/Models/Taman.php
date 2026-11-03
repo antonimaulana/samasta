@@ -355,7 +355,7 @@ class Taman extends Model
             'Taman Lingkungan' => '#0891b2',
             'Jalur Hijau Jalan' => '#d97706',
             'RTH Jalur Hijau' => '#d97706',
-            'Di luar wilayah pemeliharaan' => '#b45309',
+            'Di luar wilayah pemeliharaan' => '#64748b',
             default => '#64748b',
         };
     }
