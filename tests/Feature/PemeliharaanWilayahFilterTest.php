@@ -275,11 +275,11 @@ class PemeliharaanWilayahFilterTest extends TestCase
             'tanggal' => now()->toDateString(),
             'tim' => 'Tim Armada',
             'taman_id' => null,
-            'lokasi_pelaksanaan' => 'Jl. Permintaan Warga',
+            'lokasi_pelaksanaan' => 'Jl. Luar Wilayah Test',
         ]);
 
         $this->assertSame(
-            '(Permintaan Masyarakat) Jl. Permintaan Warga',
+            '('.PemeliharaanTaman::LOKASI_LUAR_WILAYAH_LABEL.') Jl. Luar Wilayah Test',
             $manual->lokasiPelaksanaanPdfLabel()
         );
     }

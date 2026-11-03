@@ -24,6 +24,9 @@ class PemeliharaanTaman extends Model
 
     public const TIM_ARMADA = 'Tim Armada';
 
+    /** Label kategori lokasi saat input tanpa taman (centang luar wilayah pemeliharaan). */
+    public const LOKASI_LUAR_WILAYAH_LABEL = 'Di luar wilayah pemeliharaan';
+
     public const JENIS_ARMADA = [
         'Dump Truck',
         'Truck',
@@ -163,7 +166,7 @@ class PemeliharaanTaman extends Model
     public function lokasiKategoriLabel(): string
     {
         if ($this->taman_id === null) {
-            return 'Permintaan Masyarakat';
+            return self::LOKASI_LUAR_WILAYAH_LABEL;
         }
 
         return $this->taman?->kategori ?? '—';
