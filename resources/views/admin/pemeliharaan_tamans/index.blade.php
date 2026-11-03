@@ -150,7 +150,29 @@
                                 <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{{ $kinerja->tim }}</span>
                             </td>
                             <td class="admin-table-cell-wrap px-4 py-3">
-                                <p class="font-medium">{{ $kinerja->lokasi_pelaksanaan }}</p>
+                                @if ($kinerja->taman_id && $kinerja->taman)
+                                    <p class="font-medium text-gray-900">{{ $kinerja->taman->nama_taman }}</p>
+                                    @if (filled($kinerja->taman->alamat))
+                                        <p class="mt-0.5 text-xs leading-snug text-gray-600">{{ $kinerja->taman->alamat }}</p>
+                                    @endif
+                                    @if (filled($kinerja->taman->kategori))
+                                        <div class="mt-1.5">
+                                            <x-admin.taman-kategori-badge :kategori="$kinerja->taman->kategori" />
+                                        </div>
+                                    @endif
+                                @elseif ($kinerja->taman_id)
+                                    <p class="font-medium text-gray-900">{{ $kinerja->lokasi_pelaksanaan }}</p>
+                                    @if (filled($kinerja->lokasiKategoriLabel()) && $kinerja->lokasiKategoriLabel() !== '—')
+                                        <div class="mt-1.5">
+                                            <x-admin.taman-kategori-badge :kategori="$kinerja->lokasiKategoriLabel()" />
+                                        </div>
+                                    @endif
+                                @else
+                                    <p class="font-medium text-gray-900">{{ $kinerja->lokasi_pelaksanaan }}</p>
+                                    <div class="mt-1.5">
+                                        <x-admin.taman-kategori-badge :kategori="\App\Models\PemeliharaanTaman::LOKASI_LUAR_WILAYAH_LABEL" />
+                                    </div>
+                                @endif
                                 @if ($kinerja->uraian_pekerjaan)
                                     <p class="mt-0.5 text-xs text-gray-500">{{ Str::limit($kinerja->uraian_pekerjaan, 60) }}</p>
                                 @endif
