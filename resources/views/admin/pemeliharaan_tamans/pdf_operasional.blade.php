@@ -170,7 +170,7 @@
         </tr>
         <tr>
             <th>Lokasi Pelaksanaan</th>
-            <td>({{ $kinerja->lokasiKategoriLabel() }}) {{ $kinerja->lokasi_pelaksanaan }}</td>
+            <td>{{ $kinerja->lokasiPelaksanaanPdfLabel() }}</td>
         </tr>
         @if ($kinerja->relationLoaded('petugas') && $kinerja->petugas->isNotEmpty())
             <tr>

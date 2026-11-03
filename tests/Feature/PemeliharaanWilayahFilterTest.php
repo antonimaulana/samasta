@@ -268,7 +268,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
         $record->load('taman');
 
         $this->assertSame('Maryono', $record->namaPengawas());
-        $this->assertSame('(Taman Kota) '.$record->lokasi_pelaksanaan, $record->lokasiPelaksanaanPdfLabel());
+        $this->assertSame($record->lokasi_pelaksanaan.' — Taman Kota', $record->lokasiPelaksanaanPdfLabel());
         $this->assertSame('2 / 5 hari (40% progres)', $record->progressSummaryLabel());
 
         $manual = PemeliharaanTaman::create([
@@ -279,7 +279,7 @@ class PemeliharaanWilayahFilterTest extends TestCase
         ]);
 
         $this->assertSame(
-            '('.PemeliharaanTaman::LOKASI_LUAR_WILAYAH_LABEL.') Jl. Luar Wilayah Test',
+            'Jl. Luar Wilayah Test — '.PemeliharaanTaman::LOKASI_LUAR_WILAYAH_LABEL,
             $manual->lokasiPelaksanaanPdfLabel()
         );
     }

@@ -150,13 +150,7 @@
                                 <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">{{ $kinerja->tim }}</span>
                             </td>
                             <td class="admin-table-cell-wrap px-4 py-3">
-                                <p class="font-medium">
-                                    @if ($kinerja->taman_id)
-                                        {{ $kinerja->lokasi_pelaksanaan }}
-                                    @else
-                                        {{ $kinerja->lokasiPelaksanaanPdfLabel() }}
-                                    @endif
-                                </p>
+                                <p class="font-medium">{{ $kinerja->lokasi_pelaksanaan }}</p>
                                 @if ($kinerja->uraian_pekerjaan)
                                     <p class="mt-0.5 text-xs text-gray-500">{{ Str::limit($kinerja->uraian_pekerjaan, 60) }}</p>
                                 @endif

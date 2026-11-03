@@ -174,7 +174,14 @@ class PemeliharaanTaman extends Model
 
     public function lokasiPelaksanaanPdfLabel(): string
     {
-        return '('.$this->lokasiKategoriLabel().') '.$this->lokasi_pelaksanaan;
+        $lokasi = (string) ($this->lokasi_pelaksanaan ?: '—');
+        $kategori = $this->lokasiKategoriLabel();
+
+        if ($kategori === '—') {
+            return $lokasi;
+        }
+
+        return $lokasi.' — '.$kategori;
     }
 
     public function armadaPdfHtml(): ?string

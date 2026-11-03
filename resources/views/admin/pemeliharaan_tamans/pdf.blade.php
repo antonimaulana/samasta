@@ -74,7 +74,7 @@
                             <td>{{ $item->tanggal->translatedFormat('d/m/Y') }}</td>
                         @endunless
                         <td>
-                            ({{ $item->lokasiKategoriLabel() }}) {{ $item->lokasi_pelaksanaan }}
+                            {{ $item->lokasiPelaksanaanPdfLabel() }}
                             @if ($item->namaPengawas())
                                 <br><span style="color:#6b7280;font-size:9px;">Pengawas: {{ $item->namaPengawas() }}</span>
                             @endif
