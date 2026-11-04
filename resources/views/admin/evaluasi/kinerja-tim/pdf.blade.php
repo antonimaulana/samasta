@@ -32,8 +32,8 @@
                 <div class="kpi-value">{{ number_format($totalPersonil) }}</div>
             </td>
             <td class="kpi">
-                <div class="kpi-label">Tepat Waktu</div>
-                <div class="kpi-value">{{ $rataTepatWaktu !== null ? $rataTepatWaktu.'%' : '—' }}</div>
+                <div class="kpi-label">Partisipasi Petugas</div>
+                <div class="kpi-value">{{ $skorPartisipasi !== null ? $skorPartisipasi.'%' : '—' }}</div>
             </td>
         </tr>
     </table>
@@ -78,8 +78,8 @@
                 <th class="num">Personil</th>
                 <th class="num">Rata. Personil</th>
                 <th class="num">Taman</th>
-                <th class="num">Tepat Waktu</th>
-                <th class="num">Terlambat</th>
+                <th class="num">Partisipasi</th>
+                <th class="num">Petugas (aktif/roster)</th>
                 <th class="num">Survey</th>
             </tr>
         </thead>
@@ -94,8 +94,8 @@
                     <td class="num">{{ number_format($row['total_personil']) }}</td>
                     <td class="num">{{ number_format($row['rata_personil'], 1) }}</td>
                     <td class="num">{{ number_format($row['taman_terlayani']) }}</td>
-                    <td class="num">{{ $row['persen_tepat_waktu'] !== null ? $row['persen_tepat_waktu'].'%' : '—' }}</td>
-                    <td class="num">{{ number_format($row['permohonan_terlambat']) }}</td>
+                    <td class="num">{{ $row['persen_partisipasi'] !== null ? $row['persen_partisipasi'].'%' : '—' }}</td>
+                    <td class="num">{{ number_format($row['petugas_aktif']) }} / {{ number_format($row['petugas_roster']) }}</td>
                     <td class="num">
                         @if ($row['survey_rata'] !== null)
                             {{ $row['survey_rata'] }}/5 ({{ number_format($row['survey_jumlah']) }})

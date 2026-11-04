@@ -80,7 +80,7 @@ class RapKonsolidasiReportBuilder
                 'persenTepatWaktuPermohonan' => $operasional['persenTepatWaktu'],
                 'totalPenugasanArmada' => $armada['totalPenugasan'],
                 'armadaUtilisasi' => $armadaUtilisasi,
-                'rataTepatWaktuTim' => $kinerjaTim['rataTepatWaktu'],
+                'skorPartisipasiTim' => $kinerjaTim['skorPartisipasi'],
             ],
             'ringkasanBasisData' => [
                 'totalLokasi' => $kelengkapan['totalLokasi'],
@@ -189,9 +189,9 @@ class RapKonsolidasiReportBuilder
                         route('admin.evaluasi.armada.index', $periodQuery),
                     ),
                     self::indicator(
-                        'Kinerja Tim (Tepat Waktu)',
-                        $kinerjaTim['rataTepatWaktu'],
-                        number_format($kinerjaTim['totalKegiatan']).' kegiatan tim',
+                        'Kinerja Tim (Partisipasi Petugas)',
+                        $kinerjaTim['skorPartisipasi'],
+                        number_format($kinerjaTim['totalKegiatan']).' kegiatan tim · rata-rata 6 tim',
                         route('admin.evaluasi.kinerja-tim.index', $periodQuery),
                     ),
                 ],

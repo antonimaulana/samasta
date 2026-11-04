@@ -22,6 +22,10 @@
 
     <p class="mb-4 text-sm text-gray-600">
         Periode evaluasi: <strong class="text-blue-800">{{ $labelPeriode }}</strong>
+        @if ($skorPartisipasi !== null)
+            · Skor partisipasi petugas: <strong class="text-blue-800">{{ $skorPartisipasi }}%</strong>
+            <span class="text-gray-500">(rata-rata persentase petugas aktif ÷ roster per tim, dibagi 6)</span>
+        @endif
     </p>
 
     <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
@@ -42,15 +46,15 @@
             <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($totalPersonil) }}</p>
         </div>
         <div class="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
-            <p class="text-sm font-medium text-amber-700">Tepat Waktu</p>
+            <p class="text-sm font-medium text-amber-700">Partisipasi Petugas</p>
             <p class="mt-2 text-3xl font-bold text-amber-900">
-                @if ($rataTepatWaktu !== null)
-                    {{ $rataTepatWaktu }}%
+                @if ($skorPartisipasi !== null)
+                    {{ $skorPartisipasi }}%
                 @else
                     —
                 @endif
             </p>
-            <p class="mt-1 text-xs text-amber-700/80">Penyelesaian permohonan</p>
+            <p class="mt-1 text-xs text-amber-700/80">Skor evaluasi (6 tim pelaksana)</p>
         </div>
     </div>
 
@@ -119,7 +123,7 @@
                 <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Personil</th>
                 <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Rata. Personil</th>
                 <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Taman</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Tepat Waktu</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Partisipasi</th>
                 <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-600">Survey</th>
             </tr>
         </thead>
@@ -147,13 +151,16 @@
                     <td class="px-4 py-3 text-right text-sm text-gray-700">{{ number_format($row['rata_personil'], 1) }}</td>
                     <td class="px-4 py-3 text-right text-sm text-gray-700">{{ number_format($row['taman_terlayani']) }}</td>
                     <td class="px-4 py-3 text-right text-sm">
-                        @if ($row['persen_tepat_waktu'] !== null)
-                            <span class="{{ $row['persen_tepat_waktu'] >= 80 ? 'font-semibold text-green-700' : ($row['persen_tepat_waktu'] >= 60 ? 'font-semibold text-amber-700' : 'font-semibold text-red-700') }}">
-                                {{ $row['persen_tepat_waktu'] }}%
+                        @if ($row['persen_partisipasi'] !== null)
+                            <span class="{{ $row['persen_partisipasi'] >= 80 ? 'font-semibold text-green-700' : ($row['persen_partisipasi'] >= 60 ? 'font-semibold text-amber-700' : 'font-semibold text-red-700') }}">
+                                {{ $row['persen_partisipasi'] }}%
                             </span>
-                            <p class="text-xs text-gray-500">{{ number_format($row['permohonan_terlambat']) }} terlambat</p>
+                            <p class="text-xs text-gray-500">{{ number_format($row['petugas_aktif']) }} / {{ number_format($row['petugas_roster']) }} petugas</p>
                         @else
                             <span class="text-gray-400">—</span>
+                            @if ($row['petugas_roster'] === 0)
+                                <p class="text-xs text-gray-500">Belum ada roster</p>
+                            @endif
                         @endif
                     </td>
                     <td class="px-4 py-3 text-right text-sm text-gray-700">

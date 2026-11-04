@@ -105,7 +105,9 @@ class EvaluasiKinerjaTimTest extends TestCase
             ->assertSee($timWilayah)
             ->assertSee('Rekapitulasi Petugas Paling Aktif')
             ->assertSee('Petugas Aktif Evaluasi')
-            ->assertSee('Rekapitulasi Kinerja per Tim');
+            ->assertSee('Rekapitulasi Kinerja per Tim')
+            ->assertSee('Partisipasi Petugas')
+            ->assertSee('1 / 3 petugas');
     }
 
     public function test_admin_can_export_kinerja_tim_evaluasi_pdf(): void

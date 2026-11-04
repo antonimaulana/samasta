@@ -72,13 +72,13 @@ class EvaluasiOverviewBuilder
                 title: 'Kinerja Tim',
                 icon: '👷',
                 accent: 'violet',
-                score: $kinerjaTim['rataTepatWaktu'],
+                score: $kinerjaTim['skorPartisipasi'],
                 insight: self::insightKinerja($kinerjaTim),
                 metrics: [
                     ['label' => 'Total kegiatan', 'value' => number_format($kinerjaTim['totalKegiatan'])],
                     ['label' => 'Pemeliharaan', 'value' => number_format($kinerjaTim['totalPemeliharaan'])],
                     ['label' => 'Permohonan', 'value' => number_format($kinerjaTim['totalPermohonan'])],
-                    ['label' => 'Tepat waktu', 'value' => $kinerjaTim['rataTepatWaktu'] !== null ? $kinerjaTim['rataTepatWaktu'].'%' : '—'],
+                    ['label' => 'Partisipasi petugas', 'value' => $kinerjaTim['skorPartisipasi'] !== null ? $kinerjaTim['skorPartisipasi'].'%' : '—'],
                 ],
                 detailRoute: 'admin.evaluasi.kinerja-tim.index',
                 exportRoute: 'admin.evaluasi.kinerja-tim.export-pdf',
@@ -145,13 +145,13 @@ class EvaluasiOverviewBuilder
                 title: 'Masukan Masyarakat',
                 icon: '💬',
                 accent: 'rose',
-                score: $masukan['persenSelesai'],
+                score: $masukan['skorEvaluasi'],
                 insight: self::insightMasukan($masukan),
                 metrics: [
                     ['label' => 'Total masukan', 'value' => number_format($masukan['totalMasukan'])],
+                    ['label' => 'Respons aduan (≠ Baru)', 'value' => $masukan['persenAduanStatusDariBaru'].'%'],
+                    ['label' => 'Survey (rata ÷ 5)', 'value' => $masukan['persenSkorSurvey'].'%'],
                     ['label' => 'Aduan selesai', 'value' => $masukan['persenSelesai'].'%'],
-                    ['label' => 'Aduan terbuka', 'value' => number_format($masukan['aduanOpen'])],
-                    ['label' => 'Kepuasan (≥4)', 'value' => $masukan['persenPuas'] !== null ? $masukan['persenPuas'].'%' : '—'],
                 ],
                 detailRoute: 'admin.evaluasi.masukan-masyarakat.index',
                 exportRoute: 'admin.evaluasi.masukan-masyarakat.export-pdf',
@@ -285,11 +285,15 @@ class EvaluasiOverviewBuilder
             return 'Belum ada kegiatan tim tercatat pada periode ini.';
         }
 
-        if ($k['rataTepatWaktu'] !== null && $k['rataTepatWaktu'] >= 80) {
-            return 'Tim umumnya menyelesaikan pekerjaan sesuai jadwal yang direncanakan.';
+        if ($k['skorPartisipasi'] !== null && $k['skorPartisipasi'] >= 80) {
+            return 'Sebagian besar petugas roster ikut tercatat pada kegiatan lapangan periode ini.';
         }
 
-        return 'Bandingkan beban antar tim dan identifikasi tim dengan progres permohonan tertinggi.';
+        if ($k['skorPartisipasi'] !== null && $k['skorPartisipasi'] < 50) {
+            return 'Tingkatkan penugasan petugas tercatat di pemeliharaan rutin dan progres permohonan.';
+        }
+
+        return 'Bandingkan beban antar tim dan cakupan partisipasi petugas per roster tim.';
     }
 
     /**
@@ -357,8 +361,16 @@ class EvaluasiOverviewBuilder
             return $m['aduanOverdue'].' aduan melewati batas tinjau — respons cepat meningkatkan kepercayaan warga.';
         }
 
-        if ($m['persenSelesai'] >= 75) {
-            return 'Tindak lanjut aduan mayoritas selesai dalam periode ini.';
+        if (($m['skorEvaluasi'] ?? 0) >= 75) {
+            return 'Respons aduan dan rating survey dalam periode ini berada pada level baik.';
+        }
+
+        if ($m['totalAduan'] > 0 && ($m['persenAduanStatusDariBaru'] ?? 0) < 70) {
+            return 'Percepat perubahan status aduan dari Baru agar skor respons meningkat.';
+        }
+
+        if ($m['totalSurvey'] > 0 && ($m['persenSkorSurvey'] ?? 0) < 70) {
+            return 'Tingkatkan kualitas layanan — rata-rata rating survey masih di bawah target.';
         }
 
         return 'Tingkatkan penyelesaian aduan terbuka dan dokumentasi tindak lanjut.';

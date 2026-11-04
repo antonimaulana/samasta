@@ -29,6 +29,11 @@
 
     <p class="mb-4 text-sm text-gray-600">
         Periode evaluasi: <strong class="text-rose-800">{{ $labelPeriode }}</strong>
+        @if ($skorEvaluasi !== null)
+            · Skor evaluasi:
+            <strong class="text-rose-800">{{ $skorEvaluasi }}%</strong>
+            (rata-rata {{ $persenAduanStatusDariBaru }}% respons aduan ≠ Baru dan {{ $persenSkorSurvey }}% rating ÷ 5)
+        @endif
     </p>
 
     <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-6">

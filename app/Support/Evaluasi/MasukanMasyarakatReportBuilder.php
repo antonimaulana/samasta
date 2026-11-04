@@ -80,6 +80,14 @@ class MasukanMasyarakatReportBuilder
 
         $puas = $surveys->where('rating', '>=', 4);
 
+        $aduanBukanBaru = $aduans->where('status', '!=', 'Baru')->count();
+        $surveyAverage = $surveys->count() > 0
+            ? round((float) $surveys->avg('rating'), 1)
+            : null;
+        $persenAduanStatusDariBaru = self::persenAduanStatusDariBaru($aduans->count(), $aduanBukanBaru);
+        $persenSkorSurvey = self::persenSkorSurvey($surveyAverage);
+        $skorEvaluasi = self::skorEvaluasi($persenAduanStatusDariBaru, $persenSkorSurvey, $aduans->count(), $surveys->count());
+
         return [
             'mode' => $mode,
             'bulan' => $bulan,
@@ -101,15 +109,17 @@ class MasukanMasyarakatReportBuilder
             'persenSelesai' => $aduans->count() > 0
                 ? (int) round(($selesai->count() / $aduans->count()) * 100)
                 : 0,
+            'aduanBukanBaru' => $aduanBukanBaru,
+            'persenAduanStatusDariBaru' => $persenAduanStatusDariBaru,
+            'persenSkorSurvey' => $persenSkorSurvey,
+            'skorEvaluasi' => $skorEvaluasi,
             'persenDitanggapi' => $aduans->count() > 0
                 ? (int) round(($ditanggapi->count() / $aduans->count()) * 100)
                 : null,
             'rataHariPenyelesaian' => $durasiSelesai->isNotEmpty()
                 ? round($durasiSelesai->avg(), 1)
                 : null,
-            'surveyAverage' => $surveys->count() > 0
-                ? round((float) $surveys->avg('rating'), 1)
-                : null,
+            'surveyAverage' => $surveyAverage,
             'persenPuas' => $surveys->count() > 0
                 ? (int) round(($puas->count() / $surveys->count()) * 100)
                 : null,
@@ -132,6 +142,40 @@ class MasukanMasyarakatReportBuilder
             'daftarBulan' => ReportPeriod::daftarBulan(),
             'daftarTahun' => ReportPeriod::daftarTahun(5),
         ];
+    }
+
+    public static function persenAduanStatusDariBaru(int $totalAduan, int $aduanBukanBaru): int
+    {
+        if ($totalAduan <= 0) {
+            return 0;
+        }
+
+        return (int) round(($aduanBukanBaru / $totalAduan) * 100);
+    }
+
+    public static function persenSkorSurvey(?float $surveyAverage): int
+    {
+        if ($surveyAverage === null) {
+            return 0;
+        }
+
+        return (int) round(($surveyAverage / 5) * 100);
+    }
+
+    /**
+     * Skor kartu evaluasi: rata-rata respons aduan (≠ Baru) dan normalisasi rating survey (/5).
+     */
+    public static function skorEvaluasi(
+        int $persenAduanStatusDariBaru,
+        int $persenSkorSurvey,
+        int $totalAduan,
+        int $totalSurvey,
+    ): ?int {
+        if ($totalAduan === 0 && $totalSurvey === 0) {
+            return null;
+        }
+
+        return (int) round(($persenAduanStatusDariBaru + $persenSkorSurvey) / 2);
     }
 
     private static function scopeSurvey(Builder $query, ?User $user): Builder
