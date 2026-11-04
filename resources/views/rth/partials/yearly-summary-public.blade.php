@@ -36,7 +36,12 @@
                     $isHighlight = in_array($row['key'], $highlightKeys, true);
                 @endphp
                 <tr @class(['hover:bg-emerald-50/40', 'bg-emerald-50/20' => $isHighlight])>
-                    <td class="px-4 py-3 text-gray-800">{{ $row['label'] }}</td>
+                    <td class="px-4 py-3 text-gray-800">
+                        <span class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-md bg-emerald-100 text-xs font-bold text-emerald-800">
+                            {{ $row['key'] }}
+                        </span>
+                        {{ $row['label'] }}
+                    </td>
                     @foreach ($rthYearlySummary['years'] as $year)
                         <td @class([
                             'whitespace-nowrap px-4 py-3 text-right',
