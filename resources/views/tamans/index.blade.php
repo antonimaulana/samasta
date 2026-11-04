@@ -5,41 +5,37 @@
 @section('meta_description', 'Daftar taman hijau di Kota Batam — cari berdasarkan nama, kategori, fasilitas, atau lokasi terdekat.')
 
 @section('content')
-    <div class="mb-8">
-        <a href="{{ route('home') }}" class="mb-4 inline-flex items-center gap-1 text-sm text-emerald-700 hover:underline">
+    <div class="mb-6">
+        <a href="{{ route('home') }}" class="inline-flex items-center gap-1 text-sm text-emerald-700 hover:underline">
             ← Kembali ke beranda
         </a>
-        <div class="flex flex-wrap items-end justify-between gap-4">
-            <div class="text-center sm:text-left">
-                <h1 class="text-3xl font-bold text-emerald-950 sm:text-4xl">Jelajahi Taman</h1>
-                <p class="mt-2 text-gray-600">Temukan taman hijau di Kota Batam — filter, peta interaktif, dan navigasi</p>
-            </div>
-            <a href="{{ route('tamans.map') }}"
-               class="inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100">
-                🗺️ Peta Taman
-            </a>
-        </div>
     </div>
 
     <div class="mb-8 overflow-hidden rounded-2xl border border-green-100 bg-white shadow-sm">
         <div class="border-b border-green-50 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4">
-            <div class="flex flex-wrap items-start justify-between gap-3">
-                <div>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
                     <h2 class="text-lg font-semibold text-green-800">Cari Taman</h2>
                     <p class="mt-1 text-sm text-green-700/80">Filter berdasarkan nama, fasilitas, atau lokasi Anda</p>
                 </div>
-                @unless ($nearbyMode)
-                    <button type="button"
-                            onclick="findNearbyTamans('{{ route('tamans.index') }}')"
-                            class="inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        Taman Terdekat
-                    </button>
-                @endunless
+                <div class="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+                    @unless ($nearbyMode)
+                        <button type="button"
+                                onclick="findNearbyTamans('{{ route('tamans.index') }}')"
+                                class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 sm:flex-none sm:px-4">
+                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Taman Terdekat
+                        </button>
+                    @endunless
+                    <a href="{{ route('tamans.map') }}"
+                       class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 sm:flex-none sm:px-4 {{ $nearbyMode ? 'w-full sm:w-auto' : '' }}">
+                        🗺️ Peta Taman
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -81,7 +77,7 @@
 
             <div>
                 <p class="mb-3 text-sm font-medium text-gray-700">Filter Fasilitas</p>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap justify-between gap-2 sm:justify-start">
                     @foreach ($popularFasilitas as $fasilitas)
                         @php $isChecked = in_array($fasilitas, $selectedFasilitas, true); @endphp
                         <label class="cursor-pointer">
@@ -102,9 +98,9 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3 pt-1">
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-1 sm:justify-start">
                 <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:flex-none">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/>
@@ -114,7 +110,7 @@
 
                 @if ($search !== '' || count($selectedFasilitas) > 0 || $nearbyMode)
                     <a href="{{ route('tamans.index') }}"
-                       class="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+                       class="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 sm:flex-none">
                         Reset Filter
                     </a>
                 @endif
@@ -160,17 +156,18 @@
     @else
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($tamans as $taman)
-                <article class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-green-200 hover:shadow-md">
+                <a href="{{ route('tamans.show', $taman) }}"
+                   class="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-green-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2">
                     @if ($taman->foto_url)
                         <img src="{{ $taman->foto_url }}" alt="{{ $taman->nama_taman }}"
-                             class="h-48 w-full object-cover">
+                             class="h-48 w-full object-cover transition group-hover:brightness-[0.98]">
                     @else
                         <div class="flex h-48 items-center justify-center bg-green-100 text-green-700">
-                            <span class="text-4xl">🌳</span>
+                            <span class="text-4xl" aria-hidden="true">🌳</span>
                         </div>
                     @endif
 
-                    <div class="p-5">
+                    <div class="flex flex-1 flex-col p-5">
                         <div class="flex flex-wrap items-center gap-2">
                             <x-taman-kategori-badge :kategori="$taman->kategori" />
                             @if ($nearbyMode && isset($taman->distance_km))
@@ -182,7 +179,7 @@
                                 <span class="text-xs text-gray-500">{{ number_format($taman->luasan, 0, ',', '.') }} M²</span>
                             @endif
                         </div>
-                        <h2 class="mt-2 text-lg font-semibold text-gray-900">{{ $taman->nama_taman }}</h2>
+                        <h2 class="mt-2 text-lg font-semibold text-gray-900 group-hover:text-green-800">{{ $taman->nama_taman }}</h2>
                         <p class="mt-2 line-clamp-2 text-sm text-gray-600">{{ $taman->alamat }}</p>
 
                         @if ($taman->fasilitas_nama_list !== [])
@@ -196,12 +193,11 @@
                             </div>
                         @endif
 
-                        <a href="{{ route('tamans.show', $taman) }}"
-                           class="mt-4 inline-block text-sm font-medium text-green-700 hover:underline">
+                        <span class="mt-4 text-sm font-medium text-green-700 group-hover:underline">
                             Lihat detail →
-                        </a>
+                        </span>
                     </div>
-                </article>
+                </a>
             @endforeach
         </div>
 

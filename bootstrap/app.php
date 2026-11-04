@@ -33,20 +33,20 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (TokenMismatchException $e, Request $request) {
-            if (! $request->is('lapangan*')) {
-                return null;
-            }
-
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => 'Sesi habis. Muat ulang halaman dan login jika perlu.',
                 ], 419);
             }
 
+            $message = match (true) {
+                $request->is('logout') => 'Sesi Anda sudah habis. Anda tidak perlu keluar lagi — silakan masuk kembali jika ingin melanjutkan.',
+                $request->is('lapangan*') => 'Sesi habis. Login ulang, buka Input Lapangan, lalu isi form lagi.',
+                default => 'Sesi habis atau halaman kedaluwarsa. Login ulang, muat ulang halaman kerja, lalu ulangi tindakan Anda.',
+            };
+
             return redirect()
                 ->route('login')
-                ->withErrors([
-                    'session' => 'Sesi habis. Login ulang, buka Input Lapangan, lalu isi form lagi.',
-                ]);
+                ->withErrors(['session' => $message]);
         });
     })->create();

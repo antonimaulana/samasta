@@ -35,7 +35,13 @@
             </div>
 
             <div class="rounded-xl border border-green-200/80 bg-white p-6 shadow-sm shadow-green-100/40 sm:p-8">
-                @if ($errors->any())
+                @if ($errors->has('session'))
+                    <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        @foreach ($errors->get('session') as $error)
+                            <p>{{ $error }}</p>
+                        @endforeach
+                    </div>
+                @elseif ($errors->any())
                     <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                         @foreach ($errors->all() as $error)
                             <p>{{ $error }}</p>

@@ -48,7 +48,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
 });
 
-Route::post('/logout', [LoginController::class, 'destroy'])
+Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
