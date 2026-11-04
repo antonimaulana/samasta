@@ -102,18 +102,20 @@
                 <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">RTH per Kategori</h2>
             </div>
 
-            <div class="grid gap-6 lg:grid-cols-5">
-                <div class="space-y-6 lg:col-span-2">
-                    <div class="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-6 shadow-lg shadow-emerald-900/10">
+            <div class="grid gap-6 lg:grid-cols-5 lg:items-stretch">
+                <div class="flex flex-col gap-6 lg:col-span-2">
+                    <div class="shrink-0 rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-6 shadow-lg shadow-emerald-900/10">
                         <h3 class="text-base font-bold text-emerald-950">Komposisi Luasan</h3>
                         <div class="relative mx-auto mt-5 h-72 w-72 max-w-full sm:h-80 sm:w-80">
                             <canvas id="rthKategoriChart" aria-label="Diagram komposisi luasan RTH per kategori"></canvas>
                         </div>
                     </div>
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div class="flex min-h-[16rem] flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm lg:min-h-0">
                         <h3 class="text-sm font-semibold text-gray-800">Kelengkapan Profil Data</h3>
-                        <div class="relative mx-auto mt-4 h-52 w-52 max-w-full">
-                            <canvas id="rthKelengkapanChart" aria-label="Diagram kelengkapan profil data RTH"></canvas>
+                        <div class="relative mt-4 flex flex-1 items-center justify-center">
+                            <div class="aspect-square h-full w-full max-h-72 max-w-full sm:max-h-80">
+                                <canvas id="rthKelengkapanChart" class="max-h-full max-w-full" aria-label="Diagram kelengkapan profil data RTH"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>

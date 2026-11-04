@@ -70,7 +70,7 @@ class RthKotaBatam
 
                 'icon' => '🌳',
 
-                'ringkas' => 'Ruangs hijau skala lingkungan di berbagai permukiman.',
+                'ringkas' => 'Ruang hijau skala lingkungan di berbagai permukiman.',
 
                 'accent' => Taman::kategoriDisplayAccent('Taman Lingkungan'),
 
