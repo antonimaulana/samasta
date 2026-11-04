@@ -57,13 +57,13 @@
 
             <div class="mt-5 flex items-start gap-2 rounded-2xl bg-green-50/80 px-4 py-3 text-gray-700 ring-1 ring-green-100">
                 <span class="mt-0.5 text-lg">📍</span>
-                <p class="text-sm leading-relaxed sm:text-base">{{ $taman->alamat }}</p>
+                <p class="text-justify text-sm leading-relaxed sm:text-left sm:text-base">{{ $taman->alamat }}</p>
             </div>
 
             @if ($taman->deskripsi)
                 <div class="mt-8">
                     <h2 class="text-lg font-bold text-gray-900">Deskripsi</h2>
-                    <p class="mt-2 whitespace-pre-line leading-relaxed text-gray-600">{{ $taman->deskripsi }}</p>
+                    <p class="mt-2 whitespace-pre-line text-justify leading-relaxed text-gray-600 sm:text-left">{{ $taman->deskripsi }}</p>
                 </div>
             @endif
 
@@ -85,9 +85,9 @@
                 <div class="mt-8 border-t border-green-100 pt-8">
                     <h2 class="text-lg font-bold text-gray-900">Lokasi & Navigasi</h2>
                     @if ($parkLat !== null && $parkLng !== null)
-                        <p class="mt-1 text-sm text-gray-500">{{ $taman->latitude }}, {{ $taman->longitude }}</p>
+                        <p class="mt-1 text-justify text-sm text-gray-500 sm:text-left">{{ $taman->latitude }}, {{ $taman->longitude }}</p>
                     @else
-                        <p class="mt-1 text-sm text-amber-700">Koordinat belum lengkap — rute mengikuti alamat taman.</p>
+                        <p class="mt-1 text-justify text-sm text-amber-700 sm:text-left">Koordinat belum lengkap — rute mengikuti alamat taman.</p>
                     @endif
 
                     @if ($parkLat !== null && $parkLng !== null)
@@ -125,7 +125,7 @@
 
                     @if ($mapLat !== null && $mapLng !== null)
                         @if ($mapNeedsVerification)
-                            <p class="mt-4 text-xs text-amber-800">
+                            <p class="mt-4 text-justify text-xs text-amber-800 sm:text-left">
                                 Peta menampilkan koordinat yang tersimpan; titik belum diverifikasi (masih default atau di luar Batam). Perbarui lokasi di data taman agar pin akurat.
                             </p>
                         @endif
