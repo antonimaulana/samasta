@@ -165,10 +165,17 @@
             <th>Lokasi Pelaksanaan</th>
             <td>{{ $permohonan->lokasiPelaksanaanPdfLabel() }}</td>
         </tr>
-        <tr>
-            <th>Jumlah Personil</th>
-            <td>{{ $progres->jumlah_personil }} orang</td>
-        </tr>
+        @if ($progres->relationLoaded('petugas') && $progres->petugas->isNotEmpty())
+            <tr>
+                <th>Petugas Pelaksana</th>
+                <td>{{ $progres->petugasLabel() }} ({{ $progres->petugas->count() }} personil)</td>
+            </tr>
+        @elseif ($progres->jumlah_personil)
+            <tr>
+                <th>Jumlah Personil</th>
+                <td>{{ $progres->jumlah_personil }} personil</td>
+            </tr>
+        @endif
         <tr>
             <th>Progres Pekerjaan</th>
             <td>{{ \App\Support\PemangkasanSchedule::dailyProgressLabel($permohonan, $progres) }}</td>

@@ -6,22 +6,27 @@ use App\Models\Kelurahan;
 use App\Models\Pemangkasan;
 use App\Models\PemangkasanProgres;
 use App\Models\Taman;
+use App\Models\Petugas;
 use App\Models\User;
 use App\Support\PemangkasanProgresPdf;
+use Database\Seeders\TimPelaksanaSeeder;
 use Database\Seeders\WilayahBatamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\Support\PetugasTestHelpers;
 use Tests\TestCase;
 
 class PemangkasanProgresPdfTest extends TestCase
 {
+    use PetugasTestHelpers;
     use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->seed(WilayahBatamSeeder::class);
+        $this->seed(TimPelaksanaSeeder::class);
     }
 
     public function test_admin_can_update_progress_entry(): void
@@ -40,11 +45,10 @@ class PemangkasanProgresPdfTest extends TestCase
             ->assertSee('Edit Progres Permohonan', false)
             ->assertSee('Catatan awal.', false);
 
-        $payload = [
-            'tanggal' => now()->format('Y-m-d\TH:i'),
-            'jumlah_personil' => 8,
+        $payload = $this->withPetugasForTeam([
+            'tanggal' => '2026-08-28T10:00',
             'catatan' => 'Catatan diperbarui admin.',
-        ];
+        ], 'Tim Wilayah 1', 2);
 
         $this->actingAs($admin)
             ->put(route('admin.pemangkasans.progres.update', [
@@ -56,7 +60,7 @@ class PemangkasanProgresPdfTest extends TestCase
 
         $progres->refresh();
 
-        $this->assertSame(8, $progres->jumlah_personil);
+        $this->assertSame(2, $progres->jumlah_personil);
         $this->assertSame('Catatan diperbarui admin.', $progres->catatan);
     }
 
@@ -78,6 +82,25 @@ class PemangkasanProgresPdfTest extends TestCase
             ]))
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_pdf_lists_petugas_pelaksana_names_like_pemeliharaan_rutin(): void
+    {
+        Storage::fake('public');
+
+        [$permohonan, $progres] = $this->createSampleProgress('Dengan petugas.');
+        $petugasIds = $this->petugasIdsForTeam('Tim Wilayah 1', 2);
+        $progres->petugas()->sync($petugasIds);
+        $names = Petugas::query()->whereIn('id', $petugasIds)->orderBy('nama')->pluck('nama')->all();
+
+        $html = PemangkasanProgresPdf::render(
+            PemangkasanProgresPdf::resolveEntry($permohonan, $progres),
+            $permohonan->fresh(['taman']),
+        );
+
+        $this->assertStringContainsString('Petugas Pelaksana', $html);
+        $this->assertStringContainsString(implode(', ', $names), $html);
+        $this->assertStringContainsString('(2 personil)', $html);
     }
 
     public function test_pdf_for_day_one_uses_day_one_entry_not_day_two(): void
@@ -132,14 +155,14 @@ class PemangkasanProgresPdfTest extends TestCase
         );
 
         $this->assertStringContainsString('Catatan khusus hari pertama.', $html);
-        $this->assertStringContainsString('4 orang', $html);
+        $this->assertStringContainsString('4 personil', $html);
         $this->assertStringContainsString('1 / 2 hari (50% progres)', $html);
         $this->assertStringContainsString('Warga — Budi (081234567890)', $html);
         $this->assertStringContainsString('(Taman Kota)', $html);
         $this->assertStringNotContainsString('Jenis Layanan', $html);
         $this->assertStringNotContainsString('Penanggung Jawab</th>', $html);
         $this->assertStringNotContainsString('Catatan khusus hari kedua.', $html);
-        $this->assertStringNotContainsString('9 orang', $html);
+        $this->assertStringNotContainsString('9 personil', $html);
 
         $this->assertSame($dayOne->id, PemangkasanProgresPdf::resolveEntry($permohonan, $dayOne)->id);
         $this->assertSame($dayTwo->id, PemangkasanProgresPdf::resolveEntry($permohonan, $dayTwo)->id);

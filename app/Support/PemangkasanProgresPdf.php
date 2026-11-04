@@ -20,6 +20,8 @@ class PemangkasanProgresPdf
 
     public static function render(PemangkasanProgres $progres, Pemangkasan $permohonan): string
     {
+        $progres->loadMissing(['petugas', 'armadas.armada']);
+
         return view('admin.pemangkasans.pdf_progres', [
             'progres' => $progres,
             'permohonan' => $permohonan,
@@ -31,7 +33,7 @@ class PemangkasanProgresPdf
         PdfExport::ensureGdLoaded();
 
         $entry = self::resolveEntry($permohonan, $progres);
-        $entry->loadMissing(['armadas.armada']);
+        $entry->loadMissing(['petugas', 'armadas.armada']);
         $permohonan->loadMissing(['taman']);
 
         return PdfExport::download(
