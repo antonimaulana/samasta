@@ -99,23 +99,11 @@ class PermohonanProgressRecorder
             ]);
         }
 
-        $entryQuery = $permohonan->progres()->whereDate('tanggal', $datePart);
-
-        if ($inputTim !== null) {
-            $entryQuery->where('tim', $inputTim);
-        } else {
-            $entryQuery->whereNull('tim');
-        }
-
-        $entry = $entryQuery->first();
-
-        if (! $entry) {
-            $entry = new PemangkasanProgres([
-                'pemangkasan_id' => $permohonan->id,
-                'tim' => $inputTim,
-                'tanggal' => $tanggal,
-            ]);
-        }
+        $entry = new PemangkasanProgres([
+            'pemangkasan_id' => $permohonan->id,
+            'tim' => $inputTim,
+            'tanggal' => $tanggal,
+        ]);
 
         $entry->tim = $inputTim;
         $entry->hari_ke = PemangkasanSchedule::hariKe($permohonan->tanggal_eksekusi, $tanggal);
@@ -203,20 +191,7 @@ class PermohonanProgressRecorder
                     'nullable',
                     'image',
                     'max:4096',
-                    Rule::requiredIf(function () use ($request, $permohonan, $field, $inputTim) {
-                        $tanggal = OperasionalPelaksanaanTime::datePart(
-                            $request->input('tanggal_progres', now()->toDateString())
-                        );
-                        $existingQuery = $permohonan->progres()->whereDate('tanggal', $tanggal);
-                        if ($inputTim !== null) {
-                            $existingQuery->where('tim', $inputTim);
-                        } else {
-                            $existingQuery->whereNull('tim');
-                        }
-                        $existing = $existingQuery->first();
-
-                        return ! $request->hasFile($field) && ! filled($existing?->{$field});
-                    }),
+                    Rule::requiredIf(fn () => ! $request->hasFile($field)),
                 ];
                 $attributes[$field] = strtolower($label);
             }

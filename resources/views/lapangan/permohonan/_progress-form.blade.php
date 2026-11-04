@@ -139,6 +139,10 @@
 
             @if (filled($operatorTim))
                 <input type="hidden" name="tim_pelaksana" value="{{ $operatorTim }}">
+                <div class="sm:col-span-2">
+                    <p class="text-[10px] font-bold uppercase tracking-wide text-gray-500">Tim pelaksana</p>
+                    <p class="mt-1 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm font-bold text-green-900">{{ $operatorTim }}</p>
+                </div>
             @elseif (count($inputTeams) > 1)
                 <div class="sm:col-span-2">
                     <x-lapangan.field-label for="tim_pelaksana" :required="true">Tim pelaksana (input progres)</x-lapangan.field-label>

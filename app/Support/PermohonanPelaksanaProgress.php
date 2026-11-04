@@ -43,13 +43,27 @@ class PermohonanPelaksanaProgress
 
         $scope = app(OperatorWilayahScope::class);
 
-        if (! $scope->restrictsWilayah($user)) {
+        if ($user->akses_semua_wilayah) {
             return $assigned;
         }
 
         $userTeams = $scope->teamNames($user);
 
+        if ($userTeams === []) {
+            return [];
+        }
+
         return array_values(array_intersect($assigned, $userTeams));
+    }
+
+    /**
+     * Satu tim terkunci untuk form lapangan (Armada, Nursery, atau satu wilayah).
+     */
+    public static function operatorTimForForm(?User $user, Pemangkasan $permohonan): ?string
+    {
+        $inputTeams = self::inputTeamsForUser($user, $permohonan);
+
+        return count($inputTeams) === 1 ? $inputTeams[0] : null;
     }
 
     public static function resolveInputTim(?User $user, Pemangkasan $permohonan, ?string $requestedTim = null): ?string

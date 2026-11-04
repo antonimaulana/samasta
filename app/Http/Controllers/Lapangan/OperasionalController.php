@@ -227,7 +227,7 @@ class OperasionalController extends Controller
 
         $user = $request->user();
         $inputTeams = PermohonanPelaksanaProgress::inputTeamsForUser($user, $pemangkasan);
-        $operatorTim = count($inputTeams) === 1 ? $inputTeams[0] : null;
+        $operatorTim = PermohonanPelaksanaProgress::operatorTimForForm($user, $pemangkasan);
         $teamStatusDates = collect([now()->toDateString()])
             ->merge($pemangkasan->progres->map(
                 fn ($entry) => OperasionalPelaksanaanTime::datePart($entry->tanggal),

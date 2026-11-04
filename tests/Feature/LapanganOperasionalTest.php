@@ -474,6 +474,98 @@ class LapanganOperasionalTest extends TestCase
             ->assertSee('Dikerjakan', false);
     }
 
+    public function test_armada_operator_on_multi_team_permohonan_uses_armada_roster_without_tim_select(): void
+    {
+        $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
+        $armada = TimPelaksana::where('nama', PemeliharaanTaman::TIM_ARMADA)->firstOrFail();
+        $operator = User::factory()->operatorTeams([$armada->id])->create();
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Armada Permohonan',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $team1->kelurahans()->first()->id ?? Kelurahan::query()->value('id'),
+            'luasan' => 500,
+            'alamat' => 'Alamat armada permohonan',
+            'deskripsi' => 'Deskripsi armada permohonan.',
+        ]);
+
+        $permohonan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemangkasan Pohon',
+            'taman_id' => $taman->id,
+            'lokasi_pohon' => $taman->nama_taman,
+            'asal' => 'Warga',
+            'penanggungjawab' => 'Budi',
+            'kontak_permohonan' => '081234567890',
+            'tanggal_permohonan' => now()->toDateString(),
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => now()->toDateString(),
+            'pelaksana' => ['Tim Wilayah 1', PemeliharaanTaman::TIM_ARMADA],
+            'status' => 'Diproses',
+        ]);
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.permohonan.edit', $permohonan))
+            ->assertOk()
+            ->assertSee(PemeliharaanTaman::TIM_ARMADA, false)
+            ->assertDontSee('Pilih tim Anda', false)
+            ->assertDontSee('Tim pelaksana (input progres)', false);
+
+        $this->actingAs($operator)
+            ->post(route('lapangan.permohonan.update', $permohonan), $this->progressPayload([
+                'status' => 'Diproses',
+            ], PemeliharaanTaman::TIM_ARMADA))
+            ->assertRedirect(route('lapangan.permohonan.index'));
+
+        $this->assertDatabaseHas('pemangkasan_progres', [
+            'pemangkasan_id' => $permohonan->id,
+            'tim' => PemeliharaanTaman::TIM_ARMADA,
+        ]);
+    }
+
+    public function test_same_team_can_submit_permohonan_progress_more_than_once_per_day(): void
+    {
+        $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
+        $operator = User::factory()->operatorTeams([$team1->id])->create();
+
+        $permohonan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemangkasan Pohon',
+            'taman_id' => Taman::create([
+                'nama_taman' => 'Taman Input Ganda',
+                'kategori' => 'Taman Kota',
+                'kelurahan_id' => $team1->kelurahans()->first()->id ?? Kelurahan::query()->value('id'),
+                'luasan' => 500,
+                'alamat' => 'Alamat',
+                'deskripsi' => 'Deskripsi.',
+            ])->id,
+            'lokasi_pohon' => 'Taman Input Ganda',
+            'asal' => 'Warga',
+            'penanggungjawab' => 'Budi',
+            'kontak_permohonan' => '081234567890',
+            'tanggal_permohonan' => now()->toDateString(),
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => now()->toDateString(),
+            'pelaksana' => ['Tim Wilayah 1'],
+            'status' => 'Diproses',
+        ]);
+
+        $payload = $this->progressPayload(['status' => 'Diproses']);
+
+        $this->actingAs($operator)
+            ->post(route('lapangan.permohonan.update', $permohonan), $payload)
+            ->assertRedirect(route('lapangan.permohonan.index'));
+
+        $this->actingAs($operator)
+            ->post(route('lapangan.permohonan.update', $permohonan), $this->progressPayload([
+                'status' => 'Diproses',
+                'catatan' => 'Laporan kedua hari ini',
+            ]))
+            ->assertRedirect(route('lapangan.permohonan.index'));
+
+        $this->assertDatabaseCount('pemangkasan_progres', 2);
+    }
+
     public function test_guest_can_list_and_update_permohonan_progress(): void
     {
         $kelurahanId = Kelurahan::query()->value('id');
@@ -714,11 +806,11 @@ class LapanganOperasionalTest extends TestCase
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
      */
-    private function progressPayload(array $overrides = []): array
+    private function progressPayload(array $overrides = [], string $teamName = 'Tim Wilayah 1'): array
     {
         $payload = $this->withPetugasForTeam([
             'tanggal_progres' => now()->toDateString(),
-        ], 'Tim Wilayah 1', 2);
+        ], $teamName, 2);
 
         foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
             $payload[$field] = UploadedFile::fake()->image($field.'.jpg');
