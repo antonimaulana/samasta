@@ -26,7 +26,7 @@ class BerandaSlideDefaults
                 'hero_live_preset' => 'rth',
                 'show_stats' => true,
                 'heading' => 'Jumlah Luas Ruang Terbuka Hijau Kota Batam',
-                'description' => 'Disperakimtan mengelola taman kota, taman lingkungan, jalur hijau jalan, Kebun Raya Batam, dan TPU — seluruhnya dalam kondisi terpelihara.',
+                'description' => 'Disperakimtan mengelola taman kota, taman lingkungan, jalur hijau jalan, Kebun Raya, dan TPU — seluruhnya dalam kondisi terpelihara.',
                 'tags' => ['Taman Kota', 'Taman Lingkungan', 'Jalur Hijau', 'Kebun Raya', 'TPU'],
                 'tag_classes' => 'bg-lime-100 text-green-700 ring-lime-200',
                 'cta_text' => 'Baca data lengkap',

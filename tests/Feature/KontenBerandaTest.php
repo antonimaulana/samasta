@@ -34,7 +34,7 @@ class KontenBerandaTest extends TestCase
         $kategori = RthKotaBatam::kategori();
 
         $this->assertNotEmpty($kategori);
-        $this->assertSame('RTH Taman Kota', $kategori[0]['nama']);
+        $this->assertSame('Taman Kota', $kategori[0]['nama']);
         $this->assertGreaterThan(0, RthKotaBatam::total()['luas']);
     }
 

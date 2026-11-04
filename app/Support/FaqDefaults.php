@@ -32,7 +32,7 @@ class FaqDefaults
                 'is_active' => true,
                 'urutan' => 20,
                 'question' => 'Apa saja yang termasuk Ruang Terbuka Hijau (RTH) di Batam?',
-                'answer' => 'Meliputi taman kota, taman lingkungan, jalur hijau, Kebun Raya Batam, dan ruang publik hijau lain yang dikelola Pemerintah Kota Batam.',
+                'answer' => 'Meliputi taman kota, taman lingkungan, jalur hijau, Kebun Raya, dan ruang publik hijau lain yang dikelola Pemerintah Kota Batam.',
             ],
             [
                 'is_active' => true,

@@ -137,4 +137,9 @@ class PublicRthStatisticsBuilder
     {
         return $at->translatedFormat('d F Y, H:i').' WIB';
     }
+
+    public static function formatSnapshotDate(Carbon $at): string
+    {
+        return $at->translatedFormat('d F Y');
+    }
 }

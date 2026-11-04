@@ -28,7 +28,7 @@ class Ensiklopedia
                         'judul' => 'Pengelolaan Ruang Terbuka Hijau (RTH)',
                         'icon' => '🏞️',
                         'ringkas' => 'Pemeliharaan dan pengembangan RTH taman kota, taman lingkungan, jalur hijau, Kebun Raya, dan TPU.',
-                        'konten' => "Pengelolaan RTH Kota Batam diatur berdasarkan Peraturan Daerah dan standar teknis pertamanan. Disperakimtan mengelola lebih dari 2,5 juta meter persegi RTH yang terpelihara.\n\nKategori RTH meliputi taman kota, taman lingkungan, jalur hijau jalan, Kebun Raya Batam, dan Taman Pemakaman Umum (TPU). Setiap kategori memiliki karakteristik dan fungsi yang berbeda.\n\nPemeliharaan rutin meliputi penyiraman, pemupukan, pemangkasan, pengendalian hama, serta perbaikan fasilitas pendukung seperti lampu taman, bangku, dan jalur pejalan kaki.",
+                        'konten' => "Pengelolaan RTH Kota Batam diatur berdasarkan Peraturan Daerah dan standar teknis pertamanan. Disperakimtan mengelola lebih dari 2,5 juta meter persegi RTH yang terpelihara.\n\nKategori RTH meliputi taman kota, taman lingkungan, jalur hijau jalan, Kebun Raya, dan Taman Pemakaman Umum (TPU). Setiap kategori memiliki karakteristik dan fungsi yang berbeda.\n\nPemeliharaan rutin meliputi penyiraman, pemupukan, pemangkasan, pengendalian hama, serta perbaikan fasilitas pendukung seperti lampu taman, bangku, dan jalur pejalan kaki.",
                     ],
                     [
                         'slug' => 'layanan-pertamanan',

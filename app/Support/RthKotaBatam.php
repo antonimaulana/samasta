@@ -44,7 +44,7 @@ class RthKotaBatam
 
                 'kategori' => 'Taman Kota',
 
-                'nama' => 'RTH Taman Kota',
+                'nama' => 'Taman Kota',
 
                 'luas' => 156_216,
 
@@ -62,7 +62,7 @@ class RthKotaBatam
 
                 'kategori' => 'Taman Lingkungan',
 
-                'nama' => 'RTH Taman Lingkungan',
+                'nama' => 'Taman Lingkungan',
 
                 'luas' => 23_191,
 
@@ -80,7 +80,7 @@ class RthKotaBatam
 
                 'kategori' => 'Jalur Hijau Jalan',
 
-                'nama' => 'RTH Jalur Hijau Jalan',
+                'nama' => 'Jalur Hijau Jalan',
 
                 'luas' => 1_690_920,
 
@@ -98,7 +98,7 @@ class RthKotaBatam
 
                 'kategori' => 'Kebun Raya',
 
-                'nama' => 'Kebun Raya Batam',
+                'nama' => 'Kebun Raya',
 
                 'luas' => 300_000,
 

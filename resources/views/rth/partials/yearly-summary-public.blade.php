@@ -43,11 +43,7 @@
                         {{ $row['label'] }}
                     </td>
                     @foreach ($rthYearlySummary['years'] as $year)
-                        <td @class([
-                            'whitespace-nowrap px-4 py-3 text-right',
-                            'font-bold text-emerald-900' => $isHighlight && $year === $latestYear,
-                            'text-gray-700' => ! ($isHighlight && $year === $latestYear),
-                        ])>
+                        <td class="whitespace-nowrap px-4 py-3 text-right text-gray-700">
                             {{ $formatValue($row, $year) }}
                         </td>
                     @endforeach
