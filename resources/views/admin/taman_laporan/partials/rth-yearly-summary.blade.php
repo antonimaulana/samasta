@@ -32,3 +32,7 @@
         @endforeach
     </tbody>
 </x-admin.data-table>
+
+<p class="mx-5 mb-5 text-xs leading-relaxed text-gray-500">
+    {{ $rthYearlySummary['columnRuleLabel'] ?? \App\Support\TamanRthYearlySummary::COLUMN_RULE_LABEL }}
+</p>

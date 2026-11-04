@@ -108,4 +108,56 @@ class TamanRthYearlySummaryTest extends TestCase
         $this->assertSame(1_000_000 - 556_600, $e);
         $this->assertEqualsWithDelta(round($e / $a * 100, 2), $rowG['values'][2025], 0.0001);
     }
+
+    public function test_year_column_is_cumulative_through_end_of_that_year(): void
+    {
+        $kelurahanId = Kelurahan::query()->value('id');
+
+        Taman::create([
+            'nama_taman' => 'Taman Awal 2024',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahanId,
+            'luasan' => 100,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
+            'data_verified_at' => Carbon::parse('2024-01-15'),
+        ]);
+
+        Taman::create([
+            'nama_taman' => 'Taman Akhir 2025',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahanId,
+            'luasan' => 200,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
+            'data_verified_at' => Carbon::parse('2025-12-31 23:59:59'),
+        ]);
+
+        Taman::create([
+            'nama_taman' => 'Taman Awal 2026',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahanId,
+            'luasan' => 300,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
+            'data_verified_at' => Carbon::parse('2026-01-01 00:00:01'),
+        ]);
+
+        Taman::create([
+            'nama_taman' => 'Taman Masa Depan 2027',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahanId,
+            'luasan' => 400,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
+            'data_verified_at' => Carbon::parse('2027-06-01'),
+        ]);
+
+        $summary = app(TamanRthYearlySummary::class)->build();
+        $rowB = collect($summary['rows'])->firstWhere('key', 'B');
+
+        $this->assertSame(2, $rowB['values'][2025], 'Kolom 2025: 2024 ke bawah + verifikasi s.d. akhir 2025 (tanpa 2026+)');
+        $this->assertSame(3, $rowB['values'][2026], 'Kolom 2026: termasuk 2024, 2025, dan 2026');
+        $this->assertSame(4, $rowB['values'][2027], 'Kolom 2027: semua termasuk verifikasi 2027');
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Taman;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 /**
  * Capaian RTH per tahun (Laporan Taman), baris a–g:
@@ -15,9 +16,15 @@ use Illuminate\Database\Eloquent\Builder;
  * e = a − penyesuaian tidak terpelihara (min 0)
  * f = b
  * g = e ÷ a (%)
+ *
+ * Aturan kolom tahun Y: lokasi dihitung jika pemutakhiran/verifikasi data
+ * pada atau sebelum 31 Desember Y (termasuk seluruh tahun Y dan tahun-tahun
+ * sebelumnya). Lokasi dengan verifikasi setelah Y tidak masuk kolom Y.
+ * Lokasi tanpa tanggal verifikasi dianggap ikut semua kolom (legacy).
  */
 class TamanRthYearlySummary
 {
+    public const COLUMN_RULE_LABEL = 'Kolom tahun Y = lokasi dengan verifikasi data s.d. 31 Des Y (Y ke bawah, termasuk Y).';
     /**
      * @return list<int>
      */
@@ -51,10 +58,7 @@ class TamanRthYearlySummary
         $metrics = [];
 
         foreach ($years as $year) {
-            $query = (clone $baseQuery)->where(function (Builder $builder) use ($year) {
-                $builder->whereYear('data_verified_at', '<=', $year)
-                    ->orWhereNull('data_verified_at');
-            });
+            $query = self::applyYearColumnScope(clone $baseQuery, $year);
 
             $luasan = (int) (clone $query)->sum('luasan');
             $lokasi = (int) (clone $query)->count();
@@ -79,6 +83,7 @@ class TamanRthYearlySummary
 
         return [
             'years' => $years,
+            'columnRuleLabel' => self::COLUMN_RULE_LABEL,
             'rtrwLuasan' => $rtrwLuasan,
             'rows' => [
                 [
@@ -125,5 +130,20 @@ class TamanRthYearlySummary
                 ],
             ],
         ];
+    }
+
+    /**
+     * Kolom tahun Y: verifikasi ≤ akhir tahun Y (kumulatif “Y ke bawah”), atau belum pernah diverifikasi.
+     */
+    public static function applyYearColumnScope(Builder $query, int $year): Builder
+    {
+        $endOfYear = Carbon::create($year, 12, 31, 23, 59, 59, config('app.timezone'));
+
+        return $query->where(function (Builder $builder) use ($endOfYear) {
+            $builder->where(function (Builder $verified) use ($endOfYear) {
+                $verified->whereNotNull('data_verified_at')
+                    ->where('data_verified_at', '<=', $endOfYear);
+            })->orWhereNull('data_verified_at');
+        });
     }
 }

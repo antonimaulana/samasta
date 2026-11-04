@@ -58,5 +58,7 @@
 </div>
 
 <p class="mt-3 text-xs leading-relaxed text-gray-500">
-    A–B: taman dengan pemutakhiran ≤ tahun kolom. C: RTRW {{ PublicRthStatisticsBuilder::formatArea($rtrwLuasan) }} m². E: luas dikelola (A) setelah penyesuaian internal.
+    {{ $rthYearlySummary['columnRuleLabel'] ?? \App\Support\TamanRthYearlySummary::COLUMN_RULE_LABEL }}
+    C: RTRW {{ PublicRthStatisticsBuilder::formatArea($rtrwLuasan) }} m².
+    E: luas dikelola (A) setelah penyesuaian internal.
 </p>
