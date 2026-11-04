@@ -30,6 +30,15 @@
 
     $jadwalAkhir = $permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi;
 
+    $inputTeams = $inputTeams ?? [];
+    $operatorTim = $operatorTim ?? null;
+    $showArmadaForm = $showArmadaForm ?? false;
+    $selectedTim = old('tim_pelaksana', $operatorTim);
+    $petugasTeam = filled($selectedTim) ? $selectedTim : ($inputTeams[0] ?? null);
+    $timStatuses = ($teamStatusByDate ?? [])[$tanggalProgresDate]
+        ?? \App\Support\PermohonanPelaksanaProgress::teamStatusesForDate($permohonan, $tanggalProgresDate);
+    $assignedTeams = \App\Support\PermohonanPelaksanaProgress::assignedTeams($permohonan);
+
 @endphp
 
 
@@ -51,6 +60,10 @@
                         <p class="font-bold text-gray-900">
 
                             📆 Hari ke-{{ $entry->hari_ke }} · {{ \App\Support\OperasionalPelaksanaanTime::display($entry->tanggal) }}
+
+                            @if (filled($entry->tim))
+                                · {{ $entry->tim }}
+                            @endif
 
                         </p>
 
@@ -112,17 +125,55 @@
 
                 </p>
 
+                @if (count($assignedTeams) > 1)
+                    @include('lapangan.permohonan.partials.tim-progress-status', [
+                        'statuses' => $timStatuses,
+                        'title' => 'Status tim pada tanggal ini',
+                        'panelId' => 'tim-progress-status-panel',
+                        'interactive' => true,
+                        'class' => 'mt-3',
+                    ])
+                @endif
+
             </div>
+
+            @if (filled($operatorTim))
+                <input type="hidden" name="tim_pelaksana" value="{{ $operatorTim }}">
+            @elseif (count($inputTeams) > 1)
+                <div class="sm:col-span-2">
+                    <x-lapangan.field-label for="tim_pelaksana" :required="true">Tim pelaksana (input progres)</x-lapangan.field-label>
+                    <select name="tim_pelaksana" id="tim_pelaksana" required class="lapangan-field-input">
+                        <option value="" disabled @selected(blank($selectedTim))>Pilih tim Anda</option>
+                        @foreach ($inputTeams as $tim)
+                            <option value="{{ $tim }}" @selected($selectedTim === $tim)>{{ $tim }}</option>
+                        @endforeach
+                    </select>
+                    @error('tim_pelaksana')
+                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            @endif
 
             <div class="sm:col-span-2">
                 <x-lapangan.field-label required>Petugas</x-lapangan.field-label>
-                <x-petugas-picker
-                    :team-names="$permohonan->pelaksana ?? []"
-                    :selected-ids="old('petugas_ids', [])"
-                    :rosters-by-team="$rostersByTeam ?? []"
-                    :roster-url="route('lapangan.tim-pelaksanas.roster')"
-                    variant="lapangan"
-                />
+                @if (count($inputTeams) > 1 && blank($operatorTim))
+                    <x-petugas-picker
+                        :team-names="[]"
+                        :selected-ids="old('petugas_ids', [])"
+                        :rosters-by-team="$rostersByTeam ?? []"
+                        :roster-url="route('lapangan.tim-pelaksanas.roster')"
+                        tim-select-id="tim_pelaksana"
+                        variant="lapangan"
+                    />
+                @else
+                    <x-petugas-picker
+                        :team-name="$petugasTeam"
+                        :selected-ids="old('petugas_ids', [])"
+                        :rosters-by-team="$rostersByTeam ?? []"
+                        :roster-url="route('lapangan.tim-pelaksanas.roster')"
+                        variant="lapangan"
+                    />
+                @endif
             </div>
 
         </div>
@@ -195,23 +246,17 @@
 
 
 
-    @include('admin.pemeliharaan_tamans._armada-form', [
-
-        'kinerja' => null,
-
-        'armadaRows' => old('armada'),
-
-        'armadaInventory' => $armadaInventory,
-
-        'isTimArmada' => $permohonan->usesTimArmada(),
-
-        'operatorTim' => $permohonan->usesTimArmada() ? \App\Models\PemeliharaanTaman::TIM_ARMADA : null,
-
-        'armadaVisibility' => 'always',
-
-        'armadaRequired' => false,
-
-    ])
+    @if ($showArmadaForm)
+        @include('admin.pemeliharaan_tamans._armada-form', [
+            'kinerja' => null,
+            'armadaRows' => old('armada'),
+            'armadaInventory' => $armadaInventory,
+            'isTimArmada' => true,
+            'operatorTim' => \App\Models\PemeliharaanTaman::TIM_ARMADA,
+            'armadaVisibility' => 'always',
+            'armadaRequired' => false,
+        ])
+    @endif
 
 
 

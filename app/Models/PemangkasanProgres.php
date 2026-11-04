@@ -15,6 +15,7 @@ class PemangkasanProgres extends Model
 
     protected $fillable = [
         'pemangkasan_id',
+        'tim',
         'tanggal',
         'hari_ke',
         'jumlah_personil',

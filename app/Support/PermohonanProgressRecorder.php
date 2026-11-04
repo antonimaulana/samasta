@@ -19,10 +19,25 @@ class PermohonanProgressRecorder
             abort(403, 'Permohonan ini sudah selesai dan tidak dapat diubah.');
         }
 
-        $validated = $this->validate($request, $permohonan);
-        $armadaRows = ArmadaAssignment::extractRows($request);
+        $user = $request->user();
+        $inputTim = PermohonanPelaksanaProgress::resolveInputTim(
+            $user,
+            $permohonan,
+            $request->input('tim_pelaksana'),
+        );
 
-        $this->recordDailyProgress($permohonan, $request, $validated, $armadaRows);
+        if ($inputTim === null && PermohonanPelaksanaProgress::inputTeamsForUser($user, $permohonan) !== []) {
+            throw ValidationException::withMessages([
+                'tim_pelaksana' => 'Pilih tim pelaksana untuk progres ini.',
+            ]);
+        }
+
+        $validated = $this->validate($request, $permohonan, $inputTim);
+        $armadaRows = PermohonanPelaksanaProgress::shouldCollectArmada($user, $inputTim)
+            ? ArmadaAssignment::extractRows($request)
+            : [];
+
+        $this->recordDailyProgress($permohonan, $request, $validated, $armadaRows, $inputTim);
 
         $permohonan->update([
             'status' => $validated['status'],
@@ -60,6 +75,7 @@ class PermohonanProgressRecorder
         Request $request,
         array $validated,
         array $armadaRows,
+        ?string $inputTim,
     ): PemangkasanProgres {
         $tanggal = $validated['tanggal_progres'];
         $datePart = OperasionalPelaksanaanTime::datePart($tanggal);
@@ -83,17 +99,25 @@ class PermohonanProgressRecorder
             ]);
         }
 
-        $entry = $permohonan->progres()
-            ->whereDate('tanggal', $datePart)
-            ->first();
+        $entryQuery = $permohonan->progres()->whereDate('tanggal', $datePart);
+
+        if ($inputTim !== null) {
+            $entryQuery->where('tim', $inputTim);
+        } else {
+            $entryQuery->whereNull('tim');
+        }
+
+        $entry = $entryQuery->first();
 
         if (! $entry) {
             $entry = new PemangkasanProgres([
                 'pemangkasan_id' => $permohonan->id,
+                'tim' => $inputTim,
                 'tanggal' => $tanggal,
             ]);
         }
 
+        $entry->tim = $inputTim;
         $entry->hari_ke = PemangkasanSchedule::hariKe($permohonan->tanggal_eksekusi, $tanggal);
         $entry->jumlah_personil = (int) $validated['jumlah_personil'];
         $entry->catatan = $validated['catatan'] ?? null;
@@ -110,7 +134,13 @@ class PermohonanProgressRecorder
 
         $entry->save();
         ArmadaAssignment::sync($entry, $armadaRows);
-        PetugasAssignment::syncFromRequest($entry, $request, is_array($permohonan->pelaksana) ? $permohonan->pelaksana : []);
+
+        if ($inputTim !== null) {
+            PetugasAssignment::syncFromRequestForTim($entry, $request, $inputTim);
+        } else {
+            $petugasTeams = is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [];
+            PetugasAssignment::syncFromRequest($entry, $request, $petugasTeams);
+        }
 
         return $entry;
     }
@@ -118,13 +148,14 @@ class PermohonanProgressRecorder
     /**
      * @return array<string, mixed>
      */
-    private function validate(Request $request, Pemangkasan $permohonan): array
+    private function validate(Request $request, Pemangkasan $permohonan, ?string $inputTim): array
     {
         $isPohonTumbang = $permohonan->jenis_layanan === 'Penanganan Pohon Tumbang';
         $isMiniGarden = $permohonan->jenis_layanan === 'Pemasangan Mini Garden';
 
-        $teamNames = is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [];
-        $rosterExists = PetugasAssignment::rosterExistsForTeams($teamNames);
+        $user = $request->user();
+        $inputTeams = PermohonanPelaksanaProgress::inputTeamsForUser($user, $permohonan);
+        $rosterExists = PetugasAssignment::rosterExistsForTim($inputTim);
 
         $rules = [
             'status' => ['required', Rule::in($permohonan->lapanganStatusOptions())],
@@ -138,8 +169,15 @@ class PermohonanProgressRecorder
                 'nullable',
                 'date',
             ],
-            ...ArmadaAssignment::validationRules(false),
         ];
+
+        if (count($inputTeams) > 1) {
+            $rules['tim_pelaksana'] = ['required', 'string', Rule::in($inputTeams)];
+        }
+
+        if (PermohonanPelaksanaProgress::shouldCollectArmada($user, $inputTim)) {
+            $rules = array_merge($rules, ArmadaAssignment::validationRules(false));
+        }
 
         if ($isPohonTumbang) {
             $rules['dampak'] = ['nullable', 'string'];
@@ -152,8 +190,12 @@ class PermohonanProgressRecorder
             'catatan' => 'catatan pekerjaan',
             'tanggal_penyelesaian' => 'tanggal penyelesaian',
             'dampak' => 'dampak',
-            ...ArmadaAssignment::validationAttributes(),
+            'tim_pelaksana' => 'tim pelaksana',
         ];
+
+        if (PermohonanPelaksanaProgress::shouldCollectArmada($user, $inputTim)) {
+            $attributes = array_merge($attributes, ArmadaAssignment::validationAttributes());
+        }
 
         if (! $isMiniGarden) {
             foreach (PemeliharaanTaman::FOTO_FIELDS as $field => $label) {
@@ -161,11 +203,17 @@ class PermohonanProgressRecorder
                     'nullable',
                     'image',
                     'max:4096',
-                    Rule::requiredIf(function () use ($request, $permohonan, $field) {
+                    Rule::requiredIf(function () use ($request, $permohonan, $field, $inputTim) {
                         $tanggal = OperasionalPelaksanaanTime::datePart(
                             $request->input('tanggal_progres', now()->toDateString())
                         );
-                        $existing = $permohonan->progres()->whereDate('tanggal', $tanggal)->first();
+                        $existingQuery = $permohonan->progres()->whereDate('tanggal', $tanggal);
+                        if ($inputTim !== null) {
+                            $existingQuery->where('tim', $inputTim);
+                        } else {
+                            $existingQuery->whereNull('tim');
+                        }
+                        $existing = $existingQuery->first();
 
                         return ! $request->hasFile($field) && ! filled($existing?->{$field});
                     }),
@@ -178,10 +226,16 @@ class PermohonanProgressRecorder
 
         $validated = $request->validate($rules, [], array_merge($attributes, PetugasAssignment::validationAttributes()));
 
-        unset($validated['armada'], $validated['petugas_ids']);
+        unset($validated['armada'], $validated['petugas_ids'], $validated['tim_pelaksana']);
 
         $validated['tanggal_progres'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal_progres']);
-        PetugasAssignment::applyValidatedPersonil($validated, $request, $teamNames);
+
+        if ($inputTim !== null) {
+            PetugasAssignment::applyValidatedPersonilForTim($validated, $request, $inputTim);
+        } else {
+            $teamNames = is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [];
+            PetugasAssignment::applyValidatedPersonil($validated, $request, $teamNames);
+        }
 
         if ($validated['status'] !== 'Selesai') {
             $validated['tanggal_penyelesaian'] = null;

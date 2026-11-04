@@ -18,15 +18,26 @@ class PermohonanProgresEntryRecorder
         }
 
         $validated = $this->validate($request, $permohonan, $entry);
-        $armadaRows = ArmadaAssignment::extractRows($request);
+        $collectArmada = filled($entry->tim)
+            ? $entry->tim === PemeliharaanTaman::TIM_ARMADA
+            : $permohonan->usesTimArmada();
+        $armadaRows = $collectArmada ? ArmadaAssignment::extractRows($request) : [];
         $tanggal = $validated['tanggal'];
 
-        if ($permohonan->progres()
+        $duplicateQuery = $permohonan->progres()
             ->where('id', '!=', $entry->id)
-            ->whereDate('tanggal', $tanggal)
-            ->exists()) {
+            ->whereDate('tanggal', OperasionalPelaksanaanTime::datePart($tanggal));
+
+        $tim = $entry->tim;
+        if ($tim !== null) {
+            $duplicateQuery->where('tim', $tim);
+        } else {
+            $duplicateQuery->whereNull('tim');
+        }
+
+        if ($duplicateQuery->exists()) {
             throw ValidationException::withMessages([
-                'tanggal' => 'Sudah ada progres untuk tanggal tersebut.',
+                'tanggal' => 'Sudah ada progres untuk tim dan tanggal tersebut.',
             ]);
         }
 
@@ -49,11 +60,17 @@ class PermohonanProgresEntryRecorder
 
         $entry->save();
         ArmadaAssignment::sync($entry, $armadaRows);
-        PetugasAssignment::syncFromRequest(
-            $entry,
-            $request,
-            is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [],
-        );
+
+        if (filled($entry->tim)) {
+            PetugasAssignment::syncFromRequestForTim($entry, $request, $entry->tim);
+        } else {
+            PetugasAssignment::syncFromRequest(
+                $entry,
+                $request,
+                is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [],
+            );
+        }
+
         PemangkasanSchedule::recalculate($permohonan);
 
         return $entry->fresh(['armadas', 'petugas']);
@@ -67,21 +84,30 @@ class PermohonanProgresEntryRecorder
         $isMiniGarden = $permohonan->jenis_layanan === 'Pemasangan Mini Garden';
 
         $teamNames = is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [];
-        $rosterExists = PetugasAssignment::rosterExistsForTeams($teamNames);
+        $inputTim = filled($entry->tim) ? $entry->tim : null;
+        $rosterExists = $inputTim !== null
+            ? PetugasAssignment::rosterExistsForTim($inputTim)
+            : PetugasAssignment::rosterExistsForTeams($teamNames);
+        $collectArmada = $inputTim !== null
+            ? $inputTim === PemeliharaanTaman::TIM_ARMADA
+            : $permohonan->usesTimArmada();
 
         $rules = [
             'tanggal' => ['required', 'date'],
             'jumlah_personil' => [$rosterExists ? 'nullable' : 'required', 'integer', 'min:1', 'max:9999'],
             'catatan' => ['nullable', 'string'],
-            ...ArmadaAssignment::validationRules(false),
         ];
 
         $attributes = [
             'tanggal' => 'tanggal & waktu pelaksanaan',
             'jumlah_personil' => 'jumlah personil',
             'catatan' => 'catatan pekerjaan',
-            ...ArmadaAssignment::validationAttributes(),
         ];
+
+        if ($collectArmada) {
+            $rules = array_merge($rules, ArmadaAssignment::validationRules(false));
+            $attributes = array_merge($attributes, ArmadaAssignment::validationAttributes());
+        }
 
         if (! $isMiniGarden) {
             foreach (PemeliharaanTaman::FOTO_FIELDS as $field => $label) {
@@ -102,7 +128,12 @@ class PermohonanProgresEntryRecorder
         unset($validated['petugas_ids']);
 
         $validated['tanggal'] = OperasionalPelaksanaanTime::normalizeInput($validated['tanggal']);
-        PetugasAssignment::applyValidatedPersonil($validated, $request, $teamNames);
+
+        if ($inputTim !== null) {
+            PetugasAssignment::applyValidatedPersonilForTim($validated, $request, $inputTim);
+        } else {
+            PetugasAssignment::applyValidatedPersonil($validated, $request, $teamNames);
+        }
 
         if (! PemangkasanSchedule::tanggalWithinSchedule($permohonan, $validated['tanggal'])) {
             throw ValidationException::withMessages([

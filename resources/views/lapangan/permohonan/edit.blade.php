@@ -87,6 +87,10 @@
                 'permohonan' => $permohonan,
                 'armadaInventory' => $armadaInventory,
                 'rostersByTeam' => $rostersByTeam ?? [],
+                'inputTeams' => $inputTeams ?? [],
+                'operatorTim' => $operatorTim ?? null,
+                'showArmadaForm' => $showArmadaForm ?? false,
+                'teamStatusByDate' => $teamStatusByDate ?? [],
             ])
 
             <div class="lapangan-form-actions mt-8 space-y-3 sm:border-t sm:border-gray-100 sm:pt-6">
@@ -110,6 +114,42 @@
             if (!form) {
                 return;
             }
+
+            const teamStatusByDate = @json($teamStatusByDate ?? []);
+            const statusPanel = document.getElementById('tim-progress-status-panel');
+
+            function refreshTeamStatusPanel() {
+                if (! statusPanel) {
+                    return;
+                }
+
+                const tanggalInput = document.getElementById('tanggal_progres');
+                const datePart = (tanggalInput?.value || '').split('T')[0];
+                const statuses = teamStatusByDate[datePart] || teamStatusByDate[@json(now()->toDateString())] || {};
+
+                statusPanel.querySelectorAll('[data-tim-status]').forEach(function (chip) {
+                    const tim = chip.dataset.timStatus;
+                    const done = statuses[tim] === @json(\App\Support\PermohonanPelaksanaProgress::STATUS_DIKERJAKAN);
+                    chip.classList.toggle('border-emerald-200', done);
+                    chip.classList.toggle('bg-emerald-50', done);
+                    chip.classList.toggle('text-emerald-900', done);
+                    chip.classList.toggle('border-gray-200', ! done);
+                    chip.classList.toggle('bg-gray-50', ! done);
+                    chip.classList.toggle('text-gray-600', ! done);
+                    const badge = chip.querySelector('[data-tim-status-label]');
+                    if (badge) {
+                        badge.textContent = done ? 'Dikerjakan' : 'Menunggu';
+                        badge.classList.toggle('bg-emerald-200', done);
+                        badge.classList.toggle('text-emerald-900', done);
+                        badge.classList.toggle('bg-gray-200', ! done);
+                        badge.classList.toggle('text-gray-700', ! done);
+                    }
+                });
+            }
+
+            document.getElementById('tanggal_progres')?.addEventListener('change', refreshTeamStatusPanel);
+            document.getElementById('tanggal_progres')?.addEventListener('input', refreshTeamStatusPanel);
+            refreshTeamStatusPanel();
 
             const mulai = @json($permohonan->tanggal_eksekusi->format('Y-m-d'));
             const akhir = @json(($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->format('Y-m-d'));

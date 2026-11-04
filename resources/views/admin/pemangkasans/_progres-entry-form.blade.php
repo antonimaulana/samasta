@@ -13,10 +13,18 @@
         />
     </div>
 
+    @if (filled($progres->tim))
+        <div class="md:col-span-2">
+            <p class="text-sm font-medium text-gray-700">Tim pelaksana</p>
+            <p class="mt-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-semibold text-gray-900">{{ $progres->tim }}</p>
+        </div>
+    @endif
+
     <div class="md:col-span-2">
         <x-lapangan.field-label required>Petugas</x-lapangan.field-label>
         <x-petugas-picker
-            :team-names="$pemangkasan->pelaksana ?? []"
+            :team-name="filled($progres->tim) ? $progres->tim : null"
+            :team-names="filled($progres->tim) ? [] : ($pemangkasan->pelaksana ?? [])"
             :selected-ids="old('petugas_ids', $progres->petugas?->pluck('id')?->all() ?? [])"
             :rosters-by-team="$rostersByTeam ?? []"
             :roster-url="route('admin.tim-pelaksanas.roster')"
@@ -51,11 +59,18 @@
     </div>
 </div>
 
-@include('admin.pemeliharaan_tamans._armada-form', [
-    'kinerja' => $progres,
-    'armadaInventory' => $armadaInventory,
-    'isTimArmada' => $pemangkasan->usesTimArmada(),
-    'operatorTim' => $pemangkasan->usesTimArmada() ? \App\Models\PemeliharaanTaman::TIM_ARMADA : null,
-    'armadaVisibility' => 'always',
-    'armadaRequired' => false,
-])
+@php
+    $showAdminArmada = filled($progres->tim)
+        ? $progres->tim === \App\Models\PemeliharaanTaman::TIM_ARMADA
+        : $pemangkasan->usesTimArmada();
+@endphp
+@if ($showAdminArmada)
+    @include('admin.pemeliharaan_tamans._armada-form', [
+        'kinerja' => $progres,
+        'armadaInventory' => $armadaInventory,
+        'isTimArmada' => true,
+        'operatorTim' => \App\Models\PemeliharaanTaman::TIM_ARMADA,
+        'armadaVisibility' => 'always',
+        'armadaRequired' => false,
+    ])
+@endif

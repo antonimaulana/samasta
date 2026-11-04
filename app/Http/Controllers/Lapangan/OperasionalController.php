@@ -15,6 +15,7 @@ use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
 use App\Support\PemangkasanProgresPdf;
 use App\Support\PemeliharaanTamanRecorder;
+use App\Support\PermohonanPelaksanaProgress;
 use App\Support\PermohonanProgressRecorder;
 use App\Support\PetugasRosterBuilder;
 use App\Support\TimPelaksanaResolver;
@@ -193,7 +194,7 @@ class OperasionalController extends Controller
 
         $permohonans = $scope->scopePemangkasan(
             Pemangkasan::query()
-                ->with(['taman'])
+                ->with(['taman', 'progres'])
                 ->where('status', $status)
                 ->when($status === 'Selesai', fn ($q) => $q->orderByDesc('tanggal_penyelesaian'))
                 ->when($status !== 'Selesai', fn ($q) => $q->orderBy('tanggal_eksekusi'))
@@ -222,13 +223,33 @@ class OperasionalController extends Controller
     {
         $this->ensureCanUpdatePermohonan($request, $pemangkasan);
 
-        $pemangkasan->load(['taman', 'progres.petugas']);
+        $pemangkasan->load(['taman', 'progres.petugas', 'progres.armadas']);
+
+        $user = $request->user();
+        $inputTeams = PermohonanPelaksanaProgress::inputTeamsForUser($user, $pemangkasan);
+        $operatorTim = count($inputTeams) === 1 ? $inputTeams[0] : null;
+        $teamStatusDates = collect([now()->toDateString()])
+            ->merge($pemangkasan->progres->map(
+                fn ($entry) => OperasionalPelaksanaanTime::datePart($entry->tanggal),
+            ))
+            ->unique()
+            ->values();
+
+        $teamStatusByDate = $teamStatusDates
+            ->mapWithKeys(fn (string $date) => [
+                $date => PermohonanPelaksanaProgress::teamStatusesForDate($pemangkasan, $date),
+            ])
+            ->all();
 
         return view('lapangan.permohonan.edit', [
             'menuItem' => LapanganMenu::find('permohonan', $request->user()),
             'permohonan' => $pemangkasan,
             'armadaInventory' => ArmadaAssignment::inventory(),
             'rostersByTeam' => app(PetugasRosterBuilder::class)->allActiveByTeam(),
+            'inputTeams' => $inputTeams,
+            'operatorTim' => $operatorTim,
+            'showArmadaForm' => PermohonanPelaksanaProgress::shouldCollectArmada($user, $operatorTim),
+            'teamStatusByDate' => $teamStatusByDate,
         ]);
     }
 

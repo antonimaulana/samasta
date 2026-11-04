@@ -120,6 +120,9 @@
                                 <div class="flex flex-wrap items-start justify-between gap-2">
                                     <p class="font-semibold text-gray-900">
                                         Hari ke-{{ $entry->hari_ke }} · {{ \App\Support\OperasionalPelaksanaanTime::display($entry->tanggal) }}
+                                        @if (filled($entry->tim))
+                                            · {{ $entry->tim }}
+                                        @endif
                                         · {{ $entry->jumlah_personil }} personil
                                     </p>
                                     <x-admin.table-actions>

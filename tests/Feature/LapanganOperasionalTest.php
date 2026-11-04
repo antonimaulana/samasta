@@ -410,8 +410,68 @@ class LapanganOperasionalTest extends TestCase
 
         $this->assertDatabaseHas('pemangkasan_progres', [
             'pemangkasan_id' => $permohonan->id,
+            'tim' => 'Tim Wilayah 1',
             'jumlah_personil' => 2,
         ]);
+    }
+
+    public function test_multi_team_permohonan_progress_is_tracked_per_team(): void
+    {
+        $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();
+        $team2 = TimPelaksana::where('nama', 'Tim Wilayah 2')->firstOrFail();
+        $operator1 = User::factory()->operatorTeams([$team1->id])->create();
+        $operator2 = User::factory()->operatorTeams([$team2->id])->create();
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Multi Tim',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $team1->kelurahans()->first()->id ?? Kelurahan::query()->value('id'),
+            'luasan' => 500,
+            'alamat' => 'Alamat multi tim',
+            'deskripsi' => 'Deskripsi multi tim.',
+        ]);
+
+        $permohonan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemangkasan Pohon',
+            'taman_id' => $taman->id,
+            'lokasi_pohon' => $taman->nama_taman,
+            'asal' => 'Warga',
+            'penanggungjawab' => 'Budi',
+            'kontak_permohonan' => '081234567890',
+            'tanggal_permohonan' => now()->toDateString(),
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => now()->toDateString(),
+            'total_hari' => 1,
+            'pelaksana' => ['Tim Wilayah 1', 'Tim Wilayah 2'],
+            'status' => 'Rencana',
+        ]);
+
+        $this->actingAs($operator1)
+            ->post(route('lapangan.permohonan.update', $permohonan), $this->progressPayload([
+                'status' => 'Diproses',
+            ]))
+            ->assertRedirect(route('lapangan.permohonan.index'));
+
+        $permohonan->refresh();
+        $this->assertSame(0, (int) $permohonan->hari_tercapai);
+
+        $this->actingAs($operator2)
+            ->post(route('lapangan.permohonan.update', $permohonan), $this->progressPayload([
+                'status' => 'Diproses',
+                'tim_pelaksana' => 'Tim Wilayah 2',
+            ]))
+            ->assertRedirect(route('lapangan.permohonan.index'));
+
+        $permohonan->refresh();
+        $this->assertSame(1, (int) $permohonan->hari_tercapai);
+        $this->assertDatabaseCount('pemangkasan_progres', 2);
+
+        $this->actingAs($operator1)
+            ->get(route('lapangan.permohonan.edit', $permohonan))
+            ->assertOk()
+            ->assertSee('Menunggu', false)
+            ->assertSee('Dikerjakan', false);
     }
 
     public function test_guest_can_list_and_update_permohonan_progress(): void

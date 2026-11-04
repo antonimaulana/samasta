@@ -28,6 +28,20 @@
             </div>
         </div>
 
+        @php
+            $assignedTeams = \App\Support\PermohonanPelaksanaProgress::assignedTeams($permohonan);
+            $todayTeamStatuses = count($assignedTeams) > 1 && $permohonan->status !== 'Selesai'
+                ? \App\Support\PermohonanPelaksanaProgress::teamStatusesForDate($permohonan, now()->toDateString())
+                : [];
+        @endphp
+        @if ($todayTeamStatuses !== [])
+            @include('lapangan.permohonan.partials.tim-progress-status', [
+                'statuses' => $todayTeamStatuses,
+                'title' => 'Progres tim hari ini',
+                'class' => 'mt-3',
+            ])
+        @endif
+
         @if ($isLate)
             <p class="mt-2 flex items-center gap-1 text-xs font-bold text-red-600">
                 <span aria-hidden="true">⏰</span> Terlambat dari jadwal — segera tindak lanjuti

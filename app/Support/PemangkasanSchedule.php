@@ -62,7 +62,7 @@ class PemangkasanSchedule
             $permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi,
         ));
 
-        $hariTercapai = $permohonan->progres()->count();
+        $hariTercapai = PermohonanPelaksanaProgress::countHariTercapai($permohonan);
 
         $permohonan->forceFill([
             'total_hari' => $totalHari,
