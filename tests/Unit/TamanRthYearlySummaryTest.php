@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Support\TamanRthYearlySummary;
 use Database\Seeders\WilayahBatamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class TamanRthYearlySummaryTest extends TestCase
@@ -22,7 +21,7 @@ class TamanRthYearlySummaryTest extends TestCase
         $this->seed(WilayahBatamSeeder::class);
     }
 
-    public function test_builds_yearly_metrics_from_taman_data_verified_at(): void
+    public function test_builds_yearly_metrics_from_tahun_pembangunan(): void
     {
         $kelurahanId = Kelurahan::query()->value('id');
 
@@ -33,7 +32,7 @@ class TamanRthYearlySummaryTest extends TestCase
             'luasan' => 1000,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2024-06-01'),
+            'tahun_pembangunan' => 2024,
         ]);
 
         Taman::create([
@@ -43,7 +42,7 @@ class TamanRthYearlySummaryTest extends TestCase
             'luasan' => 2000,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2025-12-31'),
+            'tahun_pembangunan' => 2025,
         ]);
 
         Taman::create([
@@ -53,12 +52,12 @@ class TamanRthYearlySummaryTest extends TestCase
             'luasan' => 500,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2026-03-01'),
+            'tahun_pembangunan' => 2026,
         ]);
 
         $summary = app(TamanRthYearlySummary::class)->build();
 
-        $this->assertSame([2025, 2026, 2027], $summary['years']);
+        $this->assertSame([2025, 2026], $summary['years']);
 
         $rowA = collect($summary['rows'])->firstWhere('key', 'A');
         $rowB = collect($summary['rows'])->firstWhere('key', 'B');
@@ -70,12 +69,10 @@ class TamanRthYearlySummaryTest extends TestCase
 
         $this->assertSame(3000, $rowA['values'][2025]);
         $this->assertSame(3500, $rowA['values'][2026]);
-        $this->assertSame(3500, $rowA['values'][2027]);
         $this->assertSame(2, $rowB['values'][2025]);
         $this->assertSame(3, $rowB['values'][2026]);
-        $this->assertSame(3, $rowB['values'][2027]);
         $this->assertSame(52_990_000, $rowC['values'][2025]);
-        $this->assertSame(52_990_000, $rowC['values'][2027]);
+        $this->assertSame(52_990_000, $rowC['values'][2026]);
         $this->assertEqualsWithDelta(round(3000 / 52_990_000 * 100, 2), $rowD['values'][2025], 0.0001);
         $this->assertSame(0, $rowE['values'][2025]);
         $this->assertSame($rowB['values'][2025], $rowF['values'][2025]);
@@ -94,7 +91,7 @@ class TamanRthYearlySummaryTest extends TestCase
             'luasan' => 1_000_000,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2025-01-01'),
+            'tahun_pembangunan' => 2025,
         ]);
 
         $summary = app(TamanRthYearlySummary::class)->build();
@@ -109,55 +106,63 @@ class TamanRthYearlySummaryTest extends TestCase
         $this->assertEqualsWithDelta(round($e / $a * 100, 2), $rowG['values'][2025], 0.0001);
     }
 
-    public function test_year_column_is_cumulative_through_end_of_that_year(): void
+    public function test_year_column_is_cumulative_by_tahun_pembangunan(): void
     {
         $kelurahanId = Kelurahan::query()->value('id');
 
         Taman::create([
-            'nama_taman' => 'Taman Awal 2024',
+            'nama_taman' => 'Taman 2024',
             'kategori' => 'Taman Kota',
             'kelurahan_id' => $kelurahanId,
             'luasan' => 100,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2024-01-15'),
+            'tahun_pembangunan' => 2024,
         ]);
 
         Taman::create([
-            'nama_taman' => 'Taman Akhir 2025',
+            'nama_taman' => 'Taman 2025',
             'kategori' => 'Taman Kota',
             'kelurahan_id' => $kelurahanId,
             'luasan' => 200,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2025-12-31 23:59:59'),
+            'tahun_pembangunan' => 2025,
         ]);
 
         Taman::create([
-            'nama_taman' => 'Taman Awal 2026',
+            'nama_taman' => 'Taman 2026',
             'kategori' => 'Taman Kota',
             'kelurahan_id' => $kelurahanId,
             'luasan' => 300,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2026-01-01 00:00:01'),
+            'tahun_pembangunan' => 2026,
         ]);
 
         Taman::create([
-            'nama_taman' => 'Taman Masa Depan 2027',
+            'nama_taman' => 'Taman 2027',
             'kategori' => 'Taman Kota',
             'kelurahan_id' => $kelurahanId,
             'luasan' => 400,
             'alamat' => 'Alamat',
             'deskripsi' => 'Deskripsi',
-            'data_verified_at' => Carbon::parse('2027-06-01'),
+            'tahun_pembangunan' => 2027,
+        ]);
+
+        Taman::create([
+            'nama_taman' => 'Tanpa Tahun',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahanId,
+            'luasan' => 999,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
         ]);
 
         $summary = app(TamanRthYearlySummary::class)->build();
         $rowB = collect($summary['rows'])->firstWhere('key', 'B');
 
-        $this->assertSame(2, $rowB['values'][2025], 'Kolom 2025: 2024 ke bawah + verifikasi s.d. akhir 2025 (tanpa 2026+)');
-        $this->assertSame(3, $rowB['values'][2026], 'Kolom 2026: termasuk 2024, 2025, dan 2026');
-        $this->assertSame(4, $rowB['values'][2027], 'Kolom 2027: semua termasuk verifikasi 2027');
+        $this->assertSame(2, $rowB['values'][2025], 'Kolom 2025: tahun pembangunan ≤ 2025');
+        $this->assertSame(3, $rowB['values'][2026], 'Kolom 2026: tahun pembangunan ≤ 2026 (tanpa 2027+)');
     }
 }

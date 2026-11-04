@@ -10,11 +10,23 @@ use Illuminate\Support\Facades\Cache;
 class TamanMapData
 {
     /**
+     * Versi cache — berubah saat ada taman diubah agar pin peta tidak tertinggal data lama.
+     */
+    public static function cacheVersion(): string
+    {
+        $latest = Taman::query()->max('updated_at');
+
+        return $latest !== null ? (string) $latest : '0';
+    }
+
+    /**
      * @param  Builder<Taman>  $query
      * @return Collection<int, array<string, mixed>>
      */
     public static function mapPoints(Builder $query, string $cacheKey): Collection
     {
+        $cacheKey = md5($cacheKey.'|'.self::cacheVersion());
+
         return Cache::remember(
             'taman_map_points:'.$cacheKey,
             now()->addMinutes(10),

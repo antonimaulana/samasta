@@ -108,6 +108,8 @@ class TamanController extends Controller
 
             $selectedFasilitas,
 
+            TamanMapData::cacheVersion(),
+
         ]));
 
 

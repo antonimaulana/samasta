@@ -31,16 +31,20 @@ class RthWilayahStatisticsTest extends TestCase
             'deskripsi' => 'Deskripsi taman statistik rth test.',
             'status_data' => Taman::STATUS_DATA_LENGKAP,
             'data_verified_at' => now(),
+            'tahun_pembangunan' => 2025,
         ]);
 
         app(PublicRthStatisticsBuilder::class)->build(fresh: true);
 
         $this->get(route('rth.index'))
             ->assertOk()
-            ->assertSee('Pedoman Data Resmi')
+            ->assertSee('Disperkimtan Kota Batam')
+            ->assertDontSee('Pedoman Data Resmi')
             ->assertSee('Statistik Ruang Terbuka Hijau Kota Batam')
             ->assertSee('RTH per Kategori')
             ->assertSee('Capaian RTH per Tahun')
+            ->assertDontSee('selaras Laporan Taman SIMTAMAN')
+            ->assertDontSee('(A–G)')
             ->assertDontSee('Tentang data ini')
             ->assertSee('Batam Kota')
             ->assertSee('Belian')

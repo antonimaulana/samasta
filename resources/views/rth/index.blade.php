@@ -6,7 +6,7 @@
 
 @section('title', 'Statistik RTH Kota Batam')
 
-@section('meta_description', 'Pedoman data resmi Ruang Terbuka Hijau (RTH) Kota Batam — luas, lokasi, capaian RTRW, distribusi kategori, dan rekap per wilayah administratif dari SIMTAMAN.')
+@section('meta_description', 'Statistik Ruang Terbuka Hijau (RTH) Kota Batam — luas, lokasi, capaian RTRW, distribusi kategori, dan rekap per wilayah administratif dari SIMTAMAN.')
 
 @section('content')
     {{-- Hero --}}
@@ -15,42 +15,42 @@
         <div class="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-lime-300/20 blur-3xl"></div>
 
         <div class="relative">
-            <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-50 ring-1 ring-white/20">
-                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                    Pedoman Data Resmi
+            <div class="flex flex-wrap items-center gap-2 text-xs text-emerald-100/90">
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="h-4 w-4 shrink-0 text-emerald-50" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span class="font-semibold text-emerald-50">Disperkimtan Kota Batam</span>
                 </span>
-                <span class="text-xs text-emerald-100/90">Disperakimtan Kota Batam · SIMTAMAN</span>
+                <span class="text-emerald-100/70">· SIMTAMAN</span>
             </div>
 
-            <h1 class="mt-4 max-w-3xl text-2xl font-black tracking-tight sm:text-4xl lg:text-5xl">
+            <h1 class="mt-4 text-lg font-black tracking-tight whitespace-nowrap sm:text-2xl md:text-3xl lg:text-4xl">
                 Statistik Ruang Terbuka Hijau Kota Batam
             </h1>
             <p class="mt-3 text-xs text-emerald-100/85 sm:text-sm">
-                Diperbarui {{ PublicRthStatisticsBuilder::formatSnapshot($snapshotAt) }} · selaras Laporan Taman SIMTAMAN
+                Diperbarui {{ PublicRthStatisticsBuilder::formatSnapshot($snapshotAt) }}
             </p>
 
             @if ($hasData)
                 <div class="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4 xl:grid-cols-4">
-                    <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-sm">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-100">Total Luas Dikelola</p>
-                        <p class="mt-2 text-2xl font-black sm:text-3xl">{{ PublicRthStatisticsBuilder::formatArea($totalLuasan) }}</p>
-                        <p class="mt-1 text-xs text-emerald-100/80">meter persegi (m²)</p>
-                    </div>
                     <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-sm">
                         <p class="text-xs font-semibold uppercase tracking-wide text-emerald-100">Total Lokasi</p>
                         <p class="mt-2 text-3xl font-black">{{ PublicRthStatisticsBuilder::formatCount($totalTaman) }}</p>
                         <p class="mt-1 text-xs text-emerald-100/80">unit RTH terdaftar</p>
                     </div>
                     <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-sm">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-100">Capaian vs RTRW {{ $latestYear }}</p>
-                        <p class="mt-2 text-3xl font-black">{{ PublicRthStatisticsBuilder::formatPercent($latestMetrics['persen_rtrw'] ?? null) }}</p>
-                        <p class="mt-1 text-xs text-emerald-100/80">luas dikelola ÷ RTRW</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-100">Total Luas</p>
+                        <p class="mt-2 text-2xl font-black sm:text-3xl">{{ PublicRthStatisticsBuilder::formatArea($totalLuasan) }}</p>
+                        <p class="mt-1 text-xs text-emerald-100/80">meter persegi (m²)</p>
                     </div>
                     <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-sm">
                         <p class="text-xs font-semibold uppercase tracking-wide text-emerald-100">Luas Terpelihara {{ $latestYear }}</p>
                         <p class="mt-2 text-3xl font-black">{{ PublicRthStatisticsBuilder::formatPercent($latestMetrics['persen_terpelihara'] ?? null) }}</p>
                         <p class="mt-1 text-xs text-emerald-100/80">dari total luas dikelola</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-sm">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-emerald-100">Capaian RTH {{ $latestYear }}</p>
+                        <p class="mt-2 text-3xl font-black">{{ PublicRthStatisticsBuilder::formatPercent($latestMetrics['persen_rtrw'] ?? null) }}</p>
+                        <p class="mt-1 text-xs text-emerald-100/80">luas dikelola ÷ RTRW</p>
                     </div>
                 </div>
             @endif
@@ -63,6 +63,14 @@
             <p class="mt-2 text-sm text-amber-800">Statistik akan ditampilkan setelah taman terdaftar di SIMTAMAN.</p>
         </div>
     @else
+        <section id="capaian-tahun" class="mb-10 scroll-mt-24">
+            <div class="mb-5">
+                <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">Capaian RTH per Tahun</h2>
+            </div>
+
+            @include('rth.partials.yearly-summary-public')
+        </section>
+
         {{-- Quick nav --}}
         <nav class="mb-8 flex flex-wrap gap-2" aria-label="Navigasi bagian statistik">
             @foreach ([
@@ -252,7 +260,7 @@
                         <summary class="cursor-pointer list-none px-6 py-4 text-sm font-semibold text-emerald-800 hover:bg-emerald-50/50 [&::-webkit-details-marker]:hidden">
                             <span class="inline-flex items-center gap-2">
                                 <span class="transition group-open:rotate-90">▶</span>
-                                Detail per Kelurahan ({{ count($kelurahanGrouped) }} kecamatan)
+                                Detail per Kelurahan
                             </span>
                         </summary>
                         <div class="space-y-4 px-6 pb-6">
@@ -285,14 +293,6 @@
             </div>
         </section>
 
-        {{-- Capaian per tahun --}}
-        <section id="capaian-tahun" class="mb-10 scroll-mt-24">
-            <div class="mb-5">
-                <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">Capaian RTH per Tahun (A–G)</h2>
-            </div>
-
-            @include('rth.partials.yearly-summary-public')
-        </section>
     @endif
 @endsection
 

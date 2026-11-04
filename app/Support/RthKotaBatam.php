@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\Taman;
+
 class RthKotaBatam
 {
     /**
@@ -52,7 +54,7 @@ class RthKotaBatam
 
                 'ringkas' => 'Taman kota utama yang menjadi pusat rekreasi masyarakat.',
 
-                'accent' => ['bg' => 'from-emerald-500 to-teal-600', 'chart' => 'rgba(16, 185, 129, 0.85)'],
+                'accent' => Taman::kategoriDisplayAccent('Taman Kota'),
 
             ],
 
@@ -70,7 +72,7 @@ class RthKotaBatam
 
                 'ringkas' => 'Ruangs hijau skala lingkungan di berbagai permukiman.',
 
-                'accent' => ['bg' => 'from-lime-500 to-green-600', 'chart' => 'rgba(34, 197, 94, 0.85)'],
+                'accent' => Taman::kategoriDisplayAccent('Taman Lingkungan'),
 
             ],
 
@@ -88,7 +90,7 @@ class RthKotaBatam
 
                 'ringkas' => 'Jalur hijau sepanjang ruas jalan untuk kesegaran urban.',
 
-                'accent' => ['bg' => 'from-teal-500 to-cyan-600', 'chart' => 'rgba(20, 184, 166, 0.85)'],
+                'accent' => Taman::kategoriDisplayAccent('Jalur Hijau Jalan'),
 
             ],
 
@@ -106,7 +108,7 @@ class RthKotaBatam
 
                 'ringkas' => 'Kawasan konservasi dan edukasi keanekaragaman flora.',
 
-                'accent' => ['bg' => 'from-green-600 to-emerald-700', 'chart' => 'rgba(5, 150, 105, 0.85)'],
+                'accent' => Taman::kategoriDisplayAccent('Kebun Raya'),
 
             ],
 
@@ -124,7 +126,7 @@ class RthKotaBatam
 
                 'ringkas' => 'Tempat pemakaman umum dengan penataan ruang terbuka hijau.',
 
-                'accent' => ['bg' => 'from-slate-500 to-slate-600', 'chart' => 'rgba(100, 116, 139, 0.85)'],
+                'accent' => Taman::kategoriDisplayAccent('TPU'),
 
             ],
 
@@ -152,7 +154,7 @@ class RthKotaBatam
             'nama' => $kategori,
             'icon' => '🌿',
             'ringkas' => 'Kategori RTH terdaftar di SIMTAMAN.',
-            'accent' => ['bg' => 'from-emerald-500 to-teal-600', 'chart' => 'rgba(16, 185, 129, 0.85)'],
+            'accent' => Taman::kategoriDisplayAccent($kategori),
         ];
     }
 }

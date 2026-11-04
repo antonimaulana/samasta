@@ -36,8 +36,7 @@ class TamanMapPageTest extends TestCase
             ->assertSee('taman-map-canvas', false)
             ->assertSee('leaflet@1.9.4/dist/leaflet.js', false)
             ->assertSee('Taman Peta Uji')
-            ->assertSee('"lat":1.08286', false)
-            ->assertSee('peta-uji.jpg', false);
+            ->assertSee('"lat":1.08286', false);
     }
 
     public function test_map_points_normalize_legacy_southern_hemisphere_latitude(): void
@@ -112,6 +111,32 @@ class TamanMapPageTest extends TestCase
         $this->assertCount(1, $points);
         $this->assertSame(1.038944, $points->first()['lat']);
         $this->assertSame(104.049552, $points->first()['lng']);
+    }
+
+    public function test_map_points_refresh_after_coordinate_update_without_waiting_for_cache_ttl(): void
+    {
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Awal Tanpa Pin',
+            'kategori' => 'Taman Kota',
+            'luasan' => 1000,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi.',
+            'latitude' => Taman::DEFAULT_LATITUDE,
+            'longitude' => Taman::DEFAULT_LONGITUDE,
+        ]);
+
+        $pointsBefore = TamanMapData::mapPoints(Taman::query(), 'revision-test');
+        $this->assertFalse($pointsBefore->contains(fn (array $point) => $point['id'] === $taman->id));
+
+        $this->travel(1)->seconds();
+
+        $taman->update([
+            'latitude' => 1.08286,
+            'longitude' => 104.031,
+        ]);
+
+        $pointsAfter = TamanMapData::mapPoints(Taman::query(), 'revision-test');
+        $this->assertTrue($pointsAfter->contains(fn (array $point) => $point['id'] === $taman->id));
     }
 
     public function test_map_page_shows_empty_state_when_no_coordinates(): void

@@ -84,7 +84,7 @@
 
     <x-admin.collapsible-card
         title="Capaian Ruang Terbuka Hijau (RTH) per Tahun"
-        description="Kolom tahun Y: lokasi dengan verifikasi data s.d. 31 Des Y (kumulatif Y ke bawah, termasuk Y)">
+        description="{{ \App\Support\TamanRthYearlySummary::COLUMN_RULE_LABEL }}">
         @include('admin.taman_laporan.partials.rth-yearly-summary')
     </x-admin.collapsible-card>
 

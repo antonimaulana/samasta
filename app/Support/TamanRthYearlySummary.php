@@ -5,11 +5,9 @@ namespace App\Support;
 use App\Models\Taman;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
-
 /**
  * Capaian RTH per tahun (Laporan Taman), baris a–g:
- * a = jumlah luas RTH dikelola (kumulatif tahun verifikasi ≤ kolom tahun)
+ * a = jumlah luas RTH dikelola (kumulatif tahun pembangunan ≤ kolom tahun)
  * b = jumlah lokasi (unit), idem
  * c = luas RTH publik RTRW (tetap)
  * d = a ÷ c (%)
@@ -17,14 +15,11 @@ use Illuminate\Support\Carbon;
  * f = b
  * g = e ÷ a (%)
  *
- * Aturan kolom tahun Y: lokasi dihitung jika pemutakhiran/verifikasi data
- * pada atau sebelum 31 Desember Y (termasuk seluruh tahun Y dan tahun-tahun
- * sebelumnya). Lokasi dengan verifikasi setelah Y tidak masuk kolom Y.
- * Lokasi tanpa tanggal verifikasi dianggap ikut semua kolom (legacy).
+ * Aturan kolom tahun Y: lokasi dihitung jika tahun pembangunan ≤ Y.
  */
 class TamanRthYearlySummary
 {
-    public const COLUMN_RULE_LABEL = 'Kolom tahun Y = lokasi dengan verifikasi data s.d. 31 Des Y (Y ke bawah, termasuk Y).';
+    public const COLUMN_RULE_LABEL = 'Kolom tahun Y = RTH dengan tahun pembangunan Y ke bawah (≤ Y).';
     /**
      * @return list<int>
      */
@@ -133,17 +128,11 @@ class TamanRthYearlySummary
     }
 
     /**
-     * Kolom tahun Y: verifikasi ≤ akhir tahun Y (kumulatif “Y ke bawah”), atau belum pernah diverifikasi.
+     * Kolom tahun Y: tahun pembangunan ≤ Y (kumulatif “Y ke bawah”).
      */
     public static function applyYearColumnScope(Builder $query, int $year): Builder
     {
-        $endOfYear = Carbon::create($year, 12, 31, 23, 59, 59, config('app.timezone'));
-
-        return $query->where(function (Builder $builder) use ($endOfYear) {
-            $builder->where(function (Builder $verified) use ($endOfYear) {
-                $verified->whereNotNull('data_verified_at')
-                    ->where('data_verified_at', '<=', $endOfYear);
-            })->orWhereNull('data_verified_at');
-        });
+        return $query->whereNotNull('tahun_pembangunan')
+            ->where('tahun_pembangunan', '<=', $year);
     }
 }

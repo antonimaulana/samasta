@@ -350,14 +350,50 @@ class Taman extends Model
     {
         return match ($kategori) {
             'Taman Kota' => '#16a34a',
-            'Kebun Raya' => '#a16207',
+            'Kebun Raya' => '#92400e',
             'TPU' => '#7c3aed',
-            'Taman Lingkungan' => '#0891b2',
-            'Jalur Hijau Jalan' => '#d97706',
-            'RTH Jalur Hijau' => '#d97706',
+            'Taman Lingkungan' => '#2563eb',
+            'Jalur Hijau Jalan' => '#ea580c',
+            'RTH Jalur Hijau' => '#ea580c',
             'Di luar wilayah pemeliharaan' => '#64748b',
             default => '#64748b',
         };
+    }
+
+    /**
+     * Gradasi kartu statistik & warna chart (selaras {@see kategoriPinColor}).
+     *
+     * @return array{bg: string, chart: string}
+     */
+    public static function kategoriDisplayAccent(string $kategori): array
+    {
+        $bg = match ($kategori) {
+            'Taman Kota' => 'from-green-600 to-green-700',
+            'Kebun Raya' => 'from-amber-800 to-amber-900',
+            'TPU' => 'from-violet-600 to-purple-700',
+            'Taman Lingkungan' => 'from-blue-600 to-blue-700',
+            'Jalur Hijau Jalan', 'RTH Jalur Hijau' => 'from-orange-500 to-orange-600',
+            default => 'from-slate-500 to-slate-600',
+        };
+
+        return [
+            'bg' => $bg,
+            'chart' => self::kategoriPinColorRgba($kategori, 0.85),
+        ];
+    }
+
+    public static function kategoriPinColorRgba(string $kategori, float $alpha = 1.0): string
+    {
+        $hex = ltrim(self::kategoriPinColor($kategori), '#');
+        if (strlen($hex) !== 6) {
+            return 'rgba(100, 116, 139, '.$alpha.')';
+        }
+
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        return 'rgba('.$r.', '.$g.', '.$b.', '.$alpha.')';
     }
 
     /** Gaya inline badge/label — selaras dengan popup peta (`pinColor` + alpha 22/44). */
