@@ -6,100 +6,108 @@
 @section('meta_description', 'Peta interaktif taman hijau Kota Batam — filter kategori, lihat foto & fasilitas, dan arahkan rute menuju taman.')
 
 @section('content')
+    @php
+        $navActionClass = 'inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 sm:flex-none sm:px-4';
+    @endphp
     <div class="mb-6">
-        <a href="{{ route('home') }}"
-           class="mb-4 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold text-green-700 transition hover:bg-lime-100">
+        <a href="{{ route('home') }}" class="inline-flex items-center gap-1 text-sm text-emerald-700 hover:underline">
             ← Kembali ke beranda
         </a>
-        <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-                <span class="inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-green-600">
-                    🗺️ Peta Interaktif
-                </span>
-                <h1 class="mt-2 text-3xl font-black text-green-900 sm:text-4xl">Jelajahi Taman di Batam</h1>
-                <p class="mt-2 text-gray-600">Pin berwarna per kategori — klik untuk foto, fasilitas, dan rute</p>
-            </div>
-            <p id="map-visible-count" class="rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-bold text-emerald-800">
-                {{ $tamans->count() }} taman di peta
-            </p>
-        </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[320px,1fr]">
-        <aside class="h-fit overflow-hidden rounded-3xl border border-green-100 bg-white shadow-lg shadow-green-100/50 lg:sticky lg:top-24">
-            <div class="border-b border-green-50 bg-gradient-to-r from-green-50 to-emerald-50 px-5 py-4">
-                <h2 class="font-bold text-green-800">Filter Peta</h2>
-                <p class="mt-1 text-xs text-green-700/70">Filter taman yang ditampilkan di peta</p>
+        <aside class="h-fit overflow-hidden rounded-2xl border border-green-100 bg-white shadow-sm lg:sticky lg:top-24">
+            <div class="border-b border-green-50 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="min-w-0">
+                        <h2 class="text-lg font-semibold text-green-800">Filter Peta</h2>
+                        <p class="mt-1 text-sm text-green-700/80">Filter taman yang ditampilkan di peta</p>
+                    </div>
+                    <div id="map-visible-count"
+                         class="{{ $navActionClass }} w-full whitespace-nowrap sm:max-w-[11rem] sm:flex-none"
+                         aria-live="polite">
+                        {{ $tamans->count() }} taman ditampilkan
+                    </div>
+                </div>
             </div>
-            <form action="{{ route('tamans.map') }}" method="GET" class="space-y-4 p-5">
+            <form action="{{ route('tamans.map') }}" method="GET" class="space-y-5 p-6">
                 <div>
-                    <label for="search" class="mb-1 block text-xs font-semibold text-gray-600">Nama Taman</label>
-                    <input type="search" name="search" id="search" value="{{ $search }}"
-                           placeholder="Cari nama..."
-                           class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200">
+                    <label for="search" class="mb-2 block text-sm font-medium text-gray-700">Nama Taman</label>
+                    <div class="relative">
+                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-green-600">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/>
+                            </svg>
+                        </span>
+                        <input type="search"
+                               name="search"
+                               id="search"
+                               value="{{ $search }}"
+                               placeholder="Contoh: Taman Majapahit, Taman KDA..."
+                               class="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-4 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                    </div>
                 </div>
                 <div>
-                    <label for="kategori" class="mb-1 block text-xs font-semibold text-gray-600">Kategori</label>
-                    <select name="kategori" id="kategori"
-                            class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-200">
+                    <label for="kategori" class="mb-2 block text-sm font-medium text-gray-700">Kategori</label>
+                    <select name="kategori"
+                            id="kategori"
+                            class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                         <option value="">Semua kategori</option>
                         @foreach ($kategoris as $kategori)
                             <option value="{{ $kategori }}" @selected($selectedKategori === $kategori)>{{ $kategori }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div>
-                    <p class="mb-2 text-xs font-semibold text-gray-600">Fasilitas</p>
-                    <div class="flex flex-wrap gap-1.5">
-                        @foreach ($popularFasilitas as $fasilitas)
-                            @php $isChecked = in_array($fasilitas, $selectedFasilitas, true); @endphp
-                            <label class="cursor-pointer">
-                                <input type="checkbox" name="fasilitas[]" value="{{ $fasilitas }}" class="peer sr-only" @checked($isChecked)>
-                                <span class="inline-block rounded-full border px-2.5 py-1 text-xs font-semibold transition
-                                    {{ $isChecked ? 'border-green-600 bg-green-600 text-white' : 'border-green-200 bg-green-50 text-green-800' }}">
-                                    {{ $fasilitas }}
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-2 pt-1">
-                    <button type="submit" class="rounded-xl bg-gradient-to-r from-lime-500 to-green-500 px-4 py-2 text-sm font-bold text-white shadow-md shadow-green-400/30 hover:from-lime-400 hover:to-green-400">
+                @include('tamans.partials.fasilitas-filter-chips', [
+                    'popularFasilitas' => $popularFasilitas,
+                    'selectedFasilitas' => $selectedFasilitas,
+                ])
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1 sm:justify-start">
+                    <button type="submit"
+                            class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:flex-none">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"/>
+                        </svg>
                         Terapkan
                     </button>
                     @if ($search || $selectedKategori || count($selectedFasilitas) > 0)
-                        <a href="{{ route('tamans.map') }}" class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50">
-                            Reset
+                        <a href="{{ route('tamans.map') }}"
+                           class="inline-flex flex-1 items-center justify-center rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50 sm:flex-none">
+                            Reset Filter
                         </a>
                     @endif
                 </div>
             </form>
 
-            <div class="border-t border-gray-100 px-5 py-4">
-                <p class="mb-2 text-xs font-semibold text-gray-600">Legenda pin</p>
-                <div class="flex flex-wrap gap-2">
+            <div class="border-t border-green-50 px-6 py-4">
+                <p class="mb-2 text-sm font-medium text-gray-700">Legenda pin</p>
+                <div class="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
                     @foreach (\App\Models\Taman::kategoriPinLegend() as $kat => $color)
                         <button type="button"
-                                class="map-kategori-toggle inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold transition hover:opacity-90"
+                                class="map-kategori-toggle inline-flex w-full items-center justify-center gap-1.5 rounded-full border px-2 py-1 text-xs font-bold transition hover:opacity-90 sm:w-auto sm:px-2.5 sm:py-1 sm:text-xs"
                                 style="{{ \App\Models\Taman::kategoriBadgeInlineStyle($kat) }}"
                                 data-kategori="{{ $kat }}"
                                 data-active="true">
                             <span class="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-white/80" style="background:{{ $color }}"></span>
-                            {{ $kat }}
+                            <span class="truncate">{{ $kat }}</span>
                         </button>
                     @endforeach
                 </div>
             </div>
 
-            <div class="border-t border-gray-100 px-5 py-4">
-                <button type="button" id="map-locate-me"
-                        class="flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100">
-                    📍 Lokasi Saya
+            <div class="border-t border-green-50 px-6 py-4">
+                <button type="button"
+                        id="map-locate-me"
+                        class="{{ $navActionClass }} w-full sm:w-full">
+                    @include('tamans.partials.icon-location-outline')
+                    Lokasi Saya
                 </button>
             </div>
         </aside>
 
-        <div class="overflow-hidden rounded-3xl border border-green-100 bg-white shadow-xl shadow-green-100/50">
+        <div class="overflow-hidden rounded-2xl border border-green-100 bg-white shadow-sm">
             @if ($tamans->isEmpty())
                 <div class="flex h-[480px] flex-col items-center justify-center p-8 text-center">
                     <p class="text-5xl">🗺️</p>
@@ -344,3 +352,5 @@
         </script>
     @endpush
 @endif
+
+@include('tamans.partials.fasilitas-filter-script')

@@ -5,6 +5,9 @@
 @section('meta_description', 'Daftar taman hijau di Kota Batam — cari berdasarkan nama, kategori, fasilitas, atau lokasi terdekat.')
 
 @section('content')
+    @php
+        $navActionClass = 'inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 sm:flex-none sm:px-4';
+    @endphp
     <div class="mb-6">
         <a href="{{ route('home') }}" class="inline-flex items-center gap-1 text-sm text-emerald-700 hover:underline">
             ← Kembali ke beranda
@@ -22,18 +25,15 @@
                     @unless ($nearbyMode)
                         <button type="button"
                                 onclick="findNearbyTamans('{{ route('tamans.index') }}')"
-                                class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 sm:flex-none sm:px-4">
-                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
+                                class="{{ $navActionClass }}">
+                            @include('tamans.partials.icon-location-outline')
                             Taman Terdekat
                         </button>
                     @endunless
                     <a href="{{ route('tamans.map') }}"
-                       class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100 sm:flex-none sm:px-4 {{ $nearbyMode ? 'w-full sm:w-auto' : '' }}">
-                        🗺️ Peta Taman
+                       class="{{ $navActionClass }} {{ $nearbyMode ? 'w-full sm:w-auto' : '' }}">
+                        @include('tamans.partials.icon-map-outline')
+                        Peta Taman
                     </a>
                 </div>
             </div>
@@ -75,28 +75,10 @@
                 </div>
             </div>
 
-            <div>
-                <p class="mb-3 text-sm font-medium text-gray-700">Filter Fasilitas</p>
-                <div class="flex flex-wrap justify-between gap-2 sm:justify-start">
-                    @foreach ($popularFasilitas as $fasilitas)
-                        @php $isChecked = in_array($fasilitas, $selectedFasilitas, true); @endphp
-                        <label class="cursor-pointer">
-                            <input type="checkbox"
-                                   name="fasilitas[]"
-                                   value="{{ $fasilitas }}"
-                                   class="peer sr-only"
-                                   @checked($isChecked)>
-                            <span class="inline-flex items-center rounded-full border px-3.5 py-1.5 text-sm font-medium transition
-                                         {{ $isChecked
-                                             ? 'border-green-600 bg-green-600 text-white shadow-sm'
-                                             : 'border-green-200 bg-green-50 text-green-800 hover:border-green-400 hover:bg-green-100' }}
-                                         peer-focus-visible:ring-2 peer-focus-visible:ring-green-500 peer-focus-visible:ring-offset-2">
-                                {{ $fasilitas }}
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
-            </div>
+            @include('tamans.partials.fasilitas-filter-chips', [
+                'popularFasilitas' => $popularFasilitas,
+                'selectedFasilitas' => $selectedFasilitas,
+            ])
 
             <div class="flex flex-wrap items-center justify-between gap-3 pt-1 sm:justify-start">
                 <button type="submit"
@@ -210,20 +192,4 @@
 @endsection
 
 @include('tamans.partials.nearby-script')
-
-@push('scripts')
-    <script>
-        document.querySelectorAll('input[name="fasilitas[]"]').forEach(function (checkbox) {
-            checkbox.addEventListener('change', function () {
-                const badge = this.nextElementSibling;
-                if (this.checked) {
-                    badge.classList.remove('border-green-200', 'bg-green-50', 'text-green-800', 'hover:border-green-400', 'hover:bg-green-100');
-                    badge.classList.add('border-green-600', 'bg-green-600', 'text-white', 'shadow-sm');
-                } else {
-                    badge.classList.add('border-green-200', 'bg-green-50', 'text-green-800', 'hover:border-green-400', 'hover:bg-green-100');
-                    badge.classList.remove('border-green-600', 'bg-green-600', 'text-white', 'shadow-sm');
-                }
-            });
-        });
-    </script>
-@endpush
+@include('tamans.partials.fasilitas-filter-script')

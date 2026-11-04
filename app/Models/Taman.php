@@ -350,7 +350,7 @@ class Taman extends Model
     {
         return match ($kategori) {
             'Taman Kota' => '#16a34a',
-            'Kebun Raya' => '#059669',
+            'Kebun Raya' => '#a16207',
             'TPU' => '#7c3aed',
             'Taman Lingkungan' => '#0891b2',
             'Jalur Hijau Jalan' => '#d97706',
