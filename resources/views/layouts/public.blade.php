@@ -160,6 +160,7 @@
             );
         });
     </script>
+    @stack('body-end')
     @stack('scripts')
 </body>
 </html>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\BerandaMascotSetting;
 use App\Models\BerandaMascotTip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,7 +25,30 @@ class BerandaMascotTipTest extends TestCase
             ->assertSee('id="tama-tip-root"', false)
             ->assertSee('Hai, saya Tama!', false)
             ->assertSee('id="home-hero"', false)
-            ->assertSee('"section_key":"hero"', false);
+            ->assertSee('"section_key":"hero"', false)
+            ->assertSee('js/tama-tips.js', false);
+    }
+
+    public function test_home_hides_tama_when_popups_globally_disabled(): void
+    {
+        BerandaMascotSetting::current()->update(['popups_enabled' => false]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('id="tama-tip-root"', false);
+    }
+
+    public function test_admin_can_toggle_global_popup_setting(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.beranda-mascot-tips.settings.update'), [
+                'popups_enabled' => '0',
+            ])
+            ->assertRedirect();
+
+        $this->assertFalse(BerandaMascotSetting::current()->fresh()->popups_enabled);
     }
 
     public function test_admin_can_update_mascot_tip(): void

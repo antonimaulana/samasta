@@ -29,4 +29,12 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+        @php
+            $tamaTipsScript = public_path('js/tama-tips.js');
+            $tamaTipsVersion = is_readable($tamaTipsScript) ? (string) filemtime($tamaTipsScript) : '1';
+        @endphp
+        <script src="{{ asset('js/tama-tips.js') }}?v={{ $tamaTipsVersion }}" defer></script>
+    @endpush
 @endif

@@ -1,8 +1,5 @@
-import { bootTamaTips } from './tama-tips.js';
-
 function bootHomePage() {
-    bootTamaTips();
-    /* Slider info terkini: inline script di partial. FAQ: faq-beranda-script. */
+    /* Slider info terkini: inline script di partial. FAQ: faq-beranda-script. Tama: public/js/tama-tips.js */
 }
 
 if (typeof window.onPageReady === 'function') {

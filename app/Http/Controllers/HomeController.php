@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BerandaMascotSetting;
 use App\Models\BerandaMascotTip;
 use App\Models\BerandaSlide;
 use App\Support\BerandaSlidePresenter;
@@ -53,7 +54,7 @@ class HomeController extends Controller
      */
     private function tamaTipsForHome(): array
     {
-        if (! Schema::hasTable('beranda_mascot_tips')) {
+        if (! Schema::hasTable('beranda_mascot_tips') || ! BerandaMascotSetting::popupsEnabledForHome()) {
             return [];
         }
 

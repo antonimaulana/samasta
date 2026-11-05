@@ -147,12 +147,16 @@ export function bootTamaTips() {
     const observer = new IntersectionObserver(
         (entries) => {
             entries.forEach((entry) => {
-                if (!entry.isIntersecting || entry.intersectionRatio < 0.35) {
+                if (!entry.isIntersecting) {
                     return;
                 }
 
                 const sectionKey = entry.target.dataset.tamaSection;
                 if (!sectionKey || readStorage().dismissed.includes(sectionKey)) {
+                    return;
+                }
+
+                if (sectionKey !== 'hero' && entry.intersectionRatio < 0.35) {
                     return;
                 }
 
@@ -165,7 +169,7 @@ export function bootTamaTips() {
                 observer.unobserve(entry.target);
             });
         },
-        { threshold: [0.35, 0.5], rootMargin: '0px 0px -8% 0px' },
+        { threshold: [0, 0.15, 0.35, 0.5], rootMargin: '0px 0px -5% 0px' },
     );
 
     tips.forEach((tip) => {

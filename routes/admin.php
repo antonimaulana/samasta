@@ -213,6 +213,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         Route::post('beranda-slides/reorder', [BerandaSlideController::class, 'reorder'])->name('beranda-slides.reorder');
 
         Route::get('beranda-mascot-tips', [BerandaMascotTipController::class, 'index'])->name('beranda-mascot-tips.index');
+        Route::put('beranda-mascot-tips/settings', [BerandaMascotTipController::class, 'updateSettings'])->name('beranda-mascot-tips.settings.update');
+        Route::post('beranda-mascot-tips/activate-all', [BerandaMascotTipController::class, 'activateAll'])->name('beranda-mascot-tips.activate-all');
+        Route::post('beranda-mascot-tips/deactivate-all', [BerandaMascotTipController::class, 'deactivateAll'])->name('beranda-mascot-tips.deactivate-all');
         Route::get('beranda-mascot-tips/{beranda_mascot_tip}/edit', [BerandaMascotTipController::class, 'edit'])->name('beranda-mascot-tips.edit');
         Route::put('beranda-mascot-tips/{beranda_mascot_tip}', [BerandaMascotTipController::class, 'update'])->name('beranda-mascot-tips.update');
         Route::patch('beranda-mascot-tips/{beranda_mascot_tip}/toggle', [BerandaMascotTipController::class, 'toggle'])->name('beranda-mascot-tips.toggle');
