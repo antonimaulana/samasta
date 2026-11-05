@@ -46,7 +46,7 @@ class RthWilayahStatisticsTest extends TestCase
             ->assertSee('RTH per Wilayah')
             ->assertDontSee('RTH per Kecamatan')
             ->assertSee('Capaian RTH per Tahun')
-            ->assertSee('Kelengkapan Profil Data')
+            ->assertSee('Kelengkapan Profil RTH')
             ->assertDontSee('Jelajahi data')
             ->assertDontSee('Capaian RTRW')
             ->assertDontSee('· SIMTAMAN')

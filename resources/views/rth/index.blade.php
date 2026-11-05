@@ -103,22 +103,22 @@
             </div>
 
             <div class="grid gap-6 lg:grid-cols-5 lg:items-stretch">
-                <div class="flex min-h-0 flex-col gap-6 lg:col-span-2 lg:h-full">
-                    <div class="flex min-h-[14rem] flex-[1.15] flex-col rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-5 shadow-lg shadow-emerald-900/10 sm:p-6">
+                <div id="rth-kategori-charts"
+                     class="grid gap-6 sm:grid-cols-2 sm:items-stretch lg:col-span-2 lg:grid-cols-1 lg:content-stretch">
+                    <div class="rth-profile-chart-card flex min-h-[17rem] flex-col rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-5 shadow-lg shadow-emerald-900/10 sm:min-h-[18rem] sm:p-6 lg:min-h-0 lg:flex-1">
                         <h3 class="shrink-0 text-base font-bold text-emerald-950">Komposisi Luasan</h3>
-                        <div class="relative mt-4 min-h-0 flex-1">
+                        <div class="rth-profile-chart-area rth-chart-glow relative mt-4 h-44 min-h-0 sm:h-48 lg:h-auto lg:min-h-[10rem] lg:flex-1">
                             <canvas id="rthKategoriChart"
                                     class="absolute inset-0 h-full w-full"
                                     aria-label="Diagram komposisi luasan RTH per kategori"></canvas>
                         </div>
                     </div>
-                    <div id="rth-kelengkapan-card"
-                         class="flex min-h-[16rem] flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm lg:min-h-0">
-                        <h3 class="shrink-0 text-sm font-semibold text-gray-800">Kelengkapan Profil Data</h3>
-                        <div class="relative mt-4 min-h-[10rem] flex-1">
+                    <div class="rth-profile-chart-card flex min-h-[17rem] flex-col rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-5 shadow-lg shadow-emerald-900/10 sm:min-h-[18rem] sm:p-6 lg:min-h-0 lg:flex-1">
+                        <h3 class="shrink-0 text-base font-bold text-emerald-950">Kelengkapan Profil RTH</h3>
+                        <div class="rth-profile-chart-area rth-chart-glow relative mt-4 h-44 min-h-0 sm:h-48 lg:h-auto lg:min-h-[10rem] lg:flex-1">
                             <canvas id="rthKelengkapanChart"
                                     class="absolute inset-0 h-full w-full"
-                                    aria-label="Diagram kelengkapan profil data RTH"></canvas>
+                                    aria-label="Diagram kelengkapan profil RTH"></canvas>
                         </div>
                     </div>
                 </div>
@@ -139,24 +139,32 @@
                                     <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
                                         <div>
                                             <p class="text-xs text-gray-500">Lokasi</p>
-                                            <p class="text-xl font-black text-gray-900">{{ number_format($card['jumlah']) }}</p>
-                                            <p class="rth-kategori-pct text-xs text-emerald-700 tabular-nums"
-                                               data-value="{{ $card['persen_lokasi'] }}">0%</p>
+                                            <p class="rth-anim-stat text-xl font-black text-gray-900 tabular-nums"
+                                               data-type="count"
+                                               data-value="{{ $card['jumlah'] }}">{{ number_format($card['jumlah']) }}</p>
+                                            <p class="rth-anim-stat rth-glow-pct text-xs text-emerald-700 tabular-nums"
+                                               data-type="percent"
+                                               data-value="{{ $card['persen_lokasi'] }}"
+                                               data-decimals="1">0%</p>
                                         </div>
                                         <div>
                                             <p class="text-xs text-gray-500">Luasan</p>
-                                            <p class="text-xl font-black text-emerald-900">{{ number_format($card['luasan'], 0, ',', '.') }}</p>
+                                            <p class="rth-anim-stat text-xl font-black text-emerald-900 tabular-nums"
+                                               data-type="area"
+                                               data-value="{{ $card['luasan'] }}">{{ number_format($card['luasan'], 0, ',', '.') }}</p>
                                             <p class="text-xs text-gray-500">m²</p>
                                         </div>
                                         <div class="col-span-2">
                                             <p class="mb-1 text-xs text-gray-500">Kontribusi luasan</p>
                                             <div class="h-2 overflow-hidden rounded-full bg-gray-100">
-                                                <div class="rth-kategori-bar h-full rounded-full bg-gradient-to-r {{ $card['accent']['bg'] }} transition-[width] duration-1000 ease-out"
+                                                <div class="rth-kategori-bar rth-kategori-bar-glow h-full rounded-full bg-gradient-to-r {{ $card['accent']['bg'] }} transition-[width] duration-1000 ease-out"
                                                      data-width="{{ min($card['persen_luas'], 100) }}"
                                                      style="width: 0%"></div>
                                             </div>
-                                            <p class="rth-kategori-pct mt-1 text-right text-xs font-semibold text-emerald-800 tabular-nums"
-                                               data-value="{{ $card['persen_luas'] }}">0%</p>
+                                            <p class="rth-anim-stat rth-glow-pct mt-1 text-right text-xs font-semibold text-emerald-800 tabular-nums"
+                                               data-type="percent"
+                                               data-value="{{ $card['persen_luas'] }}"
+                                               data-decimals="1">0%</p>
                                         </div>
                                     </div>
                                 </div>
@@ -171,7 +179,12 @@
         <section id="per-wilayah" class="mb-10 scroll-mt-24">
             <div class="mb-5">
                 <h2 class="text-xl font-bold text-emerald-950 sm:text-2xl">RTH per Wilayah</h2>
-                <p class="mt-1 text-sm text-gray-600">{{ number_format($totalTaman) }} lokasi terdaftar</p>
+                <p class="mt-1 text-sm text-gray-600">
+                    <span class="rth-anim-stat font-semibold tabular-nums text-gray-800"
+                          data-type="count"
+                          data-value="{{ $totalTaman }}">{{ number_format($totalTaman) }}</span>
+                    lokasi terdaftar
+                </p>
             </div>
 
             <div class="overflow-hidden rounded-2xl border border-teal-200 bg-white shadow-sm">
@@ -189,10 +202,21 @@
                             @forelse ($kecamatanRows as $row)
                                 <tr class="hover:bg-teal-50/40">
                                     <td class="px-5 py-3 font-medium text-gray-900">{{ $row['kecamatan'] }}</td>
-                                    <td class="px-5 py-3 text-right text-gray-700">{{ number_format($row['jumlah']) }}</td>
-                                    <td class="px-5 py-3 text-right text-gray-700">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                                    <td class="px-5 py-3 text-right text-gray-700">
+                                        <span class="rth-anim-stat tabular-nums"
+                                              data-type="count"
+                                              data-value="{{ $row['jumlah'] }}">{{ number_format($row['jumlah']) }}</span>
+                                    </td>
+                                    <td class="px-5 py-3 text-right text-gray-700">
+                                        <span class="rth-anim-stat tabular-nums"
+                                              data-type="area"
+                                              data-value="{{ $row['luasan'] }}">{{ number_format($row['luasan'], 0, ',', '.') }}</span>
+                                    </td>
                                     <td class="px-5 py-3 text-right">
-                                        <span class="inline-flex min-w-[3rem] justify-end text-teal-800">{{ $row['persen_luas'] }}%</span>
+                                        <span class="rth-anim-stat rth-glow-pct inline-flex min-w-[3rem] justify-end text-teal-800 tabular-nums"
+                                              data-type="percent"
+                                              data-value="{{ $row['persen_luas'] }}"
+                                              data-decimals="1">{{ number_format($row['persen_luas'], 1, ',', '.') }}%</span>
                                     </td>
                                 </tr>
                             @empty
@@ -218,7 +242,14 @@
                                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 bg-gray-50 px-4 py-3">
                                         <p class="font-semibold text-gray-900">{{ $kecamatan['kecamatan'] }}</p>
                                         <p class="text-xs text-gray-600">
-                                            {{ number_format($kecamatan['jumlah']) }} lokasi · {{ number_format($kecamatan['luasan'], 0, ',', '.') }} m²
+                                            <span class="rth-anim-stat tabular-nums"
+                                                  data-type="count"
+                                                  data-value="{{ $kecamatan['jumlah'] }}">{{ number_format($kecamatan['jumlah']) }}</span>
+                                            lokasi ·
+                                            <span class="rth-anim-stat tabular-nums"
+                                                  data-type="area"
+                                                  data-value="{{ $kecamatan['luasan'] }}">{{ number_format($kecamatan['luasan'], 0, ',', '.') }}</span>
+                                            m²
                                         </p>
                                     </div>
                                     <div class="overflow-x-auto">
@@ -227,8 +258,17 @@
                                                 @foreach ($kecamatan['kelurahan'] as $kel)
                                                     <tr class="hover:bg-gray-50">
                                                         <td class="px-4 py-2.5 text-gray-800">{{ $kel['kelurahan'] }}</td>
-                                                        <td class="px-4 py-2.5 text-right text-gray-600">{{ number_format($kel['jumlah']) }}</td>
-                                                        <td class="px-4 py-2.5 text-right text-gray-600">{{ number_format($kel['luasan'], 0, ',', '.') }} m²</td>
+                                                        <td class="px-4 py-2.5 text-right text-gray-600">
+                                                            <span class="rth-anim-stat tabular-nums"
+                                                                  data-type="count"
+                                                                  data-value="{{ $kel['jumlah'] }}">{{ number_format($kel['jumlah']) }}</span>
+                                                        </td>
+                                                        <td class="px-4 py-2.5 text-right text-gray-600">
+                                                            <span class="rth-anim-stat tabular-nums"
+                                                                  data-type="area"
+                                                                  data-value="{{ $kel['luasan'] }}">{{ number_format($kel['luasan'], 0, ',', '.') }}</span>
+                                                            m²
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -246,11 +286,79 @@
 @endsection
 
 @if ($hasData)
+    @push('styles')
+        <style>
+            @keyframes rth-chart-glow-pulse {
+                0%, 100% { opacity: 0.35; transform: scale(0.94); }
+                50% { opacity: 0.9; transform: scale(1.06); }
+            }
+
+            @keyframes rth-pct-glow {
+                0%, 100% {
+                    text-shadow: 0 0 6px rgba(16, 185, 129, 0.2), 0 0 12px rgba(45, 212, 191, 0.15);
+                }
+                50% {
+                    text-shadow: 0 0 10px rgba(16, 185, 129, 0.45), 0 0 22px rgba(45, 212, 191, 0.35), 0 0 32px rgba(20, 184, 166, 0.2);
+                }
+            }
+
+            @keyframes rth-bar-glow-pulse {
+                0%, 100% { filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.35)); }
+                50% { filter: drop-shadow(0 0 10px rgba(45, 212, 191, 0.65)) drop-shadow(0 0 18px rgba(16, 185, 129, 0.35)); }
+            }
+
+            .rth-chart-glow::before,
+            .rth-chart-glow::after {
+                pointer-events: none;
+                position: absolute;
+                border-radius: 50%;
+                content: '';
+                z-index: 0;
+            }
+
+            .rth-chart-glow::before {
+                inset: 14%;
+                background: radial-gradient(circle, rgba(52, 211, 153, 0.55) 0%, rgba(20, 184, 166, 0.2) 42%, transparent 72%);
+                animation: rth-chart-glow-pulse 3.8s ease-in-out infinite;
+            }
+
+            .rth-chart-glow::after {
+                inset: 26%;
+                background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(167, 243, 208, 0.25) 40%, transparent 68%);
+                animation: rth-chart-glow-pulse 3.8s ease-in-out infinite reverse;
+                opacity: 0.55;
+            }
+
+            .rth-chart-glow canvas {
+                position: relative;
+                z-index: 1;
+            }
+
+            .rth-glow-pct {
+                animation: rth-pct-glow 2.8s ease-in-out infinite;
+            }
+
+            .rth-kategori-bar-glow.rth-kategori-bar--active {
+                animation: rth-bar-glow-pulse 2.6s ease-in-out infinite;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .rth-chart-glow::before,
+                .rth-chart-glow::after,
+                .rth-glow-pct,
+                .rth-kategori-bar-glow.rth-kategori-bar--active {
+                    animation: none;
+                }
+            }
+        </style>
+    @endpush
+
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
                 const formatCountId = (n) => Math.round(n).toLocaleString('id-ID');
                 const formatAreaId = (n) => Math.round(n).toLocaleString('id-ID');
@@ -259,24 +367,49 @@
                     maximumFractionDigits: decimals,
                 }) + '%';
 
-                document.querySelectorAll('.rth-hero-stat').forEach((el) => {
+                const formatStatValue = (type, value, decimals) => {
+                    if (type === 'count') {
+                        return formatCountId(value);
+                    }
+                    if (type === 'area') {
+                        return formatAreaId(value);
+                    }
+                    if (type === 'percent') {
+                        return formatPercentId(value, decimals);
+                    }
+
+                    return String(value);
+                };
+
+                const animateRthStat = (el, { duration = 1400, immediate = false } = {}) => {
+                    if (el.dataset.rthAnimated === '1') {
+                        return;
+                    }
+                    el.dataset.rthAnimated = '1';
+
                     const target = parseFloat(el.dataset.value || '0');
                     const type = el.dataset.type || 'count';
-                    const decimals = parseInt(el.dataset.decimals || '0', 10);
-                    const duration = 1400;
+                    const decimals = parseInt(el.dataset.decimals || (type === 'percent' ? '1' : '0'), 10);
+
+                    if (Number.isNaN(target)) {
+                        return;
+                    }
+
+                    if (prefersReducedMotion) {
+                        el.textContent = formatStatValue(type, target, decimals);
+                        return;
+                    }
+
+                    if (! immediate) {
+                        el.textContent = formatStatValue(type, 0, decimals);
+                    }
+
                     const start = performance.now();
 
                     const frame = (now) => {
                         const progress = Math.min(1, (now - start) / duration);
                         const current = target * easeOutCubic(progress);
-
-                        if (type === 'count') {
-                            el.textContent = formatCountId(current);
-                        } else if (type === 'area') {
-                            el.textContent = formatAreaId(current);
-                        } else {
-                            el.textContent = formatPercentId(current, decimals);
-                        }
+                        el.textContent = formatStatValue(type, current, decimals);
 
                         if (progress < 1) {
                             requestAnimationFrame(frame);
@@ -284,34 +417,59 @@
                     };
 
                     requestAnimationFrame(frame);
+                };
+
+                document.querySelectorAll('.rth-hero-stat').forEach((el) => {
+                    animateRthStat(el, { immediate: true });
                 });
 
-                document.querySelectorAll('.rth-kategori-pct').forEach((el) => {
-                    const target = parseFloat(el.dataset.value || '0');
-                    const duration = 1200;
-                    const start = performance.now();
-
-                    const frame = (now) => {
-                        const progress = Math.min(1, (now - start) / duration);
-                        const current = target * easeOutCubic(progress);
-                        el.textContent = current.toLocaleString('id-ID', {
-                            minimumFractionDigits: 1,
-                            maximumFractionDigits: 1,
-                        }) + '%';
-
-                        if (progress < 1) {
-                            requestAnimationFrame(frame);
+                const revealObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (! entry.isIntersecting) {
+                            return;
                         }
-                    };
 
-                    requestAnimationFrame(frame);
-                });
+                        entry.target.querySelectorAll('.rth-anim-stat').forEach((el) => {
+                            animateRthStat(el);
+                        });
 
-                requestAnimationFrame(() => {
-                    document.querySelectorAll('.rth-kategori-bar').forEach((bar) => {
-                        bar.style.width = `${bar.dataset.width || 0}%`;
+                        entry.target.querySelectorAll('.rth-kategori-bar').forEach((bar) => {
+                            bar.classList.add('rth-kategori-bar--active');
+                            bar.style.width = `${bar.dataset.width || 0}%`;
+                        });
+
+                        revealObserver.unobserve(entry.target);
                     });
+                }, { threshold: 0.12, rootMargin: '0px 0px -4% 0px' });
+
+                document.querySelectorAll('.rth-anim-stat').forEach((el) => {
+                    if (! el.closest('#per-kategori, #per-wilayah, #capaian-tahun')) {
+                        animateRthStat(el);
+                        return;
+                    }
                 });
+
+                ['#capaian-tahun', '#per-kategori', '#per-wilayah'].forEach((selector) => {
+                    const section = document.querySelector(selector);
+                    if (section) {
+                        revealObserver.observe(section);
+                    }
+                });
+
+                const doughnutGlowPlugin = {
+                    id: 'rthDoughnutGlow',
+                    beforeDatasetDraw(chart, args) {
+                        const { ctx } = chart;
+                        ctx.save();
+                        ctx.shadowColor = 'rgba(16, 185, 129, 0.45)';
+                        ctx.shadowBlur = 18;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                    },
+                    afterDatasetDraw(chart) {
+                        chart.ctx.restore();
+                    },
+                };
 
                 const doughnutDefaults = {
                     type: 'doughnut',
@@ -338,10 +496,12 @@
                     },
                 };
 
+                let kategoriChart = null;
                 const kategoriCanvas = document.getElementById('rthKategoriChart');
                 if (kategoriCanvas) {
-                    new Chart(kategoriCanvas, {
+                    kategoriChart = new Chart(kategoriCanvas, {
                         ...doughnutDefaults,
+                        plugins: [doughnutGlowPlugin],
                         data: {
                             labels: @json($chartKategoriLabels),
                             datasets: [{
@@ -371,7 +531,7 @@
                 }
 
                 const syncKelengkapanColumnHeight = () => {
-                    const leftCol = document.getElementById('rth-kategori-list')?.previousElementSibling;
+                    const leftCol = document.getElementById('rth-kategori-charts');
                     const list = document.getElementById('rth-kategori-list');
                     if (!leftCol || !list) {
                         return;
@@ -384,6 +544,30 @@
                     }
                 };
 
+                const syncProfileChartCardHeights = () => {
+                    const cards = document.querySelectorAll('.rth-profile-chart-card');
+                    if (cards.length < 2) {
+                        return;
+                    }
+
+                    cards.forEach((card) => {
+                        card.style.minHeight = '';
+                    });
+
+                    if (window.matchMedia('(min-width: 1024px)').matches) {
+                        return;
+                    }
+
+                    let maxHeight = 0;
+                    cards.forEach((card) => {
+                        maxHeight = Math.max(maxHeight, card.offsetHeight);
+                    });
+                    const uniform = `${maxHeight}px`;
+                    cards.forEach((card) => {
+                        card.style.minHeight = uniform;
+                    });
+                };
+
                 let kelengkapanChart = null;
                 const kelengkapanCanvas = document.getElementById('rthKelengkapanChart');
                 if (kelengkapanCanvas) {
@@ -391,6 +575,7 @@
                     const belum = @json($jumlahBelumLengkap);
                     kelengkapanChart = new Chart(kelengkapanCanvas, {
                         ...doughnutDefaults,
+                        plugins: [doughnutGlowPlugin],
                         data: {
                             labels: ['Profil lengkap', 'Belum lengkap'],
                             datasets: [{
@@ -421,6 +606,8 @@
 
                 const reflowKelengkapanLayout = () => {
                     syncKelengkapanColumnHeight();
+                    syncProfileChartCardHeights();
+                    kategoriChart?.resize();
                     kelengkapanChart?.resize();
                 };
 

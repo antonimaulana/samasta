@@ -16,7 +16,7 @@ use App\Models\User;
 class DashboardSummaryBuilder
 {
     /**
-     * @return array{total: int, luasan: int}
+     * @return array{total: int, luasan: int, kategori_rth: int}
      */
     public function tamanRingkasan(?User $user = null): array
     {
@@ -26,11 +26,12 @@ class DashboardSummaryBuilder
         return [
             'total' => (clone $query)->count(),
             'luasan' => (int) (clone $query)->sum('luasan'),
+            'kategori_rth' => count(Taman::KATEGORI),
         ];
     }
 
     /**
-     * @return array{total_stok: int, varietas: int, siap_persen: int}
+     * @return array{total_stok: int, varietas: int, jenis: int, siap_tanam: int, siap_persen: int}
      */
     public function bibitRingkasan(): array
     {
@@ -40,6 +41,8 @@ class DashboardSummaryBuilder
         return [
             'total_stok' => $totalStok,
             'varietas' => Bibit::count(),
+            'jenis' => (int) Bibit::query()->distinct()->count('jenis'),
+            'siap_tanam' => $bibitSiapTanam,
             'siap_persen' => $totalStok > 0 ? (int) round(($bibitSiapTanam / $totalStok) * 100) : 0,
         ];
     }

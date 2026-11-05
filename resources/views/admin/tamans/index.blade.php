@@ -4,16 +4,6 @@
 @section('header', 'Kelola Taman')
 
 @section('content')
-    @php
-        $formatLuasanRingkasan = function (int $luasanM2): string {
-            if ($luasanM2 >= 1_000_000) {
-                return number_format($luasanM2, 0, ',', '.').' m²';
-            }
-
-            return number_format($luasanM2, 0, ',', '.').' m²';
-        };
-    @endphp
-
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm text-gray-600">Kelola data RTH/taman yang terdaftar di sistem.</p>
         <div class="flex flex-wrap gap-2">
@@ -38,15 +28,35 @@
         </div>
     </div>
 
-    <div class="mb-6 max-w-xl">
+    <div class="mb-6 grid items-stretch gap-4 sm:grid-cols-3">
         <x-admin.dash-stat-card
+            class="h-full"
             tone="emerald"
-            label="Ringkasan Data Taman"
+            label="Total Lokasi"
             :value="number_format($tamanRingkasan['total'])"
-            subtitle="Total lokasi terdaftar">
-            <x-slot:meta>
-                <span class="dash-chip dash-chip--emerald">{{ $formatLuasanRingkasan($tamanRingkasan['luasan']) }} luasan</span>
-            </x-slot:meta>
+            subtitle="unit">
+            <x-slot:icon>
+                <x-admin.nav-icon name="taman" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            class="h-full"
+            tone="teal"
+            label="Total Luasan"
+            :value="number_format($tamanRingkasan['luasan'], 0, ',', '.')"
+            subtitle="m²">
+            <x-slot:icon>
+                <x-admin.nav-icon name="taman" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            class="h-full"
+            tone="cyan"
+            label="Kategori RTH"
+            :value="number_format($tamanRingkasan['kategori_rth'])"
+            subtitle="kategori">
             <x-slot:icon>
                 <x-admin.nav-icon name="taman" class="h-5 w-5" />
             </x-slot:icon>

@@ -32,32 +32,35 @@
         </div>
     </div>
 
-    <div class="mb-6 grid gap-4 sm:grid-cols-3">
+    <div class="mb-6 grid items-stretch gap-4 sm:grid-cols-3">
         <x-admin.dash-stat-card
+            class="h-full"
             tone="teal"
             label="Total Bibit"
             :value="number_format($bibitRingkasan['total_stok'])"
-            subtitle="Stok tersedia">
+            subtitle="stok unit tersedia">
             <x-slot:icon>
                 <x-admin.nav-icon name="bibit" class="h-5 w-5" />
             </x-slot:icon>
         </x-admin.dash-stat-card>
 
         <x-admin.dash-stat-card
+            class="h-full"
             tone="emerald"
-            label="Jumlah Varietas"
-            :value="number_format($bibitRingkasan['varietas'])"
-            subtitle="Master bibit">
+            label="Jumlah Jenis"
+            :value="number_format($bibitRingkasan['jenis'])"
+            subtitle="jenis">
             <x-slot:icon>
                 <x-admin.nav-icon name="bibit" class="h-5 w-5" />
             </x-slot:icon>
         </x-admin.dash-stat-card>
 
         <x-admin.dash-stat-card
+            class="h-full"
             tone="cyan"
             label="Siap Tanam"
-            :value="$bibitRingkasan['siap_persen'].'%'"
-            subtitle="Persentase stok siap tanam">
+            :value="number_format($bibitRingkasan['siap_tanam'])"
+            subtitle="stok unit tersedia">
             <x-slot:icon>
                 <x-admin.nav-icon name="bibit" class="h-5 w-5" />
             </x-slot:icon>

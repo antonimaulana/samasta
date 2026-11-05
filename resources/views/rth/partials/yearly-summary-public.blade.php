@@ -49,8 +49,27 @@
                         </div>
                     </td>
                     @foreach ($rthYearlySummary['years'] as $year)
+                        @php
+                            $cellValue = $row['values'][$year] ?? null;
+                            $cellType = match ($row['format']) {
+                                'area' => 'area',
+                                'count' => 'count',
+                                'percent' => 'percent',
+                                default => 'raw',
+                            };
+                            $cellDecimals = $row['format'] === 'percent' ? 2 : 0;
+                        @endphp
                         <td class="whitespace-nowrap px-3 py-3 text-right align-top text-xs tabular-nums text-gray-700 sm:px-4 sm:text-sm">
-                            {{ $formatValue($row, $year) }}
+                            @if ($cellValue === null)
+                                —
+                            @elseif ($cellType === 'raw')
+                                {{ $cellValue }}
+                            @else
+                                <span class="rth-anim-stat inline-block"
+                                      data-type="{{ $cellType }}"
+                                      data-value="{{ $cellValue }}"
+                                      data-decimals="{{ $cellDecimals }}">{{ $formatValue($row, $year) }}</span>
+                            @endif
                         </td>
                     @endforeach
                 </tr>

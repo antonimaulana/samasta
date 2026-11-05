@@ -19,7 +19,7 @@
 @endphp
 
 @php
-    $cardClass = trim("group dash-card dash-card--{$tone} p-5 {$animateClass}");
+    $cardClass = trim("group dash-card dash-card--{$tone} flex h-full min-h-[9rem] flex-col p-5 {$animateClass}");
 @endphp
 
 @if ($href)
