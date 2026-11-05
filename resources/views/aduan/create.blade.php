@@ -3,8 +3,10 @@
 @section('title', 'Aduan Masyarakat')
 
 @section('hero')
-    <section class="relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 text-white">
-        <div class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section class="relative isolate z-0 overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 text-white">
+        <div class="pointer-events-none absolute -right-20 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden="true"></div>
+        <div class="pointer-events-none absolute -bottom-24 -left-16 h-48 w-48 rounded-full bg-amber-300/20 blur-3xl" aria-hidden="true"></div>
+        <div class="relative mx-auto max-w-7xl px-4 pb-6 pt-10 sm:px-6 sm:pb-8 sm:pt-12 lg:px-8">
             <p class="text-xs font-bold uppercase tracking-widest text-orange-100">Layanan Publik</p>
             <h1 class="mt-2 text-3xl font-black sm:text-4xl">Aduan Kondisi Taman</h1>
             <p class="mt-3 max-w-2xl text-white/90">
@@ -12,16 +14,18 @@
                 Tim Disperakimtan akan menindaklanjuti aduan Anda.
             </p>
         </div>
-        <div class="relative -mb-1 text-[#f0fdf4]">
-            <svg viewBox="0 0 1440 40" fill="currentColor" class="block w-full"><path d="M0,20 Q360,40 720,20 T1440,20 L1440,40 L0,40 Z"/></svg>
+        <div class="relative text-green-50" aria-hidden="true">
+            <svg viewBox="0 0 1440 48" fill="currentColor" preserveAspectRatio="none" class="block h-8 w-full sm:h-10">
+                <path d="M0,24 Q360,48 720,24 T1440,24 L1440,48 L0,48 Z"/>
+            </svg>
         </div>
     </section>
 @endsection
 
-@section('main_class', 'mx-auto max-w-3xl px-4 sm:px-6 lg:px-8')
+@section('main_class', 'relative z-10 mx-auto max-w-3xl px-4 pt-2 sm:px-6 sm:pt-4 lg:px-8')
 
 @section('content')
-    <div class="relative -mt-4 pb-16">
+    <div class="relative pb-16">
         <p class="mb-4 text-center text-sm text-gray-600">
             Sudah punya nomor aduan?
             <a href="{{ route('aduan.check') }}" class="font-semibold text-green-700 hover:underline">Cek status di sini</a>

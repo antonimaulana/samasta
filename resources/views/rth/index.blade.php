@@ -103,24 +103,25 @@
             </div>
 
             <div class="grid gap-6 lg:grid-cols-5 lg:items-stretch">
-                <div class="flex flex-col gap-6 lg:col-span-2">
+                <div class="flex min-h-0 flex-col gap-6 lg:col-span-2 lg:h-full">
                     <div class="shrink-0 rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-6 shadow-lg shadow-emerald-900/10">
                         <h3 class="text-base font-bold text-emerald-950">Komposisi Luasan</h3>
                         <div class="relative mx-auto mt-5 h-72 w-72 max-w-full sm:h-80 sm:w-80">
                             <canvas id="rthKategoriChart" aria-label="Diagram komposisi luasan RTH per kategori"></canvas>
                         </div>
                     </div>
-                    <div class="flex min-h-[16rem] flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm lg:min-h-0">
-                        <h3 class="text-sm font-semibold text-gray-800">Kelengkapan Profil Data</h3>
-                        <div class="relative mt-4 flex flex-1 items-center justify-center">
-                            <div class="aspect-square h-full w-full max-h-72 max-w-full sm:max-h-80">
-                                <canvas id="rthKelengkapanChart" class="max-h-full max-w-full" aria-label="Diagram kelengkapan profil data RTH"></canvas>
-                            </div>
+                    <div id="rth-kelengkapan-card"
+                         class="flex min-h-[16rem] flex-1 flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm lg:min-h-0">
+                        <h3 class="shrink-0 text-sm font-semibold text-gray-800">Kelengkapan Profil Data</h3>
+                        <div class="relative mt-4 min-h-[10rem] flex-1">
+                            <canvas id="rthKelengkapanChart"
+                                    class="absolute inset-0 h-full w-full"
+                                    aria-label="Diagram kelengkapan profil data RTH"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-4 lg:col-span-3">
+                <div id="rth-kategori-list" class="space-y-4 lg:col-span-3">
                     @foreach ($kategoriCards as $card)
                         <article class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
                             <div class="flex flex-col sm:flex-row">
@@ -367,11 +368,26 @@
                     });
                 }
 
+                const syncKelengkapanColumnHeight = () => {
+                    const leftCol = document.getElementById('rth-kategori-list')?.previousElementSibling;
+                    const list = document.getElementById('rth-kategori-list');
+                    if (!leftCol || !list) {
+                        return;
+                    }
+
+                    if (window.matchMedia('(min-width: 1024px)').matches) {
+                        leftCol.style.minHeight = `${list.offsetHeight}px`;
+                    } else {
+                        leftCol.style.minHeight = '';
+                    }
+                };
+
+                let kelengkapanChart = null;
                 const kelengkapanCanvas = document.getElementById('rthKelengkapanChart');
                 if (kelengkapanCanvas) {
                     const lengkap = @json($jumlahDataLengkap);
                     const belum = @json($jumlahBelumLengkap);
-                    new Chart(kelengkapanCanvas, {
+                    kelengkapanChart = new Chart(kelengkapanCanvas, {
                         ...doughnutDefaults,
                         data: {
                             labels: ['Profil lengkap', 'Belum lengkap'],
@@ -399,6 +415,17 @@
                             },
                         },
                     });
+                }
+
+                const reflowKelengkapanLayout = () => {
+                    syncKelengkapanColumnHeight();
+                    kelengkapanChart?.resize();
+                };
+
+                reflowKelengkapanLayout();
+                window.addEventListener('resize', reflowKelengkapanLayout);
+                if (document.fonts?.ready) {
+                    document.fonts.ready.then(reflowKelengkapanLayout);
                 }
             });
         </script>
