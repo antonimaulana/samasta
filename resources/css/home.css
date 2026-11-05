@@ -655,3 +655,183 @@
         -webkit-line-clamp: 3;
     }
 }
+
+/* Tama mascot tips — beranda */
+.tama-tip-root {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+}
+
+.tama-tip-root.is-visible {
+    pointer-events: auto;
+}
+
+.tama-tip-root__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 78, 59, 0.25);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.tama-tip-root.is-visible .tama-tip-root__backdrop {
+    opacity: 1;
+}
+
+.tama-tip-card {
+    position: absolute;
+    left: 50%;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    width: min(100% - 1.5rem, 36rem);
+    transform: translate(-50%, 120%);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    filter: drop-shadow(0 20px 40px rgba(6, 95, 70, 0.25));
+}
+
+.tama-tip-root.is-visible .tama-tip-card {
+    transform: translate(-50%, 0);
+}
+
+.tama-tip-card__close {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+    z-index: 2;
+    display: flex;
+    height: 2rem;
+    width: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: white;
+    color: #047857;
+}
+
+.tama-tip-card__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    border-radius: 1.25rem;
+    border: 2px solid #6ee7b7;
+    background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 55%, #f0fdf4 100%);
+}
+
+@media (min-width: 640px) {
+    .tama-tip-card__inner {
+        flex-direction: row;
+        align-items: flex-end;
+    }
+}
+
+.tama-tip-card__figure {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem 1rem 0;
+    background: radial-gradient(circle at 50% 80%, rgba(52, 211, 153, 0.35), transparent 70%);
+}
+
+@media (min-width: 640px) {
+    .tama-tip-card__figure {
+        width: 9rem;
+        padding-bottom: 0.5rem;
+    }
+}
+
+.tama-tip-card__img {
+    height: auto;
+    max-height: 10.5rem;
+    width: auto;
+    max-width: 8.5rem;
+    object-fit: contain;
+    animation: tama-tip-float 3s ease-in-out infinite;
+}
+
+@keyframes tama-tip-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.tama-tip-card__bubble {
+    flex: 1;
+    padding: 1rem 1.25rem 1.25rem;
+}
+
+.tama-tip-card__kicker {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #059669;
+}
+
+.tama-tip-card__title {
+    margin-top: 0.35rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: #064e3b;
+}
+
+.tama-tip-card__body {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: #374151;
+}
+
+.tama-tip-card__actions {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tama-tip-card__primary {
+    border-radius: 0.75rem;
+    background: linear-gradient(to right, #10b981, #059669);
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+}
+
+.tama-tip-card__cta {
+    border-radius: 0.75rem;
+    border: 1px solid #6ee7b7;
+    background: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #047857;
+}
+
+.tama-tip-card__skip {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tama-tip-card__img {
+        animation: none;
+    }
+
+    .tama-tip-card,
+    .tama-tip-root__backdrop {
+        transition: none;
+    }
+}

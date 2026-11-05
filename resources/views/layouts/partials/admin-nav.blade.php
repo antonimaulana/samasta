@@ -9,6 +9,7 @@
         'admin.users.*',
         'admin.activity-logs.*',
         'admin.beranda-slides.*',
+        'admin.beranda-mascot-tips.*',
         'admin.faq.*',
         'admin.ensiklopedia-pengaturan.*',
         'admin.ensiklopedia-kategoris.*',
@@ -155,6 +156,9 @@
                 </a>
                 <a href="{{ route('admin.beranda-slides.index') }}" class="{{ $navSub(request()->routeIs('admin.beranda-slides.*')) }}">
                     Slide Beranda
+                </a>
+                <a href="{{ route('admin.beranda-mascot-tips.index') }}" class="{{ $navSub(request()->routeIs('admin.beranda-mascot-tips.*')) }}">
+                    Pesan Tama (Beranda)
                 </a>
                 <a href="{{ route('admin.faq.index') }}" class="{{ $navSub(request()->routeIs('admin.faq.*')) }}">
                     FAQ Beranda

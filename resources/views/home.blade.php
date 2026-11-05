@@ -33,6 +33,8 @@
 
         @include('home.partials.faq-beranda')
     </div>
+
+    @include('home.partials.tama-tips')
 @endsection
 
 @include('tamans.partials.nearby-script')

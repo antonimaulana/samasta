@@ -2,7 +2,7 @@
     $heroFeaturedTamans = $heroFeaturedTamans ?? collect();
 @endphp
 
-<section class="home-hero relative overflow-hidden text-white">
+<section id="home-hero" class="home-hero relative overflow-hidden text-white">
     <img src="{{ asset('images/hero-welcome-batam.jpg') }}"
          alt="Panorama Kota Batam — taman, masjid, dan teluk Batam"
          aria-hidden="true"

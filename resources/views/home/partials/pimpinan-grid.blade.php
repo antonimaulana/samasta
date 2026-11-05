@@ -4,7 +4,7 @@
     [$walikota, $wakilWalikota, $kadisPerkim] = $pimpinan;
 @endphp
 
-<section class="pemerintah-kota-section" aria-labelledby="pemerintah-kota-heading">
+<section id="pemerintah-kota" class="pemerintah-kota-section" aria-labelledby="pemerintah-kota-heading">
     <x-home-section-heading
         tag="Layanan"
         title="Pemerintah Kota Batam"

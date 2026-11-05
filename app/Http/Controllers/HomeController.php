@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BerandaMascotTip;
 use App\Models\BerandaSlide;
 use App\Support\BerandaSlidePresenter;
 use App\Models\Faq;
@@ -43,7 +44,23 @@ class HomeController extends Controller
             'penjagaHijauGallery' => PenjagaHijauKota::gallery(),
             'pimpinanKota' => PemerintahKotaBatam::pimpinan(),
             'visiMisiKota' => PemerintahKotaBatam::visiMisi(),
+            'tamaTipsPayload' => $this->tamaTipsForHome(),
         ]);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function tamaTipsForHome(): array
+    {
+        if (! Schema::hasTable('beranda_mascot_tips')) {
+            return [];
+        }
+
+        return BerandaMascotTip::activeForHome()
+            ->map(fn (BerandaMascotTip $tip) => $tip->toHomePayload())
+            ->values()
+            ->all();
     }
 
     private function faqSettingForHome(): FaqSetting

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\Dpa\DpaController as AdminDpaController;
 use App\Http\Controllers\Admin\Dpa\PaketPekerjaanController as DpaPaketPekerjaanController;
 use App\Http\Controllers\Admin\Dpa\PenyediaController as DpaPenyediaController;
 use App\Http\Controllers\Admin\Dpa\TahunAnggaranController as DpaTahunAnggaranController;
+use App\Http\Controllers\Admin\BerandaMascotTipController;
 use App\Http\Controllers\Admin\BerandaSlideController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\EnsiklopediaArtikelController;
@@ -210,6 +211,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         Route::delete('beranda-slides/{beranda_slide}', [BerandaSlideController::class, 'destroy'])->name('beranda-slides.destroy');
         Route::patch('beranda-slides/{beranda_slide}/toggle', [BerandaSlideController::class, 'toggle'])->name('beranda-slides.toggle');
         Route::post('beranda-slides/reorder', [BerandaSlideController::class, 'reorder'])->name('beranda-slides.reorder');
+
+        Route::get('beranda-mascot-tips', [BerandaMascotTipController::class, 'index'])->name('beranda-mascot-tips.index');
+        Route::get('beranda-mascot-tips/{beranda_mascot_tip}/edit', [BerandaMascotTipController::class, 'edit'])->name('beranda-mascot-tips.edit');
+        Route::put('beranda-mascot-tips/{beranda_mascot_tip}', [BerandaMascotTipController::class, 'update'])->name('beranda-mascot-tips.update');
+        Route::patch('beranda-mascot-tips/{beranda_mascot_tip}/toggle', [BerandaMascotTipController::class, 'toggle'])->name('beranda-mascot-tips.toggle');
         Route::put('faq/settings', [FaqController::class, 'updateSettings'])->name('faq.settings.update');
         Route::get('faq/create', [FaqController::class, 'create'])->name('faq.create');
         Route::post('faq', [FaqController::class, 'store'])->name('faq.store');
