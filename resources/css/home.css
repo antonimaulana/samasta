@@ -656,182 +656,205 @@
     }
 }
 
-/* Tama mascot tips — beranda */
+/* Tama mascot tips — beranda (pemandu sudut kanan, bukan modal penuh) */
 .tama-tip-root {
     position: fixed;
-    inset: 0;
+    right: max(0.5rem, env(safe-area-inset-right));
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
     z-index: 60;
+    width: min(calc(100vw - 1rem), 21rem);
     pointer-events: none;
+    opacity: 0;
+    transform: translateX(calc(100% + 1.5rem)) translateY(8px);
+    transition:
+        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.4s ease;
 }
 
 .tama-tip-root.is-visible {
     pointer-events: auto;
-}
-
-.tama-tip-root__backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(6, 78, 59, 0.25);
-    opacity: 0;
-    transition: opacity 0.35s ease;
-}
-
-.tama-tip-root.is-visible .tama-tip-root__backdrop {
     opacity: 1;
+    transform: translateX(0) translateY(0);
 }
 
-.tama-tip-card {
-    position: absolute;
-    left: 50%;
-    bottom: max(1rem, env(safe-area-inset-bottom));
-    width: min(100% - 1.5rem, 36rem);
-    transform: translate(-50%, 120%);
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-    filter: drop-shadow(0 20px 40px rgba(6, 95, 70, 0.25));
-}
-
-.tama-tip-root.is-visible .tama-tip-card {
-    transform: translate(-50%, 0);
-}
-
-.tama-tip-card__close {
-    position: absolute;
-    right: 0.75rem;
-    top: 0.75rem;
-    z-index: 2;
+.tama-tip-widget {
     display: flex;
-    height: 2rem;
-    width: 2rem;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.tama-tip-widget__bubble {
+    position: relative;
+    width: 100%;
+    padding: 0.85rem 1rem 0.75rem;
+    border-radius: 1.125rem;
+    border: 2px solid #6ee7b7;
+    background: #fff;
+    box-shadow:
+        0 12px 28px rgba(6, 95, 70, 0.18),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.tama-tip-widget__bubble::before {
+    content: '';
+    position: absolute;
+    right: 2.25rem;
+    bottom: -10px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-right: 2px solid #6ee7b7;
+    border-bottom: 2px solid #6ee7b7;
+    transform: rotate(45deg);
+    box-shadow: 4px 4px 8px rgba(6, 95, 70, 0.08);
+}
+
+.tama-tip-widget__close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    height: 1.75rem;
+    width: 1.75rem;
     align-items: center;
     justify-content: center;
     border-radius: 9999px;
-    border: 1px solid rgba(16, 185, 129, 0.35);
-    background: white;
+    color: #6b7280;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tama-tip-widget__close:hover {
+    background: #ecfdf5;
     color: #047857;
 }
 
-.tama-tip-card__inner {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    overflow: hidden;
-    border-radius: 1.25rem;
-    border: 2px solid #6ee7b7;
-    background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 55%, #f0fdf4 100%);
-}
-
-@media (min-width: 640px) {
-    .tama-tip-card__inner {
-        flex-direction: row;
-        align-items: flex-end;
-    }
-}
-
-.tama-tip-card__figure {
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    padding: 0.75rem 1rem 0;
-    background: radial-gradient(circle at 50% 80%, rgba(52, 211, 153, 0.35), transparent 70%);
-}
-
-@media (min-width: 640px) {
-    .tama-tip-card__figure {
-        width: 9rem;
-        padding-bottom: 0.5rem;
-    }
-}
-
-.tama-tip-card__img {
-    height: auto;
-    max-height: 10.5rem;
-    width: auto;
-    max-width: 8.5rem;
-    object-fit: contain;
-    animation: tama-tip-float 3s ease-in-out infinite;
-}
-
-@keyframes tama-tip-float {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-4px);
-    }
-}
-
-.tama-tip-card__bubble {
-    flex: 1;
-    padding: 1rem 1.25rem 1.25rem;
-}
-
-.tama-tip-card__kicker {
-    font-size: 0.65rem;
+.tama-tip-widget__kicker {
+    padding-right: 1.5rem;
+    font-size: 0.625rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: #059669;
 }
 
-.tama-tip-card__title {
-    margin-top: 0.35rem;
-    font-size: 1.125rem;
+.tama-tip-widget__title {
+    margin-top: 0.25rem;
+    padding-right: 0.5rem;
+    font-size: 1.05rem;
     font-weight: 800;
-    line-height: 1.25;
+    line-height: 1.3;
     color: #064e3b;
 }
 
-.tama-tip-card__body {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
+.tama-tip-widget__body {
+    margin-top: 0.45rem;
+    font-size: 0.8125rem;
     line-height: 1.55;
-    color: #374151;
+    color: #4b5563;
 }
 
-.tama-tip-card__actions {
-    margin-top: 1rem;
+.tama-tip-widget__actions {
+    margin-top: 0.75rem;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
 }
 
-.tama-tip-card__primary {
-    border-radius: 0.75rem;
+.tama-tip-widget__primary {
+    border-radius: 9999px;
     background: linear-gradient(to right, #10b981, #059669);
-    padding: 0.5rem 1.25rem;
+    padding: 0.45rem 1.1rem;
     font-size: 0.8125rem;
     font-weight: 700;
-    color: white;
-    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
 }
 
-.tama-tip-card__cta {
-    border-radius: 0.75rem;
-    border: 1px solid #6ee7b7;
-    background: white;
-    padding: 0.5rem 1rem;
-    font-size: 0.8125rem;
+.tama-tip-widget__cta {
+    font-size: 0.75rem;
     font-weight: 700;
     color: #047857;
-}
-
-.tama-tip-card__skip {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #6b7280;
     text-decoration: underline;
     text-underline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .tama-tip-card__img {
-        animation: none;
+.tama-tip-widget__skip {
+    display: block;
+    width: 100%;
+    margin-top: 0.35rem;
+    text-align: right;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #9ca3af;
+}
+
+.tama-tip-widget__skip:hover {
+    color: #6b7280;
+    text-decoration: underline;
+}
+
+.tama-tip-widget__stage {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding-right: 0.25rem;
+    margin-top: -0.35rem;
+}
+
+.tama-tip-widget__shadow {
+    position: absolute;
+    right: 1.75rem;
+    bottom: 0.15rem;
+    width: 5rem;
+    height: 0.65rem;
+    border-radius: 9999px;
+    background: rgba(6, 78, 59, 0.2);
+    filter: blur(3px);
+}
+
+.tama-tip-widget__img {
+    position: relative;
+    z-index: 1;
+    height: auto;
+    max-height: 11.5rem;
+    width: auto;
+    max-width: 9.5rem;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 16px rgba(6, 95, 70, 0.15));
+    animation: tama-tip-float 3.2s ease-in-out infinite;
+    transform-origin: bottom center;
+}
+
+@keyframes tama-tip-float {
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-5px) scale(1.01);
+    }
+}
+
+@media (min-width: 640px) {
+    .tama-tip-root {
+        width: min(calc(100vw - 2rem), 23rem);
     }
 
-    .tama-tip-card,
-    .tama-tip-root__backdrop {
+    .tama-tip-widget__img {
+        max-height: 12.5rem;
+        max-width: 10.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tama-tip-root {
         transition: none;
+    }
+
+    .tama-tip-widget__img {
+        animation: none;
     }
 }

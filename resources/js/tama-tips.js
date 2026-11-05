@@ -84,8 +84,11 @@ export function bootTamaTips() {
 
         root.classList.remove('hidden');
         root.setAttribute('aria-hidden', 'false');
+        root.classList.remove('is-visible');
         requestAnimationFrame(() => {
-            root.classList.add('is-visible');
+            requestAnimationFrame(() => {
+                root.classList.add('is-visible');
+            });
         });
     }
 
