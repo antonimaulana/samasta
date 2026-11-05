@@ -16,18 +16,49 @@ use App\Models\User;
 class DashboardSummaryBuilder
 {
     /**
+     * @return array{total: int, luasan: int}
+     */
+    public function tamanRingkasan(?User $user = null): array
+    {
+        $scope = app(OperatorWilayahScope::class);
+        $query = $scope->scopeTamans(Taman::query(), $user);
+
+        return [
+            'total' => (clone $query)->count(),
+            'luasan' => (int) (clone $query)->sum('luasan'),
+        ];
+    }
+
+    /**
+     * @return array{total_stok: int, varietas: int, siap_persen: int}
+     */
+    public function bibitRingkasan(): array
+    {
+        $totalStok = (int) Bibit::sum('stok_tersedia');
+        $bibitSiapTanam = (int) BibitMasuk::where('status_siap_tanam', true)->sum('sisa_stok');
+
+        return [
+            'total_stok' => $totalStok,
+            'varietas' => Bibit::count(),
+            'siap_persen' => $totalStok > 0 ? (int) round(($bibitSiapTanam / $totalStok) * 100) : 0,
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function build(?User $user = null): array
     {
         $scope = app(OperatorWilayahScope::class);
 
-        $tamanQuery = $scope->scopeTamans(Taman::query(), $user);
-        $totalTaman = (clone $tamanQuery)->count();
-        $totalLuasanTaman = (int) (clone $tamanQuery)->sum('luasan');
+        $tamanRingkasan = $this->tamanRingkasan($user);
+        $totalTaman = $tamanRingkasan['total'];
+        $totalLuasanTaman = $tamanRingkasan['luasan'];
 
-        $totalVarietasBibit = Bibit::count();
-        $totalStokBibit = (int) Bibit::sum('stok_tersedia');
+        $bibitRingkasan = $this->bibitRingkasan();
+        $totalVarietasBibit = $bibitRingkasan['varietas'];
+        $totalStokBibit = $bibitRingkasan['total_stok'];
+        $bibitSiapPersen = $bibitRingkasan['siap_persen'];
         $bibitSiapTanam = (int) BibitMasuk::where('status_siap_tanam', true)->sum('sisa_stok');
 
         $totalArmada = ArmadaSchema::isReady()
@@ -100,7 +131,7 @@ class DashboardSummaryBuilder
             'total_varietas_bibit' => $totalVarietasBibit,
             'total_stok_bibit' => $totalStokBibit,
             'bibit_siap_tanam' => $bibitSiapTanam,
-            'bibit_siap_persen' => $totalStokBibit > 0 ? (int) round(($bibitSiapTanam / $totalStokBibit) * 100) : 0,
+            'bibit_siap_persen' => $bibitSiapPersen,
             'total_armada' => $totalArmada,
             'armada_kondisi_baik_persen' => $armadaKondisiBaikPersen,
             'total_petugas' => $totalPetugas,

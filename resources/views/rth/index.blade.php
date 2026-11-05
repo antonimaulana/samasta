@@ -104,10 +104,12 @@
 
             <div class="grid gap-6 lg:grid-cols-5 lg:items-stretch">
                 <div class="flex min-h-0 flex-col gap-6 lg:col-span-2 lg:h-full">
-                    <div class="shrink-0 rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-6 shadow-lg shadow-emerald-900/10">
-                        <h3 class="text-base font-bold text-emerald-950">Komposisi Luasan</h3>
-                        <div class="relative mx-auto mt-5 h-72 w-72 max-w-full sm:h-80 sm:w-80">
-                            <canvas id="rthKategoriChart" aria-label="Diagram komposisi luasan RTH per kategori"></canvas>
+                    <div class="flex min-h-[14rem] flex-[1.15] flex-col rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/40 p-5 shadow-lg shadow-emerald-900/10 sm:p-6">
+                        <h3 class="shrink-0 text-base font-bold text-emerald-950">Komposisi Luasan</h3>
+                        <div class="relative mt-4 min-h-0 flex-1">
+                            <canvas id="rthKategoriChart"
+                                    class="absolute inset-0 h-full w-full"
+                                    aria-label="Diagram komposisi luasan RTH per kategori"></canvas>
                         </div>
                     </div>
                     <div id="rth-kelengkapan-card"
@@ -315,7 +317,7 @@
                     type: 'doughnut',
                     options: {
                         responsive: true,
-                        maintainAspectRatio: true,
+                        maintainAspectRatio: false,
                         cutout: '58%',
                         animation: {
                             animateRotate: true,

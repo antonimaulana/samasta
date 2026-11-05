@@ -11,7 +11,6 @@
             <h1 class="mt-2 text-3xl font-black sm:text-4xl">Aduan Kondisi Taman</h1>
             <p class="mt-3 max-w-2xl text-white/90">
                 Laporkan kondisi taman, tanaman rusak, atau tanaman berbahaya di Kota Batam.
-                Tim Disperakimtan akan menindaklanjuti aduan Anda.
             </p>
         </div>
         <div class="relative text-green-50" aria-hidden="true">

@@ -32,6 +32,38 @@
         </div>
     </div>
 
+    <div class="mb-6 grid gap-4 sm:grid-cols-3">
+        <x-admin.dash-stat-card
+            tone="teal"
+            label="Total Bibit"
+            :value="number_format($bibitRingkasan['total_stok'])"
+            subtitle="Stok tersedia">
+            <x-slot:icon>
+                <x-admin.nav-icon name="bibit" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            tone="emerald"
+            label="Jumlah Varietas"
+            :value="number_format($bibitRingkasan['varietas'])"
+            subtitle="Master bibit">
+            <x-slot:icon>
+                <x-admin.nav-icon name="bibit" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            tone="cyan"
+            label="Siap Tanam"
+            :value="$bibitRingkasan['siap_persen'].'%'"
+            subtitle="Persentase stok siap tanam">
+            <x-slot:icon>
+                <x-admin.nav-icon name="bibit" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+    </div>
+
     @include('admin.partials.table-search', ['placeholder' => 'Cari nama tanaman, nama ilmiah, jenis...'])
 
     <x-admin.data-table fixed>

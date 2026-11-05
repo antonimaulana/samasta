@@ -10,6 +10,7 @@ use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Models\TamanImage;
 use App\Support\AdminTamanListQuery;
+use App\Support\DashboardSummaryBuilder;
 use App\Support\OperatorWilayahScope;
 use App\Support\TamanTableSort;
 use App\Support\TableSearch;
@@ -42,8 +43,9 @@ class TamanController extends Controller
         $sortState = TamanTableSort::apply(AdminTamanListQuery::build($request), $request);
         $tamans = AdminTamanListQuery::paginated($request)->withQueryString();
         $listTotal = $tamans->total();
+        $tamanRingkasan = app(DashboardSummaryBuilder::class)->tamanRingkasan($request->user());
 
-        return view('admin.tamans.index', compact('tamans', 'sortState', 'listTotal'));
+        return view('admin.tamans.index', compact('tamans', 'sortState', 'listTotal', 'tamanRingkasan'));
     }
 
     public function importForm(): View

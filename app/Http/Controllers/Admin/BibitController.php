@@ -7,6 +7,7 @@ use App\Models\Bibit;
 use App\Models\BibitKeluarBatch;
 use App\Models\BibitMasukBatch;
 use App\Support\BibitCsvImporter;
+use App\Support\DashboardSummaryBuilder;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -52,7 +53,9 @@ class BibitController extends Controller
             ->limit(5)
             ->get();
 
-        return view('admin.bibits.index', compact('bibits', 'recentMasuks', 'recentKeluarBatches'));
+        $bibitRingkasan = app(DashboardSummaryBuilder::class)->bibitRingkasan();
+
+        return view('admin.bibits.index', compact('bibits', 'recentMasuks', 'recentKeluarBatches', 'bibitRingkasan'));
     }
 
     public function importForm(): View

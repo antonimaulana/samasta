@@ -1,5 +1,5 @@
 @props([
-    'href',
+    'href' => null,
     'tone' => 'emerald',
     'label',
     'value',
@@ -18,8 +18,15 @@
     };
 @endphp
 
-<a href="{{ $href }}"
-   {{ $attributes->merge(['class' => trim("group dash-card dash-card--{$tone} p-5 {$animateClass}")]) }}>
+@php
+    $cardClass = trim("group dash-card dash-card--{$tone} p-5 {$animateClass}");
+@endphp
+
+@if ($href)
+    <a href="{{ $href }}" {{ $attributes->merge(['class' => $cardClass]) }}>
+@else
+    <div {{ $attributes->merge(['class' => $cardClass]) }}>
+@endif
     <span class="dash-card__glow dash-card__glow--{{ $tone }}"></span>
     <div class="relative flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
@@ -41,7 +48,11 @@
     @isset($extra)
         <div class="relative">{{ $extra }}</div>
     @endisset
-    @if ($footer)
+    @if ($footer && $href)
         <p class="relative mt-4 text-xs font-semibold dash-link--{{ $tone }} group-hover:underline">{{ $footer }}</p>
     @endif
-</a>
+@if ($href)
+    </a>
+@else
+    </div>
+@endif

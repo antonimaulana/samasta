@@ -4,6 +4,16 @@
 @section('header', 'Kelola Taman')
 
 @section('content')
+    @php
+        $formatLuasanRingkasan = function (int $luasanM2): string {
+            if ($luasanM2 >= 1_000_000) {
+                return number_format($luasanM2, 0, ',', '.').' m²';
+            }
+
+            return number_format($luasanM2, 0, ',', '.').' m²';
+        };
+    @endphp
+
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm text-gray-600">Kelola data RTH/taman yang terdaftar di sistem.</p>
         <div class="flex flex-wrap gap-2">
@@ -26,6 +36,21 @@
         </a>
         </x-admin.can-write>
         </div>
+    </div>
+
+    <div class="mb-6 max-w-xl">
+        <x-admin.dash-stat-card
+            tone="emerald"
+            label="Ringkasan Data Taman"
+            :value="number_format($tamanRingkasan['total'])"
+            subtitle="Total lokasi terdaftar">
+            <x-slot:meta>
+                <span class="dash-chip dash-chip--emerald">{{ $formatLuasanRingkasan($tamanRingkasan['luasan']) }} luasan</span>
+            </x-slot:meta>
+            <x-slot:icon>
+                <x-admin.nav-icon name="taman" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
     </div>
 
     @if (request('alert') === 'incomplete')
