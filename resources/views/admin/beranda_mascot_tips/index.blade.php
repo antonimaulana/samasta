@@ -4,6 +4,14 @@
 @section('header', 'Pesan Tama — Beranda')
 
 @section('content')
+    @if (! ($schemaReady ?? true))
+        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            Modul pesan Tama belum siap di database. Setelah deploy, jalankan
+            <code class="rounded bg-amber-100 px-1.5 py-0.5 text-xs">php artisan migrate</code>
+            pada server, lalu muat ulang halaman ini.
+        </div>
+    @endif
+
     <p class="mb-6 max-w-2xl text-sm text-gray-600">
         Maskot <strong>Tama</strong> menampilkan pop-up saat pengunjung scroll ke bagian beranda yang sesuai. Matikan pop-up secara global atau per bagian di bawah.
     </p>
@@ -21,7 +29,12 @@
             </p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @if ($setting->popups_enabled)
+            @if (! ($schemaReady ?? true))
+                <button type="button" disabled
+                        class="cursor-not-allowed rounded-xl border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-500">
+                    Migrasi database diperlukan
+                </button>
+            @elseif ($setting->popups_enabled)
                 <form action="{{ route('admin.beranda-mascot-tips.settings.update') }}" method="POST">
                     @csrf
                     @method('PUT')
@@ -45,6 +58,7 @@
         </div>
     </div>
 
+    @if ($schemaReady ?? true)
     <div class="mb-4 flex flex-wrap gap-2">
         <form action="{{ route('admin.beranda-mascot-tips.activate-all') }}" method="POST">
             @csrf
@@ -61,6 +75,7 @@
             </button>
         </form>
     </div>
+    @endif
 
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
         <table class="min-w-full text-sm">

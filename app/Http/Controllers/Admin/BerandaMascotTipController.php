@@ -7,6 +7,7 @@ use App\Models\BerandaMascotSetting;
 use App\Models\BerandaMascotTip;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class BerandaMascotTipController extends Controller
@@ -18,19 +19,29 @@ class BerandaMascotTipController extends Controller
 
     public function index(): View
     {
-        $tips = BerandaMascotTip::query()
-            ->orderBy('urutan')
-            ->orderBy('id')
-            ->get();
+        $schemaReady = BerandaMascotSetting::schemaReady();
+
+        if ($schemaReady && BerandaMascotTip::query()->count() === 0) {
+            BerandaMascotTip::seedDefaults();
+        }
+
+        $tips = $schemaReady
+            ? BerandaMascotTip::query()->orderBy('urutan')->orderBy('id')->get()
+            : collect();
 
         return view('admin.beranda_mascot_tips.index', [
             'tips' => $tips,
             'setting' => BerandaMascotSetting::current(),
+            'schemaReady' => $schemaReady,
         ]);
     }
 
     public function updateSettings(Request $request): RedirectResponse
     {
+        if (! BerandaMascotSetting::schemaReady()) {
+            return back()->with('error', 'Tabel pesan Tama belum ada. Jalankan php artisan migrate di server.');
+        }
+
         $request->validate([
             'popups_enabled' => ['required', 'in:0,1'],
         ]);
@@ -50,6 +61,10 @@ class BerandaMascotTipController extends Controller
 
     public function activateAll(): RedirectResponse
     {
+        if (! BerandaMascotSetting::schemaReady()) {
+            return back()->with('error', 'Tabel pesan Tama belum ada. Jalankan php artisan migrate di server.');
+        }
+
         BerandaMascotTip::query()->update(['is_active' => true]);
 
         return back()->with('success', 'Semua pesan Tama diaktifkan.');
@@ -57,6 +72,10 @@ class BerandaMascotTipController extends Controller
 
     public function deactivateAll(): RedirectResponse
     {
+        if (! BerandaMascotSetting::schemaReady()) {
+            return back()->with('error', 'Tabel pesan Tama belum ada. Jalankan php artisan migrate di server.');
+        }
+
         BerandaMascotTip::query()->update(['is_active' => false]);
 
         return back()->with('success', 'Semua pesan Tama dinonaktifkan.');

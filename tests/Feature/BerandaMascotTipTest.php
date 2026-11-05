@@ -38,6 +38,20 @@ class BerandaMascotTipTest extends TestCase
             ->assertDontSee('id="tama-tip-root"', false);
     }
 
+    public function test_admin_index_without_settings_table_does_not_error(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        \Illuminate\Support\Facades\Schema::dropIfExists('beranda_mascot_settings');
+
+        $this->actingAs($admin)
+            ->get(route('admin.beranda-mascot-tips.index'))
+            ->assertOk()
+            ->assertSee('php artisan migrate', false);
+
+        $this->artisan('migrate', ['--force' => true]);
+    }
+
     public function test_admin_can_toggle_global_popup_setting(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

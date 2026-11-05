@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class BerandaMascotSetting extends Model
 {
@@ -19,17 +20,37 @@ class BerandaMascotSetting extends Model
 
     public static function current(): self
     {
+        if (! Schema::hasTable('beranda_mascot_settings')) {
+            return static::defaultInstance();
+        }
+
         return static::query()->firstOrCreate([], [
             'popups_enabled' => true,
         ]);
     }
 
+    public static function defaultInstance(): self
+    {
+        $setting = new self([
+            'popups_enabled' => true,
+        ]);
+        $setting->exists = false;
+
+        return $setting;
+    }
+
     public static function popupsEnabledForHome(): bool
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('beranda_mascot_settings')) {
+        if (! Schema::hasTable('beranda_mascot_settings')) {
             return true;
         }
 
         return static::current()->popups_enabled;
+    }
+
+    public static function schemaReady(): bool
+    {
+        return Schema::hasTable('beranda_mascot_settings')
+            && Schema::hasTable('beranda_mascot_tips');
     }
 }
