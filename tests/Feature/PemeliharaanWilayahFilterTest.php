@@ -283,4 +283,72 @@ class PemeliharaanWilayahFilterTest extends TestCase
             $manual->lokasiPelaksanaanPdfLabel()
         );
     }
+
+    public function test_admin_can_delete_pemeliharaan_input(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $record = PemeliharaanTaman::create([
+            'tanggal' => now()->toDateString(),
+            'tim' => 'Tim Wilayah 1',
+            'lokasi_pelaksanaan' => 'Lokasi hapus admin',
+            'uraian_pekerjaan' => 'Akan dihapus',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.pemeliharaan-tamans.destroy', $record))
+            ->assertRedirect(route('admin.pemeliharaan-tamans.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('pemeliharaan_tamans', ['id' => $record->id]);
+    }
+
+    public function test_operator_can_delete_pemeliharaan_input(): void
+    {
+        $operator = User::factory()->operatorTeams(
+            [TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail()->id],
+        )->create();
+        $kelurahan = TimPelaksana::where('nama', 'Tim Wilayah 1')->first()->kelurahans()->first();
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Hapus Operator',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahan->id,
+            'luasan' => 400,
+            'alamat' => 'Alamat hapus test',
+            'deskripsi' => 'Test hapus pemeliharaan operator.',
+        ]);
+
+        $record = PemeliharaanTaman::create([
+            'tanggal' => now()->toDateString(),
+            'tim' => 'Tim Wilayah 1',
+            'taman_id' => $taman->id,
+            'lokasi_pelaksanaan' => PemeliharaanTaman::lokasiLabelFromTaman($taman),
+            'uraian_pekerjaan' => 'Akan dihapus',
+        ]);
+
+        $this->actingAs($operator)
+            ->from(route('admin.pemeliharaan-tamans.index'))
+            ->delete(route('admin.pemeliharaan-tamans.destroy', $record))
+            ->assertRedirect(route('admin.pemeliharaan-tamans.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('pemeliharaan_tamans', ['id' => $record->id]);
+    }
+
+    public function test_viewer_cannot_delete_pemeliharaan_input(): void
+    {
+        $viewer = User::factory()->create(['role' => User::ROLE_VIEWER]);
+        $record = PemeliharaanTaman::create([
+            'tanggal' => now()->toDateString(),
+            'tim' => 'Tim Wilayah 1',
+            'lokasi_pelaksanaan' => 'Lokasi viewer test',
+        ]);
+
+        $this->actingAs($viewer)
+            ->delete(route('admin.pemeliharaan-tamans.destroy', $record))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('pemeliharaan_tamans', ['id' => $record->id]);
+    }
 }

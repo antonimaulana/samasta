@@ -172,14 +172,14 @@
                                     <x-admin.can-write>
                                         <x-admin.table-action-link variant="edit" :href="route('admin.pemeliharaan-tamans.edit', $kinerja)" />
                                     </x-admin.can-write>
-                                    <x-admin.can-delete>
+                                    <x-admin.can-write>
                                         <form action="{{ route('admin.pemeliharaan-tamans.destroy', $kinerja) }}" method="POST" class="inline"
                                               onsubmit="return confirm('Hapus data operasional ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <x-admin.table-action-link tag="button" variant="delete" />
+                                            <x-admin.table-action-link tag="button" variant="delete" label="Hapus" />
                                         </form>
-                                    </x-admin.can-delete>
+                                    </x-admin.can-write>
                                 </x-admin.table-actions>
                             </td>
                         </tr>

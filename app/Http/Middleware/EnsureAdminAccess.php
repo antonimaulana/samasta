@@ -29,13 +29,14 @@ class EnsureAdminAccess
         }
 
         if ($request->isMethod('DELETE') && ! $user->canDelete()) {
-            $operatorMayDeleteBibitTransaksi = $user->canWrite()
+            $operatorMayDeleteSelected = $user->canWrite()
                 && (
                     str_starts_with($routeName, 'admin.bibit-masuks.')
                     || str_starts_with($routeName, 'admin.bibit-keluars.')
+                    || str_starts_with($routeName, 'admin.pemeliharaan-tamans.')
                 );
 
-            if (! $operatorMayDeleteBibitTransaksi) {
+            if (! $operatorMayDeleteSelected) {
                 abort(403, 'Hanya administrator yang dapat menghapus data.');
             }
         }

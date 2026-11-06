@@ -18,4 +18,10 @@ class PemeliharaanTamanPolicy extends AdminContentPolicy
         return $user->canInputLapangan()
             && app(OperatorWilayahScope::class)->canAccess($user, $model);
     }
+
+    public function delete(User $user, Model $model): bool
+    {
+        return $user->canWrite()
+            && app(OperatorWilayahScope::class)->canAccess($user, $model);
+    }
 }
