@@ -46,6 +46,7 @@ class BibitController extends Controller
             ->get();
 
         $recentKeluarBatches = BibitKeluarBatch::query()
+            ->with(['items:id,bibit_keluar_batch_id,sumber'])
             ->withCount('items')
             ->withSum('items', 'jumlah')
             ->latest('tanggal_keluar')

@@ -75,6 +75,17 @@ class BibitKeluarBatch extends Model
         return (int) $this->items()->sum('jumlah');
     }
 
+    public function sumberUnikLabel(): string
+    {
+        $items = $this->relationLoaded('items')
+            ? $this->items
+            : $this->items()->get(['sumber']);
+
+        $sumber = $items->pluck('sumber')->filter()->unique()->values();
+
+        return $sumber->isEmpty() ? '—' : $sumber->join(', ');
+    }
+
     public function requiresDokumenPendukung(): bool
     {
         return $this->peruntukan === self::PERUNTUKAN_PERMINTAAN;

@@ -47,9 +47,9 @@
         <x-admin.dash-stat-card
             class="h-full"
             tone="emerald"
-            label="Jumlah Jenis"
-            :value="number_format($bibitRingkasan['jenis'])"
-            subtitle="jenis">
+            label="Jumlah Varietas"
+            :value="number_format($bibitRingkasan['varietas'])"
+            subtitle="varietas">
             <x-slot:icon>
                 <x-admin.nav-icon name="bibit" class="h-5 w-5" />
             </x-slot:icon>
@@ -238,6 +238,7 @@
                     <tr>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peruntukan</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Sumber stok</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jumlah</th>
                         <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Lokasi</th>
                         <th class="admin-table-col-actions">Aksi</th>
@@ -251,6 +252,7 @@
                                     {{ $batch->peruntukan }}
                                     <span class="block text-xs text-gray-500">{{ $batch->items_count }} jenis bibit</span>
                                 </td>
+                                <td class="px-4 py-2 text-gray-700">{{ $batch->sumberUnikLabel() }}</td>
                                 <td class="px-4 py-2 font-semibold text-red-700">-{{ number_format((int) ($batch->items_sum_jumlah ?? 0)) }}</td>
                                 <td class="max-w-[8rem] truncate px-4 py-2 text-gray-600">{{ $batch->lokasiLabel() }}</td>
                                 <td class="admin-table-col-actions">
@@ -262,7 +264,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-6 text-center text-gray-500">
+                                <td colspan="6" class="px-4 py-6 text-center text-gray-500">
                                     Belum ada transaksi keluar.
                                     @if ($canWrite ?? auth()->user()?->canWrite())
                                         <a href="{{ route('admin.bibit-keluars.create') }}" class="text-green-700 underline">Catat stok keluar</a>
