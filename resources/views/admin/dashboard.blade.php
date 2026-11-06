@@ -92,7 +92,42 @@
     </section>
 
     {{-- Ringkasan data induk --}}
-    <div class="mb-8 grid gap-4 sm:grid-cols-2">
+    <div class="mb-8 grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <x-admin.dash-stat-card
+            :href="route('admin.tamans.index')"
+            tone="emerald"
+            label="Data Taman"
+            :value="number_format($total_taman)"
+            subtitle="Total lokasi"
+            footer="Kelola taman →"
+            animate="0">
+            <x-slot:meta>
+                <span class="dash-chip dash-chip--emerald">{{ $formatLuasan($total_luasan_taman) }} luasan</span>
+            </x-slot:meta>
+            <x-slot:icon>
+                <x-admin.nav-icon name="taman" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            :href="route('admin.bibits.index')"
+            tone="teal"
+            label="Data Bibit"
+            :value="number_format($total_stok_bibit)"
+            subtitle="Total stok"
+            footer="Kelola bibit →"
+            animate="1">
+            <x-slot:meta>
+                <div class="flex flex-wrap gap-2">
+                    <span class="dash-chip dash-chip--teal">{{ number_format($total_varietas_bibit) }} varietas</span>
+                    <span class="dash-chip dash-chip--cyan">{{ $bibit_siap_persen }}% siap tanam</span>
+                </div>
+            </x-slot:meta>
+            <x-slot:icon>
+                <x-admin.nav-icon name="bibit" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
         <x-admin.dash-stat-card
             :href="route('admin.armadas.index')"
             tone="green"
