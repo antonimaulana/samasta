@@ -41,6 +41,7 @@
                                 <tr>
                                     <th class="px-4 py-2 text-left font-medium text-gray-700">Nama tanaman</th>
                                     <th class="px-4 py-2 text-left font-medium text-gray-700">Jenis</th>
+                                    <th class="px-4 py-2 text-left font-medium text-gray-700">Sumber</th>
                                     <th class="px-4 py-2 text-right font-medium text-gray-700">Jumlah</th>
                                 </tr>
                             </thead>
@@ -51,6 +52,7 @@
                                             <x-admin.bibit-nama :bibit="$item->bibit" />
                                         </td>
                                         <td class="px-4 py-2 text-gray-600">{{ $item->bibit->jenis }}</td>
+                                        <td class="px-4 py-2 text-gray-600">{{ $item->sumber ?: '—' }}</td>
                                         <td class="px-4 py-2 text-right font-semibold text-red-700">-{{ $item->jumlah }}</td>
                                     </tr>
                                 @endforeach

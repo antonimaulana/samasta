@@ -4,12 +4,16 @@
 
     if ($rows === null) {
         $rows = isset($batch)
-            ? $batch->items->map(fn ($item) => ['bibit_id' => $item->bibit_id, 'jumlah' => $item->jumlah])->all()
-            : [['bibit_id' => request('bibit_id'), 'jumlah' => '']];
+            ? $batch->items->map(fn ($item) => [
+                'bibit_id' => $item->bibit_id,
+                'sumber' => $item->sumber,
+                'jumlah' => $item->jumlah,
+            ])->all()
+            : [['bibit_id' => request('bibit_id'), 'sumber' => '', 'jumlah' => '']];
     }
 
     if ($rows === []) {
-        $rows = [['bibit_id' => '', 'jumlah' => '']];
+        $rows = [['bibit_id' => '', 'sumber' => '', 'jumlah' => '']];
     }
 @endphp
 
@@ -21,7 +25,7 @@
             + Tambah jenis bibit
         </button>
     </div>
-    <p class="mb-3 text-xs text-gray-500">Satu transaksi dapat mencakup beberapa jenis bibit untuk peruntukan dan lokasi yang sama.</p>
+    <p class="mb-3 text-xs text-gray-500">Satu transaksi dapat mencakup beberapa jenis bibit. Tentukan sumber stok (Produksi, Pengadaan, atau Hibah) per baris — stok hanya diambil dari sumber yang dipilih.</p>
 
     <div id="bibit-keluar-items" class="space-y-3">
         @foreach ($rows as $index => $row)
@@ -29,6 +33,7 @@
                 'index' => $index,
                 'row' => $row,
                 'bibits' => $bibits,
+                'editStokBonus' => $editStokBonus ?? [],
                 'canRemove' => count($rows) > 1,
             ])
         @endforeach
@@ -42,8 +47,9 @@
 <template id="bibit-keluar-row-template">
     @include('admin.bibit_keluars._baris_bibit_row', [
         'index' => '__INDEX__',
-        'row' => ['bibit_id' => '', 'jumlah' => ''],
+        'row' => ['bibit_id' => '', 'sumber' => '', 'jumlah' => ''],
         'bibits' => $bibits,
+        'editStokBonus' => $editStokBonus ?? [],
         'canRemove' => true,
     ])
 </template>
@@ -68,26 +74,74 @@
                     });
                 }
 
+                function parseStokSumber(option) {
+                    if (! option?.dataset?.stokSumber) {
+                        return null;
+                    }
+                    try {
+                        return JSON.parse(option.dataset.stokSumber);
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
                 function bindRow(row) {
                     const select = row.querySelector('[data-bibit-select]');
+                    const sumberSelect = row.querySelector('[data-sumber-select]');
                     const jumlahInput = row.querySelector('[data-jumlah-input]');
                     const stokHint = row.querySelector('[data-stok-hint]');
 
+                    function refreshSumberOptions() {
+                        const option = select?.options[select.selectedIndex];
+                        const perSumber = parseStokSumber(option);
+                        if (! sumberSelect) {
+                            return;
+                        }
+                        sumberSelect.querySelectorAll('option[value]').forEach(function (opt) {
+                            if (! opt.value) {
+                                return;
+                            }
+                            const jumlah = perSumber ? (perSumber[opt.value] ?? 0) : 0;
+                            opt.disabled = ! option?.value || jumlah <= 0;
+                            opt.textContent = opt.value + (perSumber ? (' (' + jumlah + ')') : '');
+                        });
+                        if (sumberSelect.value && sumberSelect.selectedOptions[0]?.disabled) {
+                            sumberSelect.value = '';
+                        }
+                    }
+
                     function refreshStokHint() {
                         const option = select?.options[select.selectedIndex];
-                        const stok = option?.dataset?.stok;
+                        const perSumber = parseStokSumber(option);
+                        const sumber = sumberSelect?.value;
                         if (! stokHint) {
                             return;
                         }
-                        stokHint.textContent = stok ? ('Stok tersedia: ' + stok) : 'Pilih bibit.';
-                        if (jumlahInput && stok) {
-                            jumlahInput.max = stok;
+                        if (! option?.value) {
+                            stokHint.textContent = 'Pilih bibit dan sumber stok.';
+                            jumlahInput?.removeAttribute('max');
+                            return;
+                        }
+                        if (perSumber) {
+                            const parts = Object.keys(perSumber).map(function (key) {
+                                return key + ': ' + perSumber[key];
+                            });
+                            stokHint.textContent = 'Stok per sumber — ' + parts.join(' · ');
+                        }
+                        const stokSumber = sumber && perSumber ? (perSumber[sumber] ?? 0) : null;
+                        if (jumlahInput && stokSumber !== null && sumber) {
+                            jumlahInput.max = stokSumber;
                         } else if (jumlahInput) {
                             jumlahInput.removeAttribute('max');
                         }
                     }
 
-                    select?.addEventListener('change', refreshStokHint);
+                    select?.addEventListener('change', function () {
+                        refreshSumberOptions();
+                        refreshStokHint();
+                    });
+                    sumberSelect?.addEventListener('change', refreshStokHint);
+                    refreshSumberOptions();
                     refreshStokHint();
 
                     row.querySelector('[data-remove-row]')?.addEventListener('click', function () {

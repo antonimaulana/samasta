@@ -14,6 +14,7 @@ class BibitKeluar extends Model
         'bibit_keluar_batch_id',
         'bibit_id',
         'jumlah',
+        'sumber',
     ];
 
     protected function casts(): array

@@ -101,7 +101,8 @@
                 <th style="width:12%">Tanggal</th>
                 <th style="width:28%">Nama Tanaman</th>
                 <th style="width:10%" class="num">Jumlah</th>
-                <th style="width:16%">Peruntukan</th>
+                <th style="width:12%">Sumber</th>
+                <th style="width:14%">Peruntukan</th>
                 <th style="width:16%">Lokasi</th>
                 <th style="width:8%" class="num">Foto</th>
             </tr>
@@ -113,13 +114,14 @@
                     <td>{{ $keluar->batch->tanggal_keluar->format('d/m/Y') }}</td>
                     <td><x-admin.bibit-nama :bibit="$keluar->bibit" pdf /></td>
                     <td class="num">-{{ number_format($keluar->jumlah) }}</td>
+                    <td>{{ $keluar->sumber ?: '—' }}</td>
                     <td>{{ $keluar->batch->peruntukan ?: '—' }}</td>
                     <td>{{ $keluar->batch->lokasiLabel() }}</td>
                     <td>{{ $keluar->batch?->hasFotoBukti() ? 'Ada' : '—' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="empty">Tidak ada data keluar.</td>
+                    <td colspan="8" class="empty">Tidak ada data keluar.</td>
                 </tr>
             @endforelse
         </tbody>

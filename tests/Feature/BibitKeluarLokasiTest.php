@@ -39,7 +39,7 @@ class BibitKeluarLokasiTest extends TestCase
             'lokasi_luar' => '1',
             'lokasi' => 'Kantor Kelurahan Sei Jodoh',
             'items' => [
-                ['bibit_id' => $bibit->id, 'jumlah' => 3],
+                ['bibit_id' => $bibit->id, 'sumber' => 'Produksi', 'jumlah' => 3],
             ],
             'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
             'dokumen_pendukung' => UploadedFile::fake()->create('surat.pdf', 100, 'application/pdf'),
@@ -85,7 +85,7 @@ class BibitKeluarLokasiTest extends TestCase
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
             'items' => [
-                ['bibit_id' => $bibit->id, 'jumlah' => 2],
+                ['bibit_id' => $bibit->id, 'sumber' => 'Produksi', 'jumlah' => 2],
             ],
             'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
         ])->assertRedirect(route('admin.bibit-keluars.index'));
@@ -129,8 +129,8 @@ class BibitKeluarLokasiTest extends TestCase
             'peruntukan' => 'Penanaman Awal',
             'taman_id' => $taman->id,
             'items' => [
-                ['bibit_id' => $bibitA->id, 'jumlah' => 2],
-                ['bibit_id' => $bibitB->id, 'jumlah' => 3],
+                ['bibit_id' => $bibitA->id, 'sumber' => 'Produksi', 'jumlah' => 2],
+                ['bibit_id' => $bibitB->id, 'sumber' => 'Produksi', 'jumlah' => 3],
             ],
             'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
         ])->assertRedirect(route('admin.bibit-keluars.index'));
@@ -139,5 +139,47 @@ class BibitKeluarLokasiTest extends TestCase
         $this->assertSame(2, BibitKeluar::count());
         $this->assertSame(2, $bibitA->fresh()->stok_tersedia);
         $this->assertSame(3, $bibitB->fresh()->stok_tersedia);
+    }
+
+    public function test_stok_keluar_hanya_mengurangi_sumber_yang_dipilih(): void
+    {
+        Storage::fake('public');
+
+        $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
+        $bibit = Bibit::create([
+            'nama_tanaman' => 'Tabebuya',
+            'jenis' => 'Pohon Pelindung / Peneduh',
+            'stok_tersedia' => 15,
+            'sumber_bibit' => 'Produksi',
+            'status_siap_tanam' => true,
+        ]);
+        $this->createBibitMasukLine($bibit, 10, null, ['sumber' => 'Produksi']);
+        $this->createBibitMasukLine($bibit, 5, null, ['sumber' => 'Hibah']);
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Sumber',
+            'kategori' => 'Taman Kota',
+            'luasan' => 200,
+            'alamat' => 'Jl. Sumber',
+            'deskripsi' => 'Uji sumber keluar.',
+        ]);
+
+        $this->actingAs($operator)->post(route('admin.bibit-keluars.store'), [
+            'tanggal_keluar' => OperasionalPelaksanaanTime::inputValue(now()),
+            'peruntukan' => 'Penanaman Awal',
+            'taman_id' => $taman->id,
+            'items' => [
+                ['bibit_id' => $bibit->id, 'sumber' => 'Hibah', 'jumlah' => 4],
+            ],
+            'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
+        ])->assertRedirect(route('admin.bibit-keluars.index'));
+
+        $line = BibitKeluar::query()->first();
+        $this->assertSame('Hibah', $line->sumber);
+
+        $hibahMasuk = $bibit->masuks()->where('sumber', 'Hibah')->first();
+        $produksiMasuk = $bibit->masuks()->where('sumber', 'Produksi')->first();
+        $this->assertSame(1, $hibahMasuk->sisa_stok);
+        $this->assertSame(10, $produksiMasuk->sisa_stok);
+        $this->assertSame(11, $bibit->fresh()->stok_tersedia);
     }
 }

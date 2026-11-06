@@ -56,7 +56,11 @@ class BibitKeluarController extends Controller
 
     public function create(): View
     {
-        $bibits = Bibit::where('stok_tersedia', '>', 0)->orderBy('nama_tanaman')->get();
+        $bibits = Bibit::query()
+            ->where('stok_tersedia', '>', 0)
+            ->with(['masuks' => fn ($q) => $q->where('sisa_stok', '>', 0)])
+            ->orderBy('nama_tanaman')
+            ->get();
         $tamans = Taman::orderBy('nama_taman')->get();
 
         return view('admin.bibit_keluars.create', compact('bibits', 'tamans'));
@@ -83,12 +87,13 @@ class BibitKeluarController extends Controller
 
             foreach ($items as $item) {
                 $bibit = Bibit::lockForUpdate()->findOrFail($item['bibit_id']);
-                $this->stock->kurangiStokMasuk($bibit, $item['jumlah']);
+                $this->stock->kurangiStokMasuk($bibit, $item['jumlah'], $item['sumber']);
                 $bibit->decrement('stok_tersedia', $item['jumlah']);
 
                 $batch->items()->create([
                     'bibit_id' => $item['bibit_id'],
                     'jumlah' => $item['jumlah'],
+                    'sumber' => $item['sumber'],
                 ]);
             }
         });
@@ -115,14 +120,22 @@ class BibitKeluarController extends Controller
                 $q->where('stok_tersedia', '>', 0)
                     ->orWhereIn('id', $bibitKeluar->items->pluck('bibit_id'));
             })
+            ->with(['masuks' => fn ($q) => $q->where('sisa_stok', '>', 0)])
             ->orderBy('nama_tanaman')
             ->get();
         $tamans = Taman::orderBy('nama_taman')->get();
+
+        $editStokBonus = [];
+        foreach ($bibitKeluar->items as $line) {
+            $sumber = $line->sumber ?? '';
+            $editStokBonus[$line->bibit_id][$sumber] = ($editStokBonus[$line->bibit_id][$sumber] ?? 0) + $line->jumlah;
+        }
 
         return view('admin.bibit_keluars.edit', [
             'batch' => $bibitKeluar,
             'bibits' => $bibits,
             'tamans' => $tamans,
+            'editStokBonus' => $editStokBonus,
         ]);
     }
 
@@ -148,14 +161,15 @@ class BibitKeluarController extends Controller
 
             $bonus = [];
             foreach ($bibitKeluar->items as $line) {
-                $bonus[$line->bibit_id] = ($bonus[$line->bibit_id] ?? 0) + $line->jumlah;
+                $key = $this->stock->lineKey($line->bibit_id, $line->sumber);
+                $bonus[$key] = ($bonus[$key] ?? 0) + $line->jumlah;
             }
 
             $this->stock->assertStokCukup($items, $bonus);
 
             foreach ($bibitKeluar->items as $line) {
                 $bibit = Bibit::lockForUpdate()->findOrFail($line->bibit_id);
-                $this->stock->kembalikanStokMasuk($bibit, $line->jumlah);
+                $this->stock->kembalikanStokMasuk($bibit, $line->jumlah, $line->sumber);
                 $bibit->increment('stok_tersedia', $line->jumlah);
             }
 
@@ -163,12 +177,13 @@ class BibitKeluarController extends Controller
 
             foreach ($items as $item) {
                 $bibit = Bibit::lockForUpdate()->findOrFail($item['bibit_id']);
-                $this->stock->kurangiStokMasuk($bibit, $item['jumlah']);
+                $this->stock->kurangiStokMasuk($bibit, $item['jumlah'], $item['sumber']);
                 $bibit->decrement('stok_tersedia', $item['jumlah']);
 
                 $bibitKeluar->items()->create([
                     'bibit_id' => $item['bibit_id'],
                     'jumlah' => $item['jumlah'],
+                    'sumber' => $item['sumber'],
                 ]);
             }
 
@@ -191,7 +206,7 @@ class BibitKeluarController extends Controller
 
             foreach ($bibitKeluar->items as $line) {
                 $bibit = Bibit::lockForUpdate()->findOrFail($line->bibit_id);
-                $this->stock->kembalikanStokMasuk($bibit, $line->jumlah);
+                $this->stock->kembalikanStokMasuk($bibit, $line->jumlah, $line->sumber);
                 $bibit->increment('stok_tersedia', $line->jumlah);
             }
 
@@ -228,7 +243,8 @@ class BibitKeluarController extends Controller
             'tanggal_keluar' => ['required', 'string'],
             'peruntukan' => ['required', Rule::in(BibitKeluarBatch::PERUNTUKAN)],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.bibit_id' => ['required', 'distinct', 'exists:bibits,id'],
+            'items.*.bibit_id' => ['required', 'exists:bibits,id'],
+            'items.*.sumber' => ['required', Rule::in(Bibit::SUMBER)],
             'items.*.jumlah' => ['required', 'integer', 'min:1'],
             'fotos' => $fotoRules,
             'fotos.*' => ['image', 'max:4096'],
@@ -244,13 +260,14 @@ class BibitKeluarController extends Controller
             'dokumen_pendukung' => 'dokumen pendukung',
             'items' => 'daftar bibit',
             'items.*.bibit_id' => 'bibit',
+            'items.*.sumber' => 'sumber stok',
             'items.*.jumlah' => 'jumlah keluar',
         ]);
     }
 
     /**
      * @param  array<int, array{bibit_id?: mixed, jumlah?: mixed}>  $items
-     * @return list<array{bibit_id: int, jumlah: int}>
+     * @return list<array{bibit_id: int, jumlah: int, sumber: string}>
      */
     private function normalizeItems(array $items): array
     {
@@ -263,6 +280,7 @@ class BibitKeluarController extends Controller
 
             $normalized[] = [
                 'bibit_id' => (int) $item['bibit_id'],
+                'sumber' => (string) $item['sumber'],
                 'jumlah' => (int) $item['jumlah'],
             ];
         }

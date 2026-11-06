@@ -138,7 +138,7 @@ class BibitLaporanController extends Controller
             ->select('bibit_keluars.*')
             ->orderByDesc('bibit_keluar_batches.tanggal_keluar')
             ->orderByDesc('bibit_keluars.id');
-        TableSearch::apply($riwayatKeluarQuery, $request, ['bibit.nama_tanaman', 'bibit.nama_ilmiah', 'batch.peruntukan', 'batch.lokasi']);
+        TableSearch::apply($riwayatKeluarQuery, $request, ['sumber', 'bibit.nama_tanaman', 'bibit.nama_ilmiah', 'batch.peruntukan', 'batch.lokasi']);
         $riwayatKeluar = $riwayatKeluarQuery
             ->when(! $forPdf, fn ($q) => $q->limit(10))
             ->get();

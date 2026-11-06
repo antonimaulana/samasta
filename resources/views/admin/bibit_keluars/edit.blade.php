@@ -23,7 +23,7 @@
                 @include('admin.bibit_keluars._peruntukan_lokasi')
             </div>
 
-            @include('admin.bibit_keluars._baris_bibit')
+            @include('admin.bibit_keluars._baris_bibit', ['editStokBonus' => $editStokBonus ?? []])
 
             @include('admin.partials.bibit-stok-foto-input', [
                 'required' => false,
