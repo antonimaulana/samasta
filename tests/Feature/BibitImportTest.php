@@ -47,7 +47,7 @@ class BibitImportTest extends TestCase
         $bibit = Bibit::where('nama_tanaman', 'Mahoni')->first();
         $this->assertNotNull($bibit);
         $this->assertSame('Swietenia macrophylla', $bibit->nama_ilmiah);
-        $this->assertSame('Pohon Pelindung / Peneduh', $bibit->jenis);
+        $this->assertSame('Pohon', $bibit->jenis);
         $this->assertSame(100, $bibit->stok_tersedia);
 
         $this->assertDatabaseHas('bibit_masuks', [
@@ -63,7 +63,7 @@ class BibitImportTest extends TestCase
         $bibit = Bibit::create([
             'nama_tanaman' => 'Mahoni',
             'nama_ilmiah' => 'Swietenia macrophylla',
-            'jenis' => 'Pohon Pelindung / Peneduh',
+            'jenis' => 'Pohon',
             'stok_tersedia' => 20,
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => false,
@@ -92,7 +92,7 @@ class BibitImportTest extends TestCase
 
         $csv = implode("\n", [
             'nama_tanaman,nama_ilmiah,jenis,stok_awal',
-            'Flamboyan,Delonix regia,Pohon Pelindung / Hias,25',
+            'Flamboyan,Delonix regia,Pohon,25',
         ]);
 
         $file = UploadedFile::fake()->createWithContent('bibits.csv', $csv);
@@ -111,7 +111,7 @@ class BibitImportTest extends TestCase
 
         $csv = implode("\n", [
             'nama_tanaman,nama_ilmiah,jenis,stok_awal',
-            'Flamboyan,Delonix regia,Pohon Pelindung / Hias,25',
+            'Flamboyan,Delonix regia,Pohon,25',
         ]);
 
         $file = UploadedFile::fake()->createWithContent('bibits.csv', $csv);
@@ -145,14 +145,14 @@ class BibitImportTest extends TestCase
     {
         Bibit::create([
             'nama_tanaman' => 'Mahoni',
-            'jenis' => 'Pohon Pelindung / Peneduh',
+            'jenis' => 'Pohon',
             'stok_tersedia' => 0,
             'sumber_bibit' => 'Produksi',
         ]);
 
         $path = $this->writeTempCsv(
             "nama_tanaman,nama_ilmiah,jenis,stok_awal\n".
-            "Mahoni,,Semak / Tanaman Hias Daun,10\n"
+            "Mahoni,,Semak,10\n"
         );
 
         $result = app(BibitCsvImporter::class)->import($path);
@@ -162,12 +162,28 @@ class BibitImportTest extends TestCase
         $this->assertSame(0, BibitMasuk::count());
     }
 
+    public function test_import_normalizes_legacy_jenis_labels_to_standard_categories(): void
+    {
+        $path = $this->writeTempCsv(
+            "nama_tanaman,nama_ilmiah,jenis,stok_awal\n".
+            "Kaktus,,Sukulen / Tanaman Hias,5\n"
+        );
+
+        $result = app(BibitCsvImporter::class)->import($path);
+
+        $this->assertSame(1, $result['imported']);
+        $this->assertDatabaseHas('bibits', [
+            'nama_tanaman' => 'Kaktus',
+            'jenis' => 'Sukulen',
+        ]);
+    }
+
     public function test_import_accepts_indonesian_header_aliases(): void
     {
         $path = $this->writeTempCsv(
             "sep=;\n".
             "nama tanaman;nama ilmiah;jenis tanaman;stok awal\n".
-            "Angsana;Pterocarpus indicus;Pohon Peneduh / Pelindung;75\n"
+            "Angsana;Pterocarpus indicus;Pohon;75\n"
         );
 
         $result = app(BibitCsvImporter::class)->import($path);

@@ -150,7 +150,7 @@ class BibitCsvImporter
             [
                 'Mahoni',
                 'Swietenia macrophylla',
-                'Pohon Pelindung / Peneduh',
+                'Pohon',
                 '100',
                 'Produksi',
                 now()->toDateString(),
@@ -159,7 +159,7 @@ class BibitCsvImporter
             [
                 'Bougenville',
                 '',
-                'Terna / Tanaman Hias Bunga',
+                'Terna',
                 '50',
                 'Pengadaan',
                 '',
@@ -339,15 +339,7 @@ class BibitCsvImporter
             return null;
         }
 
-        $value = trim($value);
-
-        foreach (Bibit::JENIS as $jenis) {
-            if (strcasecmp($value, $jenis) === 0) {
-                return $jenis;
-            }
-        }
-
-        return $value;
+        return Bibit::resolveJenis(trim($value)) ?? trim($value);
     }
 
     private function normalizeSumber(?string $value): string

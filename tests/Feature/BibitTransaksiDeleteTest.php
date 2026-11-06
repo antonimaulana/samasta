@@ -21,7 +21,7 @@ class BibitTransaksiDeleteTest extends TestCase
     {
         return Bibit::create([
             'nama_tanaman' => 'Pohon Test',
-            'jenis' => 'Pohon Pelindung / Peneduh',
+            'jenis' => 'Pohon',
             'stok_tersedia' => $stok,
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,

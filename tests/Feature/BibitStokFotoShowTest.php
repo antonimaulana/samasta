@@ -91,7 +91,7 @@ class BibitStokFotoShowTest extends TestCase
         ]);
         $bibit = Bibit::create([
             'nama_tanaman' => 'Flamboyan',
-            'jenis' => 'Pohon Pelindung / Peneduh',
+            'jenis' => 'Pohon',
             'stok_tersedia' => 5,
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,

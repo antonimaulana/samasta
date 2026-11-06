@@ -66,7 +66,7 @@ class BibitKeluarLokasiTest extends TestCase
         $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
         $bibit = Bibit::create([
             'nama_tanaman' => 'Flamboyan',
-            'jenis' => 'Pohon Pelindung / Peneduh',
+            'jenis' => 'Pohon',
             'stok_tersedia' => 5,
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,
@@ -102,14 +102,14 @@ class BibitKeluarLokasiTest extends TestCase
         $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
         $bibitA = Bibit::create([
             'nama_tanaman' => 'Anggrek',
-            'jenis' => 'Tanaman Hias',
+            'jenis' => 'Terna',
             'stok_tersedia' => 4,
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,
         ]);
         $bibitB = Bibit::create([
             'nama_tanaman' => 'Melati',
-            'jenis' => 'Tanaman Hias',
+            'jenis' => 'Terna',
             'stok_tersedia' => 6,
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,
@@ -148,7 +148,7 @@ class BibitKeluarLokasiTest extends TestCase
         $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
         $bibit = Bibit::create([
             'nama_tanaman' => 'Tabebuya',
-            'jenis' => 'Pohon Pelindung / Peneduh',
+            'jenis' => 'Pohon',
             'stok_tersedia' => 15,
             'sumber_bibit' => 'Produksi',
             'status_siap_tanam' => true,
