@@ -100,6 +100,9 @@ class BibitCsvImporter
             $data = $this->mapRow($header, $row);
             $data['jenis'] = $this->normalizeJenis($data['jenis'] ?? null);
             $data['stok_awal'] = $this->normalizeInteger($data['stok_awal'] ?? null);
+            if ($data['stok_awal'] === '' || $data['stok_awal'] === null) {
+                $data['stok_awal'] = '0';
+            }
             $data['sumber'] = $this->normalizeSumber($data['sumber'] ?? null);
             $data['tanggal_masuk'] = $this->normalizeDate($data['tanggal_masuk'] ?? null);
             $data['status_siap_tanam'] = $this->normalizeBoolean($data['status_siap_tanam'] ?? null);
@@ -165,6 +168,15 @@ class BibitCsvImporter
                 '',
                 '0',
             ],
+            [
+                'Placeholder Stok Nol',
+                '',
+                'Semak',
+                '0',
+                'Produksi',
+                '',
+                '0',
+            ],
         ];
     }
 
@@ -198,27 +210,31 @@ class BibitCsvImporter
                 ]);
             }
 
-            $tanggal = $payload['tanggal_masuk'];
-            if ($tanggal && strlen((string) $tanggal) <= 10) {
-                $tanggal = $tanggal.' 08:00:00';
+            $stokAwal = (int) $payload['stok_awal'];
+
+            if ($stokAwal > 0) {
+                $tanggal = $payload['tanggal_masuk'];
+                if ($tanggal && strlen((string) $tanggal) <= 10) {
+                    $tanggal = $tanggal.' 08:00:00';
+                }
+
+                $batch = \App\Models\BibitMasukBatch::create([
+                    'tanggal_masuk' => $tanggal ?? now()->format('Y-m-d H:i:s'),
+                    'sumber' => $payload['sumber'],
+                    'status_siap_tanam' => $payload['status_siap_tanam'],
+                ]);
+
+                BibitMasuk::create([
+                    'bibit_masuk_batch_id' => $batch->id,
+                    'bibit_id' => $bibit->id,
+                    'jumlah' => $stokAwal,
+                    'sisa_stok' => $stokAwal,
+                    'sumber' => $payload['sumber'],
+                    'status_siap_tanam' => $payload['status_siap_tanam'],
+                ]);
+
+                $bibit->increment('stok_tersedia', $stokAwal);
             }
-
-            $batch = \App\Models\BibitMasukBatch::create([
-                'tanggal_masuk' => $tanggal ?? now()->format('Y-m-d H:i:s'),
-                'sumber' => $payload['sumber'],
-                'status_siap_tanam' => $payload['status_siap_tanam'],
-            ]);
-
-            BibitMasuk::create([
-                'bibit_masuk_batch_id' => $batch->id,
-                'bibit_id' => $bibit->id,
-                'jumlah' => $payload['stok_awal'],
-                'sisa_stok' => $payload['stok_awal'],
-                'sumber' => $payload['sumber'],
-                'status_siap_tanam' => $payload['status_siap_tanam'],
-            ]);
-
-            $bibit->increment('stok_tersedia', $payload['stok_awal']);
 
             return true;
         });
@@ -456,7 +472,7 @@ class BibitCsvImporter
             'nama_tanaman' => ['required', 'string', 'max:255'],
             'nama_ilmiah' => ['nullable', 'string', 'max:150'],
             'jenis' => ['required', Rule::in(Bibit::JENIS)],
-            'stok_awal' => ['required', 'integer', 'min:1'],
+            'stok_awal' => ['required', 'integer', 'min:0'],
             'sumber' => ['required', Rule::in(Bibit::SUMBER)],
             'tanggal_masuk' => ['required', 'date'],
             'status_siap_tanam' => ['boolean'],

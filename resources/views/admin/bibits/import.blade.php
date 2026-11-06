@@ -18,9 +18,9 @@
 
             <p class="mt-2 leading-relaxed">
 
-                Unggah file CSV berisi data bibit sekaligus. Setiap baris akan membuat data bibit
+                Unggah file CSV berisi data bibit sekaligus. Setiap baris membuat atau melengkapi master bibit.
 
-                (jika belum ada) dan transaksi <strong>stok masuk</strong> sebagai stok awal.
+                Jika <strong>stok awal &gt; 0</strong>, sistem juga mencatat transaksi stok masuk; jika <strong>0 atau kosong</strong>, tanaman tetap masuk daftar tanpa transaksi masuk.
 
                 Foto bukti stok tidak disertakan — dapat ditambahkan manual setelah import.
 
@@ -102,7 +102,7 @@
 
                             @endforeach;
 
-                            stok awal harus angka bulat minimal 1.
+                            stok awal boleh 0 (master tanaman tetap tercatat tanpa transaksi masuk).
 
                         </p>
 
@@ -180,7 +180,7 @@
 
                 <p class="mt-2 text-xs text-gray-500">
 
-                    Maks. 4 MB · UTF-8 · jika bibit sudah ada, stok awal ditambahkan sebagai transaksi masuk baru.
+                    Maks. 4 MB · UTF-8 · stok awal boleh 0 · jika bibit sudah ada, stok &gt; 0 ditambahkan sebagai transaksi masuk baru.
 
                 </p>
 

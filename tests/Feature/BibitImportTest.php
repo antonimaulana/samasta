@@ -162,6 +162,40 @@ class BibitImportTest extends TestCase
         $this->assertSame(0, BibitMasuk::count());
     }
 
+    public function test_import_creates_bibit_master_when_stok_awal_is_zero(): void
+    {
+        $path = $this->writeTempCsv(
+            "nama_tanaman,nama_ilmiah,jenis,stok_awal\n".
+            "Tanaman Kosong,,Semak,0\n"
+        );
+
+        $result = app(BibitCsvImporter::class)->import($path);
+
+        $this->assertSame(1, $result['imported']);
+        $this->assertSame(0, $result['skipped']);
+
+        $bibit = Bibit::where('nama_tanaman', 'Tanaman Kosong')->first();
+        $this->assertNotNull($bibit);
+        $this->assertSame(0, $bibit->stok_tersedia);
+        $this->assertSame(0, BibitMasuk::count());
+    }
+
+    public function test_import_treats_blank_stok_awal_as_zero(): void
+    {
+        $path = $this->writeTempCsv(
+            "nama_tanaman,nama_ilmiah,jenis,stok_awal\n".
+            "Tanaman Tanpa Stok,,Pohon,\n"
+        );
+
+        $result = app(BibitCsvImporter::class)->import($path);
+
+        $this->assertSame(1, $result['imported']);
+        $this->assertDatabaseHas('bibits', [
+            'nama_tanaman' => 'Tanaman Tanpa Stok',
+            'stok_tersedia' => 0,
+        ]);
+    }
+
     public function test_import_normalizes_legacy_jenis_labels_to_standard_categories(): void
     {
         $path = $this->writeTempCsv(
