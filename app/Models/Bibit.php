@@ -36,6 +36,10 @@ class Bibit extends Model
         'Semak / Pe' => 'Semak / Perdu',
         'Tanaman M' => 'Tanaman Merambat',
         'Tanaman R' => 'Tanaman Rias',
+        'Semak / Penutup Tanah' => 'Penutup Tanah',
+        'Tanaman Rambat' => 'Tanaman Merambat',
+        'Tanaman Menjuntai' => 'Tanaman Merambat',
+        'Perdu / Pohon Kecil' => 'Perdu / Pohon',
     ];
 
     /** @var array<string, string> Kategori standar sebelumnya → kategori terbaru */

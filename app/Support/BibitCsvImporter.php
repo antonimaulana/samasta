@@ -110,7 +110,14 @@ class BibitCsvImporter
             $validator = Validator::make($data, $this->rules());
 
             if ($validator->fails()) {
-                $errors[] = 'Baris '.$rowNumber.': '.implode(' ', $validator->errors()->all());
+                $messages = collect($validator->errors()->all())->map(function (string $message) use ($data) {
+                    if ($message === __('validation.in', ['attribute' => 'jenis'])) {
+                        return 'jenis "'.$data['jenis'].'" tidak valid (tidak ada di daftar jenis tanaman).';
+                    }
+
+                    return $message;
+                })->all();
+                $errors[] = 'Baris '.$rowNumber.': '.implode(' ', $messages);
                 $skipped++;
 
                 continue;

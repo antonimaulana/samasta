@@ -196,6 +196,24 @@ class BibitImportTest extends TestCase
         ]);
     }
 
+    public function test_import_accepts_operational_jenis_labels_from_field_csv(): void
+    {
+        $path = $this->writeTempCsv(
+            "nama_tanaman,nama_ilmiah,jenis,stok_awal\n".
+            "Climbing,,Tanaman Rambat,10\n".
+            "Pandan,,Perdu / Pohon Kecil,0\n".
+            "Bayam,,Semak / Penutup Tanah,5\n"
+        );
+
+        $result = app(BibitCsvImporter::class)->import($path);
+
+        $this->assertSame(3, $result['imported']);
+        $this->assertSame(0, $result['skipped']);
+        $this->assertDatabaseHas('bibits', ['nama_tanaman' => 'Climbing', 'jenis' => 'Tanaman Merambat']);
+        $this->assertDatabaseHas('bibits', ['nama_tanaman' => 'Pandan', 'jenis' => 'Perdu / Pohon']);
+        $this->assertDatabaseHas('bibits', ['nama_tanaman' => 'Bayam', 'jenis' => 'Penutup Tanah']);
+    }
+
     public function test_import_accepts_short_jenis_aliases_from_spreadsheet(): void
     {
         $path = $this->writeTempCsv(
