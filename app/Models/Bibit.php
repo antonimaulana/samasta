@@ -10,20 +10,38 @@ class Bibit extends Model
 {
     /** @var list<string> */
     public const JENIS = [
-        'Perdu',
-        'Semak',
-        'Pohon',
-        'Penutup Tanah',
-        'Perdu / Semak',
-        'Tanaman Pagar',
-        'Perdu / Pohon',
-        'Sukulen',
-        'Perdu Rambat',
-        'Semak / Perdu',
-        'Terna',
-        'Tanaman Merambat',
         'Palem',
-        'Perdu / Palem',
+        'Penutup Tanah',
+        'Perdu',
+        'Perdu / Pagar',
+        'Perdu / Pohon',
+        'Perdu / Semak',
+        'Perdu Rambat',
+        'Pohon',
+        'Semak',
+        'Semak / Perdu',
+        'Sukulen',
+        'Tanaman Merambat',
+        'Tanaman Rias',
+        'Terna',
+    ];
+
+    /** @var array<string, string> Singkatan / label CSV → kategori standar */
+    public const JENIS_ALIASES = [
+        'Penutup Ta' => 'Penutup Tanah',
+        'Perdu / Pa' => 'Perdu / Pagar',
+        'Perdu / Po' => 'Perdu / Pohon',
+        'Perdu / Se' => 'Perdu / Semak',
+        'Perdu Ram' => 'Perdu Rambat',
+        'Semak / Pe' => 'Semak / Perdu',
+        'Tanaman M' => 'Tanaman Merambat',
+        'Tanaman R' => 'Tanaman Rias',
+    ];
+
+    /** @var array<string, string> Kategori standar sebelumnya → kategori terbaru */
+    public const STANDARD_JENIS_REVISION_MAP = [
+        'Tanaman Pagar' => 'Perdu / Pagar',
+        'Perdu / Palem' => 'Perdu / Pagar',
     ];
 
     /** @var array<string, string> */
@@ -35,7 +53,7 @@ class Bibit extends Model
 
     /** @var array<string, string> Label jenis detail lama → kategori standar */
     public const DETAILED_JENIS_MAP = [
-        'Semak / Tanaman Hias Pagar' => 'Tanaman Pagar',
+        'Semak / Tanaman Hias Pagar' => 'Perdu / Pagar',
         'Semak / Tanaman Hias Bunga' => 'Semak',
         'Semak Rendah / Tanaman Hias' => 'Semak',
         'Tumbuhan Terna / Groundcover' => 'Penutup Tanah',
@@ -47,7 +65,7 @@ class Bibit extends Model
         'Pohon Pelindung / Hias' => 'Pohon',
         'Terna / Tanaman Hias Daun' => 'Terna',
         'Tanaman Merambat / Climber' => 'Tanaman Merambat',
-        'Semak / Tanaman Pagar/Bonsai' => 'Tanaman Pagar',
+        'Semak / Tanaman Pagar/Bonsai' => 'Perdu / Pagar',
         'Terna / Tanaman Hias Bunga' => 'Terna',
         'Semak / Tanaman Hias Daun' => 'Semak',
         'Pohon Pelindung / Peneduh' => 'Pohon',
@@ -70,7 +88,7 @@ class Bibit extends Model
         'Pohon Pelindung / Peneduh Bunga' => 'Pohon',
         'Semak / Bonsai / Hias' => 'Semak',
         'Pohon Kecil / Semak Besar Bunga' => 'Perdu / Semak',
-        'Semak / Tanaman Pagar Ringan' => 'Tanaman Pagar',
+        'Semak / Tanaman Pagar Ringan' => 'Perdu / Pagar',
         'Pohon Pelindung / Kayu' => 'Pohon',
         'Pohon Kecil / Semak Bunga' => 'Perdu / Semak',
     ];
@@ -116,6 +134,18 @@ class Bibit extends Model
 
         foreach (self::LEGACY_JENIS_MAP as $old => $canonical) {
             if (strcasecmp($old, $value) === 0) {
+                return $canonical;
+            }
+        }
+
+        foreach (self::STANDARD_JENIS_REVISION_MAP as $old => $canonical) {
+            if (strcasecmp($old, $value) === 0) {
+                return $canonical;
+            }
+        }
+
+        foreach (self::JENIS_ALIASES as $alias => $canonical) {
+            if (strcasecmp($alias, $value) === 0) {
                 return $canonical;
             }
         }

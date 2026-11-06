@@ -196,6 +196,22 @@ class BibitImportTest extends TestCase
         ]);
     }
 
+    public function test_import_accepts_short_jenis_aliases_from_spreadsheet(): void
+    {
+        $path = $this->writeTempCsv(
+            "nama_tanaman,nama_ilmiah,jenis,stok_awal\n".
+            "Merambat Rias,,Tanaman R,0\n"
+        );
+
+        $result = app(BibitCsvImporter::class)->import($path);
+
+        $this->assertSame(1, $result['imported']);
+        $this->assertDatabaseHas('bibits', [
+            'nama_tanaman' => 'Merambat Rias',
+            'jenis' => 'Tanaman Rias',
+        ]);
+    }
+
     public function test_import_normalizes_legacy_jenis_labels_to_standard_categories(): void
     {
         $path = $this->writeTempCsv(
