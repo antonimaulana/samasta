@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\Taman;
 use App\Support\OperatorWilayahScope;
+use App\Support\TamanLuasan;
 use App\Support\TamanWilayahAssigner;
 use App\Support\UploadedFileErrorMessage;
 use Illuminate\Foundation\Http\FormRequest;
@@ -50,6 +51,10 @@ abstract class TamanRequest extends FormRequest
 
         if ($this->has('luasan') && ! filled($this->input('luasan'))) {
             $this->merge(['luasan' => null]);
+        } elseif ($this->has('luasan') && filled($this->input('luasan'))) {
+            $this->merge([
+                'luasan' => TamanLuasan::normalizeRequest((string) $this->input('luasan')),
+            ]);
         }
     }
 
@@ -64,7 +69,7 @@ abstract class TamanRequest extends FormRequest
             'nama_taman' => ['required', 'string', 'max:255'],
             'kategori' => ['required', Rule::in(Taman::KATEGORI)],
             'kelurahan_id' => ['nullable', 'exists:kelurahans,id'],
-            'luasan' => ['nullable', 'integer', 'min:0'],
+            'luasan' => ['nullable', 'numeric', 'min:0', 'decimal:0,'.TamanLuasan::DECIMAL_PLACES],
             'alamat' => ['nullable', 'string'],
             'latitude' => ['nullable', 'string', 'max:255'],
             'longitude' => ['nullable', 'string', 'max:255'],

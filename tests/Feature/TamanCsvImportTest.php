@@ -33,7 +33,7 @@ class TamanCsvImportTest extends TestCase
         $content = $response->streamedContent();
 
         $this->assertStringContainsString("sep=;\r\n", $content);
-        $this->assertStringContainsString('id;nama_taman;status_data;kolom_belum_lengkap;kategori;kecamatan;kelurahan;luasan;alamat;latitude;longitude;deskripsi;fasilitas;tahun_pembangunan;nilai_pembangunan;kontraktor;konsultan_perencana;data_verified_at;jumlah_foto_galeri', $content);
+        $this->assertStringContainsString('id;nama_taman;kategori;kecamatan;kelurahan;luasan;alamat;latitude;longitude;deskripsi;fasilitas;tahun_pembangunan;nilai_pembangunan;kontraktor;konsultan_perencana;data_verified_at;status_data;kolom_belum_lengkap;jumlah_foto_galeri', $content);
     }
 
     public function test_import_accepts_semicolon_delimited_csv(): void
@@ -106,7 +106,7 @@ class TamanCsvImportTest extends TestCase
         $this->assertNotNull($taman);
         $this->assertSame(Taman::STATUS_DATA_BELUM_LENGKAP, $taman->status_data);
         $this->assertNull($taman->kelurahan_id);
-        $this->assertSame(0, $taman->luasan);
+        $this->assertEqualsWithDelta(0, (float) $taman->luasan, 0.001);
         $this->assertSame('', $taman->alamat);
         $this->assertSame('', $taman->deskripsi);
         $this->assertSame(Taman::defaultLatitude(), $taman->latitude);
@@ -153,7 +153,7 @@ class TamanCsvImportTest extends TestCase
         $this->assertSame(1, $result['imported'], implode(' | ', $result['errors']));
 
         $taman = Taman::where('nama_taman', 'Taman Luasan ID')->first();
-        $this->assertSame(3358, $taman->luasan);
+        $this->assertEqualsWithDelta(3358.3, (float) $taman->luasan, 0.001);
         $this->assertSame(Taman::STATUS_DATA_BELUM_LENGKAP, $taman->status_data);
     }
 
@@ -176,7 +176,7 @@ class TamanCsvImportTest extends TestCase
         $this->assertNull($dash->nilai_pembangunan);
 
         $format = Taman::where('nama_taman', 'Taman Format')->first();
-        $this->assertSame(5000, $format->luasan);
+        $this->assertEqualsWithDelta(5000, (float) $format->luasan, 0.001);
         $this->assertSame(5000, $format->nilai_pembangunan);
     }
 
@@ -206,7 +206,7 @@ class TamanCsvImportTest extends TestCase
         $this->assertSame(1, $result['updated']);
 
         $taman = Taman::where('nama_taman', 'Taman Keep Old')->first();
-        $this->assertSame(5000, $taman->luasan);
+        $this->assertEqualsWithDelta(5000, (float) $taman->luasan, 0.001);
         $this->assertSame('Alamat tetap', $taman->alamat);
         $this->assertSame('Deskripsi tetap', $taman->deskripsi);
         $this->assertSame('Taman Kota', $taman->kategori);

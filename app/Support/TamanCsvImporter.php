@@ -546,7 +546,19 @@ class TamanCsvImporter
 
     private function normalizeLuasan(?string $value): ?string
     {
-        return $this->normalizeOptionalInteger($value);
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+        $value = preg_replace('/^rp\.?\s*/iu', '', $value) ?? $value;
+        $value = trim($value);
+
+        if ($value === '' || $this->isPlaceholderValue($value)) {
+            return null;
+        }
+
+        return TamanLuasan::normalizeRequest($value);
     }
 
     private function normalizeNilaiPembangunan(?string $value): ?string
@@ -880,8 +892,8 @@ class TamanCsvImporter
             }
         }
 
-        if (($payload['luasan'] ?? null) !== null && (int) $payload['luasan'] > 0) {
-            $update['luasan'] = (int) $payload['luasan'];
+        if (($payload['luasan'] ?? null) !== null && (float) $payload['luasan'] > 0) {
+            $update['luasan'] = $payload['luasan'];
         }
 
         if (($payload['kelurahan_id'] ?? null) !== null) {
@@ -948,7 +960,8 @@ class TamanCsvImporter
         return [
             'nama_taman.required' => 'Nama taman wajib diisi.',
             'kategori.in' => 'Kategori tidak valid.',
-            'luasan.integer' => 'Luasan harus angka bulat.',
+            'luasan.numeric' => 'Luasan harus angka.',
+            'luasan.decimal' => 'Luasan maksimal '.TamanLuasan::DECIMAL_PLACES.' angka di belakang koma.',
             'luasan.min' => 'Luasan tidak boleh negatif.',
             'tahun_pembangunan.integer' => 'Tahun pembangunan harus angka bulat.',
             'tahun_pembangunan.min' => 'Tahun pembangunan minimal 1950.',
@@ -971,7 +984,7 @@ class TamanCsvImporter
             'kategori' => ['nullable', Rule::in(Taman::KATEGORI)],
             'kecamatan' => ['nullable', 'string', 'max:255'],
             'kelurahan' => ['nullable', 'string', 'max:255'],
-            'luasan' => ['nullable', 'integer', 'min:0'],
+            'luasan' => ['nullable', 'numeric', 'min:0', 'decimal:0,'.TamanLuasan::DECIMAL_PLACES],
             'alamat' => ['nullable', 'string'],
             'latitude' => ['nullable', 'string', 'max:255'],
             'longitude' => ['nullable', 'string', 'max:255'],

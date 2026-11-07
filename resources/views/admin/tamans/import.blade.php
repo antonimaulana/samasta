@@ -58,7 +58,7 @@
                             @foreach (\App\Models\Taman::KATEGORI as $kat)
                                 <strong>{{ $kat }}</strong>@if (! $loop->last), @endif
                             @endforeach;
-                            luasan harus angka bulat jika diisi.
+                            luasan boleh angka desimal (maks. 3 digit di belakang koma) jika diisi.
                         </p>
                     @endif
                 @endif

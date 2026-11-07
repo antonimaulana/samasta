@@ -112,7 +112,7 @@ class TamanImportTest extends TestCase
         $this->assertDatabaseCount('tamans', 2);
 
         $existing = Taman::where('nama_taman', 'Taman Existing')->first();
-        $this->assertSame(2000, $existing->luasan);
+        $this->assertEqualsWithDelta(2000, (float) $existing->luasan, 0.001);
         $this->assertSame('Jl. Baru', $existing->alamat);
         $this->assertSame(2018, $existing->tahun_pembangunan);
         $this->assertSame(Taman::defaultLatitude(), $existing->latitude);

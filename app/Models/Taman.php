@@ -339,7 +339,7 @@ class Taman extends Model
     {
         return [
             'fasilitas' => 'array',
-            'luasan' => 'integer',
+            'luasan' => 'decimal:3',
             'tahun_pembangunan' => 'integer',
             'nilai_pembangunan' => 'integer',
             'data_verified_at' => 'datetime',

@@ -47,7 +47,7 @@
 
     <div class="mt-1.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <p class="text-[11px] tabular-nums text-gray-500">
-            {{ number_format($taman->luasan, 0, ',', '.') }} M²
+            {{ \App\Support\TamanLuasan::format($taman->luasan) }} M²
             <span class="text-gray-300">·</span>
             {{ $taman->tahun_pembangunan ?? '—' }}
         </p>

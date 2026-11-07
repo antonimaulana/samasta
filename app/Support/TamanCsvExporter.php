@@ -79,7 +79,7 @@ class TamanCsvExporter
             'kategori' => $this->exportKategori($taman->kategori),
             'kecamatan' => $this->exportText($taman->kelurahan?->kecamatan?->nama),
             'kelurahan' => $this->exportText($taman->kelurahan?->nama),
-            'luasan' => (string) (int) $taman->luasan,
+            'luasan' => TamanLuasan::inputValue($taman->luasan) ?: '0',
             'alamat' => $this->exportText($taman->alamat),
             'latitude' => $this->exportText($taman->latitude),
             'longitude' => $this->exportText($taman->longitude),

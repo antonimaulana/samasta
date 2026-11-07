@@ -28,9 +28,9 @@
 
             <div>
                 <x-admin.form.label for="luasan">Luasan (M²)</x-admin.form.label>
-                <x-admin.form.input type="number" name="luasan" id="luasan" min="0" step="1"
-                                    value="{{ old('luasan', $taman?->luasan ?? '') }}"
-                                    placeholder="Contoh: 5000" />
+                <x-admin.form.input type="number" name="luasan" id="luasan" min="0" step="0.001"
+                                    value="{{ old('luasan', isset($taman) ? \App\Support\TamanLuasan::inputValue($taman->luasan) : '') }}"
+                                    placeholder="Contoh: 5000 atau 1234,5" />
             </div>
 
             <div>

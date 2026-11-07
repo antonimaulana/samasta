@@ -70,7 +70,7 @@ class TamanCompleteness
             ['key' => 'alamat', 'label' => 'Alamat', 'filled' => filled(trim((string) $taman->alamat))],
             ['key' => 'kelurahan', 'label' => 'Kelurahan / kecamatan', 'filled' => filled($taman->kelurahan_id)],
             ['key' => 'koordinat', 'label' => 'Latitude & longitude', 'filled' => filled($taman->latitude) && filled($taman->longitude)],
-            ['key' => 'luasan', 'label' => 'Luasan (M²)', 'filled' => (int) $taman->luasan > 0],
+            ['key' => 'luasan', 'label' => 'Luasan (M²)', 'filled' => TamanLuasan::filled($taman->luasan)],
             ['key' => 'galeri', 'label' => 'Galeri foto', 'filled' => $hasGallery],
             ['key' => 'fasilitas', 'label' => 'Fasilitas & kondisi', 'filled' => $hasFasilitas],
             ['key' => 'tahun_pembangunan', 'label' => 'Tahun pembangunan', 'filled' => filled($taman->tahun_pembangunan)],

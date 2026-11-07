@@ -89,7 +89,7 @@ class TamanCompletenessTest extends TestCase
 
         $this->assertNotNull($taman);
         $this->assertSame('Taman Kota', $taman->kategori);
-        $this->assertSame(0, $taman->luasan);
+        $this->assertEqualsWithDelta(0, (float) $taman->luasan, 0.001);
         $this->assertSame('', $taman->alamat);
         $this->assertSame('', $taman->deskripsi);
         $this->assertSame(Taman::STATUS_DATA_BELUM_LENGKAP, $taman->status_data);
