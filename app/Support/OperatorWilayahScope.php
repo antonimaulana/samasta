@@ -576,7 +576,9 @@ class OperatorWilayahScope
 
         $pelaksana = $pemangkasan->pelaksana ?? [];
 
-
+        if (! is_array($pelaksana)) {
+            $pelaksana = filled($pelaksana) ? [(string) $pelaksana] : [];
+        }
 
         if (array_intersect($teamNames, $pelaksana) !== []) {
 

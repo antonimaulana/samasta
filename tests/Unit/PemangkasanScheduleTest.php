@@ -158,4 +158,11 @@ class PemangkasanScheduleTest extends TestCase
         $this->assertTrue(PemangkasanSchedule::tanggalWithinSchedule($permohonan, '2026-08-29'));
         $this->assertFalse(PemangkasanSchedule::tanggalWithinSchedule($permohonan, '2026-08-31'));
     }
+
+    public function test_label_rentang_when_execution_date_missing(): void
+    {
+        $permohonan = new Pemangkasan(['status' => 'Rencana', 'total_hari' => 1]);
+
+        $this->assertSame('Belum dijadwalkan', PemangkasanSchedule::labelRentang($permohonan));
+    }
 }

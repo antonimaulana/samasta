@@ -79,7 +79,7 @@
                         <dt class="text-xs font-semibold uppercase text-gray-500">
                             {{ $isTumbang ? 'Tanggal Laporan' : 'Tanggal Permohonan' }}
                         </dt>
-                        <dd class="mt-1 font-medium text-gray-900">{{ $pemangkasan->tanggal_permohonan->translatedFormat('d F Y') }}</dd>
+                        <dd class="mt-1 font-medium text-gray-900">{{ $pemangkasan->tanggal_permohonan?->translatedFormat('d F Y') ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">Jadwal Pelaksanaan</dt>

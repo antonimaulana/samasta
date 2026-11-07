@@ -18,6 +18,7 @@ class ViewerRouteAllowlist
             'admin.jadwal-layanan.index',
             'admin.pemangkasans.index',
             'admin.pemangkasans.show',
+            'admin.pemangkasans.export-pdf',
             'admin.pemangkasans.export-pdf-progres',
             'admin.aduan-masyarakats.index',
             'admin.aduan-masyarakats.show',

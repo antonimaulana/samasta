@@ -84,6 +84,10 @@ class PemangkasanSchedule
 
     public static function labelRentang(Pemangkasan $permohonan): string
     {
+        if (! $permohonan->tanggal_eksekusi) {
+            return 'Belum dijadwalkan';
+        }
+
         $mulai = $permohonan->tanggal_eksekusi->format('d/m/Y');
         $akhir = ($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->format('d/m/Y');
         $totalHari = (int) ($permohonan->total_hari ?: self::totalHari(
@@ -123,6 +127,10 @@ class PemangkasanSchedule
             return false;
         }
 
+        if (! $permohonan->tanggal_eksekusi && ! $permohonan->tanggal_akhir_jadwal) {
+            return false;
+        }
+
         $akhir = Carbon::parse($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->startOfDay();
 
         return $akhir->lt(today());
@@ -148,6 +156,10 @@ class PemangkasanSchedule
 
     public static function startedEarly(Pemangkasan $permohonan): bool
     {
+        if (! $permohonan->tanggal_eksekusi) {
+            return false;
+        }
+
         $mulai = Carbon::parse($permohonan->tanggal_eksekusi)->startOfDay();
 
         $entries = $permohonan->relationLoaded('progres')

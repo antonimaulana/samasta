@@ -32,7 +32,17 @@ class PemangkasanController extends Controller
 {
     public function __construct()
     {
-        $this->authorizeResource(Pemangkasan::class, 'pemangkasan');
+        $this->authorizeResource(Pemangkasan::class, 'pemangkasan', [
+            'except' => [
+                'checkScheduleConflict',
+                'exportPdfPermohonan',
+                'exportPdfProgres',
+                'editProgres',
+                'updateProgres',
+                'destroyProgres',
+                'updateStatus',
+            ],
+        ]);
     }
 
     public function index(Request $request): View

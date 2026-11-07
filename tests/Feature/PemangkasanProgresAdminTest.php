@@ -22,6 +22,25 @@ class PemangkasanProgresAdminTest extends TestCase
         $this->seed(WilayahBatamSeeder::class);
     }
 
+    public function test_admin_can_open_permohonan_detail_page(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $permohonan = $this->createPermohonan();
+
+        PemangkasanProgres::create([
+            'pemangkasan_id' => $permohonan->id,
+            'tanggal' => OperasionalPelaksanaanTime::normalizeInput(now()->format('Y-m-d H:i:s')),
+            'hari_ke' => 1,
+            'jumlah_personil' => 2,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.pemangkasans.show', $permohonan))
+            ->assertOk()
+            ->assertSee('Cetak PDF', false)
+            ->assertSee('Progres Harian', false);
+    }
+
     public function test_admin_can_delete_daily_progress_entry(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

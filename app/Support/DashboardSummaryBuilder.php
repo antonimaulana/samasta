@@ -48,24 +48,25 @@ class DashboardSummaryBuilder
     }
 
     /**
-     * @return array{total_unit: int, total_petugas: int, kondisi_baik_persen: int}
+     * @return array{total_unit: int, jumlah_kategori: int, kondisi_baik_persen: int}
      */
     public function armadaRingkasan(): array
     {
         if (! ArmadaSchema::isReady()) {
             return [
                 'total_unit' => 0,
-                'total_petugas' => (int) Petugas::query()->where('aktif', true)->count(),
+                'jumlah_kategori' => 0,
                 'kondisi_baik_persen' => 0,
             ];
         }
 
-        $totalUnit = (int) Armada::query()->armadaInventory()->sum('jumlah');
-        $baikUnit = (int) Armada::query()->armadaInventory()->where('kondisi', 'Baik')->sum('jumlah');
+        $inventory = Armada::query()->armadaInventory();
+        $totalUnit = (int) (clone $inventory)->sum('jumlah');
+        $baikUnit = (int) (clone $inventory)->where('kondisi', 'Baik')->sum('jumlah');
 
         return [
             'total_unit' => $totalUnit,
-            'total_petugas' => (int) Petugas::query()->where('aktif', true)->count(),
+            'jumlah_kategori' => (int) (clone $inventory)->distinct()->count('jenis'),
             'kondisi_baik_persen' => $totalUnit > 0 ? (int) round(($baikUnit / $totalUnit) * 100) : 0,
         ];
     }

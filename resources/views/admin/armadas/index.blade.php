@@ -20,7 +20,7 @@
             tone="emerald"
             label="Total Armada"
             :value="number_format($armadaRingkasan['total_unit'])"
-            subtitle="unit inventaris">
+            subtitle="unit">
             <x-slot:icon>
                 <x-admin.nav-icon name="armada" class="h-5 w-5" />
             </x-slot:icon>
@@ -29,11 +29,11 @@
         <x-admin.dash-stat-card
             class="h-full"
             tone="teal"
-            label="Petugas Aktif"
-            :value="number_format($armadaRingkasan['total_petugas'])"
-            subtitle="petugas terdaftar">
+            label="Kategori Armada"
+            :value="number_format($armadaRingkasan['jumlah_kategori'])"
+            subtitle="jenis">
             <x-slot:icon>
-                <x-admin.nav-icon name="users" class="h-5 w-5" />
+                <x-admin.nav-icon name="armada" class="h-5 w-5" />
             </x-slot:icon>
         </x-admin.dash-stat-card>
 
@@ -42,7 +42,7 @@
             tone="cyan"
             label="Kondisi Armada"
             :value="$armadaRingkasan['kondisi_baik_persen'].'%'"
-            subtitle="unit berkondisi Baik">
+            subtitle="kondisi baik">
             <x-slot:icon>
                 <x-admin.nav-icon name="armada" class="h-5 w-5" />
             </x-slot:icon>
@@ -165,10 +165,10 @@
         <x-admin.data-table fixed>
             <colgroup>
                 <col style="width: 9%">
-                <col style="width: 15%">
                 <col style="width: 11%">
-                <col style="width: 19%">
-                <col style="width: 20%">
+                <col style="width: 11%">
+                <col style="width: 21%">
+                <col style="width: 22%">
                 <col style="width: 12%">
                 <col>
             </colgroup>
