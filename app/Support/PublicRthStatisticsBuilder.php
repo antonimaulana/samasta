@@ -35,7 +35,7 @@ class PublicRthStatisticsBuilder
         $latestMetrics = $this->extractLatestYearMetrics($yearly, $latestYear);
 
         $totalTaman = (int) $report['totalTaman'];
-        $totalLuasan = (int) $report['totalLuasan'];
+        $totalLuasan = (float) $report['totalLuasan'];
         $lengkap = (int) ($report['rekapStatusData']['Lengkap'] ?? 0);
         $belumLengkap = (int) ($report['rekapStatusData']['Belum Lengkap'] ?? 0);
 

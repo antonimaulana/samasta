@@ -25,7 +25,7 @@ class DashboardSummaryBuilder
 
         return [
             'total' => (clone $query)->count(),
-            'luasan' => (int) (clone $query)->sum('luasan'),
+            'luasan' => (float) (clone $query)->sum('luasan'),
             'kategori_rth' => count(Taman::KATEGORI),
         ];
     }

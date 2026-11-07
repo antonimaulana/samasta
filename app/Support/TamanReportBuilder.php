@@ -61,13 +61,13 @@ class TamanReportBuilder
                 return [
                     'kecamatan' => $kecamatan,
                     'jumlah' => $items->count(),
-                    'luasan' => (int) $items->sum('luasan'),
+                    'luasan' => (float) $items->sum('luasan'),
                     'kelurahan' => $items
                         ->groupBy(fn (Taman $taman) => $taman->kelurahan?->nama ?? 'Belum diset')
                         ->map(fn (Collection $kelurahanItems, string $kelurahan) => [
                             'kelurahan' => $kelurahan,
                             'jumlah' => $kelurahanItems->count(),
-                            'luasan' => (int) $kelurahanItems->sum('luasan'),
+                            'luasan' => (float) $kelurahanItems->sum('luasan'),
                         ])
                         ->sortBy('kelurahan')
                         ->values(),
@@ -99,7 +99,7 @@ class TamanReportBuilder
                 return [
                     'kategori' => $label,
                     'jumlah' => $items->count(),
-                    'luasan' => (int) $items->sum('luasan'),
+                    'luasan' => (float) $items->sum('luasan'),
                 ];
             })
             ->values();
@@ -113,7 +113,7 @@ class TamanReportBuilder
             'rekapStatusData' => $rekapStatusData,
             'rekapKategori' => $rekapKategori,
             'totalTaman' => $tamans->count(),
-            'totalLuasan' => (int) $tamans->sum('luasan'),
+            'totalLuasan' => (float) $tamans->sum('luasan'),
             'search' => $search !== '' ? $search : null,
             'kategori' => filled($kategori) ? (string) $kategori : null,
             'statusData' => in_array($statusData, [Taman::STATUS_DATA_LENGKAP, Taman::STATUS_DATA_BELUM_LENGKAP], true)

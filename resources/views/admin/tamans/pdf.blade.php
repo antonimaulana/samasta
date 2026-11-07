@@ -209,7 +209,7 @@
                                         —
                                     @endif
                                 </td>
-                                <td class="num">{{ number_format($taman->luasan, 0, ',', '.') }}</td>
+                                <td class="num">{{ $taman->luasanLabel() }}</td>
                                 <td>{{ $taman->alamat ?? '—' }}</td>
                                 <td class="center">
                                     @if ($taman->latitude && $taman->longitude)

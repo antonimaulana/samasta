@@ -38,7 +38,7 @@
                         <x-taman-kategori-badge :kategori="$taman->kategori" size="md" />
                         @if ($taman->luasan > 0)
                             <span class="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-100">
-                                {{ number_format($taman->luasan, 0, ',', '.') }} M²
+                                {{ $taman->luasanLabel() }} M²
                             </span>
                         @endif
                     </div>

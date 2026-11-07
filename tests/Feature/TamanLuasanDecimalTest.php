@@ -41,6 +41,30 @@ class TamanLuasanDecimalTest extends TestCase
         $this->assertEqualsWithDelta(1234.75, (float) $taman->luasan, 0.001);
     }
 
+    public function test_jalur_hijau_taman_stores_sub_meter_precision(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $payload = [
+            'nama_taman' => 'Jl. H. M. Itam',
+            'kategori' => 'Jalur Hijau Jalan',
+            'kelurahan_id' => Kelurahan::query()->value('id'),
+            'luasan' => '26233,81',
+            'alamat' => 'Median Jalan',
+            'deskripsi' => 'Jalur hijau uji desimal.',
+        ];
+
+        $this->actingAs($admin)
+            ->post(route('admin.tamans.store'), $payload)
+            ->assertRedirect();
+
+        $taman = Taman::query()->where('nama_taman', 'Jl. H. M. Itam')->firstOrFail();
+
+        $this->assertSame('Jalur Hijau Jalan', $taman->kategori);
+        $this->assertEqualsWithDelta(26233.81, (float) $taman->luasan, 0.0001);
+        $this->assertSame('26.233,81', $taman->luasanLabel());
+    }
+
     public function test_admin_can_update_taman_with_decimal_luasan(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);

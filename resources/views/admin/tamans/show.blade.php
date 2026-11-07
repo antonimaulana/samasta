@@ -35,7 +35,7 @@
                     <x-admin.rth-detail-row label="Kategori">
                         <x-admin.taman-kategori-badge :kategori="$taman->kategori" />
                     </x-admin.rth-detail-row>
-                    <x-admin.rth-detail-row label="Luasan">{{ \App\Support\TamanLuasan::format($taman->luasan) }} m²</x-admin.rth-detail-row>
+                    <x-admin.rth-detail-row label="Luasan">{{ $taman->luasanLabel() }} m²</x-admin.rth-detail-row>
                     <x-admin.rth-detail-row label="Wilayah">
                         @if ($taman->kelurahan)
                             {{ $taman->kelurahan->nama }}, {{ $taman->kelurahan->kecamatan->nama }}

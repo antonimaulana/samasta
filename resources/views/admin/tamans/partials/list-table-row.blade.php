@@ -23,7 +23,7 @@
         @endif
     </td>
     <td class="whitespace-nowrap px-4 py-3 text-sm tabular-nums text-gray-900">
-        {{ number_format($taman->luasan, 0, ',', '.') }}
+        {{ $taman->luasanLabel() }}
     </td>
     <td class="whitespace-nowrap px-4 py-3 align-top text-sm text-gray-900">
         {{ $taman->tahun_pembangunan ?? '—' }}

@@ -52,8 +52,8 @@ class RthArProfileBuilder
             'title' => $taman->nama_taman,
             'subtitle' => $this->buildSubtitle($taman),
             'location_label' => $this->buildLocationLabel($taman),
-            'luasan' => (int) $taman->luasan,
-            'luasan_formatted' => TamanLuasan::format($taman->luasan),
+            'luasan' => (float) $taman->luasan,
+            'luasan_formatted' => TamanLuasan::format($taman->luasan, $taman->kategori),
             'data_freshness' => [
                 'is_fresh' => $isDataFresh,
                 'label' => $isDataFresh ? 'Diperbarui' : 'Kedaluwarsa',

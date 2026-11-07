@@ -55,7 +55,7 @@ class TamanRthYearlySummary
         foreach ($years as $year) {
             $query = self::applyYearColumnScope(clone $baseQuery, $year);
 
-            $luasan = (int) (clone $query)->sum('luasan');
+            $luasan = (float) (clone $query)->sum('luasan');
             $lokasi = (int) (clone $query)->count();
             $luasanTerpelihara = max(0, $luasan - $penyesuaianTidakTerpelihara);
 

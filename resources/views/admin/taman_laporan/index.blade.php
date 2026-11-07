@@ -107,7 +107,7 @@
                                 <x-admin.taman-kategori-badge :kategori="$row['kategori']" />
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['jumlah']) }}</td>
-                            <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -138,7 +138,7 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $row['kecamatan'] }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['jumlah']) }}</td>
-                                <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -157,7 +157,7 @@
                             {{ $kecamatanGroup['kecamatan'] }}
                             <span class="font-normal text-gray-500">
                                 — {{ number_format($kecamatanGroup['jumlah']) }} lokasi,
-                                {{ number_format($kecamatanGroup['luasan'], 0, ',', '.') }} M²
+                                {{ \App\Support\TamanLuasan::format($kecamatanGroup['luasan']) }} M²
                             </span>
                         </p>
                         <x-admin.data-table>
@@ -173,7 +173,7 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $row['kelurahan'] }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['jumlah']) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                                        <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -196,7 +196,7 @@
                         <div>
                             <div class="mb-3 flex flex-wrap items-center gap-2">
                                 <x-admin.taman-kategori-badge :kategori="$kategoriLabel" />
-                                <span class="text-sm text-gray-500">{{ $items->count() }} taman · {{ number_format($items->sum('luasan'), 0, ',', '.') }} M²</span>
+                                <span class="text-sm text-gray-500">{{ $items->count() }} taman · {{ \App\Support\TamanLuasan::format($items->sum('luasan'), $kategoriLabel) }} M²</span>
                             </div>
 
                             <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">

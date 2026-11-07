@@ -151,7 +151,7 @@
                                             <p class="text-xs text-gray-500">Luasan</p>
                                             <p class="rth-anim-stat text-xl font-black text-emerald-900 tabular-nums"
                                                data-type="area"
-                                               data-value="{{ $card['luasan'] }}">{{ number_format($card['luasan'], 0, ',', '.') }}</p>
+                                               data-value="{{ $card['luasan'] }}">{{ \App\Support\TamanLuasan::format($card['luasan'], $card['kategori'] ?? null) }}</p>
                                             <p class="text-xs text-gray-500">m²</p>
                                         </div>
                                         <div class="col-span-2">
@@ -210,7 +210,7 @@
                                     <td class="px-5 py-3 text-right text-gray-700">
                                         <span class="rth-anim-stat tabular-nums"
                                               data-type="area"
-                                              data-value="{{ $row['luasan'] }}">{{ number_format($row['luasan'], 0, ',', '.') }}</span>
+                                              data-value="{{ $row['luasan'] }}">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</span>
                                     </td>
                                     <td class="px-5 py-3 text-right">
                                         <span class="rth-anim-stat rth-glow-pct inline-flex min-w-[3rem] justify-end text-teal-800 tabular-nums"
@@ -248,7 +248,7 @@
                                             lokasi ·
                                             <span class="rth-anim-stat tabular-nums"
                                                   data-type="area"
-                                                  data-value="{{ $kecamatan['luasan'] }}">{{ number_format($kecamatan['luasan'], 0, ',', '.') }}</span>
+                                                  data-value="{{ $kecamatan['luasan'] }}">{{ \App\Support\TamanLuasan::format($kecamatan['luasan']) }}</span>
                                             m²
                                         </p>
                                     </div>
@@ -266,7 +266,7 @@
                                                         <td class="px-4 py-2.5 text-right text-gray-600">
                                                             <span class="rth-anim-stat tabular-nums"
                                                                   data-type="area"
-                                                                  data-value="{{ $kel['luasan'] }}">{{ number_format($kel['luasan'], 0, ',', '.') }}</span>
+                                                                  data-value="{{ $kel['luasan'] }}">{{ \App\Support\TamanLuasan::format($kel['luasan']) }}</span>
                                                             m²
                                                         </td>
                                                     </tr>

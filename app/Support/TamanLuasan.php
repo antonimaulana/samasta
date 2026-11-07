@@ -4,7 +4,29 @@ namespace App\Support;
 
 final class TamanLuasan
 {
-    public const DECIMAL_PLACES = 3;
+    public const DECIMAL_PLACES = 4;
+
+    public const JALUR_HIJAU_DECIMAL_PLACES = 2;
+
+    /**
+     * @return list<string>
+     */
+    public static function jalurHijauKategori(): array
+    {
+        return ['Jalur Hijau Jalan', 'RTH Jalur Hijau'];
+    }
+
+    public static function isJalurHijauKategori(?string $kategori): bool
+    {
+        return $kategori !== null && in_array($kategori, self::jalurHijauKategori(), true);
+    }
+
+    public static function displayDecimalPlaces(?string $kategori): int
+    {
+        return self::isJalurHijauKategori($kategori)
+            ? self::JALUR_HIJAU_DECIMAL_PLACES
+            : self::DECIMAL_PLACES;
+    }
 
     /**
      * Nilai untuk input HTML (tanpa pemisah ribuan).
@@ -27,12 +49,16 @@ final class TamanLuasan
     /**
      * Tampilan dengan pemisah ribuan Indonesia; desimal hanya jika perlu.
      */
-    public static function format(float|int|string|null $luasan): string
+    public static function format(float|int|string|null $luasan, ?string $kategori = null): string
     {
         $value = (float) ($luasan ?? 0);
 
         if (! is_finite($value)) {
             return '0';
+        }
+
+        if (self::isJalurHijauKategori($kategori)) {
+            return number_format($value, self::JALUR_HIJAU_DECIMAL_PLACES, ',', '.');
         }
 
         if (abs($value - round($value)) < 0.0005) {

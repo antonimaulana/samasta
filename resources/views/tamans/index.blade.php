@@ -158,7 +158,7 @@
                                 </span>
                             @endif
                             @if ($taman->luasan > 0)
-                                <span class="text-xs text-gray-500">{{ number_format($taman->luasan, 0, ',', '.') }} M²</span>
+                                <span class="text-xs text-gray-500">{{ $taman->luasanLabel() }} M²</span>
                             @endif
                         </div>
                         <h2 class="mt-2 text-lg font-semibold text-gray-900 group-hover:text-green-800">{{ $taman->nama_taman }}</h2>

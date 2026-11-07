@@ -339,11 +339,16 @@ class Taman extends Model
     {
         return [
             'fasilitas' => 'array',
-            'luasan' => 'decimal:3',
+            'luasan' => 'decimal:4',
             'tahun_pembangunan' => 'integer',
             'nilai_pembangunan' => 'integer',
             'data_verified_at' => 'datetime',
         ];
+    }
+
+    public function luasanLabel(): string
+    {
+        return \App\Support\TamanLuasan::format($this->luasan, $this->kategori);
     }
 
     public static function kategoriPinColor(string $kategori): string

@@ -92,7 +92,7 @@
                 <tr>
                     <td>{{ $row['kategori'] }}</td>
                     <td class="num">{{ number_format($row['jumlah']) }}</td>
-                    <td class="num">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                    <td class="num">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
                 </tr>
             @empty
                 <tr>
@@ -116,7 +116,7 @@
                 <tr>
                     <td>{{ $row['kecamatan'] }}</td>
                     <td class="num">{{ number_format($row['jumlah']) }}</td>
-                    <td class="num">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                    <td class="num">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
                 </tr>
             @empty
                 <tr>
@@ -145,7 +145,7 @@
                         @endif
                         <td>{{ $row['kelurahan'] }}</td>
                         <td class="num">{{ number_format($row['jumlah']) }}</td>
-                        <td class="num">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                        <td class="num">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
                     </tr>
                 @endforeach
             @empty
@@ -161,7 +161,7 @@
 
         @foreach ($tamansPerKategori as $kategori => $items)
             @if ($items->isNotEmpty())
-                <h2>{{ $kategori }} ({{ number_format($items->count()) }} lokasi · {{ number_format($items->sum('luasan'), 0, ',', '.') }} m²)</h2>
+                <h2>{{ $kategori }} ({{ number_format($items->count()) }} lokasi · {{ \App\Support\TamanLuasan::format($items->sum('luasan'), $kategori) }} m²)</h2>
                 <table>
                     <thead>
                         <tr>
@@ -186,7 +186,7 @@
                                         —
                                     @endif
                                 </td>
-                                <td class="num">{{ number_format($taman->luasan, 0, ',', '.') }}</td>
+                                <td class="num">{{ $taman->luasanLabel() }}</td>
                                 <td>{{ $taman->alamat ?? '—' }}</td>
                                 <td>
                                     @if ($taman->latitude && $taman->longitude)

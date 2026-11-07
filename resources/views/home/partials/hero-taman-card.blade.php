@@ -47,7 +47,7 @@
 
         <p class="mt-1 truncate text-xs text-gray-600">
 
-            {{ $taman->kategori }}@if ($taman->luasan > 0) · {{ number_format($taman->luasan, 0, ',', '.') }} m² @endif
+            {{ $taman->kategori }}@if ($taman->luasan > 0) · {{ $taman->luasanLabel() }} m² @endif
 
         </p>
 

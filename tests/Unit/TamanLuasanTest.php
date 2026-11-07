@@ -19,4 +19,10 @@ class TamanLuasanTest extends TestCase
         $this->assertSame('1234.75', TamanLuasan::normalizeRequest('1234,75'));
         $this->assertSame('99.5', TamanLuasan::normalizeRequest('99,5'));
     }
+
+    public function test_format_jalur_hijau_uses_two_decimal_places(): void
+    {
+        $this->assertSame('26.233,81', TamanLuasan::format(26233.81, 'Jalur Hijau Jalan'));
+        $this->assertSame('1.890.919,50', TamanLuasan::format(1890919.5, 'Jalur Hijau Jalan'));
+    }
 }
