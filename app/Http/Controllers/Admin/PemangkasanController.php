@@ -215,7 +215,17 @@ class PemangkasanController extends Controller
     {
         $this->authorize('view', $pemangkasan);
 
-        return PemangkasanPermohonanPdf::download($pemangkasan);
+        try {
+            return PemangkasanPermohonanPdf::download($pemangkasan);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $exception) {
+            throw $exception;
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(503, 'Laporan PDF permohonan tidak dapat dibuat. Jalankan `php artisan pemangkasan:pdf-test '.$pemangkasan->getKey().'` di server untuk detail error.');
+        }
     }
 
     public function exportPdfProgres(Pemangkasan $pemangkasan, PemangkasanProgres $pemangkasanProgres): Response

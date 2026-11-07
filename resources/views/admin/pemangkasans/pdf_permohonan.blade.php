@@ -184,7 +184,7 @@
         </tr>
         <tr>
             <th>{{ $isTumbang ? 'Tanggal Laporan' : 'Tanggal Permohonan' }}</th>
-            <td>{{ $permohonan->tanggal_permohonan?->translatedFormat('l, d F Y') ?? '—' }}</td>
+            <td>{{ \App\Support\OperasionalPelaksanaanTime::displayDateLong($permohonan->tanggal_permohonan) }}</td>
         </tr>
         <tr>
             <th>Jadwal Pelaksanaan</th>

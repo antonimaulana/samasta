@@ -62,6 +62,21 @@ class OperasionalPelaksanaanTime
 
         $carbon = self::parse($value);
 
-        return $carbon->translatedFormat('l, d F Y').' · '.$carbon->format('H:i');
+        try {
+            return $carbon->translatedFormat('l, d F Y').' · '.$carbon->format('H:i');
+        } catch (\Throwable) {
+            return $carbon->format('d/m/Y').' · '.$carbon->format('H:i');
+        }
+    }
+
+    public static function displayDateLong(CarbonInterface|string|null $value): string
+    {
+        if (blank($value)) {
+            return '—';
+        }
+
+        $carbon = $value instanceof CarbonInterface ? Carbon::instance($value) : self::parse($value);
+
+        return $carbon->format('d/m/Y');
     }
 }

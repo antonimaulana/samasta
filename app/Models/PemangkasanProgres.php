@@ -64,17 +64,21 @@ class PemangkasanProgres extends Model
 
     public function armadaPdfHtml(): ?string
     {
-        if (! Schema::hasTable('pemangkasan_progres_armadas')) {
+        try {
+            if (! Schema::hasTable('pemangkasan_progres_armadas')) {
+                return null;
+            }
+
+            if ($this->armadas->isEmpty()) {
+                return null;
+            }
+
+            return $this->armadas
+                ->map(fn (PemangkasanProgresArmada $armada) => $armada->pdfEntryHtml())
+                ->implode(', ');
+        } catch (\Throwable) {
             return null;
         }
-
-        if ($this->armadas->isEmpty()) {
-            return null;
-        }
-
-        return $this->armadas
-            ->map(fn (PemangkasanProgresArmada $armada) => $armada->pdfEntryHtml())
-            ->implode(', ');
     }
 
     /**

@@ -11,16 +11,16 @@ class PemangkasanPermohonanPdf
     public static function download(Pemangkasan $permohonan): Response
     {
         try {
-            return self::attemptDownload($permohonan, includeProgresPhotos: true);
+            return self::attemptDownload($permohonan, includeProgresPhotos: false);
         } catch (\Throwable $first) {
             report($first);
 
             try {
-                return self::attemptDownload($permohonan, includeProgresPhotos: false);
+                return self::attemptDownload($permohonan, includeProgresPhotos: true);
             } catch (\Throwable $second) {
                 report($second);
 
-                abort(503, 'Laporan PDF permohonan tidak dapat dibuat. Periksa data progres, foto, atau log server (storage/logs/laravel.log).');
+                throw $second;
             }
         }
     }
