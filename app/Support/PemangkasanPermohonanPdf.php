@@ -11,12 +11,12 @@ class PemangkasanPermohonanPdf
     public static function download(Pemangkasan $permohonan): Response
     {
         try {
-            return self::attemptDownload($permohonan, includeProgresPhotos: false);
+            return self::attemptDownload($permohonan, includeProgresPhotos: true);
         } catch (\Throwable $first) {
             report($first);
 
             try {
-                return self::attemptDownload($permohonan, includeProgresPhotos: true);
+                return self::attemptDownload($permohonan, includeProgresPhotos: false);
             } catch (\Throwable $second) {
                 report($second);
 
@@ -36,6 +36,7 @@ class PemangkasanPermohonanPdf
         $html = view('admin.pemangkasans.pdf_permohonan', [
             'permohonan' => $permohonan,
             'includeProgresPhotos' => $includeProgresPhotos,
+            'progresPerTim' => TimPelaksanaPdfOrder::groupPemangkasanProgres($permohonan->progres, $permohonan),
         ])->render();
 
         return PdfExport::download($html, self::filename($permohonan));

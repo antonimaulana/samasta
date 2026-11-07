@@ -158,10 +158,19 @@
         </tr>
     </table>
 
-    @include('admin.pemangkasans._pdf_progres_rekap_table', [
-        'permohonan' => $permohonan,
-        'includeProgresPhotos' => $includeProgresPhotos,
-    ])
+    @php
+        $progresPerTim = $progresPerTim ?? \App\Support\TimPelaksanaPdfOrder::groupPemangkasanProgres($permohonan->progres, $permohonan);
+    @endphp
+    @forelse ($progresPerTim as $tim => $entries)
+        @include('admin.pemangkasans._pdf_progres_rekap_table', [
+            'permohonan' => $permohonan,
+            'progresEntries' => $entries,
+            'sectionTitle' => $tim,
+            'includeProgresPhotos' => $includeProgresPhotos,
+        ])
+    @empty
+        <p class="rekap-empty" style="text-align:center;padding:16px;">Belum ada progres harian yang tercatat untuk permohonan ini.</p>
+    @endforelse
 
     <div class="footer">
         Dicetak otomatis dari Sistem {{ config('app.name') }} · {{ now()->format('d/m/Y H:i') }} WIB

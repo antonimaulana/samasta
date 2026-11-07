@@ -17,6 +17,7 @@ use App\Support\PdfExport;
 use App\Support\PetugasAssignment;
 use App\Support\PetugasRosterBuilder;
 use App\Support\TableSearch;
+use App\Support\TimPelaksanaPdfOrder;
 use App\Support\TimPelaksanaResolver;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -215,6 +216,8 @@ class PemeliharaanTamanController extends Controller
             ->orderBy('lokasi_pelaksanaan')
             ->get()
             ->groupBy('tim');
+
+        $kinerjas = TimPelaksanaPdfOrder::sortGrouped($kinerjas);
 
         $html = view('admin.pemeliharaan_tamans.pdf', [
             'tanggalMulai' => $tanggalMulai,

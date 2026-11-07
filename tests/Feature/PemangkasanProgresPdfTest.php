@@ -9,6 +9,7 @@ use App\Models\Taman;
 use App\Models\Petugas;
 use App\Models\User;
 use App\Support\PemangkasanProgresPdf;
+use App\Support\TimPelaksanaPdfOrder;
 use Database\Seeders\TimPelaksanaSeeder;
 use Database\Seeders\WilayahBatamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -169,6 +170,71 @@ class PemangkasanProgresPdfTest extends TestCase
         $this->assertStringContainsString('progres)', $html);
     }
 
+    public function test_gabungan_pdf_groups_progress_per_tim_in_order(): void
+    {
+        Storage::fake('public');
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Multi Tim PDF',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => Kelurahan::query()->value('id'),
+            'luasan' => 500,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi.',
+        ]);
+
+        $permohonan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemangkasan Pohon',
+            'taman_id' => $taman->id,
+            'lokasi_pohon' => $taman->nama_taman,
+            'asal' => 'Warga',
+            'tanggal_permohonan' => '2026-08-20',
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => '2026-08-28',
+            'tanggal_akhir_jadwal' => '2026-08-29',
+            'status' => 'Diproses',
+            'total_hari' => 2,
+            'pelaksana' => ['Tim Wilayah 1', 'Tim Wilayah 2'],
+        ]);
+
+        PemangkasanProgres::create([
+            'pemangkasan_id' => $permohonan->id,
+            'tim' => 'Tim Wilayah 2',
+            'tanggal' => '2026-08-29',
+            'hari_ke' => 2,
+            'jumlah_personil' => 3,
+            'catatan' => 'Progres tim dua.',
+        ]);
+
+        PemangkasanProgres::create([
+            'pemangkasan_id' => $permohonan->id,
+            'tim' => 'Tim Wilayah 1',
+            'tanggal' => '2026-08-28',
+            'hari_ke' => 1,
+            'jumlah_personil' => 4,
+            'catatan' => 'Progres tim satu.',
+        ]);
+
+        $permohonan->load('progres');
+        $grouped = TimPelaksanaPdfOrder::groupPemangkasanProgres($permohonan->progres, $permohonan);
+
+        $html = view('admin.pemangkasans.pdf_permohonan', [
+            'permohonan' => $permohonan->fresh(['taman', 'progres']),
+            'includeProgresPhotos' => true,
+            'progresPerTim' => $grouped,
+        ])->render();
+
+        $posW1 = strpos($html, 'Tim Wilayah 1 (1 progres)');
+        $posW2 = strpos($html, 'Tim Wilayah 2 (1 progres)');
+
+        $this->assertNotFalse($posW1);
+        $this->assertNotFalse($posW2);
+        $this->assertLessThan($posW2, $posW1);
+        $this->assertStringContainsString('Progres tim satu.', $html);
+        $this->assertStringContainsString('Progres tim dua.', $html);
+    }
+
     public function test_pdf_for_day_one_uses_day_one_entry_not_day_two(): void
     {
         Storage::fake('public');
@@ -272,6 +338,7 @@ class PemangkasanProgresPdfTest extends TestCase
 
         $progres = PemangkasanProgres::create(array_merge([
             'pemangkasan_id' => $permohonan->id,
+            'tim' => 'Tim Wilayah 1',
             'tanggal' => '2026-08-28',
             'hari_ke' => 1,
             'jumlah_personil' => 4,
