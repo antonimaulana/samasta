@@ -34,8 +34,8 @@ class PdfExport
 
     public static function renderBinary(string $html, string $orientation = 'portrait'): string
     {
-        @ini_set('memory_limit', '512M');
-        @set_time_limit(120);
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(180);
 
         $options = new Options;
         $options->set('isRemoteEnabled', true);

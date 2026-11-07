@@ -152,6 +152,7 @@
 </head>
 <body>
     @php
+        $includeProgresPhotos = $includeProgresPhotos ?? true;
         $fotoGroups = \App\Models\PemangkasanProgres::fotoGroups();
         $logoPath = public_path('images/logo-pemkot-batam.png');
         $logoBase64 = is_readable($logoPath)
@@ -214,15 +215,10 @@
                     <th>Tanggal Pelaksanaan</th>
                     <td>{{ \App\Support\OperasionalPelaksanaanTime::displayLong($progres->tanggal) }}</td>
                 </tr>
-                @if ($progres->relationLoaded('petugas') && $progres->petugas->isNotEmpty())
+                @if (filled($progres->petugasLabel()) && $progres->petugasLabel() !== '—')
                     <tr>
                         <th>Petugas Pelaksana</th>
-                        <td>{{ $progres->petugasLabel() }} ({{ $progres->petugas->count() }} personil)</td>
-                    </tr>
-                @elseif ($progres->jumlah_personil)
-                    <tr>
-                        <th>Jumlah Personil</th>
-                        <td>{{ $progres->jumlah_personil }} personil</td>
+                        <td>{{ $progres->petugasLabel() }}</td>
                     </tr>
                 @endif
                 @if ($progres->catatan)
@@ -239,6 +235,7 @@
                 @endif
             </table>
 
+            @if ($includeProgresPhotos)
             @foreach ($fotoGroups as $groupLabel => $fields)
                 <div class="photo-section">
                     <table class="photo-section-head">
@@ -273,6 +270,9 @@
                     </table>
                 </div>
             @endforeach
+            @else
+                <p class="empty-progres" style="margin-top:8px;">Foto progres tidak disertakan (generasi ringkas).</p>
+            @endif
         </div>
     @empty
         <p class="empty-progres">Belum ada progres harian yang tercatat untuk permohonan ini.</p>

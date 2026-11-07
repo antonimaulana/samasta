@@ -14,7 +14,11 @@ class LogAdminActivity
         $response = $next($request);
 
         if ($response->isSuccessful() || $response->isRedirection()) {
-            ActivityLogger::logRequest($request);
+            try {
+                ActivityLogger::logRequest($request);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
         }
 
         return $response;

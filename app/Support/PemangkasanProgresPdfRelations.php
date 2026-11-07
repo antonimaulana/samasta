@@ -41,7 +41,13 @@ final class PemangkasanProgresPdfRelations
         }
 
         foreach ($entries as $entry) {
-            $entry->loadMissing($relations);
+            foreach ($relations as $relation) {
+                try {
+                    $entry->loadMissing($relation);
+                } catch (\Throwable $exception) {
+                    report($exception);
+                }
+            }
         }
     }
 
@@ -49,8 +55,12 @@ final class PemangkasanProgresPdfRelations
     {
         $relations = self::names();
 
-        if ($relations !== []) {
-            $entry->loadMissing($relations);
+        foreach ($relations as $relation) {
+            try {
+                $entry->loadMissing($relation);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
         }
     }
 }
