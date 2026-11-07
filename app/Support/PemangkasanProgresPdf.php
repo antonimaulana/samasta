@@ -20,13 +20,7 @@ class PemangkasanProgresPdf
 
     public static function render(PemangkasanProgres $progres, Pemangkasan $permohonan): string
     {
-        $relations = ['petugas', 'armadas'];
-
-        if (ArmadaSchema::isReady()) {
-            $relations[] = 'armadas.armada';
-        }
-
-        $progres->loadMissing($relations);
+        PemangkasanProgresPdfRelations::loadOneForPdf($progres);
 
         return view('admin.pemangkasans.pdf_progres', [
             'progres' => $progres,

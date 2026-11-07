@@ -24,7 +24,7 @@ class OperasionalKegiatanPdfFilename
 
     public static function permohonanProgres(Pemangkasan $permohonan, PemangkasanProgres $progres): string
     {
-        $tim = collect($permohonan->pelaksana ?? [])->filter()->first() ?? 'Permohonan';
+        $tim = self::pelaksanaTim($permohonan);
 
         return self::build(
             tim: (string) $tim,
@@ -36,13 +36,7 @@ class OperasionalKegiatanPdfFilename
 
     public static function permohonanGabungan(Pemangkasan $permohonan): string
     {
-        $pelaksana = $permohonan->pelaksana ?? [];
-
-        if (! is_array($pelaksana)) {
-            $pelaksana = filled($pelaksana) ? [(string) $pelaksana] : [];
-        }
-
-        $tim = collect($pelaksana)->filter()->first() ?? 'Permohonan';
+        $tim = self::pelaksanaTim($permohonan);
         $total = max(1, (int) ($permohonan->total_hari ?? 1));
         $selesai = $permohonan->relationLoaded('progres')
             ? $permohonan->progres->count()
@@ -55,6 +49,17 @@ class OperasionalKegiatanPdfFilename
             tanggal: $permohonan->tanggal_eksekusi ?? $permohonan->tanggal_permohonan,
             progresPercent: $progresPercent,
         );
+    }
+
+    private static function pelaksanaTim(Pemangkasan $permohonan): string
+    {
+        $pelaksana = $permohonan->pelaksana ?? [];
+
+        if (! is_array($pelaksana)) {
+            $pelaksana = filled($pelaksana) ? [(string) $pelaksana] : [];
+        }
+
+        return (string) (collect($pelaksana)->filter()->first() ?? 'Permohonan');
     }
 
     private static function pemeliharaanProgresPercent(PemeliharaanTaman $kinerja): int

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class PemangkasanProgres extends Model
@@ -63,6 +64,10 @@ class PemangkasanProgres extends Model
 
     public function armadaPdfHtml(): ?string
     {
+        if (! Schema::hasTable('pemangkasan_progres_armadas')) {
+            return null;
+        }
+
         if ($this->armadas->isEmpty()) {
             return null;
         }

@@ -18,22 +18,25 @@ class PemangkasanPermohonanPdf
             },
         ]);
 
-        $progresRelations = ['petugas', 'armadas'];
+        PemangkasanProgresPdfRelations::loadForPdf($permohonan->progres);
 
-        if (ArmadaSchema::isReady()) {
-            $progresRelations[] = 'armadas.armada';
+        try {
+            $html = view('admin.pemangkasans.pdf_permohonan', [
+                'permohonan' => $permohonan,
+            ])->render();
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(503, 'Laporan PDF permohonan tidak dapat dibuat. Periksa data progres atau hubungi administrator.');
         }
 
-        $permohonan->progres->each(function ($progres) use ($progresRelations) {
-            $progres->loadMissing($progresRelations);
-        });
+        try {
+            return PdfExport::download($html, self::filename($permohonan));
+        } catch (\Throwable $exception) {
+            report($exception);
 
-        return PdfExport::download(
-            view('admin.pemangkasans.pdf_permohonan', [
-                'permohonan' => $permohonan,
-            ])->render(),
-            self::filename($permohonan),
-        );
+            abort(503, 'Laporan PDF permohonan tidak dapat dibuat. Periksa foto progres atau aktifkan ekstensi GD di server.');
+        }
     }
 
     public static function filename(Pemangkasan $permohonan): string
