@@ -71,7 +71,7 @@
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         @unless ($periodeSatuHari)
-                            <td>{{ $item->tanggal->translatedFormat('d/m/Y') }}</td>
+                            <td>{{ $item->tanggal ? $item->tanggal->translatedFormat('d/m/Y') : '—' }}</td>
                         @endunless
                         <td>
                             {{ $item->lokasiPelaksanaanPdfLabel() }}

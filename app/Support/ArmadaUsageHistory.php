@@ -71,6 +71,7 @@ class ArmadaUsageHistory
     /**
      * @return Collection<int, array{
      *     armada: string,
+     *     armada_jenis: ?string,
      *     armada_url: ?string,
      *     sumber: string,
      *     tanggal: ?Carbon,
@@ -92,6 +93,7 @@ class ArmadaUsageHistory
 
                 return [
                     'armada' => $armada?->nama ?? '—',
+                    'armada_jenis' => $armada?->jenis,
                     'armada_url' => $armada
                         ? route('admin.armadas.show', $armada)
                         : null,
@@ -117,6 +119,7 @@ class ArmadaUsageHistory
 
                 return [
                     'armada' => $armada?->nama ?? '—',
+                    'armada_jenis' => $armada?->jenis,
                     'armada_url' => $armada
                         ? route('admin.armadas.show', $armada)
                         : null,

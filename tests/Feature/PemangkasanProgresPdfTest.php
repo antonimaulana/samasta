@@ -103,6 +103,30 @@ class PemangkasanProgresPdfTest extends TestCase
         $this->assertStringContainsString('(2 personil)', $html);
     }
 
+    public function test_admin_can_export_permohonan_gabungan_pdf(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('PHP GD extension is required for PDF export.');
+        }
+
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        [$permohonan, $progres] = $this->createSampleProgress('Catatan gabungan PDF.');
+
+        $this->actingAs($admin)
+            ->get(route('admin.pemangkasans.export-pdf', $permohonan))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $html = view('admin.pemangkasans.pdf_permohonan', [
+            'permohonan' => $permohonan->fresh(['taman', 'progres.petugas', 'progres.armadas.armada']),
+        ])->render();
+
+        $this->assertStringContainsString('Catatan gabungan PDF.', $html);
+        $this->assertStringContainsString('Gabungan', $html);
+    }
+
     public function test_pdf_for_day_one_uses_day_one_entry_not_day_two(): void
     {
         Storage::fake('public');

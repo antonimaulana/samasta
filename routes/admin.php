@@ -91,6 +91,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::get('bibit-laporan/export/pdf', [BibitLaporanController::class, 'exportPdf'])->name('bibit-laporan.export-pdf');
     Route::get('pemangkasans/schedule-conflicts', [PemangkasanController::class, 'checkScheduleConflict'])
         ->name('pemangkasans.schedule-conflicts');
+    Route::get('pemangkasans/{pemangkasan}/export/pdf', [PemangkasanController::class, 'exportPdfPermohonan'])
+        ->name('pemangkasans.export-pdf');
     Route::get('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}/export/pdf', [PemangkasanController::class, 'exportPdfProgres'])
         ->name('pemangkasans.export-pdf-progres');
     Route::get('pemangkasans/{pemangkasan}/progres/{pemangkasanProgres}/edit', [PemangkasanController::class, 'editProgres'])

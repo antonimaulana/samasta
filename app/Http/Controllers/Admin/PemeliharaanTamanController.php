@@ -13,13 +13,12 @@ use App\Support\OperasionalFotoStorage;
 use App\Support\OperasionalKegiatanPdfFilename;
 use App\Support\OperasionalPelaksanaanTime;
 use App\Support\OperatorWilayahScope;
+use App\Support\PdfExport;
 use App\Support\PetugasAssignment;
 use App\Support\PetugasRosterBuilder;
 use App\Support\TableSearch;
 use App\Support\TimPelaksanaResolver;
 use Carbon\Carbon;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -182,7 +181,7 @@ class PemeliharaanTamanController extends Controller
     {
         $this->authorize('viewAny', PemeliharaanTaman::class);
 
-        $this->ensureGdLoaded();
+        PdfExport::ensureGdLoaded();
 
         $validated = $request->validate([
             'tanggal_mulai' => ['nullable', 'date'],
@@ -234,14 +233,14 @@ class PemeliharaanTamanController extends Controller
         }
         $filename .= '.pdf';
 
-        return $this->downloadPdf($html, $filename);
+        return PdfExport::download($html, $filename);
     }
 
     public function exportPdfOperasional(PemeliharaanTaman $pemeliharaanTaman): Response
     {
         $this->authorize('view', $pemeliharaanTaman);
 
-        $this->ensureGdLoaded();
+        PdfExport::ensureGdLoaded();
 
         $html = view('admin.pemeliharaan_tamans.pdf_operasional', [
             'kinerja' => $pemeliharaanTaman->load(['armadas.armada', 'taman', 'petugas']),
@@ -249,34 +248,7 @@ class PemeliharaanTamanController extends Controller
 
         $filename = OperasionalKegiatanPdfFilename::pemeliharaan($pemeliharaanTaman);
 
-        return $this->downloadPdf($html, $filename);
-    }
-
-    private function ensureGdLoaded(): void
-    {
-        if (! extension_loaded('gd')) {
-            abort(503, 'Ekstensi PHP GD belum aktif. Aktifkan extension=gd di php.ini (XAMPP: C:\\xampp\\php\\php.ini) lalu restart server PHP.');
-        }
-    }
-
-    private function downloadPdf(string $html, string $filename): Response
-    {
-        @ini_set('memory_limit', '512M');
-        @set_time_limit(120);
-
-        $options = new Options;
-        $options->set('isRemoteEnabled', true);
-        $options->set('defaultFont', 'DejaVu Sans');
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-        ]);
+        return PdfExport::download($html, $filename);
     }
 
     private function validateOperasional(Request $request): array

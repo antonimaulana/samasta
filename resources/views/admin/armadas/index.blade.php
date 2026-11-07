@@ -14,6 +14,41 @@
         </x-admin.can-write>
     </div>
 
+    <div class="mb-6 grid items-stretch gap-4 sm:grid-cols-3">
+        <x-admin.dash-stat-card
+            class="h-full"
+            tone="emerald"
+            label="Total Armada"
+            :value="number_format($armadaRingkasan['total_unit'])"
+            subtitle="unit inventaris">
+            <x-slot:icon>
+                <x-admin.nav-icon name="armada" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            class="h-full"
+            tone="teal"
+            label="Petugas Aktif"
+            :value="number_format($armadaRingkasan['total_petugas'])"
+            subtitle="petugas terdaftar">
+            <x-slot:icon>
+                <x-admin.nav-icon name="users" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            class="h-full"
+            tone="cyan"
+            label="Kondisi Armada"
+            :value="$armadaRingkasan['kondisi_baik_persen'].'%'"
+            subtitle="unit berkondisi Baik">
+            <x-slot:icon>
+                <x-admin.nav-icon name="armada" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+    </div>
+
     <div class="mb-6 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <form method="GET" class="flex flex-wrap items-end gap-3 p-5">
             <div>
@@ -127,7 +162,16 @@
             <h3 class="font-bold text-gray-900">Riwayat Penggunaan Armada Terbaru</h3>
             <p class="text-xs text-gray-500">Entri terbaru dari pemeliharaan rutin dan operasional permohonan</p>
         </div>
-        <x-admin.data-table>
+        <x-admin.data-table fixed>
+            <colgroup>
+                <col style="width: 9%">
+                <col style="width: 15%">
+                <col style="width: 11%">
+                <col style="width: 19%">
+                <col style="width: 20%">
+                <col style="width: 12%">
+                <col>
+            </colgroup>
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Tanggal</th>
@@ -149,7 +193,10 @@
                             @if ($entry['armada_url'])
                                 <a href="{{ $entry['armada_url'] }}" class="font-medium text-green-800 hover:underline">{{ $entry['armada'] }}</a>
                             @else
-                                {{ $entry['armada'] }}
+                                <span class="font-medium text-gray-900">{{ $entry['armada'] }}</span>
+                            @endif
+                            @if (! empty($entry['armada_jenis']))
+                                <p class="mt-0.5 text-xs text-gray-500">{{ $entry['armada_jenis'] }}</p>
                             @endif
                         </td>
                         <td class="px-4 py-3">

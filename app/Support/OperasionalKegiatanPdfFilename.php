@@ -34,6 +34,23 @@ class OperasionalKegiatanPdfFilename
         );
     }
 
+    public static function permohonanGabungan(Pemangkasan $permohonan): string
+    {
+        $tim = collect($permohonan->pelaksana ?? [])->filter()->first() ?? 'Permohonan';
+        $total = max(1, (int) ($permohonan->total_hari ?? 1));
+        $selesai = $permohonan->relationLoaded('progres')
+            ? $permohonan->progres->count()
+            : $permohonan->progres()->count();
+        $progresPercent = max(0, min(100, (int) round(($selesai / $total) * 100)));
+
+        return self::build(
+            tim: (string) $tim,
+            kegiatan: (string) ($permohonan->jenis_layanan ?? 'permohonan').' lengkap',
+            tanggal: $permohonan->tanggal_eksekusi ?? $permohonan->tanggal_permohonan,
+            progresPercent: $progresPercent,
+        );
+    }
+
     private static function pemeliharaanProgresPercent(PemeliharaanTaman $kinerja): int
     {
         if ($kinerja->persentase_progres !== null) {

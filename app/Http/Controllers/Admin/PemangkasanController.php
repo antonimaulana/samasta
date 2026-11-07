@@ -13,6 +13,7 @@ use App\Support\JadwalLayananQuery;
 use App\Support\OperatorWilayahScope;
 use App\Support\PelaksanaScheduleConflictChecker;
 use App\Support\PemangkasanProgresDeleter;
+use App\Support\PemangkasanPermohonanPdf;
 use App\Support\PemangkasanProgresPdf;
 use App\Support\PemangkasanSchedule;
 use App\Support\PermohonanProgresEntryRecorder;
@@ -198,6 +199,13 @@ class PemangkasanController extends Controller
         }
 
         return back()->with('success', 'Status layanan berhasil diperbarui.');
+    }
+
+    public function exportPdfPermohonan(Pemangkasan $pemangkasan): Response
+    {
+        $this->authorize('view', $pemangkasan);
+
+        return PemangkasanPermohonanPdf::download($pemangkasan);
     }
 
     public function exportPdfProgres(Pemangkasan $pemangkasan, PemangkasanProgres $pemangkasanProgres): Response

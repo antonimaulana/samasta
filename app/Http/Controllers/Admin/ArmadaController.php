@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Armada;
 use App\Models\PemeliharaanTaman;
 use App\Support\ArmadaUsageHistory;
+use App\Support\DashboardSummaryBuilder;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,6 +35,7 @@ class ArmadaController extends Controller
         return view('admin.armadas.index', [
             'items' => $items,
             'recentUsage' => app(ArmadaUsageHistory::class)->recent(15),
+            'armadaRingkasan' => app(DashboardSummaryBuilder::class)->armadaRingkasan(),
         ]);
     }
 
