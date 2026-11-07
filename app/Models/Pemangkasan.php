@@ -230,7 +230,7 @@ class Pemangkasan extends Model
         return basename((string) $this->pendukung_pelaksanaan);
     }
 
-    public static function badgeClass(string $jenisLayanan): string
+    public static function badgeClass(?string $jenisLayanan): string
     {
         return match ($jenisLayanan) {
             'Penanganan Pohon Tumbang' => 'bg-orange-100 text-orange-800',

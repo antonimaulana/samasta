@@ -165,4 +165,12 @@ class PemangkasanScheduleTest extends TestCase
 
         $this->assertSame('Belum dijadwalkan', PemangkasanSchedule::labelRentang($permohonan));
     }
+
+    public function test_jadwal_adjustment_labels_empty_when_execution_date_missing(): void
+    {
+        $permohonan = new Pemangkasan(['status' => 'Rencana', 'total_hari' => 1]);
+
+        $this->assertSame([], PemangkasanSchedule::jadwalAdjustmentLabels($permohonan));
+        $this->assertNull(PemangkasanSchedule::plannedScheduleEnd($permohonan));
+    }
 }

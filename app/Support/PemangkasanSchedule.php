@@ -145,13 +145,17 @@ class PemangkasanSchedule
         return self::tanggalWithinSchedule($permohonan, today());
     }
 
-    public static function plannedScheduleEnd(Pemangkasan $permohonan): Carbon
+    public static function plannedScheduleEnd(Pemangkasan $permohonan): ?Carbon
     {
-        return Carbon::parse(
-            $permohonan->tanggal_akhir_jadwal_rencana
-                ?? $permohonan->tanggal_akhir_jadwal
-                ?? $permohonan->tanggal_eksekusi,
-        )->startOfDay();
+        $raw = $permohonan->tanggal_akhir_jadwal_rencana
+            ?? $permohonan->tanggal_akhir_jadwal
+            ?? $permohonan->tanggal_eksekusi;
+
+        if (blank($raw)) {
+            return null;
+        }
+
+        return Carbon::parse($raw)->startOfDay();
     }
 
     public static function startedEarly(Pemangkasan $permohonan): bool
@@ -170,14 +174,29 @@ class PemangkasanSchedule
             return false;
         }
 
-        $earliest = $entries->min(fn (PemangkasanProgres $entry) => Carbon::parse($entry->tanggal)->startOfDay());
+        $earliest = $entries
+            ->filter(fn (PemangkasanProgres $entry) => filled($entry->tanggal))
+            ->min(fn (PemangkasanProgres $entry) => Carbon::parse($entry->tanggal)->startOfDay());
+
+        if ($earliest === null) {
+            return false;
+        }
 
         return $earliest->lt($mulai);
     }
 
     public static function needsExtraTime(Pemangkasan $permohonan): bool
     {
+        if (! $permohonan->tanggal_eksekusi) {
+            return false;
+        }
+
         $rencana = self::plannedScheduleEnd($permohonan);
+
+        if (! $rencana) {
+            return false;
+        }
+
         $aktual = Carbon::parse($permohonan->tanggal_akhir_jadwal ?? $permohonan->tanggal_eksekusi)->startOfDay();
 
         return $aktual->gt($rencana);
@@ -188,6 +207,10 @@ class PemangkasanSchedule
      */
     public static function jadwalAdjustmentLabels(Pemangkasan $permohonan): array
     {
+        if (! $permohonan->tanggal_eksekusi) {
+            return [];
+        }
+
         $labels = [];
 
         if (self::startedEarly($permohonan)) {
