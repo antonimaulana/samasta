@@ -18,8 +18,14 @@ class PemangkasanPermohonanPdf
             },
         ]);
 
-        $permohonan->progres->each(function ($progres) {
-            $progres->loadMissing(['petugas', 'armadas.armada']);
+        $progresRelations = ['petugas', 'armadas'];
+
+        if (ArmadaSchema::isReady()) {
+            $progresRelations[] = 'armadas.armada';
+        }
+
+        $permohonan->progres->each(function ($progres) use ($progresRelations) {
+            $progres->loadMissing($progresRelations);
         });
 
         return PdfExport::download(

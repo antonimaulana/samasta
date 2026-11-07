@@ -36,7 +36,13 @@ class OperasionalKegiatanPdfFilename
 
     public static function permohonanGabungan(Pemangkasan $permohonan): string
     {
-        $tim = collect($permohonan->pelaksana ?? [])->filter()->first() ?? 'Permohonan';
+        $pelaksana = $permohonan->pelaksana ?? [];
+
+        if (! is_array($pelaksana)) {
+            $pelaksana = filled($pelaksana) ? [(string) $pelaksana] : [];
+        }
+
+        $tim = collect($pelaksana)->filter()->first() ?? 'Permohonan';
         $total = max(1, (int) ($permohonan->total_hari ?? 1));
         $selesai = $permohonan->relationLoaded('progres')
             ? $permohonan->progres->count()

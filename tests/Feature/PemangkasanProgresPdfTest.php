@@ -103,6 +103,46 @@ class PemangkasanProgresPdfTest extends TestCase
         $this->assertStringContainsString('(2 personil)', $html);
     }
 
+    public function test_admin_can_export_permohonan_gabungan_pdf_without_progress_entries(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('PHP GD extension is required for PDF export.');
+        }
+
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman PDF Tanpa Progres',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => Kelurahan::query()->value('id'),
+            'luasan' => 500,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi.',
+        ]);
+
+        $permohonan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemangkasan Pohon',
+            'taman_id' => $taman->id,
+            'lokasi_pohon' => $taman->nama_taman,
+            'asal' => 'Warga',
+            'tanggal_permohonan' => '2026-08-20',
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => '2026-08-28',
+            'tanggal_akhir_jadwal' => '2026-08-28',
+            'status' => 'Rencana',
+            'total_hari' => 1,
+            'pelaksana' => ['Tim Wilayah 1'],
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.pemangkasans.export-pdf', $permohonan))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
     public function test_admin_can_export_permohonan_gabungan_pdf(): void
     {
         if (! extension_loaded('gd')) {

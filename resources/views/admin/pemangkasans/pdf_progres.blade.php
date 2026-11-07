@@ -208,7 +208,7 @@
                 <tr>
                     @foreach ($fields as $field)
                         @php
-                            $base64 = $progres->fotoBase64($field);
+                            $base64 = $progres->fotoDompdfSrc($field);
                             $size = $progres->fotoPdfSize($field, $photoMaxWidth, $photoMaxHeight);
                         @endphp
                         <td>
