@@ -31,6 +31,7 @@ class PemangkasanPermohonanPdf
 
         $permohonan->loadMissing(['taman']);
         self::loadProgresEntries($permohonan);
+        PemangkasanProgresPdfRelations::loadForPdf($permohonan->progres);
 
         $html = view('admin.pemangkasans.pdf_permohonan', [
             'permohonan' => $permohonan,

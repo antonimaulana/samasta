@@ -69,75 +69,32 @@
         }
         .info td { color: #111827; }
 
-        .progres-block {
-            margin-top: 14px;
-            padding-top: 10px;
-            border-top: 2px solid #86efac;
-            page-break-inside: avoid;
-        }
-        .progres-heading {
-            font-size: 11px;
-            font-weight: bold;
+        .rekap-heading {
+            font-size: 13px;
+            margin: 14px 0 8px;
             color: #15803d;
-            margin-bottom: 8px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
+            border-bottom: 2px solid #bbf7d0;
+            padding-bottom: 4px;
         }
-
-        .photo-section {
-            margin-bottom: 9px;
-            page-break-inside: avoid;
-            border: 1px solid rgba(134, 239, 172, 0.55);
-            background: #fff;
-        }
-        .photo-section-head { width: 100%; border-collapse: collapse; }
-        .photo-section-head td { border: none; padding: 0; vertical-align: middle; }
-        .photo-section-accent { width: 4px; background: rgba(134, 239, 172, 0.45); }
-        .photo-section-bar {
-            background: rgba(236, 253, 245, 0.85);
-            border-bottom: 1px solid rgba(134, 239, 172, 0.55);
-            padding: 5px 10px;
-            text-align: center;
-        }
-        .photo-section-label {
+        .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+        .rekap-table th, .rekap-table td {
+            border: 1px solid #e5e7eb;
+            padding: 6px 8px;
+            vertical-align: top;
             font-size: 10px;
+        }
+        .rekap-table th { background: #f0fdf4; text-align: left; font-size: 10px; }
+        .foto-group { margin-bottom: 4px; }
+        .foto-group-label {
+            font-size: 8px;
             font-weight: bold;
             color: #166534;
-            letter-spacing: 0.6px;
+            margin-bottom: 2px;
             text-transform: uppercase;
         }
-        .photos { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .photos td {
-            width: 50%;
-            vertical-align: middle;
-            text-align: center;
-            padding: 5px 4px 6px;
-            border-top: 1px solid rgba(134, 239, 172, 0.35);
-        }
-        .photo-box {
-            border: 1px solid rgba(134, 239, 172, 0.4);
-            background: #f8fafc;
-            padding: 6px;
-            min-height: 178px;
-            text-align: center;
-        }
-        .photo-box img { display: inline-block; max-width: 100%; }
-        .photo-empty {
-            min-height: 178px;
-            color: #9ca3af;
-            font-style: italic;
-            font-size: 9px;
-            line-height: 178px;
-            text-align: center;
-        }
-        .empty-progres {
-            color: #9ca3af;
-            font-style: italic;
-            text-align: center;
-            padding: 16px;
-            margin-top: 12px;
-        }
+        .foto-wrap { display: inline-block; width: 48%; vertical-align: top; text-align: center; padding: 2px; }
+        .foto-wrap img { border: 1px solid #d1d5db; display: inline-block; }
+        .rekap-empty { color: #9ca3af; font-style: italic; font-size: 9px; }
 
         .footer {
             margin-top: 6px;
@@ -153,13 +110,10 @@
 <body>
     @php
         $includeProgresPhotos = $includeProgresPhotos ?? true;
-        $fotoGroups = \App\Models\PemangkasanProgres::fotoGroups();
         $logoPath = public_path('images/logo-pemkot-batam.png');
         $logoBase64 = is_readable($logoPath)
             ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath))
             : null;
-        $photoMaxWidth = 392;
-        $photoMaxHeight = 178;
         $isTumbang = $permohonan->jenis_layanan === 'Penanganan Pohon Tumbang';
     @endphp
 
@@ -204,79 +158,10 @@
         </tr>
     </table>
 
-    @forelse ($permohonan->progres as $progres)
-        <div class="progres-block">
-            <div class="progres-heading">
-                Progres Harian — {{ \App\Support\PemangkasanSchedule::dailyProgressLabel($permohonan, $progres) }}
-            </div>
-
-            <table class="info">
-                <tr>
-                    <th>Tanggal Pelaksanaan</th>
-                    <td>{{ \App\Support\OperasionalPelaksanaanTime::displayLong($progres->tanggal) }}</td>
-                </tr>
-                @if (filled($progres->petugasLabel()) && $progres->petugasLabel() !== '—')
-                    <tr>
-                        <th>Petugas Pelaksana</th>
-                        <td>{{ $progres->petugasLabel() }}</td>
-                    </tr>
-                @endif
-                @if ($progres->catatan)
-                    <tr>
-                        <th>Uraian Pekerjaan</th>
-                        <td>{{ $progres->catatan }}</td>
-                    </tr>
-                @endif
-                @if ($progres->armadaPdfHtml())
-                    <tr>
-                        <th>Armada</th>
-                        <td>{!! $progres->armadaPdfHtml() !!}</td>
-                    </tr>
-                @endif
-            </table>
-
-            @if ($includeProgresPhotos)
-            @foreach ($fotoGroups as $groupLabel => $fields)
-                <div class="photo-section">
-                    <table class="photo-section-head">
-                        <tr>
-                            <td class="photo-section-accent"></td>
-                            <td class="photo-section-bar">
-                                <span class="photo-section-label">{{ $groupLabel }}</span>
-                            </td>
-                        </tr>
-                    </table>
-                    <table class="photos">
-                        <tr>
-                            @foreach ($fields as $field)
-                                @php
-                                    $base64 = $progres->fotoDompdfSrc($field);
-                                    $size = $progres->fotoPdfSize($field, $photoMaxWidth, $photoMaxHeight);
-                                @endphp
-                                <td>
-                                    <div class="photo-box">
-                                        @if ($base64 && $size)
-                                            <img src="{{ $base64 }}"
-                                                 alt="{{ $groupLabel }}"
-                                                 width="{{ $size['width'] }}"
-                                                 height="{{ $size['height'] }}">
-                                        @else
-                                            <div class="photo-empty">Tidak ada foto</div>
-                                        @endif
-                                    </div>
-                                </td>
-                            @endforeach
-                        </tr>
-                    </table>
-                </div>
-            @endforeach
-            @else
-                <p class="empty-progres" style="margin-top:8px;">Foto progres tidak disertakan (generasi ringkas).</p>
-            @endif
-        </div>
-    @empty
-        <p class="empty-progres">Belum ada progres harian yang tercatat untuk permohonan ini.</p>
-    @endforelse
+    @include('admin.pemangkasans._pdf_progres_rekap_table', [
+        'permohonan' => $permohonan,
+        'includeProgresPhotos' => $includeProgresPhotos,
+    ])
 
     <div class="footer">
         Dicetak otomatis dari Sistem {{ config('app.name') }} · {{ now()->format('d/m/Y H:i') }} WIB

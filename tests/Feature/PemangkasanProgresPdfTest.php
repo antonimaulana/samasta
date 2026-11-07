@@ -165,6 +165,8 @@ class PemangkasanProgresPdfTest extends TestCase
 
         $this->assertStringContainsString('Catatan gabungan PDF.', $html);
         $this->assertStringContainsString('Gabungan', $html);
+        $this->assertStringContainsString('Sebelum Pelaksanaan', $html);
+        $this->assertStringContainsString('progres)', $html);
     }
 
     public function test_pdf_for_day_one_uses_day_one_entry_not_day_two(): void

@@ -62,6 +62,19 @@ class PemangkasanProgres extends Model
         return $this->jumlah_personil ? number_format((int) $this->jumlah_personil).' personil' : '—';
     }
 
+    public function namaPengawas(): ?string
+    {
+        $tim = filled($this->tim) ? $this->tim : null;
+
+        if ($tim === null) {
+            return null;
+        }
+
+        return TimPelaksana::query()
+            ->where('nama', $tim)
+            ->value('nama_pengawas');
+    }
+
     public function armadaPdfHtml(): ?string
     {
         try {
