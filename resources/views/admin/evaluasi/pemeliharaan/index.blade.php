@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Evaluasi Pemeliharaan per Taman')
-@section('header', 'Evaluasi Pemeliharaan per Taman')
+@section('title', 'Evaluasi Pemeliharaan RTH')
+@section('header', 'Evaluasi Pemeliharaan RTH')
 
 @section('content')
     <div class="mb-6 overflow-hidden rounded-2xl border border-green-100 bg-white shadow-sm">
         <div class="border-b border-green-50 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4">
             <h2 class="text-lg font-semibold text-green-800">Filter Evaluasi</h2>
-            <p class="mt-1 text-sm text-green-700/80">Rekapitulasi frekuensi pemeliharaan rutin per taman untuk pengambilan keputusan</p>
+            <p class="mt-1 text-sm text-green-700/80">Kegiatan pemeliharaan rutin per periode dan status terpelihara luasan RTH</p>
         </div>
 
         <form action="{{ route('admin.evaluasi.pemeliharaan.index') }}" method="GET" class="space-y-4 p-6">
@@ -68,11 +68,15 @@
         </form>
     </div>
 
-    <p class="mb-4 text-sm text-gray-600">
+    <p class="mb-1 text-sm text-gray-600">
         Periode evaluasi: <strong class="text-green-800">{{ $labelPeriode }}</strong>
     </p>
+    <p class="mb-4 text-sm text-teal-700">
+        <strong>{{ $labelKriteria }}</strong>
+        · {{ $labelSnapshot }}
+    </p>
 
-    <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
         <div class="rounded-2xl border border-green-100 bg-gradient-to-br from-green-50 to-emerald-50 p-5">
             <p class="text-sm font-medium text-green-700">Total Kegiatan</p>
             <p class="mt-2 text-3xl font-bold text-green-900">{{ number_format($totalKegiatan) }}</p>
@@ -92,6 +96,19 @@
                 <span class="text-lg font-semibold text-slate-600">({{ $persenKegiatanLuarWilayah }}%)</span>
             </p>
             <p class="mt-1 text-xs text-slate-500">dari {{ number_format($totalKegiatan) }} kegiatan tercatat</p>
+        </div>
+        <div class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-green-50 p-5">
+            <p class="text-sm font-medium text-emerald-700">Luasan Terpelihara</p>
+            <p class="mt-2 text-2xl font-bold text-emerald-900">
+                {{ number_format($luasanTerpelihara, 0, ',', '.') }}
+                <span class="text-sm font-medium text-emerald-700">m²</span>
+            </p>
+            <p class="mt-1 text-sm font-semibold text-emerald-700">{{ $persenLuasan }}% dari {{ number_format($totalLuasan, 0, ',', '.') }} m²</p>
+        </div>
+        <div class="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
+            <p class="text-sm font-medium text-amber-700">Belum Terpelihara</p>
+            <p class="mt-2 text-3xl font-bold text-amber-900">{{ number_format($lokasiBelumTerpelihara) }}</p>
+            <p class="mt-1 text-sm text-amber-700">lokasi · {{ number_format($luasanBelumTerpelihara, 0, ',', '.') }} m²</p>
         </div>
     </div>
 

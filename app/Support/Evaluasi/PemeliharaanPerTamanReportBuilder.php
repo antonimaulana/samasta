@@ -70,6 +70,8 @@ class PemeliharaanPerTamanReportBuilder
             ? (int) round(($totalTamanTerlayani / $totalTamanInScope) * 100)
             : 0;
 
+        $snapshot = RthTerpeliharaReportBuilder::build($request, $user, $forPdf);
+
         return [
             'mode' => $mode,
             'bulan' => $bulan,
@@ -94,6 +96,17 @@ class PemeliharaanPerTamanReportBuilder
             'daftarKategori' => Taman::query()->distinct()->orderBy('kategori')->pluck('kategori'),
             'daftarBulan' => ReportPeriod::daftarBulan(),
             'daftarTahun' => ReportPeriod::daftarTahun(5),
+            'freshDays' => $snapshot['freshDays'],
+            'labelKriteria' => $snapshot['labelKriteria'],
+            'labelSnapshot' => $snapshot['labelSnapshot'],
+            'kecamatan_id' => $snapshot['kecamatan_id'],
+            'luasanTerpelihara' => $snapshot['luasanTerpelihara'],
+            'luasanBelumTerpelihara' => $snapshot['luasanBelumTerpelihara'],
+            'persenLuasan' => $snapshot['persenLuasan'],
+            'totalLuasan' => $snapshot['totalLuasan'],
+            'lokasiBelumTerpelihara' => $snapshot['lokasiBelumTerpelihara'],
+            'daftarKecamatan' => $snapshot['daftarKecamatan'],
+            'daftarFreshDays' => $snapshot['daftarFreshDays'],
         ];
     }
 

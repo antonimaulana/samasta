@@ -20,7 +20,8 @@ class EvaluasiDashboardTest extends TestCase
             ->assertSee('Ringkasan evaluasi')
             ->assertSee('Indeks gabungan')
             ->assertSee('Jangka waktu')
-            ->assertSee('Pemeliharaan Per Taman')
+            ->assertSee('Pemeliharaan RTH')
+            ->assertDontSee('RTH Terpelihara')
             ->assertSee('Kelengkapan Data');
     }
 

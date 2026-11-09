@@ -39,7 +39,7 @@ class EvaluasiPemeliharaanController extends Controller
 
         return PdfExport::download(
             $html,
-            'evaluasi-pemeliharaan-per-taman-'.$slug.'.pdf',
+            'evaluasi-pemeliharaan-rth-'.$slug.'.pdf',
             'landscape',
         );
     }

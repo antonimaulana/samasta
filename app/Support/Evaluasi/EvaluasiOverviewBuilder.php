@@ -32,44 +32,28 @@ class EvaluasiOverviewBuilder
         $aspects = [
             self::aspect(
                 id: 'pemeliharaan',
-                title: 'Pemeliharaan Per Taman',
+                title: 'Pemeliharaan RTH',
                 icon: '🌳',
                 accent: 'green',
                 score: (int) $pemeliharaan['coveragePercent'],
-                insight: self::insightPemeliharaan($pemeliharaan),
+                insight: self::insightPemeliharaan($pemeliharaan, $rth),
                 metrics: [
                     ['label' => 'Kegiatan', 'value' => number_format($pemeliharaan['totalKegiatan'])],
-                    ['label' => 'Taman terlayani', 'value' => $pemeliharaan['totalTamanTerlayani'].' / '.$pemeliharaan['totalTamanInScope']],
-                    ['label' => 'Cakupan', 'value' => $pemeliharaan['coveragePercent'].'%'],
+                    ['label' => 'Cakupan periode', 'value' => $pemeliharaan['coveragePercent'].'%'],
                     [
-                        'label' => 'Luar wilayah',
-                        'value' => number_format($pemeliharaan['kegiatanLuarWilayah'])
-                            .' ('.$pemeliharaan['persenKegiatanLuarWilayah'].'%)',
+                        'label' => 'Luasan terpelihara',
+                        'value' => number_format($rth['luasanTerpelihara']).' m² ('.$rth['persenLuasan'].'%)',
+                    ],
+                    [
+                        'label' => 'Belum terpelihara',
+                        'value' => number_format($rth['lokasiBelumTerpelihara']).' lokasi',
                     ],
                 ],
                 detailRoute: 'admin.evaluasi.pemeliharaan.index',
                 exportRoute: 'admin.evaluasi.pemeliharaan.export-pdf',
                 query: $query,
                 periodScoped: true,
-            ),
-            self::aspect(
-                id: 'rth-terpelihara',
-                title: 'RTH Terpelihara',
-                icon: '🌿',
-                accent: 'teal',
-                score: (int) round($rth['persenLokasi']),
-                insight: self::insightRth($rth),
-                metrics: [
-                    ['label' => 'Lokasi terpelihara', 'value' => $rth['lokasiTerpelihara'].' / '.$rth['totalLokasi']],
-                    ['label' => 'Persen lokasi', 'value' => $rth['persenLokasi'].'%'],
-                    ['label' => 'Luasan terpelihara', 'value' => number_format($rth['luasanTerpelihara']).' m²'],
-                    ['label' => 'Belum terpelihara', 'value' => number_format($rth['lokasiBelumTerpelihara'])],
-                ],
-                detailRoute: 'admin.evaluasi.rth-terpelihara.index',
-                exportRoute: 'admin.evaluasi.rth-terpelihara.export-pdf',
-                query: $query,
-                periodScoped: false,
-                footnote: 'Snapshot — berdasarkan pemeliharaan rutin '.$rth['freshDays'].' hari terakhir.',
+                footnote: 'Luasan terpelihara: snapshot '.$rth['freshDays'].' hari terakhir.',
             ),
             self::aspect(
                 id: 'kinerja-tim',
@@ -242,11 +226,16 @@ class EvaluasiOverviewBuilder
 
     /**
      * @param  array<string, mixed>  $p
+     * @param  array<string, mixed>  $r
      */
-    private static function insightPemeliharaan(array $p): string
+    private static function insightPemeliharaan(array $p, array $r): string
     {
         if ($p['totalTamanInScope'] === 0) {
             return 'Belum ada taman dalam cakupan wilayah untuk dinilai.';
+        }
+
+        if ($r['lokasiBelumTerpelihara'] > 0 && $r['persenLuasan'] < 75) {
+            return $r['lokasiBelumTerpelihara'].' lokasi belum terpelihara dalam '.$r['freshDays'].' hari — perkuat frekuensi kunjungan rutin.';
         }
 
         if ($p['coveragePercent'] >= 80) {
@@ -254,7 +243,7 @@ class EvaluasiOverviewBuilder
         }
 
         if ($p['tamanBelumDipelihara']->count() > 0) {
-            return $p['tamanBelumDipelihara']->count().' taman belum tercatat pemeliharaannya — prioritaskan kunjungan lapangan.';
+            return $p['tamanBelumDipelihara']->count().' taman belum tercatat pemeliharaannya pada periode filter — prioritaskan kunjungan lapangan.';
         }
 
         return 'Tingkatkan frekuensi kunjungan agar cakupan mendekati 100%.';
@@ -318,22 +307,6 @@ class EvaluasiOverviewBuilder
         }
 
         return 'Percepat penyelesaian permohonan rencana yang sudah jatuh tempo.';
-    }
-
-    /**
-     * @param  array<string, mixed>  $r
-     */
-    private static function insightRth(array $r): string
-    {
-        if ($r['totalLokasi'] === 0) {
-            return 'Belum ada data lokasi RTH.';
-        }
-
-        if ($r['persenLokasi'] >= 85) {
-            return 'Sebagian besar lokasi RTH memiliki jejak pemeliharaan rutin recent.';
-        }
-
-        return $r['lokasiBelumTerpelihara'].' lokasi belum terpelihara dalam '.$r['freshDays'].' hari — risiko penurunan kualitas taman.';
     }
 
     /**

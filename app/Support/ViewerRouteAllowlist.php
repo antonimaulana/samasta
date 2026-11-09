@@ -42,8 +42,6 @@ class ViewerRouteAllowlist
             'admin.evaluasi.kinerja-tim.export-pdf',
             'admin.evaluasi.operasional-permohonan.index',
             'admin.evaluasi.operasional-permohonan.export-pdf',
-            'admin.evaluasi.rth-terpelihara.index',
-            'admin.evaluasi.rth-terpelihara.export-pdf',
             'admin.evaluasi.masukan-masyarakat.index',
             'admin.evaluasi.masukan-masyarakat.export-pdf',
             'admin.evaluasi.kelengkapan-data.index',

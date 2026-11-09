@@ -2,16 +2,17 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Evaluasi Pemeliharaan per Taman</title>
+    <title>Evaluasi Pemeliharaan RTH</title>
     @include('admin.partials.pdf_styles')
 </head>
 <body>
-    <h1>Evaluasi Pemeliharaan per Taman</h1>
+    <h1>Evaluasi Pemeliharaan RTH</h1>
     <p class="meta">
         Dinas Perumahan, Kawasan Permukiman dan Pertamanan Kota Batam<br>
         Periode: <strong>{{ $labelPeriode }}</strong>
         @if ($tim) · Tim: {{ $tim }} @endif
-        @if ($kategori) · Kategori: {{ $kategori }} @endif
+        @if ($kategori) · Kategori: {{ $kategori }} @endif<br>
+        {{ $labelKriteria }}
     </p>
 
     <table class="kpi-table">
@@ -32,6 +33,17 @@
                 <div class="kpi-label">Luar wilayah pemeliharaan</div>
                 <div class="kpi-value">{{ number_format($kegiatanLuarWilayah) }} ({{ $persenKegiatanLuarWilayah }}%)</div>
             </td>
+        </tr>
+        <tr>
+            <td class="kpi">
+                <div class="kpi-label">Luasan terpelihara</div>
+                <div class="kpi-value">{{ number_format($luasanTerpelihara, 0, ',', '.') }} m² ({{ $persenLuasan }}%)</div>
+            </td>
+            <td class="kpi">
+                <div class="kpi-label">Belum terpelihara</div>
+                <div class="kpi-value">{{ number_format($lokasiBelumTerpelihara) }} lokasi · {{ number_format($luasanBelumTerpelihara, 0, ',', '.') }} m²</div>
+            </td>
+            <td class="kpi" colspan="2"></td>
         </tr>
     </table>
 

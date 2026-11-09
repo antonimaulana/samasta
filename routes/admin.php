@@ -29,7 +29,6 @@ use App\Http\Controllers\Admin\EvaluasiMasukanMasyarakatController;
 use App\Http\Controllers\Admin\EvaluasiOperasionalPermohonanController;
 use App\Http\Controllers\Admin\EvaluasiPemeliharaanController;
 use App\Http\Controllers\Admin\EvaluasiRapKonsolidasiController;
-use App\Http\Controllers\Admin\EvaluasiRthTerpeliharaController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\OperasionalPertamananLaporanController;
 use App\Http\Controllers\Admin\PemangkasanController;
@@ -142,10 +141,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
         ->name('evaluasi.operasional-permohonan.index');
     Route::get('evaluasi/operasional-permohonan/export/pdf', [EvaluasiOperasionalPermohonanController::class, 'exportPdf'])
         ->name('evaluasi.operasional-permohonan.export-pdf');
-    Route::get('evaluasi/rth-terpelihara', [EvaluasiRthTerpeliharaController::class, 'index'])
-        ->name('evaluasi.rth-terpelihara.index');
-    Route::get('evaluasi/rth-terpelihara/export/pdf', [EvaluasiRthTerpeliharaController::class, 'exportPdf'])
-        ->name('evaluasi.rth-terpelihara.export-pdf');
+    Route::get('evaluasi/rth-terpelihara', function (Request $request) {
+        return redirect()->route('admin.evaluasi.pemeliharaan.index', $request->query());
+    })->name('evaluasi.rth-terpelihara.index');
+    Route::get('evaluasi/rth-terpelihara/export/pdf', function (Request $request) {
+        return redirect()->route('admin.evaluasi.pemeliharaan.export-pdf', $request->query());
+    })->name('evaluasi.rth-terpelihara.export-pdf');
     Route::get('evaluasi/masukan-masyarakat', [EvaluasiMasukanMasyarakatController::class, 'index'])
         ->name('evaluasi.masukan-masyarakat.index');
     Route::get('evaluasi/masukan-masyarakat/export/pdf', [EvaluasiMasukanMasyarakatController::class, 'exportPdf'])

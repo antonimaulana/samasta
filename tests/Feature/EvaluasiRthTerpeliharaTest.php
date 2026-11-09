@@ -23,7 +23,16 @@ class EvaluasiRthTerpeliharaTest extends TestCase
         $this->seed(TimPelaksanaSeeder::class);
     }
 
-    public function test_admin_can_view_rth_terpelihara_evaluasi_page(): void
+    public function test_legacy_rth_terpelihara_route_redirects_to_pemeliharaan_rth(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.evaluasi.rth-terpelihara.index', ['fresh_days' => 60]))
+            ->assertRedirect(route('admin.evaluasi.pemeliharaan.index', ['fresh_days' => 60]));
+    }
+
+    public function test_pemeliharaan_rth_page_shows_luasan_terpelihara_snapshot(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $kelurahanId = Kelurahan::query()->value('id');
@@ -64,28 +73,22 @@ class EvaluasiRthTerpeliharaTest extends TestCase
             'uraian_pekerjaan' => 'Pemeliharaan lama',
         ]);
 
-        $response = $this->actingAs($admin)
-            ->get(route('admin.evaluasi.rth-terpelihara.index'));
-
-        $response->assertOk()
-            ->assertSee('Evaluasi RTH Terpelihara')
-            ->assertSee('Lokasi Perlu Perhatian')
-            ->assertSee('Taman RTH Lama')
-            ->assertSee('1')
+        $this->actingAs($admin)
+            ->get(route('admin.evaluasi.pemeliharaan.index'))
+            ->assertOk()
+            ->assertSee('Evaluasi Pemeliharaan RTH')
+            ->assertSee('Luasan Terpelihara')
+            ->assertSee('Belum Terpelihara')
+            ->assertSee('1.200')
             ->assertSee('50%');
     }
 
-    public function test_admin_can_export_rth_terpelihara_evaluasi_pdf(): void
+    public function test_legacy_rth_terpelihara_pdf_redirects_to_pemeliharaan_export(): void
     {
-        if (! extension_loaded('gd')) {
-            $this->markTestSkipped('PHP GD extension is required for PDF export.');
-        }
-
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
         $this->actingAs($admin)
             ->get(route('admin.evaluasi.rth-terpelihara.export-pdf'))
-            ->assertOk()
-            ->assertHeader('content-type', 'application/pdf');
+            ->assertRedirect(route('admin.evaluasi.pemeliharaan.export-pdf'));
     }
 }
