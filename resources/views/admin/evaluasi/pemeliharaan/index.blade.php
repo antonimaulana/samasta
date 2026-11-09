@@ -85,9 +85,13 @@
             <p class="text-sm font-medium text-amber-700">Cakupan Pemeliharaan</p>
             <p class="mt-2 text-3xl font-bold text-amber-900">{{ $coveragePercent }}%</p>
         </div>
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p class="text-sm font-medium text-gray-600">Total Personil</p>
-            <p class="mt-2 text-3xl font-bold text-gray-900">{{ number_format($totalPersonil) }}</p>
+        <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-gray-50 p-5">
+            <p class="text-sm font-medium text-slate-700">Lokasi di luar wilayah pemeliharaan</p>
+            <p class="mt-2 text-3xl font-bold text-slate-900">
+                {{ number_format($kegiatanLuarWilayah) }}
+                <span class="text-lg font-semibold text-slate-600">({{ $persenKegiatanLuarWilayah }}%)</span>
+            </p>
+            <p class="mt-1 text-xs text-slate-500">dari {{ number_format($totalKegiatan) }} kegiatan tercatat</p>
         </div>
     </div>
 

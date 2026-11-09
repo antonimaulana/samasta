@@ -58,7 +58,12 @@ class PemeliharaanPerTamanReportBuilder
             ->values();
 
         $totalKegiatan = $entries->count();
-        $totalPersonil = (int) $entries->sum('jumlah_personil');
+        $kegiatanLuarWilayah = $entries->filter(
+            fn (PemeliharaanTaman $entry) => $entry->taman_id === null,
+        )->count();
+        $persenKegiatanLuarWilayah = $totalKegiatan > 0
+            ? (int) round(($kegiatanLuarWilayah / $totalKegiatan) * 100)
+            : 0;
         $totalTamanTerlayani = $tamanTerlayaniIds->count();
         $totalTamanInScope = $tamansInScope->count();
         $coveragePercent = $totalTamanInScope > 0
@@ -75,7 +80,8 @@ class PemeliharaanPerTamanReportBuilder
             'tim' => $tim,
             'kategori' => $kategori,
             'totalKegiatan' => $totalKegiatan,
-            'totalPersonil' => $totalPersonil,
+            'kegiatanLuarWilayah' => $kegiatanLuarWilayah,
+            'persenKegiatanLuarWilayah' => $persenKegiatanLuarWilayah,
             'totalTamanTerlayani' => $totalTamanTerlayani,
             'totalTamanInScope' => $totalTamanInScope,
             'coveragePercent' => $coveragePercent,

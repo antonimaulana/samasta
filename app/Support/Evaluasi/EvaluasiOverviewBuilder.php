@@ -41,7 +41,11 @@ class EvaluasiOverviewBuilder
                     ['label' => 'Kegiatan', 'value' => number_format($pemeliharaan['totalKegiatan'])],
                     ['label' => 'Taman terlayani', 'value' => $pemeliharaan['totalTamanTerlayani'].' / '.$pemeliharaan['totalTamanInScope']],
                     ['label' => 'Cakupan', 'value' => $pemeliharaan['coveragePercent'].'%'],
-                    ['label' => 'Personil', 'value' => number_format($pemeliharaan['totalPersonil'])],
+                    [
+                        'label' => 'Luar wilayah',
+                        'value' => number_format($pemeliharaan['kegiatanLuarWilayah'])
+                            .' ('.$pemeliharaan['persenKegiatanLuarWilayah'].'%)',
+                    ],
                 ],
                 detailRoute: 'admin.evaluasi.pemeliharaan.index',
                 exportRoute: 'admin.evaluasi.pemeliharaan.export-pdf',

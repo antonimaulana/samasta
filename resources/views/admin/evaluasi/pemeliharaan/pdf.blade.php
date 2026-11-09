@@ -29,8 +29,8 @@
                 <div class="kpi-value">{{ $coveragePercent }}%</div>
             </td>
             <td class="kpi">
-                <div class="kpi-label">Total Personil</div>
-                <div class="kpi-value">{{ number_format($totalPersonil) }}</div>
+                <div class="kpi-label">Luar wilayah pemeliharaan</div>
+                <div class="kpi-value">{{ number_format($kegiatanLuarWilayah) }} ({{ $persenKegiatanLuarWilayah }}%)</div>
             </td>
         </tr>
     </table>

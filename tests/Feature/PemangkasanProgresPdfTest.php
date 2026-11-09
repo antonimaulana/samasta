@@ -286,6 +286,10 @@ class PemangkasanProgresPdfTest extends TestCase
             $permohonan->fresh(['taman']),
         );
 
+        $this->assertStringContainsString('photo-section', $html);
+        $this->assertStringContainsString('Saat Pelaksanaan', $html);
+        $this->assertStringNotContainsString('rekap-table', $html);
+
         $this->assertStringContainsString('Catatan khusus hari pertama.', $html);
         $this->assertStringContainsString('4 personil', $html);
         $this->assertStringContainsString('1 / 2 hari (50% progres)', $html);

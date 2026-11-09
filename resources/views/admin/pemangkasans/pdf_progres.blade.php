@@ -69,32 +69,55 @@
         }
         .info td { color: #111827; }
 
-        .rekap-heading {
-            font-size: 13px;
-            margin: 14px 0 8px;
-            color: #15803d;
-            border-bottom: 2px solid #bbf7d0;
-            padding-bottom: 4px;
+        .photo-section {
+            margin-bottom: 9px;
+            page-break-inside: avoid;
+            border: 1px solid rgba(134, 239, 172, 0.55);
+            background: #fff;
         }
-        .rekap-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-        .rekap-table th, .rekap-table td {
-            border: 1px solid #e5e7eb;
-            padding: 6px 8px;
-            vertical-align: top;
+        .photo-section-head {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .photo-section-head td { border: none; padding: 0; vertical-align: middle; }
+        .photo-section-accent { width: 4px; background: rgba(134, 239, 172, 0.45); }
+        .photo-section-bar {
+            background: rgba(236, 253, 245, 0.85);
+            border-bottom: 1px solid rgba(134, 239, 172, 0.55);
+            padding: 5px 10px;
+            text-align: center;
+        }
+        .photo-section-label {
             font-size: 10px;
-        }
-        .rekap-table th { background: #f0fdf4; text-align: left; font-size: 10px; }
-        .foto-group { margin-bottom: 4px; }
-        .foto-group-label {
-            font-size: 8px;
             font-weight: bold;
             color: #166534;
-            margin-bottom: 2px;
+            letter-spacing: 0.6px;
             text-transform: uppercase;
         }
-        .foto-wrap { display: inline-block; width: 48%; vertical-align: top; text-align: center; padding: 2px; }
-        .foto-wrap img { border: 1px solid #d1d5db; display: inline-block; }
-        .rekap-empty { color: #9ca3af; font-style: italic; font-size: 9px; }
+        .photos { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .photos td {
+            width: 50%;
+            vertical-align: middle;
+            text-align: center;
+            padding: 5px 4px 6px;
+            border-top: 1px solid rgba(134, 239, 172, 0.35);
+        }
+        .photo-box {
+            border: 1px solid rgba(134, 239, 172, 0.4);
+            background: #f8fafc;
+            padding: 4px;
+            min-height: 178px;
+            text-align: center;
+        }
+        .photo-box img { display: inline-block; max-width: 100%; }
+        .photo-empty {
+            min-height: 178px;
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 9px;
+            line-height: 178px;
+            text-align: center;
+        }
 
         .footer {
             margin-top: 6px;
@@ -113,6 +136,13 @@
             ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath))
             : null;
         $isTumbang = $permohonan->jenis_layanan === 'Penanganan Pohon Tumbang';
+        $fotoGroups = [
+            'Sebelum Pelaksanaan' => ['foto_sebelum_1', 'foto_sebelum_2'],
+            'Saat Pelaksanaan' => ['foto_saat_1', 'foto_saat_2'],
+            'Sesudah Pelaksanaan' => ['foto_sesudah_1', 'foto_sesudah_2'],
+        ];
+        $photoMaxWidth = 392;
+        $photoMaxHeight = 178;
     @endphp
 
     <div class="header-wrap">
@@ -171,12 +201,40 @@
         @endif
     </table>
 
-    @include('admin.pemangkasans._pdf_progres_rekap_table', [
-        'permohonan' => $permohonan,
-        'progresEntries' => collect([$progres]),
-        'sectionTitle' => $progres->tim ?: ($permohonan->pelaksanaLabel() ?: 'Operasional'),
-        'includeProgresPhotos' => true,
-    ])
+    @foreach ($fotoGroups as $groupLabel => $fields)
+        <div class="photo-section">
+            <table class="photo-section-head">
+                <tr>
+                    <td class="photo-section-accent"></td>
+                    <td class="photo-section-bar">
+                        <span class="photo-section-label">{{ $groupLabel }}</span>
+                    </td>
+                </tr>
+            </table>
+            <table class="photos">
+                <tr>
+                    @foreach ($fields as $field)
+                        @php
+                            $base64 = $progres->fotoDompdfSrc($field);
+                            $size = $progres->fotoPdfSize($field, $photoMaxWidth, $photoMaxHeight);
+                        @endphp
+                        <td>
+                            <div class="photo-box">
+                                @if ($base64 && $size)
+                                    <img src="{{ $base64 }}"
+                                         alt="{{ $groupLabel }}"
+                                         width="{{ $size['width'] }}"
+                                         height="{{ $size['height'] }}">
+                                @else
+                                    <div class="photo-empty">Tidak ada foto</div>
+                                @endif
+                            </div>
+                        </td>
+                    @endforeach
+                </tr>
+            </table>
+        </div>
+    @endforeach
 
     <div class="footer">
         Dicetak otomatis dari Sistem {{ config('app.name') }} · {{ now()->format('d/m/Y H:i') }} WIB

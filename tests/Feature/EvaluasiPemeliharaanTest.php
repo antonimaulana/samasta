@@ -55,10 +55,31 @@ class EvaluasiPemeliharaanTest extends TestCase
             'uraian_pekerjaan' => 'Pembersihan rutin',
         ]);
 
+        PemeliharaanTaman::create([
+            'tanggal' => now()->format('Y-m-d').' 09:00:00',
+            'tim' => PemeliharaanTaman::timNames()[0],
+            'taman_id' => null,
+            'lokasi_pelaksanaan' => 'Jalan Umum Batam',
+            'jumlah_personil' => 3,
+            'uraian_pekerjaan' => 'Pemangkasan pinggir jalan',
+        ]);
+
+        PemeliharaanTaman::create([
+            'tanggal' => now()->format('Y-m-d').' 10:00:00',
+            'tim' => PemeliharaanTaman::timNames()[0],
+            'taman_id' => null,
+            'lokasi_pelaksanaan' => 'Trotoar kompleks',
+            'jumlah_personil' => 2,
+            'uraian_pekerjaan' => 'Pembersihan semak',
+        ]);
+
         $this->actingAs($admin)
             ->get(route('admin.evaluasi.pemeliharaan.index'))
             ->assertOk()
             ->assertSee('Evaluasi Pemeliharaan per Taman')
+            ->assertSee('Lokasi di luar wilayah pemeliharaan')
+            ->assertSee('(67%)', false)
+            ->assertDontSee('Total Personil')
             ->assertSee('Taman Evaluasi Alpha')
             ->assertSee('Taman Evaluasi Beta')
             ->assertSee('Taman Belum Dipelihara');
