@@ -93,21 +93,22 @@
                         </td>
                         @foreach ($fotoGroups as $groupLabel => $fields)
                             <td>
-                                @php
-                                    $fotoPayloads = collect($fields)
-                                        ->mapWithKeys(fn (string $field) => [$field => $item->fotoPdfPayload($field, 115, 68)])
-                                        ->filter();
-                                @endphp
-                                @if ($fotoPayloads->isNotEmpty())
+                                @php $hasFoto = collect($fields)->contains(fn ($field) => $item->fotoDompdfSrc($field)); @endphp
+                                @if ($hasFoto)
                                     <div class="foto-group">
                                         <div class="foto-group-label">{{ $groupLabel }}</div>
-                                        @foreach ($fotoPayloads as $field => $payload)
-                                            <div class="foto-wrap">
-                                                <img src="{{ $payload['src'] }}"
-                                                     alt="{{ $groupLabel }}"
-                                                     width="{{ $payload['width'] }}"
-                                                     height="{{ $payload['height'] }}">
-                                            </div>
+                                        @foreach ($fields as $field)
+                                            @if ($item->fotoDompdfSrc($field))
+                                                @php $size = $item->fotoPdfSize($field, 115, 68); @endphp
+                                                <div class="foto-wrap">
+                                                    @if ($size)
+                                                        <img src="{{ $item->fotoDompdfSrc($field) }}"
+                                                             alt="{{ $groupLabel }}"
+                                                             width="{{ $size['width'] }}"
+                                                             height="{{ $size['height'] }}">
+                                                    @endif
+                                                </div>
+                                            @endif
                                         @endforeach
                                     </div>
                                 @else
