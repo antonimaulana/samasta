@@ -249,6 +249,7 @@ class OperasionalController extends Controller
             'inputTeams' => $inputTeams,
             'operatorTim' => $operatorTim,
             'showArmadaForm' => PermohonanPelaksanaProgress::shouldCollectArmada($user, $operatorTim),
+            'collectFotoDocumentation' => PermohonanPelaksanaProgress::shouldCollectFotoDocumentation($pemangkasan, $operatorTim),
             'teamStatusByDate' => $teamStatusByDate,
         ]);
     }

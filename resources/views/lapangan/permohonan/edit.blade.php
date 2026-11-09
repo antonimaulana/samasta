@@ -75,10 +75,19 @@
     </div>
 
     <div class="lapangan-card p-5 sm:p-6">
+        <div id="lapangan-permohonan-errors"
+             class="mb-4 hidden rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900"
+             role="alert">
+            <p class="font-bold">Belum bisa disimpan — lengkapi dulu:</p>
+            <ul class="mt-2 list-inside list-disc space-y-1" data-error-list></ul>
+        </div>
+
         <form id="lapangan-permohonan-progres-form"
               action="{{ route('lapangan.permohonan.update', $permohonan) }}"
               method="POST"
-              enctype="multipart/form-data">
+              enctype="multipart/form-data"
+              data-foto-fields="{{ json_encode(array_keys(\App\Models\PemeliharaanTaman::FOTO_FIELDS)) }}"
+              data-collect-foto="{{ ($collectFotoDocumentation ?? true) ? '1' : '0' }}">
             @csrf
 
             @include('lapangan.permohonan._progress-form', [
@@ -88,6 +97,7 @@
                 'inputTeams' => $inputTeams ?? [],
                 'operatorTim' => $operatorTim ?? null,
                 'showArmadaForm' => $showArmadaForm ?? false,
+                'collectFotoDocumentation' => $collectFotoDocumentation ?? true,
                 'teamStatusByDate' => $teamStatusByDate ?? [],
             ])
 
@@ -216,4 +226,8 @@
             });
         });
     </script>
+    @if ($collectFotoDocumentation ?? true)
+        <script src="{{ asset('js/lapangan-foto-compress.js') }}?v=2"></script>
+        <script src="{{ asset('js/lapangan-permohonan-form.js') }}?v=2"></script>
+    @endif
 @endpush

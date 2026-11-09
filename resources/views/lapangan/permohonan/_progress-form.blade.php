@@ -6,8 +6,6 @@
 
     $isPohonTumbang = $permohonan->jenis_layanan === 'Penanganan Pohon Tumbang';
 
-    $isMiniGarden = $permohonan->jenis_layanan === 'Pemasangan Mini Garden';
-
     $tanggalProgresDate = filled(old('tanggal_progres'))
         ? \App\Support\OperasionalPelaksanaanTime::datePart(old('tanggal_progres'))
         : now()->toDateString();
@@ -38,6 +36,11 @@
     $timStatuses = ($teamStatusByDate ?? [])[$tanggalProgresDate]
         ?? \App\Support\PermohonanPelaksanaProgress::teamStatusesForDate($permohonan, $tanggalProgresDate);
     $assignedTeams = \App\Support\PermohonanPelaksanaProgress::assignedTeams($permohonan);
+
+    $collectFotoDocumentation = $collectFotoDocumentation ?? \App\Support\PermohonanPelaksanaProgress::shouldCollectFotoDocumentation(
+        $permohonan,
+        $operatorTim ?? (filled($selectedTim) ? $selectedTim : null),
+    );
 
 @endphp
 
@@ -184,23 +187,17 @@
 
 
 
-        @unless ($isMiniGarden)
-
-            <div id="foto-dokumentasi-section" class="{{ $showWorkPhotos ? '' : 'hidden' }}">
-
+        @if ($collectFotoDocumentation)
+            <div id="foto-dokumentasi-section" class="{{ $showWorkPhotos ? '' : 'hidden' }} lapangan-form-section mt-4">
+                <p class="lapangan-section-title mb-3 text-sm font-black text-emerald-900">Dokumentasi foto</p>
+                <p class="mb-3 text-xs text-gray-600">Unggah 6 foto (sebelum, saat, sesudah) seperti input pemeliharaan Armada.</p>
                 <x-operasional-foto-fields
-
                     :record="null"
-
                     variant="lapangan"
-
                     :required="$showWorkPhotos"
-
                 />
-
             </div>
-
-        @endunless
+        @endif
 
 
 
@@ -410,13 +407,48 @@
 
 
 
+            const timPelaksanaSelect = document.getElementById('tim_pelaksana');
+            const isMiniGarden = @json($permohonan->jenis_layanan === 'Pemasangan Mini Garden');
+            const form = document.getElementById('lapangan-permohonan-progres-form');
+
+            function shouldShowFotoForTim(tim) {
+                if (! isMiniGarden) {
+                    return true;
+                }
+
+                return tim === 'Tim Nursery';
+            }
+
+            function syncFotoSectionForTim() {
+                if (! fotoDokumentasiSection || ! isMiniGarden || ! timPelaksanaSelect) {
+                    return;
+                }
+
+                const tim = timPelaksanaSelect.value || '';
+                const allowed = shouldShowFotoForTim(tim);
+
+                if (form) {
+                    form.dataset.collectFoto = allowed ? '1' : '0';
+                }
+
+                if (! allowed) {
+                    fotoDokumentasiSection.classList.add('hidden');
+                } else {
+                    toggleStatusFields();
+                }
+            }
+
             statusSelect?.addEventListener('change', toggleStatusFields);
 
             tanggalProgresInput?.addEventListener('change', updateHariKe);
 
+            timPelaksanaSelect?.addEventListener('change', syncFotoSectionForTim);
+
             toggleStatusFields();
 
             updateHariKe();
+
+            syncFotoSectionForTim();
 
         });
 

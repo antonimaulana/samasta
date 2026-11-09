@@ -184,11 +184,15 @@ class PemeliharaanTamanController extends Controller
 
         PdfExport::ensureGdLoaded();
 
+        if ($request->has('tim') && ! filled($request->input('tim'))) {
+            $request->merge(['tim' => null]);
+        }
+
         $validated = $request->validate([
             'tanggal_mulai' => ['nullable', 'date'],
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
             'tanggal' => ['nullable', 'date'],
-            'tim' => ['nullable', Rule::in(PemeliharaanTaman::timNames())],
+            'tim' => ['nullable', 'string', Rule::in(PemeliharaanTaman::timNames())],
         ]);
 
         if (filled($validated['tanggal'] ?? null) && blank($validated['tanggal_mulai'] ?? null)) {
@@ -215,17 +219,9 @@ class PemeliharaanTamanController extends Controller
             ->orderBy('tim')
             ->orderBy('lokasi_pelaksanaan')
             ->get()
-            ->groupBy('tim');
+            ->groupBy(fn (PemeliharaanTaman $row) => filled($row->tim) ? (string) $row->tim : 'Tanpa tim');
 
         $kinerjas = TimPelaksanaPdfOrder::sortGrouped($kinerjas);
-
-        $html = view('admin.pemeliharaan_tamans.pdf', [
-            'tanggalMulai' => $tanggalMulai,
-            'tanggalSelesai' => $tanggalSelesai,
-            'kinerjasPerTim' => $kinerjas,
-            'timFilter' => $validated['tim'] ?? null,
-            'totalOperasional' => $kinerjas->flatten()->count(),
-        ])->render();
 
         $filename = 'pemeliharaan-rutin-'.$tanggalMulai->format('Y-m-d');
         if (! $tanggalMulai->isSameDay($tanggalSelesai)) {
@@ -236,7 +232,21 @@ class PemeliharaanTamanController extends Controller
         }
         $filename .= '.pdf';
 
-        return PdfExport::inline($html, $filename);
+        try {
+            $html = view('admin.pemeliharaan_tamans.pdf', [
+                'tanggalMulai' => $tanggalMulai,
+                'tanggalSelesai' => $tanggalSelesai,
+                'kinerjasPerTim' => $kinerjas,
+                'timFilter' => $validated['tim'] ?? null,
+                'totalOperasional' => $kinerjas->flatten()->count(),
+            ])->render();
+
+            return PdfExport::inline($html, $filename);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            abort(503, 'Gagal menghasilkan PDF. Coba persempit rentang tanggal atau filter tim, lalu ekspor lagi.');
+        }
     }
 
     public function exportPdfOperasional(PemeliharaanTaman $pemeliharaanTaman): Response

@@ -139,7 +139,7 @@ class PermohonanProgressRecorder
     private function validate(Request $request, Pemangkasan $permohonan, ?string $inputTim): array
     {
         $isPohonTumbang = $permohonan->jenis_layanan === 'Penanganan Pohon Tumbang';
-        $isMiniGarden = $permohonan->jenis_layanan === 'Pemasangan Mini Garden';
+        $collectFoto = PermohonanPelaksanaProgress::shouldCollectFotoDocumentation($permohonan, $inputTim);
 
         $user = $request->user();
         $inputTeams = PermohonanPelaksanaProgress::inputTeamsForUser($user, $permohonan);
@@ -185,7 +185,7 @@ class PermohonanProgressRecorder
             $attributes = array_merge($attributes, ArmadaAssignment::validationAttributes());
         }
 
-        if (! $isMiniGarden) {
+        if ($collectFoto) {
             foreach (PemeliharaanTaman::FOTO_FIELDS as $field => $label) {
                 $rules[$field] = [
                     'nullable',

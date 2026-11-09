@@ -81,10 +81,9 @@ class PermohonanProgresEntryRecorder
      */
     private function validate(Request $request, Pemangkasan $permohonan, PemangkasanProgres $entry): array
     {
-        $isMiniGarden = $permohonan->jenis_layanan === 'Pemasangan Mini Garden';
-
         $teamNames = is_array($permohonan->pelaksana) ? $permohonan->pelaksana : [];
         $inputTim = filled($entry->tim) ? $entry->tim : null;
+        $collectFoto = PermohonanPelaksanaProgress::shouldCollectFotoDocumentation($permohonan, $inputTim);
         $rosterExists = $inputTim !== null
             ? PetugasAssignment::rosterExistsForTim($inputTim)
             : PetugasAssignment::rosterExistsForTeams($teamNames);
@@ -109,7 +108,7 @@ class PermohonanProgresEntryRecorder
             $attributes = array_merge($attributes, ArmadaAssignment::validationAttributes());
         }
 
-        if (! $isMiniGarden) {
+        if ($collectFoto) {
             foreach (PemeliharaanTaman::FOTO_FIELDS as $field => $label) {
                 $rules[$field] = ['nullable', 'image', 'max:4096'];
 

@@ -39,9 +39,9 @@
     <p class="meta">
         Dinas Perumahan, Kawasan Permukiman dan Pertamanan Kota Batam<br>
         @if ($periodeSatuHari)
-            Tanggal: <strong>{{ $tanggalMulai->translatedFormat('d F Y') }}</strong>
+            Tanggal: <strong>{{ \App\Support\OperasionalPelaksanaanTime::displayDateLong($tanggalMulai) }}</strong>
         @else
-            Periode: <strong>{{ $tanggalMulai->translatedFormat('d M Y') }} – {{ $tanggalSelesai->translatedFormat('d M Y') }}</strong>
+            Periode: <strong>{{ $tanggalMulai->format('d/m/Y') }} – {{ $tanggalSelesai->format('d/m/Y') }}</strong>
         @endif
         @if ($timFilter)
             · Tim: <span class="badge">{{ $timFilter }}</span>
@@ -71,7 +71,7 @@
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         @unless ($periodeSatuHari)
-                            <td>{{ $item->tanggal ? $item->tanggal->translatedFormat('d/m/Y') : '—' }}</td>
+                            <td>{{ $item->tanggal ? \App\Support\OperasionalPelaksanaanTime::displayDateLong($item->tanggal) : '—' }}</td>
                         @endunless
                         <td>
                             {{ $item->lokasiPelaksanaanPdfLabel() }}
@@ -93,22 +93,21 @@
                         </td>
                         @foreach ($fotoGroups as $groupLabel => $fields)
                             <td>
-                                @php $hasFoto = collect($fields)->contains(fn ($field) => $item->fotoDompdfSrc($field)); @endphp
-                                @if ($hasFoto)
+                                @php
+                                    $fotoPayloads = collect($fields)
+                                        ->mapWithKeys(fn (string $field) => [$field => $item->fotoPdfPayload($field, 115, 68)])
+                                        ->filter();
+                                @endphp
+                                @if ($fotoPayloads->isNotEmpty())
                                     <div class="foto-group">
                                         <div class="foto-group-label">{{ $groupLabel }}</div>
-                                        @foreach ($fields as $field)
-                                            @if ($item->fotoDompdfSrc($field))
-                                                @php $size = $item->fotoPdfSize($field, 115, 68); @endphp
-                                                <div class="foto-wrap">
-                                                    @if ($size)
-                                                        <img src="{{ $item->fotoDompdfSrc($field) }}"
-                                                             alt="{{ $groupLabel }}"
-                                                             width="{{ $size['width'] }}"
-                                                             height="{{ $size['height'] }}">
-                                                    @endif
-                                                </div>
-                                            @endif
+                                        @foreach ($fotoPayloads as $field => $payload)
+                                            <div class="foto-wrap">
+                                                <img src="{{ $payload['src'] }}"
+                                                     alt="{{ $groupLabel }}"
+                                                     width="{{ $payload['width'] }}"
+                                                     height="{{ $payload['height'] }}">
+                                            </div>
                                         @endforeach
                                     </div>
                                 @else

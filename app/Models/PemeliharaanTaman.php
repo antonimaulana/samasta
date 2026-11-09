@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\OperasionalDateTime;
+use App\Support\OperasionalFotoPdf;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,6 +12,9 @@ use Illuminate\Support\Facades\Storage;
 
 class PemeliharaanTaman extends Model
 {
+    /** @var array<string, array{src: string, width: int, height: int}|null> */
+    protected array $fotoPdfPayloadCache = [];
+
     protected $table = 'pemeliharaan_tamans';
 
     public const FOTO_FIELDS = [
@@ -275,47 +279,29 @@ class PemeliharaanTaman extends Model
     }
 
     /**
-     * Data URI aman untuk Dompdf (JPEG/PNG/GIF; format lain dikonversi ke JPEG bila GD tersedia).
+     * @return array{src: string, width: int, height: int}|null
      */
-    public function fotoDompdfSrc(string $field): ?string
+    public function fotoPdfPayload(string $field, int $maxWidth = 115, int $maxHeight = 68): ?array
     {
-        $path = $this->{$field};
+        $cacheKey = $field.'|'.$maxWidth.'|'.$maxHeight;
 
-        if (! $path || ! Storage::disk('public')->exists($path)) {
-            return null;
+        if (! array_key_exists($cacheKey, $this->fotoPdfPayloadCache)) {
+            $this->fotoPdfPayloadCache[$cacheKey] = OperasionalFotoPdf::embedPayload(
+                $this->{$field},
+                $maxWidth,
+                $maxHeight,
+            );
         }
 
-        try {
-            $mime = Storage::disk('public')->mimeType($path);
-        } catch (\Throwable) {
-            $mime = null;
-        }
+        return $this->fotoPdfPayloadCache[$cacheKey];
+    }
 
-        if (in_array($mime, ['image/jpeg', 'image/png', 'image/gif'], true)) {
-            return $this->fotoBase64($field);
-        }
-
-        if (! extension_loaded('gd')) {
-            return null;
-        }
-
-        $binary = Storage::disk('public')->get($path);
-        $image = @imagecreatefromstring($binary);
-
-        if ($image === false) {
-            return null;
-        }
-
-        ob_start();
-        imagejpeg($image, null, 85);
-        imagedestroy($image);
-        $jpeg = ob_get_clean();
-
-        if ($jpeg === false || $jpeg === '') {
-            return null;
-        }
-
-        return 'data:image/jpeg;base64,'.base64_encode($jpeg);
+    /**
+     * Data URI untuk Dompdf: foto diperkecil dulu (hindari memori penuh pada PDF rentang/multi tim).
+     */
+    public function fotoDompdfSrc(string $field, int $maxWidth = 115, int $maxHeight = 68): ?string
+    {
+        return $this->fotoPdfPayload($field, $maxWidth, $maxHeight)['src'] ?? null;
     }
 
     /**
@@ -323,26 +309,17 @@ class PemeliharaanTaman extends Model
      *
      * @return array{width: int, height: int}|null
      */
-    public function fotoPdfSize(string $field, int $maxWidth = 250, int $maxHeight = 100): ?array
+    public function fotoPdfSize(string $field, int $maxWidth = 115, int $maxHeight = 68): ?array
     {
-        $path = $this->{$field};
+        $payload = $this->fotoPdfPayload($field, $maxWidth, $maxHeight);
 
-        if (! $path || ! Storage::disk('public')->exists($path)) {
+        if ($payload === null) {
             return null;
         }
-
-        $size = @getimagesize(Storage::disk('public')->path($path));
-
-        if ($size === false) {
-            return null;
-        }
-
-        [$width, $height] = $size;
-        $scale = min($maxWidth / $width, $maxHeight / $height, 1);
 
         return [
-            'width' => max(1, (int) round($width * $scale)),
-            'height' => max(1, (int) round($height * $scale)),
+            'width' => $payload['width'],
+            'height' => $payload['height'],
         ];
     }
 

@@ -523,6 +523,51 @@ class LapanganOperasionalTest extends TestCase
         ]);
     }
 
+    public function test_nursery_operator_sees_and_submits_foto_on_mini_garden_permohonan(): void
+    {
+        $nursery = TimPelaksana::where('nama', 'Tim Nursery')->firstOrFail();
+        $operator = User::factory()->operatorTeams([$nursery->id])->create();
+
+        $permohonan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemasangan Mini Garden',
+            'taman_id' => Taman::create([
+                'nama_taman' => 'Taman Mini Garden',
+                'kategori' => 'Taman Kota',
+                'kelurahan_id' => Kelurahan::query()->value('id'),
+                'luasan' => 500,
+                'alamat' => 'Alamat',
+                'deskripsi' => 'Deskripsi.',
+            ])->id,
+            'lokasi_pohon' => 'Lokasi mini garden',
+            'asal' => 'Warga',
+            'penanggungjawab' => 'Budi',
+            'kontak_permohonan' => '081234567890',
+            'tanggal_permohonan' => now()->toDateString(),
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => now()->toDateString(),
+            'pelaksana' => ['Tim Nursery'],
+            'status' => 'Diproses',
+        ]);
+
+        $this->actingAs($operator)
+            ->get(route('lapangan.permohonan.edit', $permohonan))
+            ->assertOk()
+            ->assertSee('Dokumentasi foto', false)
+            ->assertSee('foto_sebelum_1', false)
+            ->assertSee('lapangan-foto-compress.js', false);
+
+        $this->actingAs($operator)
+            ->post(route('lapangan.permohonan.update', $permohonan), $this->progressPayload([
+                'status' => 'Diproses',
+            ], 'Tim Nursery'))
+            ->assertRedirect(route('lapangan.permohonan.index'));
+
+        $progres = $permohonan->fresh()->progres->first();
+        $this->assertNotNull($progres);
+        $this->assertNotNull($progres->foto_sebelum_1);
+    }
+
     public function test_same_team_can_submit_permohonan_progress_more_than_once_per_day(): void
     {
         $team1 = TimPelaksana::where('nama', 'Tim Wilayah 1')->firstOrFail();

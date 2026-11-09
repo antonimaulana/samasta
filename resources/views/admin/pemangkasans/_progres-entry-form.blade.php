@@ -1,6 +1,9 @@
 @php
-    $isMiniGarden = $pemangkasan->jenis_layanan === 'Pemasangan Mini Garden';
     $jadwalAkhir = $pemangkasan->tanggal_akhir_jadwal ?? $pemangkasan->tanggal_eksekusi;
+    $collectFotoDocumentation = \App\Support\PermohonanPelaksanaProgress::shouldCollectFotoDocumentation(
+        $pemangkasan,
+        filled($progres->tim) ? $progres->tim : null,
+    );
 @endphp
 
 <div class="grid gap-6 md:grid-cols-2">
@@ -39,7 +42,7 @@
         </p>
     </div>
 
-    @unless ($isMiniGarden)
+    @if ($collectFotoDocumentation)
         <div class="md:col-span-2">
             <x-operasional-foto-fields
                 :record="$progres"
@@ -47,7 +50,7 @@
                 :required="false"
             />
         </div>
-    @endunless
+    @endif
 
     <div class="md:col-span-2">
         <label for="catatan" class="mb-1 block text-sm font-medium text-gray-700">Catatan / Uraian Pekerjaan</label>

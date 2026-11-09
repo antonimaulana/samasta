@@ -26,6 +26,45 @@ class PemeliharaanTamanPdfTest extends TestCase
         $this->seed(TimPelaksanaSeeder::class);
     }
 
+    public function test_admin_can_export_pemeliharaan_rutin_bulk_pdf_for_date_range(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('PHP GD extension is required for PDF export.');
+        }
+
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $tanggalAwal = now()->subDays(6)->toDateString();
+        $tanggalAkhir = now()->toDateString();
+
+        foreach (['Tim Wilayah 1', 'Tim Wilayah 2'] as $tim) {
+            $record = PemeliharaanTaman::create([
+                'tanggal' => $tanggalAwal,
+                'tim' => $tim,
+                'lokasi_pelaksanaan' => 'Lokasi '.$tim,
+                'jumlah_personil' => 2,
+                'uraian_pekerjaan' => 'Rentang PDF',
+            ]);
+
+            foreach (array_keys(PemeliharaanTaman::FOTO_FIELDS) as $field) {
+                $path = 'pemeliharaan-taman/'.$tim.'-'.$field.'.jpg';
+                Storage::disk('public')->put($path, UploadedFile::fake()->image($field.'.jpg', 1600, 1200)->getContent());
+                $record->{$field} = $path;
+            }
+            $record->save();
+        }
+
+        $this->actingAs($admin)
+            ->get(route('admin.pemeliharaan-tamans.export-pdf', [
+                'tanggal_mulai' => $tanggalAwal,
+                'tanggal_selesai' => $tanggalAkhir,
+                'tim' => '',
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
     public function test_admin_can_export_pemeliharaan_rutin_bulk_pdf(): void
     {
         if (! extension_loaded('gd')) {

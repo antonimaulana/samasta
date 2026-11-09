@@ -105,6 +105,26 @@ class PermohonanPelaksanaProgress
     }
 
     /**
+     * Dokumentasi 6 foto progres (sama pola Armada / wilayah). Mini Garden: hanya Tim Nursery.
+     */
+    public static function shouldCollectFotoDocumentation(Pemangkasan $permohonan, ?string $inputTim = null): bool
+    {
+        if ($permohonan->jenis_layanan !== 'Pemasangan Mini Garden') {
+            return true;
+        }
+
+        if ($inputTim === 'Tim Nursery') {
+            return true;
+        }
+
+        if ($inputTim !== null) {
+            return false;
+        }
+
+        return in_array('Tim Nursery', self::assignedTeams($permohonan), true);
+    }
+
+    /**
      * @return array<string, string>
      */
     public static function teamStatusesForDate(Pemangkasan $permohonan, string $datePart): array
