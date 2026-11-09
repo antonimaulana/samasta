@@ -52,13 +52,15 @@ class PemeliharaanTamanPdfTest extends TestCase
             ->post(route('admin.pemeliharaan-tamans.store'), $payload)
             ->assertRedirect();
 
-        $this->actingAs($admin)
+        $response = $this->actingAs($admin)
             ->get(route('admin.pemeliharaan-tamans.export-pdf', [
                 'tanggal_mulai' => now()->toDateString(),
                 'tanggal_selesai' => now()->toDateString(),
-            ]))
-            ->assertOk()
+            ]));
+
+        $response->assertOk()
             ->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('inline;', (string) $response->headers->get('content-disposition'));
     }
 
     public function test_bulk_pdf_lists_tim_sections_in_standard_order(): void
@@ -129,9 +131,11 @@ class PemeliharaanTamanPdfTest extends TestCase
         }
         $record->save();
 
-        $this->actingAs($admin)
-            ->get(route('admin.pemeliharaan-tamans.export-pdf-operasional', $record))
-            ->assertOk()
+        $response = $this->actingAs($admin)
+            ->get(route('admin.pemeliharaan-tamans.export-pdf-operasional', $record));
+
+        $response->assertOk()
             ->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('inline;', (string) $response->headers->get('content-disposition'));
     }
 }

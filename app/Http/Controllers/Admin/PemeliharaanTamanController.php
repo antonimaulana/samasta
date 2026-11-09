@@ -236,7 +236,7 @@ class PemeliharaanTamanController extends Controller
         }
         $filename .= '.pdf';
 
-        return PdfExport::download($html, $filename);
+        return PdfExport::inline($html, $filename);
     }
 
     public function exportPdfOperasional(PemeliharaanTaman $pemeliharaanTaman): Response
@@ -251,7 +251,7 @@ class PemeliharaanTamanController extends Controller
 
         $filename = OperasionalKegiatanPdfFilename::pemeliharaan($pemeliharaanTaman);
 
-        return PdfExport::download($html, $filename);
+        return PdfExport::inline($html, $filename);
     }
 
     private function validateOperasional(Request $request): array

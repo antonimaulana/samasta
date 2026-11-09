@@ -16,12 +16,10 @@ class PdfExport
         }
     }
 
+    /** Tampilkan PDF di tab browser (selaras dengan tombol PDF di admin/lapangan). */
     public static function download(string $html, string $filename, string $orientation = 'portrait'): Response
     {
-        return response(self::renderBinary($html, $orientation), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-        ]);
+        return self::inline($html, $filename, $orientation);
     }
 
     public static function inline(string $html, string $filename, string $orientation = 'portrait'): Response
