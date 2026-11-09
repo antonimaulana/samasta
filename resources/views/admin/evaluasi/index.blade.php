@@ -11,8 +11,22 @@
 
         <form action="{{ route('admin.evaluasi.index') }}" method="GET" class="space-y-4 p-6">
             <div class="flex flex-wrap items-start justify-between gap-4">
-                <p id="evaluasi-jangka-waktu-label" class="text-sm font-semibold text-gray-800">Jangka waktu</p>
-                <aside class="rounded-2xl border border-green-200 bg-gradient-to-br from-white to-green-50/80 px-5 py-3 text-center shadow-sm sm:min-w-[11rem]"
+                <div class="min-w-0 flex-1">
+                    <p id="evaluasi-jangka-waktu-label" class="mb-2 text-sm font-semibold text-gray-800">Jangka waktu</p>
+                    <fieldset class="m-0 border-0 p-0" aria-labelledby="evaluasi-jangka-waktu-label">
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($rentangOptions as $key => $label)
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="rentang" value="{{ $key }}" class="peer sr-only" @checked($rentang === $key)>
+                                    <span class="inline-block rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition peer-checked:border-green-600 peer-checked:bg-green-600 peer-checked:text-white hover:border-green-400">
+                                        {{ $label }}
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </fieldset>
+                </div>
+                <aside class="shrink-0 rounded-2xl border border-green-200 bg-gradient-to-br from-white to-green-50/80 px-5 py-3 text-center shadow-sm sm:min-w-[11rem]"
                        aria-labelledby="evaluasi-jangka-waktu-label">
                     <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Indeks gabungan</p>
                     <p class="text-3xl font-black text-green-700">
@@ -25,19 +39,6 @@
                     <p class="mt-0.5 text-xs text-gray-500">untuk {{ $labelPeriode }}</p>
                 </aside>
             </div>
-
-            <fieldset class="m-0 border-0 p-0" aria-labelledby="evaluasi-jangka-waktu-label">
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($rentangOptions as $key => $label)
-                        <label class="cursor-pointer">
-                            <input type="radio" name="rentang" value="{{ $key }}" class="peer sr-only" @checked($rentang === $key)>
-                            <span class="inline-block rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition peer-checked:border-green-600 peer-checked:bg-green-600 peer-checked:text-white hover:border-green-400">
-                                {{ $label }}
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
-            </fieldset>
 
             <div id="evaluasi-bulan-fields" class="grid max-w-md gap-4 sm:grid-cols-2 {{ $rentang === 'bulan' ? '' : 'hidden' }}">
                 <div>
@@ -72,10 +73,10 @@
                     Perbarui evaluasi
                 </button>
                 @if ($showRapKonsolidasi)
-                    <a href="{{ $rapRoute }}"
+                    <x-admin.pdf-export-link :href="$rapRoute"
                        class="rounded-lg border border-violet-300 bg-white px-5 py-2 text-sm font-semibold text-violet-800 hover:bg-violet-50">
                         RAP Konsolidasi (PDF)
-                    </a>
+                    </x-admin.pdf-export-link>
                 @endif
             </div>
         </form>

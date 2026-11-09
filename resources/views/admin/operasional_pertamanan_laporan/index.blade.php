@@ -81,10 +81,10 @@
                         class="rounded-lg bg-amber-600 px-5 py-2 text-sm font-medium text-white hover:bg-amber-700">
                     Tampilkan Laporan
                 </button>
-                <a href="{{ route('admin.operasional-pertamanan-laporan.export-pdf', request()->query()) }}"
+                <x-admin.pdf-export-link :href="route('admin.operasional-pertamanan-laporan.export-pdf', request()->query())"
                    class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-5 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-50">
                     📄 Export PDF
-                </a>
+                </x-admin.pdf-export-link>
             </div>
         </form>
     </div>

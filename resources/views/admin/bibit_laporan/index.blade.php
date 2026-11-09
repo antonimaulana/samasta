@@ -70,10 +70,10 @@
                         class="rounded-lg bg-teal-600 px-5 py-2 text-sm font-medium text-white hover:bg-teal-700">
                     Tampilkan Laporan
                 </button>
-                <a href="{{ route('admin.bibit-laporan.export-pdf', request()->query()) }}"
+                <x-admin.pdf-export-link :href="route('admin.bibit-laporan.export-pdf', request()->query())"
                    class="inline-flex items-center gap-2 rounded-lg border border-teal-300 bg-white px-5 py-2 text-sm font-semibold text-teal-800 hover:bg-teal-50">
                     📄 Export PDF
-                </a>
+                </x-admin.pdf-export-link>
             </div>
         </form>
     </div>

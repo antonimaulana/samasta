@@ -77,10 +77,10 @@
             </div>
 
             <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap lg:items-end">
-                <a href="{{ route('admin.dashboard.export-pdf') }}" class="dash-btn-hero">
+                <x-admin.pdf-export-link :href="route('admin.dashboard.export-pdf')" class="dash-btn-hero">
                     <x-admin.nav-icon name="download" class="h-4 w-4" />
                     Unduh Ringkasan
-                </a>
+                </x-admin.pdf-export-link>
                 @if ($isViewer ?? auth()->user()?->isViewer())
                     <a href="{{ route('admin.evaluasi.index') }}" class="dash-btn-hero dash-btn-hero--evaluasi">
                         <x-admin.nav-icon name="chart" class="h-4 w-4" />

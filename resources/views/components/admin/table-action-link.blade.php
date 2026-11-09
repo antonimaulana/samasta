@@ -35,7 +35,9 @@
         <x-admin.table-icon :name="$iconName" />
     </button>
 @else
-    <a href="{{ $href }}" title="{{ $labelText }}" aria-label="{{ $labelText }}" {{ $attributes->merge(['class' => $classes]) }}>
+    <a href="{{ $href }}" title="{{ $labelText }}" aria-label="{{ $labelText }}"
+       @if ($variant === 'pdf') target="_blank" rel="noopener noreferrer" @endif
+       {{ $attributes->merge(['class' => $classes]) }}>
         <x-admin.table-icon :name="$iconName" />
     </a>
 @endif

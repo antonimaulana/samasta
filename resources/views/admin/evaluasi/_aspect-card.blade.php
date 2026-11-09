@@ -47,9 +47,9 @@
            class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50">
             Lihat detail &amp; grafik
         </a>
-        <a href="{{ $aspect['exportUrl'] }}"
+        <x-admin.pdf-export-link :href="$aspect['exportUrl']"
            class="rounded-lg border border-green-300 bg-white px-3 py-1.5 text-xs font-semibold text-green-800 hover:bg-green-50">
             Export PDF
-        </a>
+        </x-admin.pdf-export-link>
     </div>
 </article>

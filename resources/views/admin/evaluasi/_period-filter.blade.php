@@ -78,10 +78,10 @@
                 Tampilkan Evaluasi
             </button>
             @if ($exportRoute)
-                <a href="{{ $exportRoute }}"
+                <x-admin.pdf-export-link :href="$exportRoute"
                    class="inline-flex items-center gap-2 rounded-lg border bg-white px-5 py-2 text-sm font-semibold {{ $accentClasses['export'] }}">
                     📄 Export PDF
-                </a>
+                </x-admin.pdf-export-link>
             @endif
         </div>
     </form>
