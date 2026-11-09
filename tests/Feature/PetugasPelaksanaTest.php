@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Kelurahan;
+use App\Models\Pemangkasan;
+use App\Models\PemangkasanProgres;
 use App\Models\PemeliharaanTaman;
 use App\Models\Petugas;
 use App\Models\Taman;
@@ -246,5 +248,69 @@ class PetugasPelaksanaTest extends TestCase
         $this->assertNotNull($record);
         $this->assertSame(count($petugas), (int) $record->jumlah_personil);
         $this->assertCount(count($petugas), $record->petugas);
+    }
+
+    public function test_petugas_riwayat_lists_pemeliharaan_and_permohonan(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $team = TimPelaksana::query()->where('nama', 'Tim Wilayah 1')->firstOrFail();
+        $petugas = Petugas::query()->where('tim_pelaksana_id', $team->id)->firstOrFail();
+        $kelurahan = Kelurahan::query()->first();
+
+        $taman = Taman::create([
+            'nama_taman' => 'Taman Riwayat Petugas',
+            'kategori' => 'Taman Kota',
+            'kelurahan_id' => $kelurahan->id,
+            'luasan' => 1000,
+            'alamat' => 'Alamat riwayat',
+            'deskripsi' => 'Deskripsi riwayat.',
+        ]);
+
+        $pemeliharaan = PemeliharaanTaman::query()->create([
+            'tanggal' => now()->subDay(),
+            'tim' => 'Tim Wilayah 1',
+            'taman_id' => $taman->id,
+            'uraian_pekerjaan' => 'Sapukan dedaunan',
+        ]);
+        $pemeliharaan->petugas()->sync([$petugas->id]);
+
+        $pemangkasan = Pemangkasan::create([
+            'jenis_layanan' => 'Pemangkasan Pohon',
+            'taman_id' => $taman->id,
+            'lokasi_pohon' => $taman->nama_taman,
+            'asal' => 'Warga',
+            'penanggungjawab' => 'Pemohon Uji',
+            'kontak_permohonan' => '081234567890',
+            'tanggal_permohonan' => now()->subDays(2)->toDateString(),
+            'kategori' => 'Laporan Masyarakat',
+            'kondisi_sebelum' => '',
+            'tanggal_eksekusi' => now()->toDateString(),
+            'tanggal_akhir_jadwal' => now()->toDateString(),
+            'pelaksana' => ['Tim Wilayah 1'],
+            'status' => 'Diproses',
+        ]);
+
+        $progres = PemangkasanProgres::create([
+            'pemangkasan_id' => $pemangkasan->id,
+            'tim' => 'Tim Wilayah 1',
+            'tanggal' => now()->format('Y-m-d').' 09:00:00',
+            'hari_ke' => 1,
+            'catatan' => 'Progres uji petugas',
+        ]);
+        $progres->petugas()->attach($petugas->id);
+
+        $this->actingAs($admin)
+            ->get(route('admin.tim-pelaksanas.petugas.show', [$team, $petugas]))
+            ->assertOk()
+            ->assertSee('Riwayat pelaksanaan pekerjaan', false)
+            ->assertSee('Pemeliharaan rutin', false)
+            ->assertSee('Pelaksanaan permohonan', false)
+            ->assertSee('Sapukan dedaunan', false)
+            ->assertSee('Progres uji petugas', false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.tim-pelaksanas.show', $team))
+            ->assertOk()
+            ->assertSee('Riwayat', false);
     }
 }

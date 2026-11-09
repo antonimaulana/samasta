@@ -55,6 +55,7 @@ class ViewerRouteAllowlist
             'admin.armadas.show',
             'admin.tim-pelaksanas.index',
             'admin.tim-pelaksanas.show',
+            'admin.tim-pelaksanas.petugas.show',
         ];
     }
 

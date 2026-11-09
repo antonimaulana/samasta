@@ -5,12 +5,41 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Petugas;
 use App\Models\TimPelaksana;
+use App\Support\PetugasPelaksanaanHistoryBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PetugasController extends Controller
 {
+    public function show(
+        Request $request,
+        TimPelaksana $timPelaksana,
+        Petugas $petugas,
+        PetugasPelaksanaanHistoryBuilder $historyBuilder,
+    ): View {
+        $this->authorize('view', $timPelaksana);
+        $this->ensurePetugasBelongsToTeam($timPelaksana, $petugas);
+
+        $riwayat = $historyBuilder->forPetugas($petugas);
+
+        if (! $request->user()?->canWrite()) {
+            $riwayat = $riwayat->map(function (object $baris) {
+                if ($baris->jenis === 'pemeliharaan') {
+                    $baris->detail_url = null;
+                }
+
+                return $baris;
+            });
+        }
+
+        return view('admin.tim_pelaksanas.petugas.show', [
+            'timPelaksana' => $timPelaksana,
+            'petugas' => $petugas,
+            'riwayat' => $riwayat,
+        ]);
+    }
+
     public function index(TimPelaksana $timPelaksana): View
     {
         $this->authorize('managePetugas', $timPelaksana);

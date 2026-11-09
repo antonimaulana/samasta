@@ -60,6 +60,7 @@
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Jabatan</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Peran</th>
                 <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -84,10 +85,16 @@
                             <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">Nonaktif</span>
                         @endif
                     </td>
+                    <td class="px-4 py-3 text-right text-sm">
+                        <x-admin.table-action-link
+                            :href="route('admin.tim-pelaksanas.petugas.show', [$timPelaksana, $petugas])"
+                            label="Riwayat"
+                        />
+                    </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="px-4 py-10 text-center text-sm text-gray-500">Belum ada petugas terdaftar untuk tim ini.</td>
+                    <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-500">Belum ada petugas terdaftar untuk tim ini.</td>
                 </tr>
             @endforelse
         </tbody>

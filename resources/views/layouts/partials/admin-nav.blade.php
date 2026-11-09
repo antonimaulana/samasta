@@ -1,11 +1,10 @@
 ﻿@php
     $tamanActive = request()->routeIs('admin.tamans.*', 'admin.taman-laporan.*');
     $bibitActive = request()->routeIs('admin.bibits.*', 'admin.bibit-masuks.*', 'admin.bibit-keluars.*', 'admin.bibit-laporan.*');
-    $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.armadas.*');
+    $operasionalActive = request()->routeIs('admin.pemangkasans.*', 'admin.operasional-pertamanan-laporan.*', 'admin.pemeliharaan-tamans.*', 'admin.armadas.*', 'admin.tim-pelaksanas.*');
     $masyarakatActive = request()->routeIs('admin.aduan-masyarakats.*', 'admin.survey-kepuasan.*');
     $evaluasiActive = request()->routeIs('admin.evaluasi.*');
     $sistemActive = request()->routeIs(
-        'admin.tim-pelaksanas.*',
         'admin.users.*',
         'admin.activity-logs.*',
         'admin.beranda-slides.*',
@@ -91,6 +90,9 @@
             <a href="{{ route('admin.armadas.index') }}" class="{{ $navSub(request()->routeIs('admin.armadas.*')) }}">
                 Armada
             </a>
+            <a href="{{ route('admin.tim-pelaksanas.index') }}" class="{{ $navSub(request()->routeIs('admin.tim-pelaksanas.*')) }}">
+                Tim Kerja
+            </a>
             <a href="{{ route('admin.operasional-pertamanan-laporan.index') }}" class="{{ $navSub(request()->routeIs('admin.operasional-pertamanan-laporan.*')) }}">
                 Laporan Operasional
             </a>
@@ -145,9 +147,6 @@
                 </svg>
             </button>
             <div class="sidebar-submenu">
-                <a href="{{ route('admin.tim-pelaksanas.index') }}" class="{{ $navSub(request()->routeIs('admin.tim-pelaksanas.*')) }}">
-                    Tim Kerja
-                </a>
                 <a href="{{ route('admin.users.index') }}" class="{{ $navSub(request()->routeIs('admin.users.*')) }}">
                     Kelola Pengguna
                 </a>

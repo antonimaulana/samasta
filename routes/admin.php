@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\PemeliharaanTamanController;
 use App\Http\Controllers\Admin\SurveyKepuasanController as AdminSurveyKepuasanController;
 use App\Http\Controllers\Admin\TamanController as AdminTamanController;
 use App\Http\Controllers\Admin\TamanLaporanController;
+use App\Http\Controllers\Admin\PetugasController;
 use App\Http\Controllers\Admin\TimPelaksanaController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
@@ -192,6 +193,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::get('tim-pelaksanas/roster', [TimPelaksanaController::class, 'roster'])->name('tim-pelaksanas.roster');
     Route::get('tim-pelaksanas', [TimPelaksanaController::class, 'index'])->name('tim-pelaksanas.index');
     Route::get('tim-pelaksanas/{tim_pelaksana}', [TimPelaksanaController::class, 'show'])->name('tim-pelaksanas.show');
+    Route::get('tim-pelaksanas/{tim_pelaksana}/petugas/{petugas}', [PetugasController::class, 'show'])
+        ->name('tim-pelaksanas.petugas.show');
     Route::middleware('admin.manage')->group(function () {
         Route::get('ensiklopedia-pengaturan', [EnsiklopediaPengaturanController::class, 'index'])->name('ensiklopedia-pengaturan.index');
         Route::get('ensiklopedia', fn () => redirect()->route('admin.ensiklopedia-pengaturan.index'));

@@ -55,10 +55,19 @@ class ViewerScopeTest extends TestCase
 
         $this->assertNotNull($team);
 
+        $petugas = $team->petugas()->first();
+        $this->assertNotNull($petugas);
+
         $this->actingAs($viewer)
             ->get(route('admin.tim-pelaksanas.show', $team))
             ->assertOk()
-            ->assertSee('Daftar Petugas', false);
+            ->assertSee('Daftar Petugas', false)
+            ->assertSee('Riwayat', false);
+
+        $this->actingAs($viewer)
+            ->get(route('admin.tim-pelaksanas.petugas.show', [$team, $petugas]))
+            ->assertOk()
+            ->assertSee('Riwayat pelaksanaan pekerjaan', false);
     }
 
     public function test_viewer_cannot_post_to_admin_routes(): void
