@@ -18,6 +18,8 @@ class EvaluasiDashboardTest extends TestCase
             ->get(route('admin.evaluasi.index'))
             ->assertOk()
             ->assertSee('Ringkasan evaluasi')
+            ->assertSee('Indeks gabungan')
+            ->assertSee('Jangka waktu')
             ->assertSee('Pemeliharaan Per Taman')
             ->assertSee('Kelengkapan Data');
     }

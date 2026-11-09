@@ -39,9 +39,12 @@
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <span class="rounded-full px-2.5 py-1 text-xs font-medium {{ \App\Models\Pemangkasan::badgeClass($pemangkasan->jenis_layanan) }}">
-                            {{ $pemangkasan->jenis_layanan }}
-                        </span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="rounded-full px-2.5 py-1 text-xs font-medium {{ \App\Models\Pemangkasan::badgeClass($pemangkasan->jenis_layanan) }}">
+                                {{ $pemangkasan->jenis_layanan }}
+                            </span>
+                            <x-pemangkasan-kategori-badge :kategori="$pemangkasan->kategori" />
+                        </div>
                         <h2 class="mt-3 text-xl font-bold text-gray-900">{{ $pemangkasan->lokasi_pohon }}</h2>
                         @if ($isLate)
                             <p class="mt-1 text-sm font-medium text-red-600">
@@ -73,7 +76,9 @@
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">Kategori</dt>
-                        <dd class="mt-1 font-medium text-gray-900">{{ $pemangkasan->kategori }}</dd>
+                        <dd class="mt-1">
+                            <x-pemangkasan-kategori-badge :kategori="$pemangkasan->kategori" />
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">

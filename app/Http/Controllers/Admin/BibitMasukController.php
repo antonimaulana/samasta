@@ -8,9 +8,11 @@ use App\Models\BibitMasuk;
 use App\Models\BibitMasukBatch;
 use App\Support\BibitStokBuktiFotoStorage;
 use App\Support\OperasionalPelaksanaanTime;
+use App\Support\PdfExport;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +23,24 @@ class BibitMasukController extends Controller
     public function __construct(
         private BibitStokBuktiFotoStorage $fotoStorage,
     ) {
-        $this->authorizeResource(BibitMasukBatch::class, 'bibit_masuk');
+        $this->authorizeResource(BibitMasukBatch::class, 'bibit_masuk', [
+            'except' => ['exportPdf'],
+        ]);
+    }
+
+    public function exportPdf(BibitMasukBatch $bibitMasuk): Response
+    {
+        $this->authorize('view', $bibitMasuk);
+
+        PdfExport::ensureGdLoaded();
+
+        $batch = $bibitMasuk->load(['items.bibit']);
+
+        $html = view('admin.bibit_masuks.pdf', ['batch' => $batch])->render();
+        $tanggal = $batch->tanggal_masuk?->format('Y-m-d') ?? 'transaksi';
+        $filename = 'stok-masuk-'.$batch->id.'-'.$tanggal.'.pdf';
+
+        return PdfExport::download($html, $filename);
     }
 
     public function index(Request $request): View

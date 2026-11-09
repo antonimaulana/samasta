@@ -5,6 +5,7 @@
             <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ \App\Models\Pemangkasan::badgeClass($permohonan->jenis_layanan) }}">
                 {{ $permohonan->jenis_layanan }}
             </span>
+            <x-pemangkasan-kategori-badge :kategori="$permohonan->kategori" class="text-[11px]" />
             <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $statusClass }}">
                 {{ $permohonan->status }}
             </span>

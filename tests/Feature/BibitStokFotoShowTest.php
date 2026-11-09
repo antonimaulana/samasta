@@ -118,4 +118,73 @@ class BibitStokFotoShowTest extends TestCase
             ->assertSee('Foto bukti', false)
             ->assertSee('bibit-keluar/bukti.jpg', false);
     }
+
+    public function test_stok_masuk_detail_has_pdf_export(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('PHP GD extension is required for PDF export.');
+        }
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $bibit = Bibit::create([
+            'nama_tanaman' => 'Tebu',
+            'jenis' => 'Pohon',
+            'stok_tersedia' => 3,
+            'sumber_bibit' => 'Produksi',
+            'status_siap_tanam' => true,
+        ]);
+
+        $masuk = $this->createBibitMasukLine($bibit, 3);
+        $batch = $masuk->batch;
+
+        $this->actingAs($admin)
+            ->get(route('admin.bibit-masuks.show', $batch))
+            ->assertOk()
+            ->assertSee('Cetak PDF', false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.bibit-masuks.export-pdf', $batch))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_stok_keluar_detail_has_pdf_export(): void
+    {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('PHP GD extension is required for PDF export.');
+        }
+
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $bibit = Bibit::create([
+            'nama_tanaman' => 'Ketapang',
+            'jenis' => 'Pohon',
+            'stok_tersedia' => 2,
+            'sumber_bibit' => 'Produksi',
+            'status_siap_tanam' => true,
+        ]);
+        $this->createBibitMasukLine($bibit, 2);
+
+        $batch = BibitKeluarBatch::create([
+            'tanggal_keluar' => now()->format('Y-m-d H:i:s'),
+            'peruntukan' => BibitKeluarBatch::PERUNTUKAN_AFKIR,
+            'taman_id' => null,
+            'lokasi' => null,
+        ]);
+        $batch->items()->create([
+            'bibit_id' => $bibit->id,
+            'jumlah' => 1,
+            'sumber' => 'Produksi',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.bibit-keluars.show', $batch))
+            ->assertOk()
+            ->assertSee('Cetak PDF', false)
+            ->assertDontSee('>Lokasi<', false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.bibit-keluars.export-pdf', $batch))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
 }

@@ -15,11 +15,14 @@ class BibitKeluarBatch extends Model
 
     public const PERUNTUKAN_PERMINTAAN = 'Permintaan Masyarakat/Instansi';
 
+    public const PERUNTUKAN_AFKIR = 'Afkir/Tanaman Mati';
+
     public const PERUNTUKAN = [
         'Penanaman Awal',
         'Pergantian',
         'Perbanyakan',
         self::PERUNTUKAN_PERMINTAAN,
+        self::PERUNTUKAN_AFKIR,
     ];
 
     protected $fillable = [
@@ -89,6 +92,16 @@ class BibitKeluarBatch extends Model
     public function requiresDokumenPendukung(): bool
     {
         return $this->peruntukan === self::PERUNTUKAN_PERMINTAAN;
+    }
+
+    public function requiresLokasi(): bool
+    {
+        return $this->peruntukan !== self::PERUNTUKAN_AFKIR;
+    }
+
+    public static function isAfkirPeruntukan(?string $peruntukan): bool
+    {
+        return $peruntukan === self::PERUNTUKAN_AFKIR;
     }
 
     public function dokumenPendukungUrl(): ?string

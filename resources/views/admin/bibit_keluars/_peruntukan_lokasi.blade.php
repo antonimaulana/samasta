@@ -36,7 +36,7 @@
     @enderror
 </div>
 
-<div>
+<div id="bibit-keluar-lokasi-section">
     <label class="mb-1 block text-sm font-medium text-gray-700">Lokasi *</label>
     <label class="mb-3 flex cursor-pointer items-center gap-2">
         <input type="checkbox" name="lokasi_luar" id="bibit_keluar_lokasi_luar" value="1"
@@ -81,6 +81,8 @@
                 const dokumenSection = document.getElementById('bibit-keluar-dokumen-section');
                 const dokumenInput = document.getElementById('dokumen_pendukung');
                 const permintaanValue = @json(\App\Models\BibitKeluarBatch::PERUNTUKAN_PERMINTAAN);
+                const afkirValue = @json(\App\Models\BibitKeluarBatch::PERUNTUKAN_AFKIR);
+                const lokasiSection = document.getElementById('bibit-keluar-lokasi-section');
 
                 function toggleDokumenPendukung() {
                     const needsDoc = peruntukanSelect?.value === permintaanValue;
@@ -90,7 +92,31 @@
                     }
                 }
 
+                function toggleLokasiSection() {
+                    const hideLokasi = peruntukanSelect?.value === afkirValue;
+                    lokasiSection?.classList.toggle('hidden', hideLokasi);
+
+                    if (hideLokasi) {
+                        lokasiLuarCheckbox && (lokasiLuarCheckbox.checked = false);
+                        if (tamanHiddenInput) {
+                            tamanHiddenInput.value = '';
+                            tamanHiddenInput.removeAttribute('required');
+                            tamanHiddenInput.removeAttribute('data-searchable-required');
+                        }
+                        if (lokasiManualInput) {
+                            lokasiManualInput.value = '';
+                            lokasiManualInput.required = false;
+                        }
+                    } else {
+                        toggleLokasiMode();
+                    }
+                }
+
                 function toggleLokasiMode() {
+                    if (peruntukanSelect?.value === afkirValue) {
+                        return;
+                    }
+
                     const isManual = lokasiLuarCheckbox?.checked ?? false;
                     lokasiTamanSection?.classList.toggle('hidden', isManual);
                     lokasiManualSection?.classList.toggle('hidden', ! isManual);
@@ -124,8 +150,11 @@
                 }
 
                 lokasiLuarCheckbox?.addEventListener('change', toggleLokasiMode);
-                peruntukanSelect?.addEventListener('change', toggleDokumenPendukung);
-                toggleLokasiMode();
+                peruntukanSelect?.addEventListener('change', function () {
+                    toggleDokumenPendukung();
+                    toggleLokasiSection();
+                });
+                toggleLokasiSection();
                 toggleDokumenPendukung();
             });
         </script>

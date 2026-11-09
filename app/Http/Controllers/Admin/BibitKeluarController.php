@@ -11,9 +11,11 @@ use App\Models\Taman;
 use App\Support\BibitKeluarStock;
 use App\Support\BibitStokBuktiFotoStorage;
 use App\Support\OperasionalPelaksanaanTime;
+use App\Support\PdfExport;
 use App\Support\TableSearch;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -25,7 +27,24 @@ class BibitKeluarController extends Controller
         private BibitKeluarStock $stock,
         private BibitStokBuktiFotoStorage $fotoStorage,
     ) {
-        $this->authorizeResource(BibitKeluarBatch::class, 'bibit_keluar');
+        $this->authorizeResource(BibitKeluarBatch::class, 'bibit_keluar', [
+            'except' => ['exportPdf'],
+        ]);
+    }
+
+    public function exportPdf(BibitKeluarBatch $bibitKeluar): Response
+    {
+        $this->authorize('view', $bibitKeluar);
+
+        PdfExport::ensureGdLoaded();
+
+        $batch = $bibitKeluar->load(['items.bibit', 'taman.kelurahan.kecamatan']);
+
+        $html = view('admin.bibit_keluars.pdf', ['batch' => $batch])->render();
+        $tanggal = $batch->tanggal_keluar?->format('Y-m-d') ?? 'transaksi';
+        $filename = 'stok-keluar-'.$batch->id.'-'.$tanggal.'.pdf';
+
+        return PdfExport::download($html, $filename);
     }
 
     public function index(Request $request): View
@@ -299,6 +318,14 @@ class BibitKeluarController extends Controller
      */
     private function lokasiValidationRules(Request $request): array
     {
+        if (BibitKeluarBatch::isAfkirPeruntukan($request->input('peruntukan'))) {
+            return [
+                'lokasi_luar' => ['nullable', 'boolean'],
+                'taman_id' => ['nullable'],
+                'lokasi' => ['nullable', 'string', 'max:255'],
+            ];
+        }
+
         $isLokasiLuar = $request->boolean('lokasi_luar');
 
         $rules = [
@@ -320,6 +347,13 @@ class BibitKeluarController extends Controller
      */
     private function normalizeLokasiFields(Request $request, array $validated): array
     {
+        if (BibitKeluarBatch::isAfkirPeruntukan($validated['peruntukan'] ?? null)) {
+            $validated['taman_id'] = null;
+            $validated['lokasi'] = null;
+
+            return $validated;
+        }
+
         if ($request->boolean('lokasi_luar')) {
             $validated['taman_id'] = null;
             $validated['lokasi'] = trim((string) ($validated['lokasi'] ?? ''));

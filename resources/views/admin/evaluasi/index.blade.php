@@ -6,23 +6,27 @@
 @section('content')
     <div class="mb-6 overflow-hidden rounded-2xl border border-green-100 bg-white shadow-sm">
         <div class="border-b border-green-50 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-5">
-            <div class="flex flex-wrap items-start justify-between gap-4">
-                <div class="max-w-2xl">
-                    <h2 class="text-lg font-semibold text-green-900">Ringkasan evaluasi</h2>
-                </div>
-                @if ($indeksKinerja !== null)
-                    <div class="rounded-2xl border border-green-200 bg-white px-5 py-3 text-center shadow-sm">
-                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Indeks gabungan</p>
-                        <p class="text-3xl font-black text-green-700">{{ $indeksKinerja }}%</p>
-                        <p class="mt-0.5 text-xs text-gray-500">{{ $labelPeriode }}</p>
-                    </div>
-                @endif
-            </div>
+            <h2 class="text-lg font-semibold text-green-900">Ringkasan evaluasi</h2>
         </div>
 
         <form action="{{ route('admin.evaluasi.index') }}" method="GET" class="space-y-4 p-6">
-            <fieldset>
-                <legend class="mb-3 text-sm font-semibold text-gray-800">Jangka waktu</legend>
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <p id="evaluasi-jangka-waktu-label" class="text-sm font-semibold text-gray-800">Jangka waktu</p>
+                <aside class="rounded-2xl border border-green-200 bg-gradient-to-br from-white to-green-50/80 px-5 py-3 text-center shadow-sm sm:min-w-[11rem]"
+                       aria-labelledby="evaluasi-jangka-waktu-label">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Indeks gabungan</p>
+                    <p class="text-3xl font-black text-green-700">
+                        @if ($indeksKinerja !== null)
+                            {{ $indeksKinerja }}%
+                        @else
+                            —
+                        @endif
+                    </p>
+                    <p class="mt-0.5 text-xs text-gray-500">untuk {{ $labelPeriode }}</p>
+                </aside>
+            </div>
+
+            <fieldset class="m-0 border-0 p-0" aria-labelledby="evaluasi-jangka-waktu-label">
                 <div class="flex flex-wrap gap-2">
                     @foreach ($rentangOptions as $key => $label)
                         <label class="cursor-pointer">

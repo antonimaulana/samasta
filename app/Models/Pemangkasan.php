@@ -239,6 +239,17 @@ class Pemangkasan extends Model
         };
     }
 
+    /** Kelas badge Tailwind untuk kategori asal permohonan (Instruksi / Laporan / Survei). */
+    public static function kategoriBadgeClass(?string $kategori): string
+    {
+        return match ($kategori) {
+            'Instruksi' => 'bg-indigo-100 text-indigo-900 ring-1 ring-indigo-200/80',
+            'Laporan Masyarakat' => 'bg-rose-100 text-rose-900 ring-1 ring-rose-200/80',
+            'Survei Lapangan' => 'bg-cyan-100 text-cyan-900 ring-1 ring-cyan-200/80',
+            default => 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
+        };
+    }
+
     public static function layananIcon(string $jenisLayanan): string
     {
         return match ($jenisLayanan) {

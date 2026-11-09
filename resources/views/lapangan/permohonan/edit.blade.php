@@ -12,9 +12,7 @@
             <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ \App\Models\Pemangkasan::badgeClass($permohonan->jenis_layanan) }}">
                 {{ $permohonan->jenis_layanan }}
             </span>
-            <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-800">
-                {{ $permohonan->kategori }}
-            </span>
+            <x-pemangkasan-kategori-badge :kategori="$permohonan->kategori" />
         </div>
 
         <h2 class="mt-3 text-lg font-black text-gray-900">{{ $permohonan->lokasi_pohon }}</h2>

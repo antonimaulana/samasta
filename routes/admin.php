@@ -85,6 +85,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin.access', 'adm
     Route::post('bibits/import', [BibitController::class, 'import'])
         ->name('bibits.import.store');
     Route::resource('bibits', BibitController::class);
+    Route::get('bibit-keluars/{bibit_keluar}/export/pdf', [BibitKeluarController::class, 'exportPdf'])
+        ->name('bibit-keluars.export-pdf');
+    Route::get('bibit-masuks/{bibit_masuk}/export/pdf', [BibitMasukController::class, 'exportPdf'])
+        ->name('bibit-masuks.export-pdf');
     Route::resource('bibit-keluars', BibitKeluarController::class)->names('bibit-keluars');
     Route::resource('bibit-masuks', BibitMasukController::class)->names('bibit-masuks');
     Route::get('bibit-laporan', [BibitLaporanController::class, 'index'])->name('bibit-laporan.index');

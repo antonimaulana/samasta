@@ -4,8 +4,15 @@
 @section('header', 'Detail Stok Keluar')
 
 @section('content')
-    <div class="mb-4">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <a href="{{ route('admin.bibit-keluars.index') }}" class="text-sm text-green-700 hover:underline">← Kembali ke Stok Keluar</a>
+        <a href="{{ route('admin.bibit-keluars.export-pdf', $batch) }}"
+           class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Cetak PDF
+        </a>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
@@ -23,10 +30,12 @@
                 </div>
 
                 <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <dt class="text-xs font-semibold uppercase text-gray-500">Lokasi</dt>
-                        <dd class="mt-1 font-medium text-gray-900">{{ $batch->lokasiLabel() }}</dd>
-                    </div>
+                    @if ($batch->requiresLokasi())
+                        <div>
+                            <dt class="text-xs font-semibold uppercase text-gray-500">Lokasi</dt>
+                            <dd class="mt-1 font-medium text-gray-900">{{ $batch->lokasiLabel() }}</dd>
+                        </div>
+                    @endif
                     <div>
                         <dt class="text-xs font-semibold uppercase text-gray-500">Dicatat</dt>
                         <dd class="mt-1 text-sm text-gray-700">{{ $batch->created_at->translatedFormat('d F Y, H:i') }} WIB</dd>

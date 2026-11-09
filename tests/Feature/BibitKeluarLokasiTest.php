@@ -95,6 +95,37 @@ class BibitKeluarLokasiTest extends TestCase
         $this->assertSame('Taman Keluar Bibit — Jl. Test No. 1', $batch->lokasi);
     }
 
+    public function test_store_stok_keluar_afkir_without_lokasi(): void
+    {
+        Storage::fake('public');
+
+        $operator = User::factory()->create(['role' => User::ROLE_OPERATOR]);
+        $bibit = Bibit::create([
+            'nama_tanaman' => 'Pohon Mati',
+            'jenis' => 'Pohon',
+            'stok_tersedia' => 6,
+            'sumber_bibit' => 'Produksi',
+            'status_siap_tanam' => true,
+        ]);
+        $this->createBibitMasukLine($bibit, 6);
+
+        $this->actingAs($operator)->post(route('admin.bibit-keluars.store'), [
+            'tanggal_keluar' => OperasionalPelaksanaanTime::inputValue(now()),
+            'peruntukan' => BibitKeluarBatch::PERUNTUKAN_AFKIR,
+            'items' => [
+                ['bibit_id' => $bibit->id, 'sumber' => 'Produksi', 'jumlah' => 2],
+            ],
+            'fotos' => [UploadedFile::fake()->image('bukti.jpg')],
+        ])->assertRedirect(route('admin.bibit-keluars.index'));
+
+        $batch = BibitKeluarBatch::query()->first();
+        $this->assertSame(BibitKeluarBatch::PERUNTUKAN_AFKIR, $batch->peruntukan);
+        $this->assertNull($batch->taman_id);
+        $this->assertNull($batch->lokasi);
+        $this->assertFalse($batch->requiresLokasi());
+        $this->assertSame(4, $bibit->fresh()->stok_tersedia);
+    }
+
     public function test_store_stok_keluar_with_multiple_bibit_in_one_transaction(): void
     {
         Storage::fake('public');
