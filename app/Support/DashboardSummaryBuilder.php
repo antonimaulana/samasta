@@ -74,11 +74,16 @@ class DashboardSummaryBuilder
     }
 
     /**
-     * @return array{total_tim: int, total_petugas: int}
+     * @return array{total_tim: int, total_pengawas: int, total_petugas: int}
      */
     public function timKerjaRingkasan(): array
     {
         $totalTim = (int) TimPelaksana::query()->count();
+        $totalPengawas = (int) TimPelaksana::query()
+            ->whereNotNull('nama_pengawas')
+            ->where('nama_pengawas', '!=', '')
+            ->distinct()
+            ->count('nama_pengawas');
         $totalPetugas = 0;
 
         if (Schema::hasTable('petugas')) {
@@ -87,6 +92,7 @@ class DashboardSummaryBuilder
 
         return [
             'total_tim' => $totalTim,
+            'total_pengawas' => $totalPengawas,
             'total_petugas' => $totalPetugas,
         ];
     }

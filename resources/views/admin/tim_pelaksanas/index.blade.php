@@ -26,11 +26,11 @@
         </div>
     @endif
 
-    <div class="mb-6 grid items-stretch gap-4 sm:grid-cols-2 lg:max-w-3xl">
+    <div class="mb-6 grid items-stretch gap-4 sm:grid-cols-3">
         <x-admin.dash-stat-card
             class="h-full"
             tone="emerald"
-            label="Total Tim Kerja"
+            label="Jumlah Tim Kerja"
             :value="number_format($timKerjaRingkasan['total_tim'])"
             subtitle="tim">
             <x-slot:icon>
@@ -40,10 +40,21 @@
 
         <x-admin.dash-stat-card
             class="h-full"
+            tone="teal"
+            label="Jumlah Pengawas"
+            :value="number_format($timKerjaRingkasan['total_pengawas'])"
+            subtitle="pengawas">
+            <x-slot:icon>
+                <x-admin.nav-icon name="users" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            class="h-full"
             tone="cyan"
-            label="Total Petugas"
+            label="Jumlah Petugas"
             :value="number_format($timKerjaRingkasan['total_petugas'])"
-            subtitle="petugas aktif">
+            subtitle="petugas">
             <x-slot:icon>
                 <x-admin.nav-icon name="users" class="h-5 w-5" />
             </x-slot:icon>

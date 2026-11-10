@@ -31,8 +31,9 @@ class TimPelaksanaWilayahTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.tim-pelaksanas.index'))
             ->assertOk()
-            ->assertSee('Total Tim Kerja', false)
-            ->assertSee('Total Petugas', false)
+            ->assertSee('Jumlah Tim Kerja', false)
+            ->assertSee('Jumlah Pengawas', false)
+            ->assertSee('Jumlah Petugas', false)
             ->assertSee('Tim Wilayah 1')
             ->assertSee('Maryono')
             ->assertSee('Munasir');
