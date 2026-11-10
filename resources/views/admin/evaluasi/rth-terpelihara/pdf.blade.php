@@ -111,7 +111,7 @@
                     <td>{{ $row['nama'] }}</td>
                     <td>{{ $row['kategori'] }}</td>
                     <td>{{ $row['wilayah'] }}</td>
-                    <td class="num">{{ number_format($row['luasan'], 0, ',', '.') }}</td>
+                    <td class="num">{{ \App\Support\TamanLuasan::format($row['luasan'], $row['kategori']) }}</td>
                     <td>
                         @if ($row['latest_maintenance'])
                             {{ $row['latest_maintenance']->timezone(config('app.timezone'))->format('d/m/Y') }}

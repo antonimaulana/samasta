@@ -38,7 +38,7 @@ class TamanLaporanTest extends TestCase
             ->get(route('admin.taman-laporan.index'))
             ->assertOk()
             ->assertSee('Laporan Taman')
-            ->assertSee('Capaian Ruang Terbuka Hijau (RTH) per Tahun')
+            ->assertSee('Indikator capaian RTH yang dikelola Dinas per tahun')
             ->assertSee('Rekap Ruang Terbuka Hijau (RTH) per Kategori')
             ->assertSee('Rekap Ruang Terbuka Hijau (RTH) per Wilayah')
             ->assertSee('Per Kecamatan')
@@ -89,7 +89,7 @@ class TamanLaporanTest extends TestCase
             'generatedAt' => now(),
         ])->render();
 
-        $this->assertStringContainsString('Capaian Ruang Terbuka Hijau (RTH) per Tahun', $html);
+        $this->assertStringContainsString('Indikator capaian RTH yang dikelola Dinas per tahun', $html);
         $this->assertStringContainsString('Rekap Ruang Terbuka Hijau (RTH) per Kategori', $html);
         $this->assertStringContainsString('Rekap Ruang Terbuka Hijau (RTH) per Wilayah', $html);
         $this->assertStringContainsString('Daftar Ruang Terbuka Hijau (RTH) per Kategori', $html);

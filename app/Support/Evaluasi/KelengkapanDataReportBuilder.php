@@ -7,6 +7,7 @@ use App\Models\Taman;
 use App\Models\User;
 use App\Support\OperatorWilayahScope;
 use App\Support\TamanCompleteness;
+use App\Support\TamanLuasan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -60,7 +61,7 @@ class KelengkapanDataReportBuilder
                 'wilayah' => $taman->kelurahan?->kecamatan?->nama
                     ?? $taman->kelurahan?->nama
                     ?? '—',
-                'luasan' => (int) $taman->luasan,
+                'luasan' => (float) $taman->luasan,
                 'score' => $score,
                 'is_lengkap' => $isLengkap,
                 'is_mutakhir' => $isMutakhir,
@@ -90,9 +91,9 @@ class KelengkapanDataReportBuilder
         $lokasiMutakhir = $rows->where('is_mutakhir', true)->count();
         $belumVerifikasi = $rows->where('mutakhir_status', 'belum_verifikasi')->count();
         $kedaluwarsa = $rows->where('mutakhir_status', 'kedaluwarsa')->count();
-        $totalLuasan = (int) $rows->sum('luasan');
-        $luasanLengkap = (int) $rows->where('is_lengkap', true)->sum('luasan');
-        $luasanMutakhir = (int) $rows->where('is_mutakhir', true)->sum('luasan');
+        $totalLuasan = TamanLuasan::roundTotal($rows->sum('luasan'));
+        $luasanLengkap = TamanLuasan::roundTotal($rows->where('is_lengkap', true)->sum('luasan'));
+        $luasanMutakhir = TamanLuasan::roundTotal($rows->where('is_mutakhir', true)->sum('luasan'));
         $rataScore = $rows->count() > 0
             ? (int) round($rows->avg('score'))
             : 0;
@@ -219,7 +220,7 @@ class KelengkapanDataReportBuilder
                     'rata_score' => $totalLokasi > 0
                         ? (int) round($group->avg('score'))
                         : 0,
-                    'total_luasan' => (int) $group->sum('luasan'),
+                    'total_luasan' => TamanLuasan::roundTotal($group->sum('luasan')),
                 ];
             })
             ->sortByDesc('total_lokasi')

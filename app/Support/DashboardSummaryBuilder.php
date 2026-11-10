@@ -13,6 +13,8 @@ use App\Models\SurveyKepuasan;
 use App\Models\Taman;
 use App\Models\TimPelaksana;
 use App\Models\User;
+use Illuminate\Support\Facades\Schema;
+
 class DashboardSummaryBuilder
 {
     /**
@@ -25,7 +27,7 @@ class DashboardSummaryBuilder
 
         return [
             'total' => (clone $query)->count(),
-            'luasan' => (float) (clone $query)->sum('luasan'),
+            'luasan' => TamanLuasan::roundTotal((clone $query)->sum('luasan')),
             'kategori_rth' => count(Taman::KATEGORI),
         ];
     }
@@ -68,6 +70,24 @@ class DashboardSummaryBuilder
             'total_unit' => $totalUnit,
             'jumlah_kategori' => (int) (clone $inventory)->distinct()->count('jenis'),
             'kondisi_baik_persen' => $totalUnit > 0 ? (int) round(($baikUnit / $totalUnit) * 100) : 0,
+        ];
+    }
+
+    /**
+     * @return array{total_tim: int, total_petugas: int}
+     */
+    public function timKerjaRingkasan(): array
+    {
+        $totalTim = (int) TimPelaksana::query()->count();
+        $totalPetugas = 0;
+
+        if (Schema::hasTable('petugas')) {
+            $totalPetugas = (int) Petugas::query()->where('aktif', true)->count();
+        }
+
+        return [
+            'total_tim' => $totalTim,
+            'total_petugas' => $totalPetugas,
         ];
     }
 

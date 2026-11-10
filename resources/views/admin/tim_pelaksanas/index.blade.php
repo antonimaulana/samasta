@@ -26,6 +26,30 @@
         </div>
     @endif
 
+    <div class="mb-6 grid items-stretch gap-4 sm:grid-cols-2 lg:max-w-3xl">
+        <x-admin.dash-stat-card
+            class="h-full"
+            tone="emerald"
+            label="Total Tim Kerja"
+            :value="number_format($timKerjaRingkasan['total_tim'])"
+            subtitle="tim">
+            <x-slot:icon>
+                <x-admin.nav-icon name="operasional" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+
+        <x-admin.dash-stat-card
+            class="h-full"
+            tone="cyan"
+            label="Total Petugas"
+            :value="number_format($timKerjaRingkasan['total_petugas'])"
+            subtitle="petugas aktif">
+            <x-slot:icon>
+                <x-admin.nav-icon name="users" class="h-5 w-5" />
+            </x-slot:icon>
+        </x-admin.dash-stat-card>
+    </div>
+
     <x-admin.data-table>
         <thead class="bg-gray-50">
             <tr>

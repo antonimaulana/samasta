@@ -53,7 +53,10 @@ abstract class TamanRequest extends FormRequest
             $this->merge(['luasan' => null]);
         } elseif ($this->has('luasan') && filled($this->input('luasan'))) {
             $this->merge([
-                'luasan' => TamanLuasan::normalizeRequest((string) $this->input('luasan')),
+                'luasan' => TamanLuasan::persistNormalized(
+                    TamanLuasan::normalizeRequest((string) $this->input('luasan')),
+                    $this->input('kategori') !== null ? (string) $this->input('kategori') : null
+                ),
             ]);
         }
     }

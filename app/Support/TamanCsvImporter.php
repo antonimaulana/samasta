@@ -152,6 +152,9 @@ class TamanCsvImporter
             $data['nilai_pembangunan'] = $this->normalizeNilaiPembangunan($data['nilai_pembangunan'] ?? null);
             $data['tahun_pembangunan'] = $this->normalizeTahunPembangunan($data['tahun_pembangunan'] ?? null);
             $data['kategori'] = $this->normalizeKategori($data['kategori'] ?? null);
+            if ($data['luasan'] !== null) {
+                $data['luasan'] = TamanLuasan::persistNormalized($data['luasan'], $data['kategori'] ?? null);
+            }
             $data['latitude'] = $this->normalizeCoordinate($data['latitude'] ?? null);
             $data['longitude'] = $this->normalizeCoordinate($data['longitude'] ?? null);
             $data['kecamatan'] = $this->normalizeWilayahName($data['kecamatan'] ?? null);

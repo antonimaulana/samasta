@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\TamanCompleteness;
+use App\Support\TamanLuasan;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -334,6 +335,17 @@ class Taman extends Model
         'status_data',
         'foto',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (Taman $taman): void {
+            if ($taman->luasan === null) {
+                return;
+            }
+
+            $taman->luasan = TamanLuasan::quantizeStorage((float) $taman->luasan, $taman->kategori);
+        });
+    }
 
     protected function casts(): array
     {

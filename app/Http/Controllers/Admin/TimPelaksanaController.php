@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Kelurahan;
 use App\Models\Petugas;
 use App\Models\TimPelaksana;
+use App\Support\DashboardSummaryBuilder;
 use App\Support\PetugasRosterBuilder;
 use App\Support\TimPelaksanaResolver;
 use App\Support\TimPelaksanaSaver;
@@ -30,7 +31,10 @@ class TimPelaksanaController extends Controller
 
         $teams = $query->orderBy('urutan')->orderBy('nama')->get();
 
-        return view('admin.tim_pelaksanas.index', compact('teams'));
+        return view('admin.tim_pelaksanas.index', [
+            'teams' => $teams,
+            'timKerjaRingkasan' => app(DashboardSummaryBuilder::class)->timKerjaRingkasan(),
+        ]);
     }
 
     public function show(TimPelaksana $timPelaksana): View

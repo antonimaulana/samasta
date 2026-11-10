@@ -29,6 +29,33 @@ final class TamanLuasan
     }
 
     /**
+     * Presisi simpan DB = presisi tampilan per kategori, agar SUM(luasan) selaras dengan
+     * penjumlahan angka di portal (Jalur Hijau 2 desimal, lainnya hingga 4 desimal).
+     */
+    public static function quantizeStorage(float|int|string|null $luasan, ?string $kategori = null): float
+    {
+        $value = (float) ($luasan ?? 0);
+
+        if (! is_finite($value) || $value < 0) {
+            return 0.0;
+        }
+
+        return round($value, self::displayDecimalPlaces($kategori), PHP_ROUND_HALF_UP);
+    }
+
+    /**
+     * Setelah {@see normalizeRequest()}: kuantisasi sesuai kategori untuk persistensi.
+     */
+    public static function persistNormalized(?string $normalized, ?string $kategori): ?string
+    {
+        if ($normalized === null) {
+            return null;
+        }
+
+        return self::inputValue(self::quantizeStorage((float) $normalized, $kategori));
+    }
+
+    /**
      * Nilai untuk input HTML (tanpa pemisah ribuan).
      */
     public static function inputValue(float|int|string|null $luasan): string
@@ -51,7 +78,7 @@ final class TamanLuasan
      */
     public static function format(float|int|string|null $luasan, ?string $kategori = null): string
     {
-        $value = (float) ($luasan ?? 0);
+        $value = self::quantizeStorage($luasan, $kategori);
 
         if (! is_finite($value)) {
             return '0';
@@ -156,5 +183,19 @@ final class TamanLuasan
     public static function formatTotal(float|int|string|null $value): string
     {
         return number_format(self::roundTotal($value), 0, ',', '.');
+    }
+
+    /**
+     * Total agregat dengan desimal (mis. rekap data baku Excel: 2 desimal).
+     */
+    public static function formatAggregateDecimal(float|int|string|null $value, int $decimalPlaces = 2): string
+    {
+        $value = (float) ($value ?? 0);
+
+        if (! is_finite($value)) {
+            return number_format(0, $decimalPlaces, ',', '.');
+        }
+
+        return number_format($value, $decimalPlaces, ',', '.');
     }
 }

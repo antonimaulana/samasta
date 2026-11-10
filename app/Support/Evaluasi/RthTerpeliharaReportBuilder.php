@@ -7,6 +7,7 @@ use App\Models\PemeliharaanTaman;
 use App\Models\Taman;
 use App\Models\User;
 use App\Support\OperatorWilayahScope;
+use App\Support\TamanLuasan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -63,7 +64,7 @@ class RthTerpeliharaReportBuilder
                     ?? $taman->kelurahan?->nama
                     ?? '—',
                 'kecamatan_id' => $taman->kelurahan?->kecamatan_id,
-                'luasan' => (int) $taman->luasan,
+                'luasan' => (float) $taman->luasan,
                 'is_terpelihara' => $isTerpelihara,
                 'latest_maintenance' => $latestDate,
                 'hari_sejak' => $latestDate?->diffInDays(now()),
@@ -74,8 +75,8 @@ class RthTerpeliharaReportBuilder
 
         $totalLokasi = $rows->count();
         $lokasiTerpelihara = $rows->where('is_terpelihara', true)->count();
-        $totalLuasan = (int) $rows->sum('luasan');
-        $luasanTerpelihara = (int) $rows->where('is_terpelihara', true)->sum('luasan');
+        $totalLuasan = TamanLuasan::roundTotal($rows->sum('luasan'));
+        $luasanTerpelihara = TamanLuasan::roundTotal($rows->where('is_terpelihara', true)->sum('luasan'));
 
         $persenLokasi = $totalLokasi > 0
             ? round(($lokasiTerpelihara / $totalLokasi) * 100, 1)
@@ -151,8 +152,8 @@ class RthTerpeliharaReportBuilder
             ->map(function (Collection $group, string $label) {
                 $totalLokasi = $group->count();
                 $lokasiTerpelihara = $group->where('is_terpelihara', true)->count();
-                $totalLuasan = (int) $group->sum('luasan');
-                $luasanTerpelihara = (int) $group->where('is_terpelihara', true)->sum('luasan');
+                $totalLuasan = TamanLuasan::roundTotal($group->sum('luasan'));
+                $luasanTerpelihara = TamanLuasan::roundTotal($group->where('is_terpelihara', true)->sum('luasan'));
 
                 return [
                     'label' => $label,

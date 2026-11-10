@@ -159,7 +159,7 @@
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-700">{{ $row['kategori'] }}</td>
                     <td class="px-4 py-3 text-sm text-gray-700">{{ $row['wilayah'] }}</td>
-                    <td class="px-4 py-3 text-right text-sm text-gray-700">{{ number_format($row['luasan'], 0, ',', '.') }} m²</td>
+                    <td class="px-4 py-3 text-right text-sm text-gray-700">{{ \App\Support\TamanLuasan::format($row['luasan'], $row['kategori']) }} m²</td>
                     <td class="px-4 py-3 text-sm text-gray-700">
                         @if ($row['latest_maintenance'])
                             <a href="{{ $row['url'] }}" class="text-amber-800 hover:underline">
