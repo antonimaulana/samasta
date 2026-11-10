@@ -3,7 +3,8 @@
         $value = $row['values'][$year] ?? 0;
 
         return match ($row['format']) {
-            'area', 'count' => number_format((float) $value, 0, ',', '.'),
+            'area' => \App\Support\TamanLuasan::formatTotal($value),
+            'count' => number_format((int) $value, 0, ',', '.'),
             'percent' => number_format((float) $value, 2, ',', '.').'%',
             default => (string) $value,
         };

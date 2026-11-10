@@ -35,7 +35,7 @@ class PublicRthStatisticsBuilder
         $latestMetrics = $this->extractLatestYearMetrics($yearly, $latestYear);
 
         $totalTaman = (int) $report['totalTaman'];
-        $totalLuasan = (float) $report['totalLuasan'];
+        $totalLuasan = TamanLuasan::roundTotal($report['totalLuasan']);
         $lengkap = (int) ($report['rekapStatusData']['Lengkap'] ?? 0);
         $belumLengkap = (int) ($report['rekapStatusData']['Belum Lengkap'] ?? 0);
 
@@ -110,17 +110,17 @@ class PublicRthStatisticsBuilder
             ->firstWhere('key', $key)['values'][$year] ?? null;
 
         return [
-            'luasan' => $value('A') !== null ? (int) $value('A') : null,
+            'luasan' => $value('A') !== null ? TamanLuasan::roundTotal($value('A')) : null,
             'lokasi' => $value('B') !== null ? (int) $value('B') : null,
-            'luasan_terpelihara' => $value('E') !== null ? (int) $value('E') : null,
+            'luasan_terpelihara' => $value('E') !== null ? TamanLuasan::roundTotal($value('E')) : null,
             'persen_rtrw' => $value('D') !== null ? (float) $value('D') : null,
             'persen_terpelihara' => $value('G') !== null ? (float) $value('G') : null,
         ];
     }
 
-    public static function formatArea(?int $value): string
+    public static function formatArea(float|int|null $value): string
     {
-        return $value !== null ? number_format($value, 0, ',', '.') : '—';
+        return $value !== null ? TamanLuasan::formatTotal($value) : '—';
     }
 
     public static function formatCount(?int $value): string

@@ -5,7 +5,8 @@
         $value = $row['values'][$year] ?? null;
 
         return match ($row['format']) {
-            'area', 'count' => RthStats::formatArea((int) $value),
+            'area' => RthStats::formatArea($value),
+            'count' => RthStats::formatCount($value !== null ? (int) $value : null),
             'percent' => RthStats::formatPercent((float) $value, 2),
             default => (string) $value,
         };

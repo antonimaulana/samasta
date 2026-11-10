@@ -11,7 +11,8 @@
             $value = $row['values'][$year] ?? 0;
 
             return match ($row['format']) {
-                'area', 'count' => number_format((float) $value, 0, ',', '.'),
+                'area' => \App\Support\TamanLuasan::formatTotal($value),
+                'count' => number_format((int) $value, 0, ',', '.'),
                 'percent' => number_format((float) $value, 2, ',', '.').'%',
                 default => (string) $value,
             };
@@ -29,7 +30,7 @@
         Dinas Perumahan, Kawasan Permukiman dan Pertamanan Kota Batam<br>
         Dicetak: <strong>{{ $generatedAt->translatedFormat('d F Y H:i') }} WIB</strong>
         · Total: <strong>{{ number_format($totalTaman) }} RTH</strong>
-        · Luasan: <strong>{{ number_format($totalLuasan, 0, ',', '.') }} m²</strong>
+        · Luasan: <strong>{{ \App\Support\TamanLuasan::formatTotal($totalLuasan) }} m²</strong>
         @if ($filterParts)
             <br>Filter: <strong>{{ implode(' · ', $filterParts) }}</strong>
         @endif
@@ -43,7 +44,7 @@
             </td>
             <td class="kpi">
                 <div class="kpi-label">Total Luasan (m²)</div>
-                <div class="kpi-value">{{ number_format($totalLuasan, 0, ',', '.') }}</div>
+                <div class="kpi-value">{{ \App\Support\TamanLuasan::formatTotal($totalLuasan) }}</div>
             </td>
             <td class="kpi">
                 <div class="kpi-label">Data Lengkap</div>
@@ -56,7 +57,7 @@
         </tr>
     </table>
 
-    <h2>Capaian Ruang Terbuka Hijau (RTH) per Tahun</h2>
+    <h2>Indikator capaian RTH yang dikelola Dinas per tahun</h2>
     <table>
         <thead>
             <tr>
@@ -92,7 +93,7 @@
                 <tr>
                     <td>{{ $row['kategori'] }}</td>
                     <td class="num">{{ number_format($row['jumlah']) }}</td>
-                    <td class="num">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
+                    <td class="num">{{ \App\Support\TamanLuasan::formatTotal($row['luasan']) }}</td>
                 </tr>
             @empty
                 <tr>
@@ -116,7 +117,7 @@
                 <tr>
                     <td>{{ $row['kecamatan'] }}</td>
                     <td class="num">{{ number_format($row['jumlah']) }}</td>
-                    <td class="num">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
+                    <td class="num">{{ \App\Support\TamanLuasan::formatTotal($row['luasan']) }}</td>
                 </tr>
             @empty
                 <tr>
@@ -145,7 +146,7 @@
                         @endif
                         <td>{{ $row['kelurahan'] }}</td>
                         <td class="num">{{ number_format($row['jumlah']) }}</td>
-                        <td class="num">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
+                        <td class="num">{{ \App\Support\TamanLuasan::formatTotal($row['luasan']) }}</td>
                     </tr>
                 @endforeach
             @empty
@@ -161,7 +162,7 @@
 
         @foreach ($tamansPerKategori as $kategori => $items)
             @if ($items->isNotEmpty())
-                <h2>{{ $kategori }} ({{ number_format($items->count()) }} lokasi · {{ \App\Support\TamanLuasan::format($items->sum('luasan'), $kategori) }} m²)</h2>
+                <h2>{{ $kategori }} ({{ number_format($items->count()) }} lokasi · {{ \App\Support\TamanLuasan::formatTotal($items->sum('luasan')) }} m²)</h2>
                 <table>
                     <thead>
                         <tr>

@@ -69,7 +69,7 @@
             </div>
             <div class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-5">
                 <p class="text-sm font-medium text-emerald-700">Total Luasan</p>
-                <p class="mt-2 text-3xl font-bold text-emerald-900">{{ number_format($totalLuasan, 0, ',', '.') }} <span class="text-base font-semibold">M²</span></p>
+                <p class="mt-2 text-3xl font-bold text-emerald-900">{{ \App\Support\TamanLuasan::formatTotal($totalLuasan) }} <span class="text-base font-semibold">M²</span></p>
             </div>
             <div class="rounded-2xl border border-green-100 bg-white p-5 shadow-sm">
                 <p class="text-sm font-medium text-green-700">Data Lengkap</p>
@@ -83,7 +83,7 @@
     </x-admin.collapsible-card>
 
     <x-admin.collapsible-card
-        title="Capaian Ruang Terbuka Hijau (RTH) per Tahun"
+        title="Indikator capaian RTH yang dikelola Dinas per tahun"
         description="{{ \App\Support\TamanRthYearlySummary::COLUMN_RULE_LABEL }}">
         @include('admin.taman_laporan.partials.rth-yearly-summary')
     </x-admin.collapsible-card>
@@ -107,7 +107,7 @@
                                 <x-admin.taman-kategori-badge :kategori="$row['kategori']" />
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['jumlah']) }}</td>
-                            <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::formatTotal($row['luasan']) }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -138,7 +138,7 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $row['kecamatan'] }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['jumlah']) }}</td>
-                                <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::formatTotal($row['luasan']) }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -157,7 +157,7 @@
                             {{ $kecamatanGroup['kecamatan'] }}
                             <span class="font-normal text-gray-500">
                                 — {{ number_format($kecamatanGroup['jumlah']) }} lokasi,
-                                {{ \App\Support\TamanLuasan::format($kecamatanGroup['luasan']) }} M²
+                                {{ \App\Support\TamanLuasan::formatTotal($kecamatanGroup['luasan']) }} M²
                             </span>
                         </p>
                         <x-admin.data-table>
@@ -173,7 +173,7 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-3 text-sm text-gray-900">{{ $row['kelurahan'] }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ number_format($row['jumlah']) }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::format($row['luasan']) }}</td>
+                                        <td class="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">{{ \App\Support\TamanLuasan::formatTotal($row['luasan']) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -196,7 +196,7 @@
                         <div>
                             <div class="mb-3 flex flex-wrap items-center gap-2">
                                 <x-admin.taman-kategori-badge :kategori="$kategoriLabel" />
-                                <span class="text-sm text-gray-500">{{ $items->count() }} taman · {{ \App\Support\TamanLuasan::format($items->sum('luasan'), $kategoriLabel) }} M²</span>
+                                <span class="text-sm text-gray-500">{{ $items->count() }} taman · {{ \App\Support\TamanLuasan::formatTotal($items->sum('luasan')) }} M²</span>
                             </div>
 
                             <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">

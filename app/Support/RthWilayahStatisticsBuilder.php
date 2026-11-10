@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Kecamatan;
 use App\Models\Taman;
+use App\Support\TamanLuasan;
 use Illuminate\Support\Collection;
 
 class RthWilayahStatisticsBuilder
@@ -14,7 +15,7 @@ class RthWilayahStatisticsBuilder
     public function totals(): array
     {
         $jumlah = Taman::count();
-        $totalLuas = (int) Taman::sum('luasan');
+        $totalLuas = TamanLuasan::roundTotal(Taman::sum('luasan'));
         $belumWilayah = Taman::whereNull('kelurahan_id')->count();
 
         return [
@@ -68,11 +69,11 @@ class RthWilayahStatisticsBuilder
             ->map(fn (Collection $rows, string $kecamatan) => [
                 'kecamatan' => $kecamatan,
                 'jumlah_taman' => (int) $rows->sum('jumlah_taman'),
-                'total_luasan' => (int) $rows->sum('total_luasan'),
+                'total_luasan' => TamanLuasan::roundTotal($rows->sum('total_luasan')),
                 'kelurahan' => $rows->map(fn ($row) => [
                     'kelurahan' => $row->kelurahan,
                     'jumlah_taman' => (int) $row->jumlah_taman,
-                    'total_luasan' => (int) $row->total_luasan,
+                    'total_luasan' => TamanLuasan::roundTotal($row->total_luasan),
                 ])->values()->all(),
             ])
             ->values()
@@ -94,7 +95,7 @@ class RthWilayahStatisticsBuilder
             ->map(fn ($row) => [
                 'nama' => $row->nama,
                 'jumlah_taman' => (int) $row->jumlah_taman,
-                'total_luasan' => (int) $row->total_luasan,
+                'total_luasan' => TamanLuasan::roundTotal($row->total_luasan),
             ])
             ->all();
     }

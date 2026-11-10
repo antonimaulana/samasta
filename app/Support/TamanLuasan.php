@@ -120,4 +120,41 @@ final class TamanLuasan
     {
         return (float) ($luasan ?? 0) > 0;
     }
+
+    /**
+     * Total/agregasi luasan (rekap, KPI, baris A laporan): jumlah nilai persis lalu dibulatkan ke m² bulat.
+     * Nilai per lokasi tetap memakai {@see format()} dengan desimal sesuai kategori.
+     */
+    public static function roundTotal(float|int|string|null $value): int
+    {
+        $value = (float) ($value ?? 0);
+
+        if (! is_finite($value)) {
+            return 0;
+        }
+
+        return (int) round($value, 0, PHP_ROUND_HALF_UP);
+    }
+
+    /**
+     * @param  iterable<mixed>  $items
+     */
+    public static function sumRounded(iterable $items, callable $valueResolver): int
+    {
+        $sum = 0.0;
+
+        foreach ($items as $item) {
+            $sum += (float) $valueResolver($item);
+        }
+
+        return self::roundTotal($sum);
+    }
+
+    /**
+     * Tampilan luasan agregat (total/rekap): selalu bilangan bulat tanpa desimal.
+     */
+    public static function formatTotal(float|int|string|null $value): string
+    {
+        return number_format(self::roundTotal($value), 0, ',', '.');
+    }
 }

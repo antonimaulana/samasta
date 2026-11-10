@@ -106,6 +106,36 @@ class TamanRthYearlySummaryTest extends TestCase
         $this->assertEqualsWithDelta(round($e / $a * 100, 2), $rowG['values'][2025], 0.0001);
     }
 
+    public function test_yearly_luasan_row_rounds_aggregate_without_decimals(): void
+    {
+        $kelurahanId = Kelurahan::query()->value('id');
+
+        Taman::create([
+            'nama_taman' => 'Jalur A',
+            'kategori' => 'Jalur Hijau Jalan',
+            'kelurahan_id' => $kelurahanId,
+            'luasan' => 26233.81,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
+            'tahun_pembangunan' => 2025,
+        ]);
+
+        Taman::create([
+            'nama_taman' => 'Jalur B',
+            'kategori' => 'Jalur Hijau Jalan',
+            'kelurahan_id' => $kelurahanId,
+            'luasan' => 26233.81,
+            'alamat' => 'Alamat',
+            'deskripsi' => 'Deskripsi',
+            'tahun_pembangunan' => 2025,
+        ]);
+
+        $summary = app(TamanRthYearlySummary::class)->build();
+        $rowA = collect($summary['rows'])->firstWhere('key', 'A');
+
+        $this->assertSame(52_468, $rowA['values'][2025]);
+    }
+
     public function test_year_column_is_cumulative_by_tahun_pembangunan(): void
     {
         $kelurahanId = Kelurahan::query()->value('id');

@@ -25,4 +25,18 @@ class TamanLuasanTest extends TestCase
         $this->assertSame('26.233,81', TamanLuasan::format(26233.81, 'Jalur Hijau Jalan'));
         $this->assertSame('1.890.919,50', TamanLuasan::format(1890919.5, 'Jalur Hijau Jalan'));
     }
+
+    public function test_round_total_sums_decimals_then_rounds_half_up(): void
+    {
+        $this->assertSame(52_468, TamanLuasan::roundTotal(26233.81 + 26233.81));
+        $this->assertSame(1_690_920, TamanLuasan::roundTotal(1_690_919.5));
+        $this->assertSame(100, TamanLuasan::roundTotal(99.49));
+        $this->assertSame(101, TamanLuasan::roundTotal(100.5));
+    }
+
+    public function test_format_total_never_shows_decimals(): void
+    {
+        $this->assertSame('52.468', TamanLuasan::formatTotal(26233.81 + 26233.81));
+        $this->assertSame('1.690.920', TamanLuasan::formatTotal(1_690_919.5));
+    }
 }
